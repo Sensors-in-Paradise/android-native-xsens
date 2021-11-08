@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity(), XsensDotDeviceCallback, XsensDotScanne
         val intent = Intent(this, CaptureActivity::class.java)
 
         findViewById<Button>(R.id.btn_continue_activity_main).setOnClickListener {
-
+            startActivity(intent)
         }
 
     }
