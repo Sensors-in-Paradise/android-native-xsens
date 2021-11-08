@@ -12,3 +12,4 @@
 /captures
 .externalNativeBuild
 .cxx
+/Xsens_DOT_Core/build
