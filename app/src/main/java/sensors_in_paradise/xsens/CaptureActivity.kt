@@ -51,6 +51,9 @@ class CaptureActivity : AppCompatActivity() {
                 if (position != 0) {
                     startButton.isEnabled = true
                 }
+                else {
+                    startButton.isEnabled = false
+                }
             }
         }
 
