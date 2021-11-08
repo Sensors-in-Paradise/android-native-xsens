@@ -2,8 +2,11 @@ package sensors_in_paradise.xsens
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.ScanSettings
+import android.content.Intent
 import android.os.Bundle
+import android.provider.AlarmClock.EXTRA_MESSAGE
 import android.util.Log
+import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.xsens.dot.android.sdk.XsensDotSdk
@@ -16,6 +19,7 @@ import java.util.*
 
 class MainActivity : AppCompatActivity(), XsensDotDeviceCallback, XsensDotScannerCallback {
     private lateinit var tv: TextView
+
     private val scannedDevices = ArrayList<BluetoothDevice>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +30,13 @@ class MainActivity : AppCompatActivity(), XsensDotDeviceCallback, XsensDotScanne
         val scanStarted = mXsScanner!!.startScan()
         Log.println(Log.INFO, "XSENS", "")
         tv.text = "Scan started: $scanStarted"
+
+        val intent = Intent(this, CaptureActivity::class.java)
+
+        findViewById<Button>(R.id.btn_continue_activity_main).setOnClickListener {
+
+        }
+
     }
 
     private var mXsScanner: XsensDotScanner? = null

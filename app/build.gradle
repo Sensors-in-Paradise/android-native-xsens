@@ -53,6 +53,8 @@ dependencies {
     implementation project(path: ':Xsens_DOT_Core')
     implementation "androidx.core:core-ktx:1.7.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.5.31")
+
 }
 repositories {
     mavenCentral()
