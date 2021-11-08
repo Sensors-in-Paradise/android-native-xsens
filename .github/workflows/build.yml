@@ -7,7 +7,7 @@ on: [push, pull_request]
 jobs:
   #workflow called build checks if project successfully builds
   build:
-    runs-on: [ubuntu-latest, windows-latest]
+    runs-on: [ubuntu-latest]
 
     steps:
             # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
