@@ -4,11 +4,12 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.ScanSettings
 import android.content.Intent
 import android.os.Bundle
-import android.provider.AlarmClock.EXTRA_MESSAGE
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.XsensDotSdk
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.interfaces.XsensDotDeviceCallback
@@ -19,12 +20,14 @@ import java.util.*
 
 class MainActivity : AppCompatActivity(), XsensDotDeviceCallback, XsensDotScannerCallback {
     private lateinit var tv: TextView
+    private lateinit var rv: RecyclerView
 
     private val scannedDevices = ArrayList<BluetoothDevice>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        tv = findViewById(R.id.tv)
+        tv = findViewById(R.id.tv_center_acitivity_main)
+        rv =  findViewById(R.id.rv_bluetoothDevices_activity_main)
         XsensDotSdk.setDebugEnabled(true)
         initXsScanner()
         val scanStarted = mXsScanner!!.startScan()
@@ -34,8 +37,9 @@ class MainActivity : AppCompatActivity(), XsensDotDeviceCallback, XsensDotScanne
         val intent = Intent(this, CaptureActivity::class.java)
 
         findViewById<Button>(R.id.btn_continue_activity_main).setOnClickListener {
-
+            startActivity(intent)
         }
+
 
     }
 
@@ -64,9 +68,9 @@ class MainActivity : AppCompatActivity(), XsensDotDeviceCallback, XsensDotScanne
             scannedDevices.add(device)
             val name = device.name
             val address = device.address
-            val currentText = tv.text
-            tv.text = "$currentText\n Name: $name address:$address"
-            Log.println(Log.INFO, "XSENS", "Device discovered: $name ---> $address")
+
+            tv.visibility = View.INVISIBLE;
+
         }
 
     }

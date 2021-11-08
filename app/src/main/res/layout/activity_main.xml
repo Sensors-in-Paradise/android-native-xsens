@@ -2,17 +2,18 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rv"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:textAlignment="center"
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/tv"
+        android:id="@+id/tv_center_acitivity_main"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="TextView" />
+        android:text="No devices found." />
 
     <Button
         android:id="@+id/btn_continue_activity_main"
@@ -20,4 +21,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:text="Go to capture screen" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_bluetoothDevices_activity_main"
+        android:layout_width="match_parent"
+        android:layout_height="684dp" />
 </FrameLayout>
