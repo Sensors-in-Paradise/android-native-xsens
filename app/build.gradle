@@ -4,7 +4,7 @@ apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 31
-    buildToolsVersion "29.0.2"
+    //buildToolsVersion "29.0.2"
 
     defaultConfig {
         applicationId "sensors_in_paradise.xsens"
