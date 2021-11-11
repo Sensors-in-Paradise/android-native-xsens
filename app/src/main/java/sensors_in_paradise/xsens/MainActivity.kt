@@ -5,14 +5,17 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.*
 import com.google.android.material.tabs.TabLayout
+import com.xsens.dot.android.sdk.models.XsensDotDevice
+import sensors_in_paradise.xsens.page1.ConnectionInterface
 import sensors_in_paradise.xsens.page1.Page1Handler
 
-class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
+class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface {
 
     private lateinit var flipper: ViewFlipper
     private lateinit var tabLayout: TabLayout
 
     private val pageHandlers = ArrayList<PageInterface>()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,7 +26,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
 
         initClickListeners()
 
-        pageHandlers.add(Page1Handler())
+        pageHandlers.add(Page1Handler(this))
         for (handler in pageHandlers) {
             handler.activityCreated(this)
         }
@@ -50,6 +53,10 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
     }
 
     override fun onTabReselected(tab: TabLayout.Tab?) {
+        //TODO("Not yet implemented")
+    }
+
+    override fun onConnectedDevicesChanged(devices: ArrayList<XsensDotDevice>) {
         //TODO("Not yet implemented")
     }
 }
