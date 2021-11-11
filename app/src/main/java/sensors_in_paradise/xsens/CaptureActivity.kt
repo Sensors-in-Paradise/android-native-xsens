@@ -48,18 +48,13 @@ class CaptureActivity : AppCompatActivity() {
                 position: Int,
                 id: Long
             ) {
-                if (position != 0) {
-                    startButton.isEnabled = true
-                }
-                else {
-                    startButton.isEnabled = false
-                }
+                startButton.isEnabled = position != 0
             }
         }
 
         startButton.setOnClickListener{
-            timer.setBase(SystemClock.elapsedRealtime())
-            timer.setFormat("Time Running - %s"); // set the format for a chronometer
+            timer.base = SystemClock.elapsedRealtime()
+            timer.format = "Time Running - %s" // set the format for a chronometer
             timer.start()
         }
         endButton = findViewById<MaterialButton>(R.id.buttonEnd)

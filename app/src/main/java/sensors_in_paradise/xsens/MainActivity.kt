@@ -34,9 +34,7 @@ class MainActivity : AppCompatActivity(), XsensDotDeviceCallback, XsensDotScanne
         val intent = Intent(this, CaptureActivity::class.java)
 
         findViewById<Button>(R.id.btn_continue_activity_main).setOnClickListener {
-            startActivity(intent)
         }
-
     }
 
     private var mXsScanner: XsensDotScanner? = null
@@ -60,7 +58,7 @@ class MainActivity : AppCompatActivity(), XsensDotDeviceCallback, XsensDotScanne
     override fun onXsensDotGetFilterProfileInfo(s: String, arrayList: ArrayList<FilterProfileInfo>) {}
     override fun onSyncStatusUpdate(s: String, b: Boolean) {}
     override fun onXsensDotScanned(device: BluetoothDevice, i: Int) {
-        if(!scannedDevices.contains(device)){
+        if (!scannedDevices.contains(device)){
             scannedDevices.add(device)
             val name = device.name
             val address = device.address
@@ -68,6 +66,5 @@ class MainActivity : AppCompatActivity(), XsensDotDeviceCallback, XsensDotScanne
             tv.text = "$currentText\n Name: $name address:$address"
             Log.println(Log.INFO, "XSENS", "Device discovered: $name ---> $address")
         }
-
     }
 }
