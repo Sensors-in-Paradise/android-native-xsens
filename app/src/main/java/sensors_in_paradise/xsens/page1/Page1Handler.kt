@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
 import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.pm.PackageManager
@@ -23,7 +24,6 @@ import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.utils.XsensDotScanner
 import sensors_in_paradise.xsens.PageInterface
 import sensors_in_paradise.xsens.R
-import sensors_in_paradise.xsens.StatefulBluetoothDevice
 import java.util.ArrayList
 
 class Page1Handler(val connectionInterface: ConnectionInterface) : XsensDotDeviceCallback, XsensDotScannerCallback, PageInterface,
@@ -44,7 +44,10 @@ class Page1Handler(val connectionInterface: ConnectionInterface) : XsensDotDevic
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
+
     override fun onXsensDotConnectionChanged(address: String, state: Int) {
+        sensorAdapter.updateItemByAddress(address)
+
         if (state == XsensDotDevice.CONN_STATE_DISCONNECTED) {
             connectionInterface.onConnectedDevicesChanged(scannedDevices)
         }
@@ -52,12 +55,19 @@ class Page1Handler(val connectionInterface: ConnectionInterface) : XsensDotDevic
             connectionInterface.onConnectedDevicesChanged(scannedDevices)
         }
     }
-    override fun onXsensDotServicesDiscovered(s: String, i: Int) {}
+    override fun onXsensDotServicesDiscovered(address: String, status: Int) {
+        sensorAdapter.updateItemByAddress(address)
+        if (status == BluetoothGatt.GATT_SUCCESS) {
+
+        }
+    }
     override fun onXsensDotFirmwareVersionRead(s: String, s1: String) {}
     override fun onXsensDotTagChanged(s: String, s1: String) {}
     override fun onXsensDotBatteryChanged(s: String, i: Int, i1: Int) {}
     override fun onXsensDotDataChanged(s: String, xsensDotData: XsensDotData) {}
-    override fun onXsensDotInitDone(s: String) {}
+    override fun onXsensDotInitDone(address: String) {
+        sensorAdapter.updateItemByAddress(address)
+    }
     override fun onXsensDotButtonClicked(s: String, l: Long) {}
     override fun onXsensDotPowerSavingTriggered(s: String) {}
     override fun onReadRemoteRssi(s: String, i: Int) {}
@@ -126,7 +136,12 @@ class Page1Handler(val connectionInterface: ConnectionInterface) : XsensDotDevic
         device: XsensDotDevice,
         wantsConnection: Boolean
     ) {
-        device.connect()
+       if(wantsConnection){
+           device.connect()
+       }
+        else{
+           device.disconnect()
+       }
     }
     private fun checkPermissions(): Boolean {
         val requiredPermissions = getRequiredButUngrantedPermissions()

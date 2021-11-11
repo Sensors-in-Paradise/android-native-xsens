@@ -1,16 +1,15 @@
 package sensors_in_paradise.xsens.page1
 
-import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.Switch
 import android.widget.TextView
+import android.widget.ViewFlipper
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import sensors_in_paradise.xsens.R
-import sensors_in_paradise.xsens.StatefulBluetoothDevice
 
 class SensorAdapter(
     private val devices: ArrayList<XsensDotDevice>,
@@ -25,7 +24,7 @@ class SensorAdapter(
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val textView: TextView = view.findViewById(R.id.tv_name_sensorDevice)
         val switch: Switch = view.findViewById(R.id.switch_connect_sensorDevice)
-
+        val flipper: ViewFlipper = view.findViewById(R.id.flipper_sensorDevice)
         init {
 
 
@@ -49,15 +48,31 @@ class SensorAdapter(
 
         val device = devices[position]
 
-        viewHolder.textView.text = device.name + " " + device.name
+        viewHolder.textView.text = device.name + " " + device.tag
         viewHolder.switch.isChecked = device.connectionState == XsensDotDevice.CONN_STATE_CONNECTED
         viewHolder.switch.setOnCheckedChangeListener { compoundButton: CompoundButton, b: Boolean ->
             connectionCallbackUI.onConnectionUpdateRequested(device, b)
         }
+        val isConnecting = (device.connectionState == XsensDotDevice.CONN_STATE_CONNECTING) or (device.connectionState == XsensDotDevice.CONN_STATE_RECONNECTING)
+        viewHolder.flipper.displayedChild = if (isConnecting) 1 else 0
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount(): Int {
         return devices.size
+    }
+    fun getDeviceIndexByAddress(address: String):Int{
+        for(device in devices){
+            if(device.address == address){
+                return devices.indexOf(device)
+            }
+        }
+        return -1
+    }
+    fun updateItemByAddress(address:String){
+        val index = getDeviceIndexByAddress(address)
+        if(index!= -1) {
+            notifyItemChanged(index)
+        }
     }
 }
