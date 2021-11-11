@@ -58,7 +58,8 @@ class Page2Handler : PageInterface {
             timer.format = "Time Running - %s" // set the format for a chronometer
             timer.start()
         }
-        endButton = activity.findViewById<MaterialButton>(R.id.buttonEnd)
+
+        endButton = activity.findViewById(R.id.buttonEnd)
 
         endButton.setOnClickListener{
             spinner.setSelection(0)

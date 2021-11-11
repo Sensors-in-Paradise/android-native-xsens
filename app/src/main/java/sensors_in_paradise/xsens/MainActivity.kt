@@ -8,6 +8,7 @@ import com.google.android.material.tabs.TabLayout
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import sensors_in_paradise.xsens.page1.ConnectionInterface
 import sensors_in_paradise.xsens.page1.Page1Handler
+import sensors_in_paradise.xsens.page2.Page2Handler
 
 class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface {
 
@@ -27,6 +28,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         initClickListeners()
 
         pageHandlers.add(Page1Handler(this))
+        pageHandlers.add(Page2Handler())
         for (handler in pageHandlers) {
             handler.activityCreated(this)
         }
