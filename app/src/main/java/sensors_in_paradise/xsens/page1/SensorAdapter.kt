@@ -1,4 +1,4 @@
-package sensors_in_paradise.xsens.devices
+package sensors_in_paradise.xsens.page1
 
 import android.os.Build
 import android.view.LayoutInflater
@@ -7,10 +7,9 @@ import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.Switch
 import android.widget.TextView
-import androidx.appcompat.widget.SwitchCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.switchmaterial.SwitchMaterial
 import sensors_in_paradise.xsens.R
+import sensors_in_paradise.xsens.StatefulBluetoothDevice
 
 class SensorAdapter(
     private val devices: ArrayList<StatefulBluetoothDevice>,
@@ -61,6 +60,4 @@ class SensorAdapter(
     override fun getItemCount(): Int {
         return devices.size
     }
-
-
 }

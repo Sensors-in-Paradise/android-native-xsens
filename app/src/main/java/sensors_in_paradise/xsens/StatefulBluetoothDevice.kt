@@ -1,4 +1,4 @@
-package sensors_in_paradise.xsens.devices
+package sensors_in_paradise.xsens
 
 import android.bluetooth.BluetoothDevice
 
@@ -10,5 +10,4 @@ class StatefulBluetoothDevice( val device: BluetoothDevice) {
         }
         return super.equals(other)
     }
-
 }

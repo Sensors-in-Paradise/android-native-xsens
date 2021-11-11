@@ -1,45 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rv"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:textAlignment="center"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:orientation="vertical">
 
-    <Button
-        android:id="@+id/btn_continue_activity_main"
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout_activity_main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:text="Go to capture screen" />
-
-    <LinearLayout
-        android:id="@+id/linearLayout_center_activity_main"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/tv_center_acitivity_main"
+        >
+        <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="No devices found." />
-
-        <ProgressBar
-            android:id="@+id/pb_activity_main"
-            style="?android:attr/progressBarStyle"
-            android:layout_width="match_parent"
+            android:text="Connection"/>
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone" />
-    </LinearLayout>
+            android:text="Recording"/>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_bluetoothDevices_activity_main"
+    </com.google.android.material.tabs.TabLayout>
+    <android.widget.ViewFlipper
+        android:id="@+id/flipper_activity_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layoutManager="LinearLayoutManager"/>
-</FrameLayout>
+        >
+
+        <include android:id="@+id/first_activity_main"  layout="@layout/connection_fragment" />
+        <include android:id="@+id/second_activity_main"  layout="@layout/capture_fragment" />
+    </android.widget.ViewFlipper>
+
+
+</LinearLayout>
