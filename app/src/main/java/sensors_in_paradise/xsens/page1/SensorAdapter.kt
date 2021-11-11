@@ -8,12 +8,13 @@ import android.widget.CompoundButton
 import android.widget.Switch
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.xsens.dot.android.sdk.models.XsensDotDevice
 import sensors_in_paradise.xsens.R
 import sensors_in_paradise.xsens.StatefulBluetoothDevice
 
 class SensorAdapter(
-    private val devices: ArrayList<StatefulBluetoothDevice>,
-    private val connectionCallback: DeviceConnectionInterface
+    private val devices: ArrayList<XsensDotDevice>,
+    private val connectionCallbackUI: UIDeviceConnectionInterface
 ) :
     RecyclerView.Adapter<SensorAdapter.ViewHolder>() {
 
@@ -45,14 +46,13 @@ class SensorAdapter(
 
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
-        val statefulDevice = devices[position]
-        val device = statefulDevice.device
 
-        val id = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) device.alias else device.address
-        viewHolder.textView.text = device.name + " " + device.address
-        viewHolder.switch.isChecked = statefulDevice.connected
+        val device = devices[position]
+
+        viewHolder.textView.text = device.name + " " + device.name
+        viewHolder.switch.isChecked = device.connectionState == XsensDotDevice.CONN_STATE_CONNECTED
         viewHolder.switch.setOnCheckedChangeListener { compoundButton: CompoundButton, b: Boolean ->
-            connectionCallback.onConnectionUpdateRequested(statefulDevice, b)
+            connectionCallbackUI.onConnectionUpdateRequested(device, b)
         }
     }
 

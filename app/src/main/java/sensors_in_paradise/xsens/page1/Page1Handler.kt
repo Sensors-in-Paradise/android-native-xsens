@@ -19,22 +19,23 @@ import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.interfaces.XsensDotDeviceCallback
 import com.xsens.dot.android.sdk.interfaces.XsensDotScannerCallback
 import com.xsens.dot.android.sdk.models.FilterProfileInfo
+import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.utils.XsensDotScanner
 import sensors_in_paradise.xsens.PageInterface
 import sensors_in_paradise.xsens.R
 import sensors_in_paradise.xsens.StatefulBluetoothDevice
 import java.util.ArrayList
 
-class Page1Handler() : XsensDotDeviceCallback, XsensDotScannerCallback, PageInterface,
-    DeviceConnectionInterface {
+class Page1Handler(val connectionInterface: ConnectionInterface) : XsensDotDeviceCallback, XsensDotScannerCallback, PageInterface,
+    UIDeviceConnectionInterface {
     private lateinit var context: Context
-
     private lateinit var tv: TextView
     private lateinit var pb: ProgressBar
     private lateinit var rv: RecyclerView
     private lateinit var linearLayout_center: LinearLayout
     private lateinit var sensorAdapter: SensorAdapter
-    private val scannedDevices = ArrayList<StatefulBluetoothDevice>()
+    private val scannedDevices = ArrayList<XsensDotDevice>()
+
     private val REQUIRED_PERMISSIONS = arrayOf(
         Manifest.permission.BLUETOOTH,
         Manifest.permission.BLUETOOTH_ADMIN,
@@ -43,8 +44,14 @@ class Page1Handler() : XsensDotDeviceCallback, XsensDotScannerCallback, PageInte
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
-
-    override fun onXsensDotConnectionChanged(s: String, i: Int) {}
+    override fun onXsensDotConnectionChanged(address: String, state: Int) {
+        if (state == XsensDotDevice.CONN_STATE_DISCONNECTED) {
+            connectionInterface.onConnectedDevicesChanged(scannedDevices)
+        }
+        else if (state == XsensDotDevice.CONN_STATE_CONNECTED) {
+            connectionInterface.onConnectedDevicesChanged(scannedDevices)
+        }
+    }
     override fun onXsensDotServicesDiscovered(s: String, i: Int) {}
     override fun onXsensDotFirmwareVersionRead(s: String, s1: String) {}
     override fun onXsensDotTagChanged(s: String, s1: String) {}
@@ -61,25 +68,22 @@ class Page1Handler() : XsensDotDeviceCallback, XsensDotScannerCallback, PageInte
         arrayList: ArrayList<FilterProfileInfo>
     ) {
     }
-
     override fun onSyncStatusUpdate(s: String, b: Boolean) {}
-
     override fun onXsensDotScanned(device: BluetoothDevice, i: Int) {
         //TODO("Move logic into new  arraylist class")
         var alreadyAdded = false
 
         for (device2 in scannedDevices) {
-            if (device2.device == device) {
+            if (device2.address == device.address) {
                 alreadyAdded = true
             }
         }
         if (!alreadyAdded) {
-            scannedDevices.add(StatefulBluetoothDevice(device))
+            scannedDevices.add(XsensDotDevice(context, device, this))
             sensorAdapter.notifyItemInserted(scannedDevices.size - 1)
         }
         linearLayout_center.visibility = View.INVISIBLE
     }
-
     override fun activityCreated(activity: Activity) {
         this.context = activity
         tv = activity.findViewById(R.id.tv_center_acitivity_main)
@@ -89,7 +93,6 @@ class Page1Handler() : XsensDotDeviceCallback, XsensDotScannerCallback, PageInte
         sensorAdapter = SensorAdapter(scannedDevices, this)
         rv.adapter = sensorAdapter
     }
-
     override fun activityResumed() {
         if (checkPermissions()) {
             // Permissions granted, starting scan
@@ -114,24 +117,17 @@ class Page1Handler() : XsensDotDeviceCallback, XsensDotScannerCallback, PageInte
             }
         }
     }
-
     private var mXsScanner: XsensDotScanner? = null
     private fun initXsScanner() {
         mXsScanner = XsensDotScanner(context, this)
         mXsScanner!!.setScanMode(ScanSettings.SCAN_MODE_BALANCED)
     }
-
     override fun onConnectionUpdateRequested(
-        statefulDevice: StatefulBluetoothDevice,
+        device: XsensDotDevice,
         wantsConnection: Boolean
     ) {
-        Toast.makeText(
-            context,
-            statefulDevice.device.address + " wants a connection: " + wantsConnection,
-            Toast.LENGTH_LONG
-        ).show()
+        device.connect()
     }
-
     private fun checkPermissions(): Boolean {
         val requiredPermissions = getRequiredButUngrantedPermissions()
         if (requiredPermissions.size > 0) {
@@ -142,7 +138,6 @@ class Page1Handler() : XsensDotDeviceCallback, XsensDotScannerCallback, PageInte
         }
         return true
     }
-
     private fun getRequiredButUngrantedPermissions(): ArrayList<String> {
         val result = ArrayList<String>()
         for (permission in REQUIRED_PERMISSIONS) {
@@ -152,7 +147,6 @@ class Page1Handler() : XsensDotDeviceCallback, XsensDotScannerCallback, PageInte
         }
         return result
     }
-
     private fun isPermissionGranted(permission: String): Boolean {
         return (ContextCompat.checkSelfPermission(
             context,
