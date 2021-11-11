@@ -25,4 +25,4 @@ jobs:
             - name: Grant execute permission for gradlew
               run: chmod +x gradlew
             - name: Lint with Gradle
-              run: ./gradlew detekAll
+              run: ./gradlew detekBasic

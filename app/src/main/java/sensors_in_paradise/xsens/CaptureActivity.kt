@@ -1,6 +1,5 @@
 package sensors_in_paradise.xsens
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.View
@@ -8,6 +7,8 @@ import android.widget.*
 import androidx.appcompat.app.ActionBar
 import com.google.android.material.button.MaterialButton
 import kotlinx.android.synthetic.main.activity_capture.*
+import androidx.appcompat.app.AppCompatActivity
+
 
 class CaptureActivity : AppCompatActivity() {
 
