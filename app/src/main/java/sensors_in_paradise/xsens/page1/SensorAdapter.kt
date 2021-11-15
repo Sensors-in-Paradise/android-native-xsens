@@ -26,8 +26,6 @@ class SensorAdapter(
         val switch: Switch = view.findViewById(R.id.switch_connect_sensorDevice)
         val flipper: ViewFlipper = view.findViewById(R.id.flipper_sensorDevice)
         init {
-
-
         }
     }
 

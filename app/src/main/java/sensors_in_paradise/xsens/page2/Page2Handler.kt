@@ -10,16 +10,17 @@ import android.widget.Chronometer
 import android.widget.Spinner
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
-import com.xsens.dot.android.sdk.interfaces.XsensDotDeviceCallback
-import com.xsens.dot.android.sdk.models.FilterProfileInfo
-import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
+import com.xsens.dot.android.sdk.utils.XsensDotLogger.TYPE_CSV
 import sensors_in_paradise.xsens.PageInterface
 import sensors_in_paradise.xsens.R
-import sensors_in_paradise.xsens.page1.Page1Handler
-import java.util.logging.Logger
+import sensors_in_paradise.xsens.page1.ConnectionInterface
+import sensors_in_paradise.xsens.page1.XSENSArrayList
+import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-class Page2Handler(val devices: ArrayList<XsensDotDevice>) : PageInterface, XsensDotDeviceCallback {
+class Page2Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface {
     private lateinit var context: Context
     private lateinit var timer: Chronometer
     private lateinit var startButton: MaterialButton
@@ -33,9 +34,9 @@ class Page2Handler(val devices: ArrayList<XsensDotDevice>) : PageInterface, Xsen
 
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter.createFromResource(
-            context,
-            R.array.activities_array,
-            android.R.layout.simple_spinner_item
+                context,
+                R.array.activities_array,
+                android.R.layout.simple_spinner_item
         ).also { adapter ->
             // Specify the layout to use when the list of choices appears
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -47,104 +48,61 @@ class Page2Handler(val devices: ArrayList<XsensDotDevice>) : PageInterface, Xsen
 
         startButton = activity.findViewById(R.id.buttonStart)
 
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 startButton.isEnabled = false
             }
 
             override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
             ) {
                 startButton.isEnabled = position != 0
             }
         }
-
-        startButton.setOnClickListener{
+        startButton.setOnClickListener {
             timer.base = SystemClock.elapsedRealtime()
             timer.format = "Time Running - %s" // set the format for a chronometer
             timer.start()
-            for (device in devices) {
-                device.setMeasurementMode(1)
+            val dir = this.context.getExternalFilesDir(null).toString() + "/XSensLogs/"
+            val filename = dir + "${spinner.selectedItem}-" +
+                    DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())
+            val testDir = File(filename)
+            testDir.mkdirs()
+            for (device in devices.getConnected()) {
+                device.measurementMode = 1
                 device.startMeasuring()
-
             }
-            //startMeasuring()
-            //startLogging
+            xsLogger =  XsensDotLogger(this.context, TYPE_CSV, 1, filename, "currentDevice",
+                    "1", false,1,
+                    null as String?, "appVersion", 0)
         }
 
         endButton = activity.findViewById(R.id.buttonEnd)
-
-
-        endButton.setOnClickListener{
+        endButton.setOnClickListener {
             spinner.setSelection(0)
             timer.stop()
             startButton.isEnabled = false
-            for (device in devices) {
+            for (device in devices.getConnected()) {
+                xsLogger.stop()
                 device.stopMeasuring()
             }
         }
     }
 
-    override fun onXsensDotDataChanged(p0: String?, p1: XsensDotData?) {
+    override fun activityResumed() {}
+
+    override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
         TODO("Not yet implemented")
     }
 
-    override fun activityResumed() {
+    override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
+        xsLogger.update(xsensDotData)
     }
 
-    override fun onXsensDotConnectionChanged(p0: String?, p1: Int) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onXsensDotServicesDiscovered(p0: String?, p1: Int) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onXsensDotFirmwareVersionRead(p0: String?, p1: String?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onXsensDotTagChanged(p0: String?, p1: String?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onXsensDotBatteryChanged(p0: String?, p1: Int, p2: Int) {
-        TODO("Not yet implemented")
-    }
-
-
-    override fun onXsensDotInitDone(p0: String?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onXsensDotButtonClicked(p0: String?, p1: Long) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onXsensDotPowerSavingTriggered(p0: String?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onReadRemoteRssi(p0: String?, p1: Int) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onXsensDotOutputRateUpdate(p0: String?, p1: Int) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onXsensDotFilterProfileUpdate(p0: String?, p1: Int) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onXsensDotGetFilterProfileInfo(p0: String?, p1: java.util.ArrayList<FilterProfileInfo>?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onSyncStatusUpdate(p0: String?, p1: Boolean) {
+    override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
         TODO("Not yet implemented")
     }
 }

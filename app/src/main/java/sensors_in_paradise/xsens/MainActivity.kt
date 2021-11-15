@@ -30,8 +30,9 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
 
         initClickListeners()
 
-        pageHandlers.add(Page1Handler(scannedDevices,this))
-        pageHandlers.add(Page2Handler(scannedDevices))
+        var page2 = Page2Handler(scannedDevices)
+        pageHandlers.add(page2)
+        pageHandlers.add(Page1Handler(scannedDevices,page2))
 
         for (handler in pageHandlers) {
             handler.activityCreated(this)
