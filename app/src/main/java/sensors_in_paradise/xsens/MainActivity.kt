@@ -8,6 +8,7 @@ import com.google.android.material.tabs.TabLayout
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import sensors_in_paradise.xsens.page1.ConnectionInterface
 import sensors_in_paradise.xsens.page1.Page1Handler
+import sensors_in_paradise.xsens.page1.XSENSArrayList
 
 class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface {
 
@@ -16,7 +17,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
 
     private val pageHandlers = ArrayList<PageInterface>()
 
-
+    private val scannedDevices = XSENSArrayList()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -26,7 +27,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
 
         initClickListeners()
 
-        pageHandlers.add(Page1Handler(this))
+        pageHandlers.add(Page1Handler(scannedDevices,this))
         for (handler in pageHandlers) {
             handler.activityCreated(this)
         }
@@ -56,7 +57,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         //TODO("Not yet implemented")
     }
 
-    override fun onConnectedDevicesChanged(devices: ArrayList<XsensDotDevice>) {
+    override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
         //TODO("Not yet implemented")
     }
 }

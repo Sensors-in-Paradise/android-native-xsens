@@ -26,7 +26,7 @@ import sensors_in_paradise.xsens.PageInterface
 import sensors_in_paradise.xsens.R
 import java.util.ArrayList
 
-class Page1Handler(val connectionInterface: ConnectionInterface) : XsensDotDeviceCallback, XsensDotScannerCallback, PageInterface,
+class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: ConnectionInterface) : XsensDotDeviceCallback, XsensDotScannerCallback, PageInterface,
     UIDeviceConnectionInterface {
     private lateinit var context: Context
     private lateinit var tv: TextView
@@ -34,7 +34,7 @@ class Page1Handler(val connectionInterface: ConnectionInterface) : XsensDotDevic
     private lateinit var rv: RecyclerView
     private lateinit var linearLayout_center: LinearLayout
     private lateinit var sensorAdapter: SensorAdapter
-    private val scannedDevices = ArrayList<XsensDotDevice>()
+
 
     private val REQUIRED_PERMISSIONS = arrayOf(
         Manifest.permission.BLUETOOTH,
@@ -47,13 +47,8 @@ class Page1Handler(val connectionInterface: ConnectionInterface) : XsensDotDevic
 
     override fun onXsensDotConnectionChanged(address: String, state: Int) {
         sensorAdapter.updateItemByAddress(address)
-
-        if (state == XsensDotDevice.CONN_STATE_DISCONNECTED) {
-            connectionInterface.onConnectedDevicesChanged(scannedDevices)
-        }
-        else if (state == XsensDotDevice.CONN_STATE_CONNECTED) {
-            connectionInterface.onConnectedDevicesChanged(scannedDevices)
-        }
+        connectionInterface.onConnectedDevicesChanged(address,
+            state == XsensDotDevice.CONN_STATE_CONNECTED)
     }
     override fun onXsensDotServicesDiscovered(address: String, status: Int) {
         sensorAdapter.updateItemByAddress(address)
@@ -80,15 +75,7 @@ class Page1Handler(val connectionInterface: ConnectionInterface) : XsensDotDevic
     }
     override fun onSyncStatusUpdate(s: String, b: Boolean) {}
     override fun onXsensDotScanned(device: BluetoothDevice, i: Int) {
-        //TODO("Move logic into new  arraylist class")
-        var alreadyAdded = false
-
-        for (device2 in scannedDevices) {
-            if (device2.address == device.address) {
-                alreadyAdded = true
-            }
-        }
-        if (!alreadyAdded) {
+        if (!scannedDevices.contains(device.address)) {
             scannedDevices.add(XsensDotDevice(context, device, this))
             sensorAdapter.notifyItemInserted(scannedDevices.size - 1)
         }
