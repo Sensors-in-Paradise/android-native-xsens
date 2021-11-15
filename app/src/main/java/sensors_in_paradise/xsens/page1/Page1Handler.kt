@@ -29,6 +29,7 @@ import java.util.ArrayList
 class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: ConnectionInterface) :  XsensDotScannerCallback,XsensDotDeviceCallback, PageInterface,
     UIDeviceConnectionInterface {
     private lateinit var context: Context
+    private lateinit var activity: Activity
     private lateinit var tv: TextView
     private lateinit var pb: ProgressBar
     private lateinit var rv: RecyclerView
@@ -46,14 +47,24 @@ class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: 
     )
 
     override fun onXsensDotConnectionChanged(address: String, state: Int) {
-        sensorAdapter.updateItemByAddress(address)
+
         connectionInterface.onConnectedDevicesChanged(address,
             state == XsensDotDevice.CONN_STATE_CONNECTED)
+
+        activity.runOnUiThread {
+            sensorAdapter.notifyItemChanged(address)
+            Toast.makeText(
+                context,
+                "ConnectionChanged: " + (state == XsensDotDevice.CONN_STATE_CONNECTED),
+                Toast.LENGTH_LONG
+            ).show()
+        }
+
     }
     override fun onXsensDotServicesDiscovered(address: String, status: Int) {
-        sensorAdapter.updateItemByAddress(address)
+        sensorAdapter.notifyItemChanged(address)
         if (status == BluetoothGatt.GATT_SUCCESS) {
-
+            
         }
     }
     override fun onXsensDotFirmwareVersionRead(s: String, s1: String) {}
@@ -63,7 +74,7 @@ class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: 
         connectionInterface.onXsensDotDataChanged(address,xsensDotData)
     }
     override fun onXsensDotInitDone(address: String) {
-        sensorAdapter.updateItemByAddress(address)
+        sensorAdapter.notifyItemChanged(address)
     }
     override fun onXsensDotButtonClicked(s: String, l: Long) {}
     override fun onXsensDotPowerSavingTriggered(s: String) {}
@@ -87,6 +98,7 @@ class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: 
     }
     override fun activityCreated(activity: Activity) {
         this.context = activity
+        this.activity = activity
         tv = activity.findViewById(R.id.tv_center_acitivity_main)
         rv = activity.findViewById(R.id.rv_bluetoothDevices_activity_main)
         pb = activity.findViewById(R.id.pb_activity_main)
@@ -133,6 +145,9 @@ class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: 
         else{
            device.disconnect()
        }
+        activity.runOnUiThread {
+            sensorAdapter.notifyItemChanged(device.address)
+        }
     }
     private fun checkPermissions(): Boolean {
         val requiredPermissions = getRequiredButUngrantedPermissions()
