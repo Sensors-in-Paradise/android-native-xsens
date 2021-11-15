@@ -21,6 +21,14 @@ class XSENSArrayList: ArrayList<XsensDotDevice>() {
         }
         return null;
     }
+    fun indexOf(deviceAddress: String): Int {
+        for ((index, device) in this.withIndex()) {
+            if (device.address == deviceAddress) {
+                return index;
+            }
+        }
+        return -1
+    }
     fun getConnected(): XSENSArrayList{
         val devices = XSENSArrayList()
         for (device in this) {

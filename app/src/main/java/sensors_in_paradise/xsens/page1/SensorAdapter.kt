@@ -9,7 +9,7 @@ import com.xsens.dot.android.sdk.models.XsensDotDevice
 import sensors_in_paradise.xsens.R
 
 class SensorAdapter(
-    private val devices: ArrayList<XsensDotDevice>,
+    private val devices: XSENSArrayList,
     private val connectionCallbackUI: UIDeviceConnectionInterface
 ) :
     RecyclerView.Adapter<SensorAdapter.ViewHolder>() {
@@ -19,9 +19,11 @@ class SensorAdapter(
      * (custom ViewHolder).
      */
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val textView: TextView = view.findViewById(R.id.tv_name_sensorDevice)
-        val switch: ToggleButton = view.findViewById(R.id.switch_connect_sensorDevice)
+        val nameTextView: TextView = view.findViewById(R.id.tv_name_sensorDevice)
+        val detailsTextView: TextView = view.findViewById(R.id.tv_details_sensorDevice)
+        val button: Button = view.findViewById(R.id.switch_connect_sensorDevice)
         val flipper: ViewFlipper = view.findViewById(R.id.flipper_sensorDevice)
+        val batteryPB: ProgressBar = view.findViewById(R.id.pb_battery_sensorDevice)
         init {
 
 
@@ -44,15 +46,18 @@ class SensorAdapter(
         // contents of the view with that element
 
         val device = devices[position]
-        viewHolder.textView.text = device.name + " " + device.tag+": "+device.connectionState
-        viewHolder.switch.setOnCheckedChangeListener { compoundButton: CompoundButton, b: Boolean ->
-            connectionCallbackUI.onConnectionUpdateRequested(device, b)
+        viewHolder.nameTextView.text = device.name + " " + device.tag
 
+        viewHolder.button.setOnClickListener {
+            connectionCallbackUI.onConnectionUpdateRequested(device, (viewHolder.button.text=="Connect") )
         }
+        val isConnected = (device.connectionState == XsensDotDevice.CONN_STATE_CONNECTED)
         val isConnecting = (device.connectionState == XsensDotDevice.CONN_STATE_CONNECTING) or (device.connectionState == XsensDotDevice.CONN_STATE_RECONNECTING)
         viewHolder.flipper.displayedChild = if (isConnecting) 1 else 0
-        viewHolder.switch.isChecked = device.connectionState == XsensDotDevice.CONN_STATE_CONNECTED
-
+        viewHolder.button.text = if (isConnected) "Disconnect" else "Connect"
+        viewHolder.detailsTextView.text =  if (isConnected) "Connected" else "Disconnected"
+        viewHolder.batteryPB.progress = if(isConnected) device.batteryPercentage else 0
+        viewHolder.batteryPB.visibility =  if(isConnected) View.VISIBLE else View.INVISIBLE
     }
 
 
@@ -60,16 +65,9 @@ class SensorAdapter(
     override fun getItemCount(): Int {
         return devices.size
     }
-    fun getDeviceIndexByAddress(address: String):Int{
-        for(device in devices){
-            if(device.address == address){
-                return devices.indexOf(device)
-            }
-        }
-        return -1
-    }
+
     fun notifyItemChanged(address:String){
-        val index = getDeviceIndexByAddress(address)
+        val index = devices.indexOf(address)
         if(index!= -1) {
             notifyItemChanged(index)
 

@@ -50,31 +50,27 @@ class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: 
 
         connectionInterface.onConnectedDevicesChanged(address,
             state == XsensDotDevice.CONN_STATE_CONNECTED)
-
-        activity.runOnUiThread {
-            sensorAdapter.notifyItemChanged(address)
-            Toast.makeText(
-                context,
-                "ConnectionChanged: " + (state == XsensDotDevice.CONN_STATE_CONNECTED),
-                Toast.LENGTH_LONG
-            ).show()
-        }
-
     }
     override fun onXsensDotServicesDiscovered(address: String, status: Int) {
-        sensorAdapter.notifyItemChanged(address)
+
         if (status == BluetoothGatt.GATT_SUCCESS) {
             
         }
     }
     override fun onXsensDotFirmwareVersionRead(s: String, s1: String) {}
-    override fun onXsensDotTagChanged(s: String, s1: String) {}
+    override fun onXsensDotTagChanged(address: String, tag: String) {
+        activity.runOnUiThread {
+            sensorAdapter.notifyItemChanged(address)
+        }
+    }
     override fun onXsensDotBatteryChanged(s: String, i: Int, i1: Int) {}
     override fun onXsensDotDataChanged(address: String, xsensDotData: XsensDotData) {
         connectionInterface.onXsensDotDataChanged(address,xsensDotData)
     }
     override fun onXsensDotInitDone(address: String) {
-        sensorAdapter.notifyItemChanged(address)
+        activity.runOnUiThread {
+            sensorAdapter.notifyItemChanged(address)
+        }
     }
     override fun onXsensDotButtonClicked(s: String, l: Long) {}
     override fun onXsensDotPowerSavingTriggered(s: String) {}
