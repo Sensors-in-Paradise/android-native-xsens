@@ -4,6 +4,6 @@ import android.app.Activity
 import android.content.Context
 
 interface PageInterface {
-    fun activityCreated( activity: Activity)
+    fun activityCreated(activity: Activity)
     fun activityResumed( )
 }

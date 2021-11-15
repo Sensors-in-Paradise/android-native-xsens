@@ -14,6 +14,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
 
     private lateinit var flipper: ViewFlipper
     private lateinit var tabLayout: TabLayout
+    private lateinit var devices: ArrayList<XsensDotDevice>
 
     private val pageHandlers = ArrayList<PageInterface>()
 
@@ -28,7 +29,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         initClickListeners()
 
         pageHandlers.add(Page1Handler(this))
-        pageHandlers.add(Page2Handler())
+        pageHandlers.add(Page2Handler(devices))
         for (handler in pageHandlers) {
             handler.activityCreated(this)
         }
