@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.*
 import com.google.android.material.tabs.TabLayout
+import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import sensors_in_paradise.xsens.page1.ConnectionInterface
 import sensors_in_paradise.xsens.page1.Page1Handler
@@ -60,4 +61,14 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
         //TODO("Not yet implemented")
     }
+
+    override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
+        //TODO("Not yet implemented")
+    }
+
+    override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
+        //TODO("Not yet implemented")
+    }
+
+
 }

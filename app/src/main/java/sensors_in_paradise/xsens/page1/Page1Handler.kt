@@ -26,7 +26,7 @@ import sensors_in_paradise.xsens.PageInterface
 import sensors_in_paradise.xsens.R
 import java.util.ArrayList
 
-class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: ConnectionInterface) : XsensDotDeviceCallback, XsensDotScannerCallback, PageInterface,
+class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: ConnectionInterface) :  XsensDotScannerCallback,XsensDotDeviceCallback, PageInterface,
     UIDeviceConnectionInterface {
     private lateinit var context: Context
     private lateinit var tv: TextView
@@ -59,14 +59,18 @@ class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: 
     override fun onXsensDotFirmwareVersionRead(s: String, s1: String) {}
     override fun onXsensDotTagChanged(s: String, s1: String) {}
     override fun onXsensDotBatteryChanged(s: String, i: Int, i1: Int) {}
-    override fun onXsensDotDataChanged(s: String, xsensDotData: XsensDotData) {}
+    override fun onXsensDotDataChanged(address: String, xsensDotData: XsensDotData) {
+        connectionInterface.onXsensDotDataChanged(address,xsensDotData)
+    }
     override fun onXsensDotInitDone(address: String) {
         sensorAdapter.updateItemByAddress(address)
     }
     override fun onXsensDotButtonClicked(s: String, l: Long) {}
     override fun onXsensDotPowerSavingTriggered(s: String) {}
     override fun onReadRemoteRssi(s: String, i: Int) {}
-    override fun onXsensDotOutputRateUpdate(s: String, i: Int) {}
+    override fun onXsensDotOutputRateUpdate(address: String, outputRate: Int) {
+        connectionInterface.onXsensDotOutputRateUpdate(address,outputRate)
+    }
     override fun onXsensDotFilterProfileUpdate(s: String, i: Int) {}
     override fun onXsensDotGetFilterProfileInfo(
         s: String,
