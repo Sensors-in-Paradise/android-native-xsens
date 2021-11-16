@@ -1,4 +1,4 @@
-package sensors_in_paradise.xsens.page1
+package sensors_in_paradise.sonar.page1
 
 import android.Manifest
 import android.app.Activity
@@ -11,7 +11,6 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.XsensDotSdk
@@ -21,22 +20,22 @@ import com.xsens.dot.android.sdk.interfaces.XsensDotScannerCallback
 import com.xsens.dot.android.sdk.models.FilterProfileInfo
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.utils.XsensDotScanner
-import sensors_in_paradise.xsens.PageInterface
-import sensors_in_paradise.xsens.R
-import sensors_in_paradise.xsens.StatefulBluetoothDevice
+import sensors_in_paradise.sonar.PageInterface
+import sensors_in_paradise.sonar.R
 import java.util.ArrayList
 
-class Page1Handler(val connectionInterface: ConnectionInterface) : XsensDotDeviceCallback, XsensDotScannerCallback, PageInterface,
+class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: ConnectionInterface) :
+    XsensDotScannerCallback, XsensDotDeviceCallback, PageInterface,
     UIDeviceConnectionInterface {
     private lateinit var context: Context
+    private lateinit var activity: Activity
     private lateinit var tv: TextView
     private lateinit var pb: ProgressBar
     private lateinit var rv: RecyclerView
-    private lateinit var linearLayout_center: LinearLayout
+    private lateinit var linearLayoutCenter: LinearLayout
     private lateinit var sensorAdapter: SensorAdapter
-    private val scannedDevices = ArrayList<XsensDotDevice>()
 
-    private val REQUIRED_PERMISSIONS = arrayOf(
+    private val _requiredPermissions = arrayOf(
         Manifest.permission.BLUETOOTH,
         Manifest.permission.BLUETOOTH_ADMIN,
         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -44,24 +43,35 @@ class Page1Handler(val connectionInterface: ConnectionInterface) : XsensDotDevic
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
+
     override fun onXsensDotConnectionChanged(address: String, state: Int) {
-        if (state == XsensDotDevice.CONN_STATE_DISCONNECTED) {
-            connectionInterface.onConnectedDevicesChanged(scannedDevices)
-        }
-        else if (state == XsensDotDevice.CONN_STATE_CONNECTED) {
-            connectionInterface.onConnectedDevicesChanged(scannedDevices)
+
+        connectionInterface.onConnectedDevicesChanged(address,
+            state == XsensDotDevice.CONN_STATE_CONNECTED)
+    }
+    override fun onXsensDotServicesDiscovered(address: String, status: Int) {
+    }
+    override fun onXsensDotFirmwareVersionRead(s: String, s1: String) {}
+    override fun onXsensDotTagChanged(address: String, tag: String) {
+        activity.runOnUiThread {
+            sensorAdapter.notifyItemChanged(address)
         }
     }
-    override fun onXsensDotServicesDiscovered(s: String, i: Int) {}
-    override fun onXsensDotFirmwareVersionRead(s: String, s1: String) {}
-    override fun onXsensDotTagChanged(s: String, s1: String) {}
     override fun onXsensDotBatteryChanged(s: String, i: Int, i1: Int) {}
-    override fun onXsensDotDataChanged(s: String, xsensDotData: XsensDotData) {}
-    override fun onXsensDotInitDone(s: String) {}
+    override fun onXsensDotDataChanged(address: String, xsensDotData: XsensDotData) {
+        connectionInterface.onXsensDotDataChanged(address, xsensDotData)
+    }
+    override fun onXsensDotInitDone(address: String) {
+        activity.runOnUiThread {
+            sensorAdapter.notifyItemChanged(address)
+        }
+    }
     override fun onXsensDotButtonClicked(s: String, l: Long) {}
     override fun onXsensDotPowerSavingTriggered(s: String) {}
     override fun onReadRemoteRssi(s: String, i: Int) {}
-    override fun onXsensDotOutputRateUpdate(s: String, i: Int) {}
+    override fun onXsensDotOutputRateUpdate(address: String, outputRate: Int) {
+        connectionInterface.onXsensDotOutputRateUpdate(address, outputRate)
+    }
     override fun onXsensDotFilterProfileUpdate(s: String, i: Int) {}
     override fun onXsensDotGetFilterProfileInfo(
         s: String,
@@ -70,26 +80,19 @@ class Page1Handler(val connectionInterface: ConnectionInterface) : XsensDotDevic
     }
     override fun onSyncStatusUpdate(s: String, b: Boolean) {}
     override fun onXsensDotScanned(device: BluetoothDevice, i: Int) {
-        //TODO("Move logic into new  arraylist class")
-        var alreadyAdded = false
-
-        for (device2 in scannedDevices) {
-            if (device2.address == device.address) {
-                alreadyAdded = true
-            }
-        }
-        if (!alreadyAdded) {
+        if (!scannedDevices.contains(device.address)) {
             scannedDevices.add(XsensDotDevice(context, device, this))
             sensorAdapter.notifyItemInserted(scannedDevices.size - 1)
         }
-        linearLayout_center.visibility = View.INVISIBLE
+        linearLayoutCenter.visibility = View.INVISIBLE
     }
     override fun activityCreated(activity: Activity) {
         this.context = activity
+        this.activity = activity
         tv = activity.findViewById(R.id.tv_center_acitivity_main)
         rv = activity.findViewById(R.id.rv_bluetoothDevices_activity_main)
         pb = activity.findViewById(R.id.pb_activity_main)
-        linearLayout_center = activity.findViewById(R.id.linearLayout_center_activity_main)
+        linearLayoutCenter = activity.findViewById(R.id.linearLayout_center_activity_main)
         sensorAdapter = SensorAdapter(scannedDevices, this)
         rv.adapter = sensorAdapter
     }
@@ -126,7 +129,14 @@ class Page1Handler(val connectionInterface: ConnectionInterface) : XsensDotDevic
         device: XsensDotDevice,
         wantsConnection: Boolean
     ) {
-        device.connect()
+       if (wantsConnection) {
+           device.connect()
+       } else {
+           device.disconnect()
+       }
+        activity.runOnUiThread {
+            sensorAdapter.notifyItemChanged(device.address)
+        }
     }
     private fun checkPermissions(): Boolean {
         val requiredPermissions = getRequiredButUngrantedPermissions()
@@ -140,7 +150,7 @@ class Page1Handler(val connectionInterface: ConnectionInterface) : XsensDotDevic
     }
     private fun getRequiredButUngrantedPermissions(): ArrayList<String> {
         val result = ArrayList<String>()
-        for (permission in REQUIRED_PERMISSIONS) {
+        for (permission in _requiredPermissions) {
             if (!isPermissionGranted(permission)) {
                 result.add(permission)
             }
