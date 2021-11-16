@@ -1,4 +1,4 @@
-package sensors_in_paradise.xsens.page1
+package sensors_in_paradise.sonar.page1
 
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 

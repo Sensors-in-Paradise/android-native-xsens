@@ -1,10 +1,9 @@
-package sensors_in_paradise.xsens.page1
+package sensors_in_paradise.sonar.page1
 
 import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothGatt
 import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.pm.PackageManager
@@ -12,7 +11,6 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.XsensDotSdk
@@ -22,22 +20,22 @@ import com.xsens.dot.android.sdk.interfaces.XsensDotScannerCallback
 import com.xsens.dot.android.sdk.models.FilterProfileInfo
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.utils.XsensDotScanner
-import sensors_in_paradise.xsens.PageInterface
-import sensors_in_paradise.xsens.R
+import sensors_in_paradise.sonar.PageInterface
+import sensors_in_paradise.sonar.R
 import java.util.ArrayList
 
-class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: ConnectionInterface) :  XsensDotScannerCallback,XsensDotDeviceCallback, PageInterface,
+class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: ConnectionInterface) :
+    XsensDotScannerCallback, XsensDotDeviceCallback, PageInterface,
     UIDeviceConnectionInterface {
     private lateinit var context: Context
     private lateinit var activity: Activity
     private lateinit var tv: TextView
     private lateinit var pb: ProgressBar
     private lateinit var rv: RecyclerView
-    private lateinit var linearLayout_center: LinearLayout
+    private lateinit var linearLayoutCenter: LinearLayout
     private lateinit var sensorAdapter: SensorAdapter
 
-
-    private val REQUIRED_PERMISSIONS = arrayOf(
+    private val _requiredPermissions = arrayOf(
         Manifest.permission.BLUETOOTH,
         Manifest.permission.BLUETOOTH_ADMIN,
         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -52,10 +50,6 @@ class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: 
             state == XsensDotDevice.CONN_STATE_CONNECTED)
     }
     override fun onXsensDotServicesDiscovered(address: String, status: Int) {
-
-        if (status == BluetoothGatt.GATT_SUCCESS) {
-            
-        }
     }
     override fun onXsensDotFirmwareVersionRead(s: String, s1: String) {}
     override fun onXsensDotTagChanged(address: String, tag: String) {
@@ -65,7 +59,7 @@ class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: 
     }
     override fun onXsensDotBatteryChanged(s: String, i: Int, i1: Int) {}
     override fun onXsensDotDataChanged(address: String, xsensDotData: XsensDotData) {
-        connectionInterface.onXsensDotDataChanged(address,xsensDotData)
+        connectionInterface.onXsensDotDataChanged(address, xsensDotData)
     }
     override fun onXsensDotInitDone(address: String) {
         activity.runOnUiThread {
@@ -76,7 +70,7 @@ class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: 
     override fun onXsensDotPowerSavingTriggered(s: String) {}
     override fun onReadRemoteRssi(s: String, i: Int) {}
     override fun onXsensDotOutputRateUpdate(address: String, outputRate: Int) {
-        connectionInterface.onXsensDotOutputRateUpdate(address,outputRate)
+        connectionInterface.onXsensDotOutputRateUpdate(address, outputRate)
     }
     override fun onXsensDotFilterProfileUpdate(s: String, i: Int) {}
     override fun onXsensDotGetFilterProfileInfo(
@@ -90,7 +84,7 @@ class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: 
             scannedDevices.add(XsensDotDevice(context, device, this))
             sensorAdapter.notifyItemInserted(scannedDevices.size - 1)
         }
-        linearLayout_center.visibility = View.INVISIBLE
+        linearLayoutCenter.visibility = View.INVISIBLE
     }
     override fun activityCreated(activity: Activity) {
         this.context = activity
@@ -98,7 +92,7 @@ class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: 
         tv = activity.findViewById(R.id.tv_center_acitivity_main)
         rv = activity.findViewById(R.id.rv_bluetoothDevices_activity_main)
         pb = activity.findViewById(R.id.pb_activity_main)
-        linearLayout_center = activity.findViewById(R.id.linearLayout_center_activity_main)
+        linearLayoutCenter = activity.findViewById(R.id.linearLayout_center_activity_main)
         sensorAdapter = SensorAdapter(scannedDevices, this)
         rv.adapter = sensorAdapter
     }
@@ -135,10 +129,9 @@ class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: 
         device: XsensDotDevice,
         wantsConnection: Boolean
     ) {
-       if(wantsConnection){
+       if (wantsConnection) {
            device.connect()
-       }
-        else{
+       } else {
            device.disconnect()
        }
         activity.runOnUiThread {
@@ -157,7 +150,7 @@ class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: 
     }
     private fun getRequiredButUngrantedPermissions(): ArrayList<String> {
         val result = ArrayList<String>()
-        for (permission in REQUIRED_PERMISSIONS) {
+        for (permission in _requiredPermissions) {
             if (!isPermissionGranted(permission)) {
                 result.add(permission)
             }
