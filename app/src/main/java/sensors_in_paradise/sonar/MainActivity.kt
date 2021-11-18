@@ -1,16 +1,17 @@
-package sensors_in_paradise.xsens
+package sensors_in_paradise.sonar
 
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.widget.ViewFlipper
 import androidx.appcompat.app.AppCompatActivity
-import android.widget.*
 import com.google.android.material.tabs.TabLayout
 import com.xsens.dot.android.sdk.events.XsensDotData
+import sensors_in_paradise.sonar.page1.ConnectionInterface
+import sensors_in_paradise.sonar.page1.Page1Handler
+import sensors_in_paradise.sonar.page1.XSENSArrayList
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import sensors_in_paradise.xsens.page1.ConnectionInterface
-import sensors_in_paradise.xsens.page1.Page1Handler
 import sensors_in_paradise.xsens.page2.Page2Handler
-import sensors_in_paradise.xsens.page1.XSENSArrayList
 
 class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface {
 
@@ -56,22 +57,24 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     }
 
     override fun onTabUnselected(tab: TabLayout.Tab?) {
-        //TODO("Not yet implemented")
+        // TODO("Not yet implemented")
     }
 
     override fun onTabReselected(tab: TabLayout.Tab?) {
-        //TODO("Not yet implemented")
+        // TODO("Not yet implemented")
     }
 
     override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
-        //TODO("Not yet implemented")
+        // TODO("Not yet implemented")
     }
 
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
-        //TODO("Not yet implemented")
+        // TODO("Not yet implemented")
     }
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
-        //TODO("Not yet implemented")
+        // TODO("Not yet implemented")
     }
+
+
 }
