@@ -4,12 +4,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.ViewFlipper
 import androidx.recyclerview.widget.RecyclerView
-import com.xsens.dot.android.sdk.models.XsensDotDevice
 import sensors_in_paradise.sonar.R
 
 class PredictionsAdapter(
@@ -44,16 +40,14 @@ class PredictionsAdapter(
        val prediction = predictions[position]
         viewHolder.titleTextView.text = prediction.title
         viewHolder.detailsTextView.text = prediction.content
-        Log.d("ADAPTER", "222Bind ViewHolder: "+position)
+        Log.d("ADAPTER", "222Bind ViewHolder: " + position)
         println("Binding view holder PREDICTION")
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount(): Int {
-        println("SIZE PREDICTION: "+predictions.size)
-        Log.d("ADAPTER", "SIZE PREDICTION: "+predictions.size)
+        println("SIZE PREDICTION: " + predictions.size)
+        Log.d("ADAPTER", "SIZE PREDICTION: " + predictions.size)
         return predictions.size
-
     }
-
 }

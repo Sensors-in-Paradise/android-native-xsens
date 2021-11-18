@@ -3,8 +3,6 @@ package sensors_in_paradise.sonar
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.widget.ViewAnimator
-import android.widget.ViewFlipper
-import android.widget.ViewSwitcher
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
 import com.xsens.dot.android.sdk.events.XsensDotData
