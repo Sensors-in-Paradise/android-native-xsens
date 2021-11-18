@@ -1,22 +1,29 @@
 package sensors_in_paradise.sonar.page1
 
+import android.content.Context
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.ViewFlipper
+import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import sensors_in_paradise.sonar.R
 
 class SensorAdapter(
+    private val context: Context,
     private val devices: XSENSArrayList,
     private val connectionCallbackUI: UIDeviceConnectionInterface
 ) :
     RecyclerView.Adapter<SensorAdapter.ViewHolder>() {
-
+    private var disconnectedDrawable:Drawable?
+    private var connectedDrawable:Drawable?
+    private var syncedDrawable:Drawable?
+    init {
+        disconnectedDrawable = context.getDrawable(R.drawable.ic_baseline_link_off_24)
+        connectedDrawable = context.getDrawable(R.drawable.ic_baseline_link_24)
+        syncedDrawable = context.getDrawable(R.drawable.ic_baseline_sync_24)
+    }
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder).
@@ -27,6 +34,7 @@ class SensorAdapter(
         val button: Button = view.findViewById(R.id.switch_connect_sensorDevice)
         val flipper: ViewFlipper = view.findViewById(R.id.flipper_sensorDevice)
         val batteryPB: ProgressBar = view.findViewById(R.id.pb_battery_sensorDevice)
+        val statusIV: ImageView = view.findViewById(R.id.imageView_status_connection_fragment)
     }
 
     // Create new views (invoked by the layout manager)
@@ -60,6 +68,14 @@ class SensorAdapter(
         viewHolder.detailsTextView.text = if (isConnected) "Connected" else "Disconnected"
         viewHolder.batteryPB.progress = if (isConnected) device.batteryPercentage else 0
         viewHolder.batteryPB.visibility = if (isConnected) View.VISIBLE else View.INVISIBLE
+
+
+        var statusDrawable = disconnectedDrawable
+        if(isConnected){
+            statusDrawable = if(device.isSynced) syncedDrawable else connectedDrawable
+        }
+
+        viewHolder.statusIV.setImageDrawable(statusDrawable)
     }
 
     // Return the size of your dataset (invoked by the layout manager)

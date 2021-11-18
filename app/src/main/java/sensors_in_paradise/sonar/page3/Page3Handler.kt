@@ -32,8 +32,6 @@ class Page3Handler : PageInterface {
         predictions.add(prediction2)
         adapter = PredictionsAdapter(predictions)
         recyclerView.adapter = adapter
-        Log.d("ADAPTER", "222SIZE PREDICTION: " + adapter.itemCount)
-        Toast.makeText(context, "Moin", Toast.LENGTH_LONG).show()
         adapter.notifyDataSetChanged()
 
         predictButton = activity.findViewById(R.id.button_start_predict)
