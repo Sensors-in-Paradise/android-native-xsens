@@ -9,14 +9,12 @@ import com.xsens.dot.android.sdk.events.XsensDotData
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.page1.Page1Handler
 import sensors_in_paradise.sonar.page1.XSENSArrayList
-import com.xsens.dot.android.sdk.models.XsensDotDevice
 import sensors_in_paradise.sonar.page2.Page2Handler
 
 class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface {
 
     private lateinit var flipper: ViewFlipper
     private lateinit var tabLayout: TabLayout
-    private lateinit var devices: ArrayList<XsensDotDevice>
 
     private val pageHandlers = ArrayList<PageInterface>()
 
@@ -30,8 +28,9 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
 
         initClickListeners()
 
-        pageHandlers.add(Page1Handler(scannedDevices,this))
-        pageHandlers.add(Page2Handler(scannedDevices))
+        val page2 = Page2Handler(scannedDevices)
+        pageHandlers.add(Page1Handler(scannedDevices, page2))
+        pageHandlers.add(page2)
 
         for (handler in pageHandlers) {
             handler.activityCreated(this)
@@ -73,6 +72,4 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
         // TODO("Not yet implemented")
     }
-
-
 }
