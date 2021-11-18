@@ -23,17 +23,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Recording"/>
-
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Prediction"/>
     </com.google.android.material.tabs.TabLayout>
-    <android.widget.ViewFlipper
-        android:id="@+id/flipper_activity_main"
+    <android.widget.ViewAnimator
+        android:id="@+id/switcher_activity_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         >
 
         <include android:id="@+id/first_activity_main"  layout="@layout/connection_fragment" />
         <include android:id="@+id/second_activity_main"  layout="@layout/capture_fragment" />
-    </android.widget.ViewFlipper>
+        <include android:id="@+id/second_activity_main"  layout="@layout/prediction_fragment" />
+    </android.widget.ViewAnimator>
 
 
 </LinearLayout>
