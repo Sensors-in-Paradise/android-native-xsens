@@ -67,15 +67,17 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             timer.format = "Time Running - %s" // set the format for a chronometer
             timer.start()
             val dir = this.context.getExternalFilesDir(null).toString() + "/XSensLogs/"
-            val filename = dir + "${spinner.selectedItem}-" +
+            val filename = "${spinner.selectedItem}-" +
                     DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())
-            val testDir = File(filename)
+            val testDir = File(dir)
             testDir.mkdirs()
+            val file = File(testDir, filename)
+            file.mkdirs()
             for (device in devices.getConnected()) {
                 device.measurementMode = 1
                 device.startMeasuring()
             }
-            xsLogger =  XsensDotLogger(this.context, TYPE_CSV, 1, filename, "currentDevice",
+            xsLogger = XsensDotLogger(this.context, TYPE_CSV, 1, filename, "currentDevice",
                     "1", false,1,
                     null as String?, "appVersion", 0)
         }
