@@ -1,20 +1,22 @@
-package sensors_in_paradise.sonar.page1
+package sensors_in_paradise.xsens.page1
 
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 
-class XSENSArrayList: ArrayList<XsensDotDevice>() {
+class XSENSArrayList : ArrayList<XsensDotDevice>() {
     fun contains(deviceAddress: String): Boolean {
+        var result = false
+
         for (device in this) {
             if (device.address == deviceAddress) {
-                return true;
+                return true
             }
         }
-        return false;
+        return false
     }
     fun get(deviceAddress: String): XsensDotDevice? {
         for (device in this) {
             if (device.address == deviceAddress) {
-                return device;
+                return device
             }
         }
         return null
@@ -34,6 +36,6 @@ class XSENSArrayList: ArrayList<XsensDotDevice>() {
                 devices.add(device)
             }
         }
-        return devices;
+        return devices
     }
 }
