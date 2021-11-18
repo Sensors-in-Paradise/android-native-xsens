@@ -3,15 +3,13 @@ package sensors_in_paradise.sonar.page2
 import android.app.Activity
 import android.content.Context
 import android.os.SystemClock
+import android.util.Log
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Chronometer
-import android.widget.Spinner
+import android.widget.*
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
+import com.xsens.dot.android.sdk.models.XsensDotPayload
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
-import com.xsens.dot.android.sdk.utils.XsensDotLogger.TYPE_CSV
 import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.page1.ConnectionInterface
@@ -62,6 +60,8 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                 startButton.isEnabled = position != 0
             }
         }
+
+        xsLoggers = ArrayList()
         startButton.setOnClickListener {
             timer.base = SystemClock.elapsedRealtime()
             timer.format = "Time Running - %s" // set the format for a chronometer
@@ -69,14 +69,12 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             val dir = this.context.getExternalFilesDir(null).toString() + "/XSensLogs/"
             val filename = "${spinner.selectedItem}-" +
                     DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())
-            val testDir = File(dir)
-            val file = File(testDir, filename)
-            file.mkdirs()
+            Log.d(devices.getConnected().toString(), "connected devices")
             for (device in devices.getConnected()) {
-                device.measurementMode = 1
+                device.measurementMode = 2
                 device.startMeasuring()
-                xsLoggers.add(XsensDotLogger(this.context, TYPE_CSV, 1, dir + filename, "currentDevice",
-                    "1", false,1,
+                xsLoggers.add(XsensDotLogger(this.context, XsensDotLogger.TYPE_CSV, 1, dir + filename + device.address + ".txt", device.address,
+                    "1", false, 1,
                     null as String?, "appVersion", 0))
             }
         }
@@ -87,9 +85,9 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             timer.stop()
             startButton.isEnabled = false
             for (logger in xsLoggers) {
-                xsLogger.stop()
+                logger.stop()
             }
-            for (device in devices) {
+            for (device in devices.getConnected()) {
                 device.stopMeasuring()
             }
         }
@@ -102,7 +100,8 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
-        xsLogger.update(xsensDotData)
+        Toast.makeText(this.context, "scheisse maaan", Toast.LENGTH_LONG).show()
+        xsLoggers.find { logger -> logger.filename.contains(deviceAddress) }?.update(xsensDotData)
     }
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
