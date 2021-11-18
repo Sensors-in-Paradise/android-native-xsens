@@ -70,14 +70,14 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             filename.mkdirs()
             Log.d(devices.getConnected().toString(), "connected devices")
             for (device in devices.getConnected()) {
-                device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_HIGH_FIDELITY_WITH_MAG
+                device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
                 device.startMeasuring()
 
                 xsLoggers.add(
                     XsensDotLogger(
                         this.context,
                         XsensDotLogger.TYPE_CSV,
-                        XsensDotPayload.PAYLOAD_TYPE_HIGH_FIDELITY_WITH_MAG,
+                        XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION,
                         filename.absolutePath + "${device.address}.csv",
                         device.address,
                         "1",
