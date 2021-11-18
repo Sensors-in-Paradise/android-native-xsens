@@ -25,7 +25,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var timer: Chronometer
     private lateinit var startButton: MaterialButton
     private lateinit var endButton: MaterialButton
-    private lateinit var xsLogger: XsensDotLogger
+    private lateinit var xsLoggers: ArrayList<XsensDotLogger>
 
     override fun activityCreated(activity: Activity) {
         this.context = activity
@@ -70,16 +70,15 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             val filename = "${spinner.selectedItem}-" +
                     DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())
             val testDir = File(dir)
-            testDir.mkdirs()
             val file = File(testDir, filename)
             file.mkdirs()
             for (device in devices.getConnected()) {
                 device.measurementMode = 1
                 device.startMeasuring()
-            }
-            xsLogger = XsensDotLogger(this.context, TYPE_CSV, 1, filename, "currentDevice",
+                xsLoggers.add(XsensDotLogger(this.context, TYPE_CSV, 1, dir + filename, "currentDevice",
                     "1", false,1,
-                    null as String?, "appVersion", 0)
+                    null as String?, "appVersion", 0))
+            }
         }
 
         endButton = activity.findViewById(R.id.buttonEnd)
@@ -87,8 +86,10 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             spinner.setSelection(0)
             timer.stop()
             startButton.isEnabled = false
-            for (device in devices.getConnected()) {
+            for (logger in xsLoggers) {
                 xsLogger.stop()
+            }
+            for (device in devices) {
                 device.stopMeasuring()
             }
         }
