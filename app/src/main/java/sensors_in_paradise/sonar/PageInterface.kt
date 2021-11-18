@@ -1,9 +1,8 @@
-package sensors_in_paradise.xsens
+package sensors_in_paradise.sonar
 
 import android.app.Activity
-import android.content.Context
 
 interface PageInterface {
     fun activityCreated(activity: Activity)
-    fun activityResumed( )
+    fun activityResumed()
 }
