@@ -1,4 +1,4 @@
-package sensors_in_paradise.xsens.page2
+package sensors_in_paradise.sonar.page2
 
 import android.app.Activity
 import android.content.Context
@@ -12,10 +12,10 @@ import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import com.xsens.dot.android.sdk.utils.XsensDotLogger.TYPE_CSV
-import sensors_in_paradise.xsens.PageInterface
-import sensors_in_paradise.xsens.R
-import sensors_in_paradise.xsens.page1.ConnectionInterface
-import sensors_in_paradise.xsens.page1.XSENSArrayList
+import sensors_in_paradise.sonar.PageInterface
+import sensors_in_paradise.sonar.R
+import sensors_in_paradise.sonar.page1.ConnectionInterface
+import sensors_in_paradise.sonar.page1.XSENSArrayList
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

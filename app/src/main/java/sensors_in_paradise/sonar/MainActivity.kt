@@ -10,8 +10,7 @@ import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.page1.Page1Handler
 import sensors_in_paradise.sonar.page1.XSENSArrayList
 import com.xsens.dot.android.sdk.models.XsensDotDevice
-import sensors_in_paradise.xsens.page1.ConnectionInterface
-import sensors_in_paradise.xsens.page2.Page2Handler
+import sensors_in_paradise.sonar.page2.Page2Handler
 
 class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface {
 
