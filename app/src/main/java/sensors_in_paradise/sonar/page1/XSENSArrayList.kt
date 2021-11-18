@@ -30,7 +30,7 @@ class XSENSArrayList : ArrayList<XsensDotDevice>() {
     fun getConnected(): XSENSArrayList {
         val devices = XSENSArrayList()
         for (device in this) {
-            if (device.connectionState == XsensDotDevice.CONN_STATE_CONNECTING) {
+            if (device.connectionState == XsensDotDevice.CONN_STATE_CONNECTED) {
                 devices.add(device)
             }
         }

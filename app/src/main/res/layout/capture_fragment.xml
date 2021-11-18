@@ -22,7 +22,7 @@
         android:id="@+id/buttonStart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:enabled="false"
+        android:enabled="true"
         android:text="Start"
         app:icon="@drawable/ic_baseline_play_arrow_24"
         app:layout_constraintBaseline_toBaselineOf="@+id/buttonEnd"
