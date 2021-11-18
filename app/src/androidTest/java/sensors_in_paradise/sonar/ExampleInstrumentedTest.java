@@ -1,4 +1,4 @@
-package sensors_in_paradise.xsens;
+package sensors_in_paradise.sonar;
 
 import android.content.Context;
 
