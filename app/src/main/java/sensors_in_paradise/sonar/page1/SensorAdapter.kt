@@ -5,7 +5,11 @@ import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.TextView
+import android.widget.Button
+import android.widget.ProgressBar
+import android.widget.ViewFlipper
+import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import sensors_in_paradise.sonar.R
@@ -16,14 +20,10 @@ class SensorAdapter(
     private val connectionCallbackUI: UIDeviceConnectionInterface
 ) :
     RecyclerView.Adapter<SensorAdapter.ViewHolder>() {
-    private var disconnectedDrawable:Drawable?
-    private var connectedDrawable:Drawable?
-    private var syncedDrawable:Drawable?
-    init {
-        disconnectedDrawable = context.getDrawable(R.drawable.ic_baseline_link_off_24)
-        connectedDrawable = context.getDrawable(R.drawable.ic_baseline_link_24)
-        syncedDrawable = context.getDrawable(R.drawable.ic_baseline_sync_24)
-    }
+    private var disconnectedDrawable: Drawable? = context.getDrawable(R.drawable.ic_baseline_link_off_24)
+    private var connectedDrawable: Drawable? = context.getDrawable(R.drawable.ic_baseline_link_24)
+    private var syncedDrawable: Drawable? = context.getDrawable(R.drawable.ic_baseline_sync_24)
+
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder).
@@ -61,18 +61,22 @@ class SensorAdapter(
         }
         val isConnected = (device.connectionState == XsensDotDevice.CONN_STATE_CONNECTED)
         val isConnecting = (device.connectionState == XsensDotDevice.CONN_STATE_CONNECTING)
+        val isSynced = device.isSynced
         val isReconnecting = (device.connectionState == XsensDotDevice.CONN_STATE_RECONNECTING)
         val isConnectingOrReconnecting = isConnecting or isReconnecting
         viewHolder.flipper.displayedChild = if (isConnectingOrReconnecting) 1 else 0
         viewHolder.button.text = if (isConnected) "Disconnect" else "Connect"
-        viewHolder.detailsTextView.text = if (isConnected) "Connected" else "Disconnected"
+        var detailsText = "Disconnected"
+        if (isConnected) {
+            detailsText = if (isSynced) "Synced" else "Connected"
+        }
+        viewHolder.detailsTextView.text = detailsText
         viewHolder.batteryPB.progress = if (isConnected) device.batteryPercentage else 0
         viewHolder.batteryPB.visibility = if (isConnected) View.VISIBLE else View.INVISIBLE
 
-
         var statusDrawable = disconnectedDrawable
-        if(isConnected){
-            statusDrawable = if(device.isSynced) syncedDrawable else connectedDrawable
+        if (isConnected) {
+            statusDrawable = if (isSynced) syncedDrawable else connectedDrawable
         }
 
         viewHolder.statusIV.setImageDrawable(statusDrawable)

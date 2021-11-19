@@ -29,28 +29,39 @@
             android:layout_height="wrap_content"
             android:visibility="gone" />
     </LinearLayout>
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swiperefresh_synch_connection_screen"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:enabled="false">
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_bluetoothDevices_activity_main"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layoutManager="LinearLayoutManager"/>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            app:layoutManager="LinearLayoutManager">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/button_sync_connection_fragment"
+        </androidx.recyclerview.widget.RecyclerView>
+
+
+    <LinearLayout
+        android:id="@+id/linearLayout_sync_connection_fragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:layout_marginHorizontal="16dp"
         android:layout_marginBottom="16dp"
-        android:enabled="false"
-        android:text="Sync sensors"
-        android:visibility="gone"
-        app:backgroundTint="#FF5722"
-        app:icon="@drawable/ic_baseline_sync_24"></com.google.android.material.button.MaterialButton>
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/pb_syncProgress_connection_fragment"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_sync_connection_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text="Sync sensors"
+            app:backgroundTint="#FF5722"
+            app:icon="@drawable/ic_baseline_sync_24"></com.google.android.material.button.MaterialButton>
+    </LinearLayout>
 </FrameLayout>

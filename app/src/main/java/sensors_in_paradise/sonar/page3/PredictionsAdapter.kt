@@ -1,6 +1,5 @@
 package sensors_in_paradise.sonar.page3
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
