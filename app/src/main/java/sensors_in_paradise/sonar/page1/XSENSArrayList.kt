@@ -37,4 +37,12 @@ class XSENSArrayList : ArrayList<XsensDotDevice>() {
         }
         return devices
     }
+    fun areAllConnectedDevicesSynced(): Boolean {
+        for (device in getConnected()) {
+            if (!device.isSynced) {
+                return false
+            }
+        }
+        return true
+    }
 }

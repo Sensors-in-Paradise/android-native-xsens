@@ -2,9 +2,7 @@ package sensors_in_paradise.sonar.page3
 
 import android.app.Activity
 import android.content.Context
-import android.util.Log
 import android.widget.Button
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 // import org.tensorflow.lite.DataType
 // import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
@@ -32,8 +30,6 @@ class Page3Handler : PageInterface {
         predictions.add(prediction2)
         adapter = PredictionsAdapter(predictions)
         recyclerView.adapter = adapter
-        Log.d("ADAPTER", "222SIZE PREDICTION: " + adapter.itemCount)
-        Toast.makeText(context, "Moin", Toast.LENGTH_LONG).show()
         adapter.notifyDataSetChanged()
 
         predictButton = activity.findViewById(R.id.button_start_predict)

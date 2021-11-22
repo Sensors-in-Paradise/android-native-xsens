@@ -28,9 +28,17 @@
             app:layout_constraintTop_toTopOf="parent">
 
 
+            <ImageView
+                android:id="@+id/imageView_status_connection_fragment"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="clip_vertical"
+                app:srcCompat="@drawable/ic_baseline_link_off_24" />
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
                 android:orientation="vertical">
 
                 <TextView
