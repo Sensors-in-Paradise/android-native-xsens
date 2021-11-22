@@ -3,7 +3,6 @@ package sensors_in_paradise.sonar.page2
 import android.app.Activity
 import android.content.Context
 import android.os.SystemClock
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -11,6 +10,7 @@ import android.widget.Chronometer
 import android.widget.Spinner
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
+import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.PageInterface
@@ -20,6 +20,8 @@ import sensors_in_paradise.sonar.page1.XSENSArrayList
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import sensors_in_paradise.sonar.UIHelper
+import kotlin.collections.ArrayList
 
 class Page2Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface {
     private lateinit var context: Context
@@ -27,11 +29,13 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var startButton: MaterialButton
     private lateinit var endButton: MaterialButton
     private lateinit var xsLoggers: ArrayList<XsensDotLogger>
+    private lateinit var uiHelper: UIHelper
+    private lateinit var spinner: Spinner
 
     override fun activityCreated(activity: Activity) {
         this.context = activity
-
-        val spinner: Spinner = activity.findViewById(R.id.spinner)
+        this.uiHelper = UIHelper(this.context)
+        spinner = activity.findViewById(R.id.spinner)
 
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter.createFromResource(
@@ -63,53 +67,73 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         xsLoggers = ArrayList()
         startButton.setOnClickListener {
-            // disable startButton
-            spinner.setSelection(0)
-            endButton.isEnabled = true
-
-            timer.base = SystemClock.elapsedRealtime()
-            timer.format = "Time Running - %s" // set the format for a chronometer
-            timer.start()
-            val filename = File(this.context.getExternalFilesDir(null).toString() +
-                    "/${spinner.selectedItem}/" +
-                    "${DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())}/dev/")
-            filename.mkdirs()
-            Log.d(devices.getConnected().toString(), "connected devices")
-            for (device in devices.getConnected()) {
-                device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
-                device.startMeasuring()
-
-                xsLoggers.add(
-                    XsensDotLogger(
-                        this.context,
-                        XsensDotLogger.TYPE_CSV,
-                        XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION,
-                        filename.absolutePath + "${device.address}.csv",
-                        device.address,
-                        "1",
-                        false,
-                        1,
-                        null as String?,
-                        "appVersion",
-                        0))
-            }
+            startLogging()
         }
         endButton.setOnClickListener {
-            spinner.setSelection(0)
-            timer.stop()
-            for (logger in xsLoggers) {
-                logger.stop()
-            }
-            for (device in devices.getConnected()) {
-                device.stopMeasuring()
-            }
-            endButton.isEnabled = false
+            stopLogging()
         }
     }
+    private fun startLogging() {
+        // disable startButton
+        spinner.setSelection(0)
+        endButton.isEnabled = true
 
-    override fun activityResumed() {}
+        timer.base = SystemClock.elapsedRealtime()
+        timer.format = "Time Running - %s" // set the format for a chronometer
+        timer.start()
+        val filename = File(this.context.getExternalFilesDir(null).toString() +
+                "/${spinner.selectedItem}/" +
+                "${DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())}/dev/")
+        filename.mkdirs()
+        for (device in devices.getConnected()) {
+            device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
+            device.startMeasuring()
 
-    override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {}
+            xsLoggers.add(
+                XsensDotLogger(
+                    this.context,
+                    XsensDotLogger.TYPE_CSV,
+                    XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION,
+                    filename.absolutePath + "${device.address}.csv",
+                    device.address,
+                    "1",
+                    false,
+                    1,
+                    null as String?,
+                    "appVersion",
+                    0))
+        }
+    }
+    private fun stopLogging() {
+        spinner.setSelection(0)
+        timer.stop()
+        for (logger in xsLoggers) {
+            logger.stop()
+        }
+        for (device in devices.getConnected()) {
+            device.stopMeasuring()
+        }
+        endButton.isEnabled = false
+    }
+
+    override fun activityResumed() {
+    }
+
+    override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
+        val deviceLogger = xsLoggers.find { logger -> logger.filename.contains(deviceAddress) }
+        if (!connected && deviceLogger != null) {
+            devices.get(deviceAddress)?.let {
+                if (it.connectionState == XsensDotDevice.CONN_STATE_DISCONNECTED) {
+                    uiHelper.buildAndShowAlert(
+                        "The Device ${it.name} was disconnected!"
+                    )
+                    deviceLogger.stop()
+                    it.stopMeasuring()
+                    timer.stop()
+                }
+            }
+        }
+    }
 
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
         xsLoggers.find { logger -> logger.filename.contains(deviceAddress) }?.update(xsensDotData)
