@@ -9,6 +9,7 @@ import android.widget.Chronometer
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.events.XsensDotData
+import com.xsens.dot.android.sdk.models.XsensDotPayload
 // import org.tensorflow.lite.DataType
 // import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import sensors_in_paradise.sonar.PageInterface
@@ -27,14 +28,14 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: PredictionsAdapter
     private val predictions = ArrayList<Prediction>()
-    private var sensorData = mutableMapOf<String, MutableList<FloatArray>>()
+    private var sensorData = mutableMapOf<String, MutableList<Pair<FloatArray, FloatArray>>>()
     private lateinit var predictButton: Button
     private lateinit var startButton: Button
     private lateinit var stopButton: Button
     private lateinit var timer: Chronometer
 
     private var isRunning = false
-    private val numDevices = 0
+    private val numDevices = 3
     private var numConnectedDevices = 0
 
 
@@ -50,7 +51,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private fun _stopDataCollection() {
         timer.stop()
         for (device in devices.getConnected()) {
-            //device.stopMeasuring()
+            device.stopMeasuring()
         }
 
         _formatData()
@@ -91,8 +92,13 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         startButton.setOnClickListener {
             if (numConnectedDevices >= numDevices) {
 
-                for(device in devices) {
-                    sensorData.put(device.address, mutableListOf<FloatArray>())
+                for(device in devices.getConnected()) {
+                    sensorData.put(device.address, mutableListOf<Pair<FloatArray, FloatArray>>())
+                }
+
+                for (device in devices.getConnected()) {
+                    device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
+                    device.startMeasuring()
                 }
 
                 timer.base = SystemClock.elapsedRealtime()
@@ -100,6 +106,8 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
                 _toggleButtons()
                 isRunning = true
+            } else {
+                Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -107,8 +115,22 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
             _stopDataCollection()
 
-            println(sensorData)
-
+            /*
+            sensorData.entries.forEach(
+                (sensorKey, sensorVal) -> {
+                    sensorVal.forEach(
+                        (pair){
+                            pair.first.forEach(
+                                (entry) {
+                                    println("JUUUUhu")
+                                    println(entry)
+                                }
+                            )
+                        }
+                    )
+                }
+            )
+            */
         }
 
         predictButton = activity.findViewById(R.id.button_predict_predict)
@@ -136,13 +158,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
     override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
         //TODO("Not yet implemented
-        if (connected) {
-            numConnectedDevices += 1
-        } else {
-            numConnectedDevices -= 1
-        }
-        println("#########################################################################################")
-        println(numConnectedDevices)
+        numConnectedDevices = devices.getConnected().size
 
         if (isRunning && numConnectedDevices < numDevices) {
             _stopDataCollection()
@@ -152,15 +168,11 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
-        // if (!isRunning) return
-
-        println("#########################################################################################")
-        println(numConnectedDevices)
 
         val quat: FloatArray = xsensDotData.getQuat()
         val freeAcc: FloatArray = xsensDotData.getFreeAcc()
 
-        sensorData[deviceAddress]?.add(quat)
+        sensorData[deviceAddress]?.add(Pair(quat, freeAcc))
 
     }
 
