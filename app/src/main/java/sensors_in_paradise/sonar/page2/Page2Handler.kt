@@ -16,7 +16,7 @@ import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.page1.ConnectionInterface
-import sensors_in_paradise.xsens.page1.XSENSArrayList
+import sensors_in_paradise.sonar.page1.XSENSArrayList
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
