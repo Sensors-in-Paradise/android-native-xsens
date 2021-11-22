@@ -4,6 +4,7 @@ import com.xsens.dot.android.sdk.models.XsensDotDevice
 
 class XSENSArrayList : ArrayList<XsensDotDevice>() {
     fun contains(deviceAddress: String): Boolean {
+
         for (device in this) {
             if (device.address == deviceAddress) {
                 return true

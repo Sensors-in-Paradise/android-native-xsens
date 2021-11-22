@@ -53,7 +53,7 @@ class SensorAdapter(
         // contents of the view with that element
 
         val device = devices[position]
-        viewHolder.nameTextView.text = device.name + " " + device.tag
+        viewHolder.nameTextView.text = "${device.name} ${device.tag}"
 
         viewHolder.button.setOnClickListener {
             val isConnectedState = (viewHolder.button.text == "Connect")
