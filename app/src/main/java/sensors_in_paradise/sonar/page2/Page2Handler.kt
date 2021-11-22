@@ -120,13 +120,14 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
-        if (!connected && xsLoggers.find { logger -> logger.filename.contains(deviceAddress) } != null) {
+        val deviceLogger = xsLoggers.find { logger -> logger.filename.contains(deviceAddress) }
+        if (!connected && deviceLogger != null) {
             devices.get(deviceAddress)?.let {
                 if (it.connectionState == XsensDotDevice.CONN_STATE_DISCONNECTED) {
                     uiHelper.buildAndShowAlert(
                         "The Device ${it.name} was disconnected!"
                     )
-                    xsLoggers.find { logger -> logger.filename.contains(deviceAddress) }?.stop()
+                    deviceLogger.stop()
                     it.stopMeasuring()
                     timer.stop()
                 }
