@@ -9,9 +9,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.view.View
-import android.widget.LinearLayout
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.XsensDotSdk
@@ -53,8 +51,6 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
     )
 
     override fun onXsensDotConnectionChanged(address: String, state: Int) {
-
-
         activity.runOnUiThread {
             connectionInterface.onConnectedDevicesChanged(address,
             state == XsensDotDevice.CONN_STATE_CONNECTED)
