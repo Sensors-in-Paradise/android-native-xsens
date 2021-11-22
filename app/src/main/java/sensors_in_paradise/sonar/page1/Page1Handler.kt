@@ -22,7 +22,6 @@ import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.utils.XsensDotScanner
 import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
-import java.util.*
 
 class Page1Handler(private val scannedDevices: XSENSArrayList, private val connectionInterface: ConnectionInterface) :
     XsensDotScannerCallback, XsensDotDeviceCallback, PageInterface,
