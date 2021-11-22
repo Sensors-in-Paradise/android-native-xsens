@@ -30,10 +30,18 @@ class XSENSArrayList : ArrayList<XsensDotDevice>() {
     fun getConnected(): XSENSArrayList {
         val devices = XSENSArrayList()
         for (device in this) {
-            if (device.connectionState == XsensDotDevice.CONN_STATE_CONNECTING) {
+            if (device.connectionState == XsensDotDevice.CONN_STATE_CONNECTED) {
                 devices.add(device)
             }
         }
         return devices
+    }
+    fun areAllConnectedDevicesSynced(): Boolean {
+        for (device in getConnected()) {
+            if (!device.isSynced) {
+                return false
+            }
+        }
+        return true
     }
 }

@@ -40,8 +40,6 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface {
         predictions.add(prediction2)
         adapter = PredictionsAdapter(predictions)
         recyclerView.adapter = adapter
-        Log.d("ADAPTER", "222SIZE PREDICTION: " + adapter.itemCount)
-        Toast.makeText(context, "Moin", Toast.LENGTH_LONG).show()
         adapter.notifyDataSetChanged()
 
         timer = activity.findViewById(R.id.timer)
