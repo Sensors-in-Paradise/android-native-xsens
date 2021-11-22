@@ -27,7 +27,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: PredictionsAdapter
     private val predictions = ArrayList<Prediction>()
-    private var sensorData = mutableMapOf<String, MutableList<XsensDotData>>()
+    private var sensorData = mutableMapOf<String, MutableList<FloatArray>>()
     private lateinit var predictButton: Button
     private lateinit var startButton: Button
     private lateinit var stopButton: Button
@@ -92,7 +92,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             if (numConnectedDevices >= numDevices) {
 
                 for(device in devices) {
-                    sensorData.put(device.address, mutableListOf<XsensDotData>())
+                    sensorData.put(device.address, mutableListOf<FloatArray>())
                 }
 
                 timer.base = SystemClock.elapsedRealtime()
@@ -152,9 +152,15 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
-        //if (!isRunning) return
+        // if (!isRunning) return
 
-        sensorData[deviceAddress]?.add(xsensDotData)
+        println("#########################################################################################")
+        println(numConnectedDevices)
+
+        val quat: FloatArray = xsensDotData.getQuat()
+        val freeAcc: FloatArray = xsensDotData.getFreeAcc()
+
+        sensorData[deviceAddress]?.add(quat)
 
     }
 

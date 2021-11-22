@@ -9,9 +9,10 @@ import com.xsens.dot.android.sdk.events.XsensDotData
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.page1.Page1Handler
 import sensors_in_paradise.sonar.page1.XSENSArrayList
+import sensors_in_paradise.sonar.page2.Page2Handler
 import sensors_in_paradise.sonar.page3.Page3Handler
 
-class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface {
+class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
 
     private lateinit var switcher: ViewAnimator
     private lateinit var tabLayout: TabLayout
@@ -27,9 +28,14 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         tabLayout = findViewById(R.id.tab_layout_activity_main)
 
         initClickListeners()
-
-        pageHandlers.add(Page1Handler(scannedDevices, this))
-        pageHandlers.add(Page3Handler(scannedDevices))
+        val page1Handler = Page1Handler(scannedDevices)
+        pageHandlers.add(page1Handler)
+        val page2Handler = Page2Handler(scannedDevices)
+        pageHandlers.add(page2Handler)
+        val page3Handler = Page3Handler(scannedDevices)
+        pageHandlers.add(page3Handler)
+        page1Handler.addConnectionInterface(page2Handler)
+        page1Handler.addConnectionInterface(page3Handler)
         for (handler in pageHandlers) {
             handler.activityCreated(this)
         }
@@ -56,18 +62,6 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     }
 
     override fun onTabReselected(tab: TabLayout.Tab?) {
-        // TODO("Not yet implemented")
-    }
-
-    override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
-        // TODO("Not yet implemented")
-    }
-
-    override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
-        // TODO("Not yet implemented")
-    }
-
-    override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
         // TODO("Not yet implemented")
     }
 }
