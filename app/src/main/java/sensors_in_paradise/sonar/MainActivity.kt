@@ -8,9 +8,8 @@ import com.google.android.material.tabs.TabLayout
 import com.xsens.dot.android.sdk.events.XsensDotData
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.page1.Page1Handler
-import sensors_in_paradise.sonar.page2.Page2Handler
-import sensors_in_paradise.sonar.page3.Page3Handler
 import sensors_in_paradise.sonar.page1.XSENSArrayList
+import sensors_in_paradise.sonar.page3.Page3Handler
 
 class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface {
 
@@ -29,10 +28,8 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
 
         initClickListeners()
 
-        val page2 = Page2Handler(scannedDevices)
-        pageHandlers.add(Page1Handler(scannedDevices, page2))
-        pageHandlers.add(page2)
-        pageHandlers.add(Page3Handler())
+        pageHandlers.add(Page1Handler(scannedDevices, this))
+        pageHandlers.add(Page3Handler(scannedDevices))
         for (handler in pageHandlers) {
             handler.activityCreated(this)
         }
