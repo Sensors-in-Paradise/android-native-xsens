@@ -117,7 +117,6 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     override fun activityResumed() {
-
     }
 
     override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
