@@ -1,6 +1,5 @@
 package sensors_in_paradise.sonar.page3
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,18 +35,13 @@ class PredictionsAdapter(
 
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
-
        val prediction = predictions[position]
         viewHolder.titleTextView.text = prediction.title
         viewHolder.detailsTextView.text = prediction.content
-        Log.d("ADAPTER", "222Bind ViewHolder: " + position)
-        println("Binding view holder PREDICTION")
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount(): Int {
-        println("SIZE PREDICTION: " + predictions.size)
-        Log.d("ADAPTER", "SIZE PREDICTION: " + predictions.size)
         return predictions.size
     }
 }

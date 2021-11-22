@@ -1,10 +1,9 @@
-package sensors_in_paradise.xsens.page1
+package sensors_in_paradise.sonar.page1
 
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 
 class XSENSArrayList : ArrayList<XsensDotDevice>() {
     fun contains(deviceAddress: String): Boolean {
-        var result = false
 
         for (device in this) {
             if (device.address == deviceAddress) {
@@ -37,5 +36,13 @@ class XSENSArrayList : ArrayList<XsensDotDevice>() {
             }
         }
         return devices
+    }
+    fun areAllConnectedDevicesSynced(): Boolean {
+        for (device in getConnected()) {
+            if (!device.isSynced) {
+                return false
+            }
+        }
+        return true
     }
 }
