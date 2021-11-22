@@ -51,6 +51,8 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         timer = activity.findViewById(R.id.timer)
 
         startButton = activity.findViewById(R.id.buttonStart)
+        endButton = activity.findViewById(R.id.buttonEnd)
+        endButton.isEnabled = false
 
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -64,6 +66,10 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         xsLoggers = ArrayList()
         startButton.setOnClickListener {
+            // disable startButton
+            spinner.setSelection(0)
+            endButton.isEnabled = true
+
             timer.base = SystemClock.elapsedRealtime()
             timer.format = "Time Running - %s" // set the format for a chronometer
             timer.start()
@@ -90,23 +96,21 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                         0))
             }
         }
-
-        endButton = activity.findViewById(R.id.buttonEnd)
         endButton.setOnClickListener {
             spinner.setSelection(0)
             timer.stop()
-            startButton.isEnabled = false
             for (logger in xsLoggers) {
                 logger.stop()
             }
             for (device in devices.getConnected()) {
                 device.stopMeasuring()
             }
+            endButton.isEnabled = false
         }
     }
 
     override fun activityResumed() {}
-
+    
     override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
         if (!connected && xsLoggers.find { logger -> logger.filename.contains(deviceAddress) } != null) {
             devices.get(deviceAddress)?.let {
@@ -126,6 +130,5 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         xsLoggers.find { logger -> logger.filename.contains(deviceAddress) }?.update(xsensDotData)
     }
 
-    override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
-    }
+    override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {}
 }
