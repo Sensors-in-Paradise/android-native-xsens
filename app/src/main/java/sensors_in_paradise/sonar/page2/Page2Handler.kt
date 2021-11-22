@@ -116,7 +116,9 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         endButton.isEnabled = false
     }
 
-    override fun activityResumed() {}
+    override fun activityResumed() {
+
+    }
 
     override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
         if (!connected && xsLoggers.find { logger -> logger.filename.contains(deviceAddress) } != null) {
