@@ -139,8 +139,8 @@ complexity:
   TooManyFunctions:
     active: true
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
-    thresholdInFiles: 23
-    thresholdInClasses: 23
+    thresholdInFiles: 27
+    thresholdInClasses: 27
     thresholdInInterfaces: 11
     thresholdInObjects: 11
     thresholdInEnums: 11
@@ -348,7 +348,7 @@ formatting:
     active: true
     autoCorrect: true
   NoWildcardImports:
-    active: true
+    active: false
   PackageName:
     active: false
     autoCorrect: true
@@ -662,6 +662,7 @@ style:
       - '0'
       - '1'
       - '2'
+      - '100'
     ignoreHashCodeFunction: true
     ignorePropertyDeclaration: false
     ignoreLocalVariableDeclaration: false
@@ -795,3 +796,4 @@ style:
     excludeImports:
       - 'java.util.*'
       - 'kotlinx.android.synthetic.*'
+      - 'android.widget.*'
