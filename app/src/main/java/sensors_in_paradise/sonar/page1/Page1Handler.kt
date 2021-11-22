@@ -22,6 +22,7 @@ import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.utils.XsensDotScanner
 import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
+import sensors_in_paradise.xsens.page1.XSENSArrayList
 import java.util.ArrayList
 
 class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: ConnectionInterface) :
