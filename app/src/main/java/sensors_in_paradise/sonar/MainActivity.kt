@@ -16,7 +16,6 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
 
     private lateinit var switcher: ViewAnimator
     private lateinit var tabLayout: TabLayout
-    private lateinit var devices: ArrayList<XsensDotDevice>
 
     private val pageHandlers = ArrayList<PageInterface>()
 

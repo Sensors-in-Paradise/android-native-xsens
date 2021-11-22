@@ -11,6 +11,7 @@ import android.widget.Chronometer
 import android.widget.Spinner
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
+import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.PageInterface
@@ -20,6 +21,7 @@ import sensors_in_paradise.sonar.page1.XSENSArrayList
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import sensors_in_paradise.sonar.UIHelper
 
 class Page2Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface {
     private lateinit var context: Context
@@ -27,10 +29,11 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var startButton: MaterialButton
     private lateinit var endButton: MaterialButton
     private lateinit var xsLoggers: ArrayList<XsensDotLogger>
+    private lateinit var uiHelper: UIHelper
 
     override fun activityCreated(activity: Activity) {
         this.context = activity
-
+        this.uiHelper = UIHelper(this.context)
         val spinner: Spinner = activity.findViewById(R.id.spinner)
 
         // Create an ArrayAdapter using the string array and a default spinner layout
@@ -72,7 +75,6 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             for (device in devices.getConnected()) {
                 device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
                 device.startMeasuring()
-
                 xsLoggers.add(
                     XsensDotLogger(
                         this.context,
@@ -106,6 +108,18 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     override fun activityResumed() {}
 
     override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
+        if (!connected && xsLoggers.find { logger -> logger.filename.contains(deviceAddress) } != null) {
+            devices.get(deviceAddress)?.let {
+                if (it.connectionState == XsensDotDevice.CONN_STATE_DISCONNECTED) {
+                    uiHelper.buildAndShowAlert(
+                        "The Device ${it.name} was disconnected!"
+                    )
+                    xsLoggers.find { logger -> logger.filename.contains(deviceAddress) }?.stop()
+                    it.stopMeasuring()
+                    timer.stop()
+                }
+            }
+        }
     }
 
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {

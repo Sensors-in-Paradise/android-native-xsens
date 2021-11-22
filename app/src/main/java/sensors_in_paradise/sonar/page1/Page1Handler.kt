@@ -22,9 +22,9 @@ import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.utils.XsensDotScanner
 import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
-import java.util.ArrayList
+import java.util.*
 
-class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: ConnectionInterface) :
+class Page1Handler(private val scannedDevices: XSENSArrayList, private val connectionInterface: ConnectionInterface) :
     XsensDotScannerCallback, XsensDotDeviceCallback, PageInterface,
     UIDeviceConnectionInterface {
     private lateinit var context: Context
@@ -45,9 +45,13 @@ class Page1Handler(val scannedDevices: XSENSArrayList, val connectionInterface: 
     )
 
     override fun onXsensDotConnectionChanged(address: String, state: Int) {
-
-        connectionInterface.onConnectedDevicesChanged(address,
+        activity.runOnUiThread {
+            connectionInterface.onConnectedDevicesChanged(address,
             state == XsensDotDevice.CONN_STATE_CONNECTED)
+        if (state != XsensDotDevice.CONN_STATE_CONNECTED) {
+            sensorAdapter.notifyItemChanged(address)
+            }
+        }
     }
     override fun onXsensDotServicesDiscovered(address: String, status: Int) {
     }
