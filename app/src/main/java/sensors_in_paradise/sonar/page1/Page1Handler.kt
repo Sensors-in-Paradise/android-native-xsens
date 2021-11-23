@@ -83,6 +83,7 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
     override fun onReadRemoteRssi(s: String, i: Int) {}
     override fun onXsensDotOutputRateUpdate(address: String, outputRate: Int) {
         connectionInterface.onXsensDotOutputRateUpdate(address, outputRate)
+        activity.runOnUiThread { sensorAdapter.notifyItemChanged(address) }
     }
     override fun onXsensDotFilterProfileUpdate(s: String, i: Int) {}
     override fun onXsensDotGetFilterProfileInfo(
@@ -202,10 +203,13 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
         isSuccess: Boolean,
         requestCode: Int
     ) {
-        Toast.makeText(context, "Finished syncing, success: $isSuccess", Toast.LENGTH_LONG).show()
         isSyncing = false
+        for (device in scannedDevices.getConnected()) {
+                device.setOutputRate(60)
+        }
         updateSyncButtonState()
         activity.runOnUiThread {
+            Toast.makeText(context, "Finished syncing, success: $isSuccess", Toast.LENGTH_LONG).show()
             syncPb.progress = 100
             if (syncingResultMap != null) {
                 for (key in syncingResultMap.keys) {

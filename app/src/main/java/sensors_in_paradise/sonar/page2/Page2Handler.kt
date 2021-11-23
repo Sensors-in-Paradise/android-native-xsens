@@ -2,7 +2,10 @@ package sensors_in_paradise.sonar.page2
 
 import android.app.Activity
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -75,7 +78,6 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
     private fun startLogging() {
         // disable startButton
-        spinner.setSelection(0)
         endButton.isEnabled = true
 
         timer.base = SystemClock.elapsedRealtime()
@@ -85,6 +87,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                 "/${spinner.selectedItem}/" +
                 "${DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())}/dev/")
         filename.mkdirs()
+        spinner.setSelection(0)
         for (device in devices.getConnected()) {
             device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
             device.startMeasuring()
@@ -107,12 +110,16 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private fun stopLogging() {
         spinner.setSelection(0)
         timer.stop()
-        for (logger in xsLoggers) {
-            logger.stop()
-        }
         for (device in devices.getConnected()) {
             device.stopMeasuring()
         }
+        Log.d("Logging", "Start")
+        Handler(Looper.getMainLooper()).postDelayed({
+            for (logger in xsLoggers) {
+                logger.stop()
+            }
+            Log.d("Logging", "Stop")
+        }, 3000)
         endButton.isEnabled = false
     }
 
