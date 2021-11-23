@@ -114,12 +114,13 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             device.stopMeasuring()
         }
         Log.d("Logging", "Start")
+        val waitTime: Long = 3000
         Handler(Looper.getMainLooper()).postDelayed({
             for (logger in xsLoggers) {
                 logger.stop()
             }
             Log.d("Logging", "Stop")
-        }, 3000)
+        }, waitTime)
         endButton.isEnabled = false
     }
 
