@@ -44,6 +44,7 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
     private val _requiredPermissions = arrayOf(
         Manifest.permission.BLUETOOTH,
         Manifest.permission.BLUETOOTH_ADMIN,
+        Manifest.permission.BLUETOOTH_SCAN,
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.READ_EXTERNAL_STORAGE,
