@@ -4,10 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.os.SystemClock
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Chronometer
-import android.widget.Spinner
+import android.widget.*
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotDevice
@@ -32,9 +29,16 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var uiHelper: UIHelper
     private lateinit var spinner: Spinner
 
+    private var numConnectedDevices = 0
+    private var numDevices = 5
+
     override fun activityCreated(activity: Activity) {
         this.context = activity
         this.uiHelper = UIHelper(this.context)
+
+        timer = activity.findViewById(R.id.timer)
+        startButton = activity.findViewById(R.id.buttonStart)
+        endButton = activity.findViewById(R.id.buttonEnd)
         spinner = activity.findViewById(R.id.spinner)
 
         // Create an ArrayAdapter using the string array and a default spinner layout
@@ -49,10 +53,6 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             spinner.adapter = adapter
         }
 
-        timer = activity.findViewById(R.id.timer)
-
-        startButton = activity.findViewById(R.id.buttonStart)
-        endButton = activity.findViewById(R.id.buttonEnd)
         endButton.isEnabled = false
 
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -67,12 +67,18 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         xsLoggers = ArrayList()
         startButton.setOnClickListener {
-            startLogging()
+            if (numConnectedDevices >= numDevices) {
+                startLogging()
+            } else {
+                Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
+            }
         }
+
         endButton.setOnClickListener {
             stopLogging()
         }
     }
+
     private fun startLogging() {
         // disable startButton
         endButton.isEnabled = true
@@ -80,6 +86,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         timer.base = SystemClock.elapsedRealtime()
         timer.format = "Time Running - %s" // set the format for a chronometer
         timer.start()
+
         val filename = File(this.context.getExternalFilesDir(null).toString() +
                 "/${spinner.selectedItem}/" +
                 "${DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())}/dev/")
@@ -104,9 +111,15 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                     0))
         }
     }
+
     private fun stopLogging() {
         spinner.setSelection(0)
         timer.stop()
+
+        for (device in devices.getConnected()) {
+            device.stopMeasuring()
+        }
+
         for (logger in xsLoggers) {
             logger.stop()
         }
