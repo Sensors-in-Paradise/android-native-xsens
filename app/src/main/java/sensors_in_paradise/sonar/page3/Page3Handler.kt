@@ -10,10 +10,13 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotPayload
+import org.tensorflow.lite.DataType
+import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 // import org.tensorflow.lite.DataType
 // import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
+import sensors_in_paradise.sonar.ml.XsensTest
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.page1.XSENSArrayList
 import kotlin.collections.ArrayList
@@ -146,23 +149,22 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         predictButton = activity.findViewById(R.id.button_predict_predict)
         predictButton.setOnClickListener {
             if (sensorDataByteBuffer != null) {
-            /*
                 // get data and model
-                val model = TestModel.newInstance(context)
+                val model = XsensTest.newInstance(context)
                 // Creates inputs for reference.
-                // ----> dimensions: numDataLines * dataLineByteSize
-                val inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1, .., ..), DataType.FLOAT32)
-                inputFeature0.loadBuffer(byteBufferSensorData)
+                // ----> dimensions: amount, numDataLines * dataLineByteSize
+                val inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1, 180, 35), DataType.FLOAT32)
+                // TODO: add the following line
+                // inputFeature0.loadBuffer(sensorDataByteBuffer)
                 // Runs model inference and gets result.
                 val outputs = model.process(inputFeature0)
                 val outputFeature0 = outputs.outputFeature0AsTensorBuffer
                 // Releases model resources if no longer used.
                 model.close()
-                //this is our Output
+                //this is our Output, first Value is for walking, second for squats
                 val test = outputFeature0.floatArray
-            */
+                // TODO: make result visible on the screen!
             } else {
-                Toast.makeText(context, "Ähhm, du spinnst!", Toast.LENGTH_SHORT).show()
                 Toast.makeText(context, "Please measure an activity first!", Toast.LENGTH_SHORT).show()
             }
         }
