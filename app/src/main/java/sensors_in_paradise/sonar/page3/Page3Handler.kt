@@ -154,8 +154,8 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                 // Creates inputs for reference.
                 // ----> dimensions: amount, numDataLines * dataLineByteSize
                 val inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1, 180, 35), DataType.FLOAT32)
-                // TODO: add the following line
-                // inputFeature0.loadBuffer(sensorDataByteBuffer)
+                // TODO: add the following line if input is ready
+                // inputFeature0.loadBuffer(ByteBuffer)
                 // Runs model inference and gets result.
                 val outputs = model.process(inputFeature0)
                 val outputFeature0 = outputs.outputFeature0AsTensorBuffer
