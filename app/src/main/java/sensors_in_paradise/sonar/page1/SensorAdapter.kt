@@ -69,6 +69,7 @@ class SensorAdapter(
         var detailsText = "Disconnected"
         if (isConnected) {
             detailsText = if (isSynced) "Synced" else "Connected"
+            detailsText += " " + device.currentOutputRate + "Hz"
         }
         viewHolder.detailsTextView.text = detailsText
         viewHolder.batteryPB.progress = if (isConnected) device.batteryPercentage else 0

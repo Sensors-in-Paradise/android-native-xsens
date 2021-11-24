@@ -44,6 +44,7 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
     private val _requiredPermissions = arrayOf(
         Manifest.permission.BLUETOOTH,
         Manifest.permission.BLUETOOTH_ADMIN,
+        Manifest.permission.BLUETOOTH_SCAN,
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -82,6 +83,7 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
     override fun onReadRemoteRssi(s: String, i: Int) {}
     override fun onXsensDotOutputRateUpdate(address: String, outputRate: Int) {
         connectionInterface.onXsensDotOutputRateUpdate(address, outputRate)
+        activity.runOnUiThread { sensorAdapter.notifyItemChanged(address) }
     }
     override fun onXsensDotFilterProfileUpdate(s: String, i: Int) {}
     override fun onXsensDotGetFilterProfileInfo(
@@ -201,8 +203,10 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
         isSuccess: Boolean,
         requestCode: Int
     ) {
-
         isSyncing = false
+        for (device in scannedDevices.getConnected()) {
+                device.setOutputRate(60)
+        }
         activity.runOnUiThread {
             Toast.makeText(context, "Finished syncing, success: $isSuccess", Toast.LENGTH_LONG).show()
             updateSyncButtonState()
