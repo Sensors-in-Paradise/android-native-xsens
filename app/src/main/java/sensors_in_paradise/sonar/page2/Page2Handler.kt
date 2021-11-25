@@ -2,8 +2,6 @@ package sensors_in_paradise.sonar.page2
 
 import android.app.Activity
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import android.view.View
@@ -110,18 +108,17 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private fun stopLogging() {
         spinner.setSelection(0)
         timer.stop()
+        Log.d("Logging", "Start")
+        for (logger in xsLoggers) {
+            logger.stop()
+        }
+        Log.d("Logging", "Stop")
         for (device in devices.getConnected()) {
             device.stopMeasuring()
         }
-        Log.d("Logging", "Start")
-        val waitTime: Long = 3000
-        Handler(Looper.getMainLooper()).postDelayed({
-            for (logger in xsLoggers) {
-                logger.stop()
-            }
-            Log.d("Logging", "Stop")
-        }, waitTime)
+        Log.d("Measuring", "Start")
         endButton.isEnabled = false
+        xsLoggers.clear()
     }
 
     override fun activityResumed() {
