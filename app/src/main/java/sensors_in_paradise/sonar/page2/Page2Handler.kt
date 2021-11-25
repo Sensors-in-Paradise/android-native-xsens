@@ -3,7 +3,6 @@ package sensors_in_paradise.sonar.page2
 import android.app.Activity
 import android.content.Context
 import android.os.SystemClock
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
