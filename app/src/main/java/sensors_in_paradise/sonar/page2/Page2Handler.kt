@@ -5,10 +5,12 @@ import android.content.Context
 import android.os.SystemClock
 import android.view.View
 import android.widget.*
+import androidx.appcompat.widget.SwitchCompat
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.models.XsensDotPayload
+import com.xsens.dot.android.sdk.recording.XsensDotRecordingManager
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
@@ -19,8 +21,12 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import sensors_in_paradise.sonar.UIHelper
 import kotlin.collections.ArrayList
+import kotlin.properties.Delegates
+import android.widget.CompoundButton
+import org.xmlpull.v1.XmlSerializer
 
-class Page2Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface {
+
+class Page2Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface, RecordingInterface {
     private lateinit var context: Context
     private lateinit var timer: Chronometer
     private lateinit var startButton: MaterialButton
@@ -28,6 +34,9 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var xsLoggers: ArrayList<XsensDotLogger>
     private lateinit var uiHelper: UIHelper
     private lateinit var spinner: Spinner
+    private lateinit var xsRecorders: ArrayList<Pair<XsensDotRecordingManager, String>>
+    private lateinit var recordingOnDevicesSwitch: SwitchCompat
+    private var recordingOnDevices by Delegates.notNull<Boolean>()
 
     private var numConnectedDevices = 0
     private var numDevices = 5
@@ -40,6 +49,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         startButton = activity.findViewById(R.id.buttonStart)
         endButton = activity.findViewById(R.id.buttonEnd)
         spinner = activity.findViewById(R.id.spinner)
+        recordingOnDevicesSwitch = activity.findViewById(R.id.switch1)
 
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter.createFromResource(
@@ -51,6 +61,12 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             // Apply the adapter to the spinner
             spinner.adapter = adapter
+        }
+
+        recordingOnDevicesSwitch.setOnCheckedChangeListener { _: CompoundButton, b: Boolean ->
+            // do something, the isChecked will be
+            // true if the switch is in the On position
+            recordingOnDevices = b
         }
 
         endButton.isEnabled = false
@@ -67,15 +83,45 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         xsLoggers = ArrayList()
         startButton.setOnClickListener {
-            if (numConnectedDevices >= numDevices) {
-                startLogging()
+            if (!recordingOnDevices) {
+                if (numConnectedDevices >= numDevices) {
+                    startLogging()
+                } else {
+                    Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
+                }
             } else {
-                Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
+                startRecording()
             }
         }
 
         endButton.setOnClickListener {
             stopLogging()
+        }
+    }
+
+    override fun requestFlashInfo() {
+        for (recorder in xsRecorders) {
+            recorder.first.requestFlashInfo()
+        }
+    }
+
+    override fun canStartRecording(address: String?, b: Boolean) {
+        xsRecorders.find {
+                pair: Pair<XsensDotRecordingManager, String> -> pair.second == address }?.first?.setActive(b)
+    }
+
+    private fun startRecording() {
+        assert(recordingOnDevices)
+        for (device in devices) {
+            val mManager = XsensDotRecordingManager(context, device, RecordingHandler(this))
+            xsRecorders.add(Pair(mManager, device.address))
+            mManager.enableDataRecordingNotification()
+        }
+        //only start recording if all managers are set to active
+        for (pair in xsRecorders) {
+            if (pair.first.isActive) {
+                pair.first.startRecording()
+            }
         }
     }
 
