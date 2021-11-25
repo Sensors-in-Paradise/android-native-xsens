@@ -34,7 +34,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var timer: Chronometer
 
     private val predictions = ArrayList<Prediction>()
-    private var rawSensorDataMap = mutableMapOf<String, MutableList<Pair<FloatArray, FloatArray>>>()
+    private val rawSensorDataMap = mutableMapOf<String, MutableList<Pair<Long, FloatArray>>>()
     private var sensorDataByteBuffer: ByteBuffer? = null
 
     private var isRunning = false
@@ -44,8 +44,10 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private val sizeOfFloat = 4
     private val numQuats = 4
     private val numFreeAccs = 3
+    private val dataVectorSize = 180
 
     val dataLineByteSize = sizeOfFloat * (numQuats + numFreeAccs) * numDevices
+    val dataLineFloatSize = (numQuats + numFreeAccs) * numDevices
     var numDataLines = 0
 
     val sensorTagMap = mapOf(
@@ -61,18 +63,30 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         stopButton.isEnabled = !(stopButton.isEnabled)
     }
 
+    private fun clearBuffers() {
+        for ((_, deviceDataList) in rawSensorDataMap) {
+            deviceDataList.clear()
+        }
+        sensorDataByteBuffer = null
+    }
+
     private fun createByteBuffer() {
         // TODO deal with empty lines of Data Collection
         val minDataLines = rawSensorDataMap.minOfOrNull { it.value.size }
         if (minDataLines == null) return
 
-        numDataLines = minDataLines
+        if (minDataLines < dataVectorSize) {
+            Toast.makeText(context, "Not enough data collected!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        numDataLines = dataVectorSize
 
         var floatArray = FloatArray(0)
         for (row in 0..numDataLines - 1) {
             var lineFloatArray = FloatArray(0)
             for ((_, deviceDataList) in rawSensorDataMap) {
-                lineFloatArray = lineFloatArray + (deviceDataList[row].first + deviceDataList[row].second)
+                lineFloatArray = lineFloatArray + deviceDataList[row].second
             }
             floatArray = floatArray + lineFloatArray
         }
@@ -114,7 +128,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         // Initialising data array
         for ((_, address) in sensorTagMap) {
-            rawSensorDataMap.put(address, mutableListOf<Pair<FloatArray, FloatArray>>())
+            rawSensorDataMap.put(address, mutableListOf<Pair<Long, FloatArray>>())
         }
 
         // Buttons and Timer
@@ -126,11 +140,12 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         startButton.setOnClickListener {
             if (numConnectedDevices >= numDevices) {
 
+                clearBuffers();
+
                 for (device in devices.getConnected()) {
                     device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
                     device.startMeasuring()
                 }
-
                 timer.base = SystemClock.elapsedRealtime()
                 timer.start()
 
@@ -142,7 +157,6 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         }
 
         stopButton.setOnClickListener {
-
             stopDataCollection()
         }
 
@@ -152,8 +166,8 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                 // get data and model
                 val model = XsensTest.newInstance(context)
                 // Creates inputs for reference.
-                // ----> dimensions: amount, numDataLines * dataLineByteSize
-                val inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1, 180, 35), DataType.FLOAT32)
+                // ----> dimensions: amount, numDataLines * dataLineFloatSize
+                val inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1, dataVectorSize, dataLineFloatSize), DataType.FLOAT32)
                 // TODO: add the following line if input is ready
                 // inputFeature0.loadBuffer(ByteBuffer)
                 // Runs model inference and gets result.
@@ -185,10 +199,11 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
 
+        val timeStamp: Long = xsensDotData.getSampleTimeFine()
         val quat: FloatArray = xsensDotData.getQuat()
         val freeAcc: FloatArray = xsensDotData.getFreeAcc()
 
-        rawSensorDataMap[deviceAddress]?.add(Pair(quat, freeAcc))
+        rawSensorDataMap[deviceAddress]?.add(Pair(timeStamp, quat + freeAcc))
     }
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
