@@ -75,17 +75,6 @@
                         app:icon="@drawable/ic_baseline_stop_24"></com.google.android.material.button.MaterialButton>
                 </LinearLayout>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/buttonDiscard"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="16dp"
-
-                    android:layout_marginBottom="16dp"
-                    android:enabled="false"
-                    android:text="Predict"
-                    app:backgroundTint="#FF0000"
-                    app:icon="@drawable/ic_baseline_delete_forever_24"></com.google.android.material.button.MaterialButton>
             </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
