@@ -8,8 +8,10 @@ import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.os.Build
 import android.view.View
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.XsensDotSdk
@@ -41,10 +43,10 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
     private var isSyncing = false
     private val unsyncedColor = Color.parseColor("#FF5722")
     private val syncedColor = Color.parseColor("#00e676")
-    private val _requiredPermissions = arrayOf(
+
+    private val _requiredPermissions = arrayListOf(
         Manifest.permission.BLUETOOTH,
         Manifest.permission.BLUETOOTH_ADMIN,
-        Manifest.permission.BLUETOOTH_SCAN,
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -102,6 +104,7 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
             linearLayoutCenter.visibility = View.INVISIBLE
         }
     }
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun activityCreated(activity: Activity) {
         this.context = activity
         this.activity = activity
@@ -119,6 +122,9 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
             isSyncing = true
             scannedDevices.getConnected()[0].isRootDevice = true
             XsensDotSyncManager.getInstance(SyncHandler(this)).startSyncing(scannedDevices.getConnected(), 0)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            _requiredPermissions.add(Manifest.permission.BLUETOOTH_SCAN)
         }
     }
     override fun activityResumed() {
