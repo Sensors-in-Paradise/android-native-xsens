@@ -108,15 +108,12 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private fun stopLogging() {
         spinner.setSelection(0)
         timer.stop()
-        Log.d("Logging", "Start")
         for (logger in xsLoggers) {
             logger.stop()
         }
-        Log.d("Logging", "Stop")
         for (device in devices.getConnected()) {
             device.stopMeasuring()
         }
-        Log.d("Measuring", "Start")
         endButton.isEnabled = false
         xsLoggers.clear()
     }
