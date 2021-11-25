@@ -154,11 +154,11 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
         device: XsensDotDevice,
         wantsConnection: Boolean
     ) {
-       if (wantsConnection) {
-           device.connect()
-       } else {
-           device.disconnect()
-       }
+        if (wantsConnection) {
+            device.connect()
+        } else {
+            device.disconnect()
+        }
         activity.runOnUiThread {
             sensorAdapter.notifyItemChanged(device.address)
         }
@@ -207,9 +207,9 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
         for (device in scannedDevices.getConnected()) {
                 device.setOutputRate(60)
         }
-        updateSyncButtonState()
         activity.runOnUiThread {
             Toast.makeText(context, "Finished syncing, success: $isSuccess", Toast.LENGTH_LONG).show()
+            updateSyncButtonState()
             syncPb.progress = 100
             if (syncingResultMap != null) {
                 for (key in syncingResultMap.keys) {
