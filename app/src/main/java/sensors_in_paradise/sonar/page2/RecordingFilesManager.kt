@@ -7,6 +7,7 @@ class RecordingFilesManager(val filePath: String) {
 
     fun getRecordings(): ArrayList<String> {
         var recordingsList = ArrayList<String>()
+
         File(filePath).walk().forEach {
             // This might have to be discussed
             // Removes all directories from output that don't end with three numbers (millis)

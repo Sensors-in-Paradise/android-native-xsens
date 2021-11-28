@@ -8,6 +8,8 @@ import android.os.SystemClock
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotDevice
@@ -31,6 +33,10 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var xsLoggers: ArrayList<XsensDotLogger>
     private lateinit var uiHelper: UIHelper
     private lateinit var spinner: Spinner
+    private lateinit var recyclerViewRecordings: RecyclerView
+
+    private var fileDirectory: String = ""
+    private lateinit var recordingsAdapter: RecordingsAdapter
 
     private var numConnectedDevices = 0
     private var numDevices = 5
@@ -38,13 +44,19 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     override fun activityCreated(activity: Activity) {
         this.context = activity
         this.uiHelper = UIHelper(this.context)
-
-        var recording = RecordingFilesManager(this.context.getExternalFilesDir(null).toString())
+        fileDirectory = this.context.getExternalFilesDir(null).toString()
 
         timer = activity.findViewById(R.id.timer)
         startButton = activity.findViewById(R.id.buttonStart)
         endButton = activity.findViewById(R.id.buttonEnd)
         spinner = activity.findViewById(R.id.spinner)
+
+        var recordingsManager = RecordingFilesManager(fileDirectory)
+        recyclerViewRecordings = activity.findViewById(R.id.recyclerViewRecordings)
+        val linearLayoutManager = LinearLayoutManager(context)
+        recyclerViewRecordings.layoutManager = linearLayoutManager
+        recordingsAdapter = RecordingsAdapter(recordingsManager)
+        recyclerViewRecordings.adapter = recordingsAdapter
 
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter.createFromResource(
@@ -92,7 +104,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         timer.format = "Time Running - %s" // set the format for a chronometer
         timer.start()
 
-        val filename = File(this.context.getExternalFilesDir(null).toString() +
+        val filename = File(fileDirectory +
                 "/${spinner.selectedItem}/" +
                 "${DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())}/dev/")
         filename.mkdirs()
@@ -136,6 +148,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         }, waitTime)
 
         endButton.isEnabled = false
+        recordingsAdapter.update()
     }
 
     override fun activityResumed() {
