@@ -39,6 +39,8 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         this.context = activity
         this.uiHelper = UIHelper(this.context)
 
+        var recording = RecordingFilesManager(this.context.getExternalFilesDir(null).toString())
+
         timer = activity.findViewById(R.id.timer)
         startButton = activity.findViewById(R.id.buttonStart)
         endButton = activity.findViewById(R.id.buttonEnd)
