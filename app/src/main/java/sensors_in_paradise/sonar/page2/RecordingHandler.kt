@@ -5,9 +5,10 @@ import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.interfaces.XsensDotRecordingCallback
 import com.xsens.dot.android.sdk.models.XsensDotRecordingFileInfo
 import com.xsens.dot.android.sdk.models.XsensDotRecordingState
-import java.util.ArrayList
+import com.xsens.dot.android.sdk.recording.XsensDotRecordingManager
+import java.util.*
 
-class RecordingHandler(val callback: RecordingInterface) : XsensDotRecordingCallback {
+class RecordingHandler(private val callback: RecordingInterface) : XsensDotRecordingCallback {
     override fun onXsensDotRecordingNotification(address: String?, isEnabled: Boolean) {
         if (isEnabled) {
             callback.requestFlashInfo()
@@ -21,16 +22,34 @@ class RecordingHandler(val callback: RecordingInterface) : XsensDotRecordingCall
     override fun onXsensDotRequestFlashInfoDone(address: String?, usedFlashSpace: Int, totalFlashSpace: Int) {
         Log.d("Request flash info done with: ",
             "usedFlashSpace: $usedFlashSpace and totalFlashSpace:  $totalFlashSpace")
-        callback.canStartRecording(address, (1 - totalFlashSpace / usedFlashSpace >= 0.10))
+        callback.canStartRecording(address, (1 - (totalFlashSpace / usedFlashSpace) > 0.10))
     }
 
     override fun onXsensDotRecordingAck(
-        p0: String?,
-        p1: Int,
-        p2: Boolean,
-        p3: XsensDotRecordingState?
+        address: String?,
+        recordingId: Int,
+        isSuccess: Boolean,
+        XSensDotRecordingState: XsensDotRecordingState?
     ) {
-        TODO("Not yet implemented")
+        if (recordingId ==
+            XsensDotRecordingManager.RECORDING_ID_START_RECORDING) {
+            // start recording result, check recordingState, it should be success or fail.
+            callback.recordingStarted(
+                address,
+                recordingId,
+                isSuccess,
+                XSensDotRecordingState
+            )
+        } else if (recordingId ==
+            XsensDotRecordingManager.RECORDING_ID_STOP_RECORDING) {
+            // stop recording result, check recordingState, it should be success or fail.
+            callback.recordingStopped(
+                address,
+                recordingId,
+                isSuccess,
+                XSensDotRecordingState
+            )
+        }
     }
 
     override fun onXsensDotGetRecordingTime(p0: String?, p1: Int, p2: Int, p3: Int) {
@@ -65,4 +84,3 @@ class RecordingHandler(val callback: RecordingInterface) : XsensDotRecordingCall
         TODO("Not yet implemented")
     }
 }
-

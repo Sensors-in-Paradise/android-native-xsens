@@ -10,20 +10,18 @@ import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.models.XsensDotPayload
+import com.xsens.dot.android.sdk.models.XsensDotRecordingState
 import com.xsens.dot.android.sdk.recording.XsensDotRecordingManager
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
+import sensors_in_paradise.sonar.UIHelper
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.page1.XSENSArrayList
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import sensors_in_paradise.sonar.UIHelper
-import kotlin.collections.ArrayList
 import kotlin.properties.Delegates
-import android.widget.CompoundButton
-import org.xmlpull.v1.XmlSerializer
 
 
 class Page2Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface, RecordingInterface {
@@ -105,11 +103,94 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         }
     }
 
+    // sets a recorder to active, since the available disk space is large enough(>50%)
     override fun canStartRecording(address: String?, b: Boolean) {
-        xsRecorders.find {
-                pair: Pair<XsensDotRecordingManager, String> -> pair.second == address }?.first?.setActive(b)
+        xsRecorders.find { pair: Pair<XsensDotRecordingManager, String> -> pair.second == address }?.first?.isActive =
+            b
     }
 
+    override fun recordingStarted(
+        address: String?,
+        recordingId: Int,
+        success: Boolean,
+        xsensDotRecordingState: XsensDotRecordingState?
+    ) {
+        val pair = xsRecorders.find { pair: Pair<XsensDotRecordingManager, String> -> pair.second == address }
+        if (pair != null && xsensDotRecordingState != null) {
+            if (address == pair.second) {
+                when (xsensDotRecordingState) {
+                    XsensDotRecordingState.success -> {
+                        Toast.makeText(
+                            this.context,
+                            "Recording started on device: $address!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    XsensDotRecordingState.fail -> {
+                        Toast.makeText(
+                            this.context,
+                            "Recording failed to start on device: $address!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    else -> {
+                        Toast.makeText(
+                            this.context,
+                            "RecordingState unexpected!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            } else {
+                Toast.makeText(
+                    this.context,
+                    "Addresses don't match up: $address and ${pair.second}!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+    override fun recordingStopped(
+        address: String?,
+        recordingId: Int,
+        success: Boolean,
+        xsensDotRecordingState: XsensDotRecordingState?
+    ) {
+        val pair = xsRecorders.find { pair: Pair<XsensDotRecordingManager, String> -> pair.second == address }
+        if (pair != null && xsensDotRecordingState != null) {
+            if (address == pair.second) {
+                when (xsensDotRecordingState) {
+                    XsensDotRecordingState.success -> {
+                        Toast.makeText(
+                            this.context,
+                            "Recording stopped on device: $address!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    XsensDotRecordingState.fail -> {
+                        Toast.makeText(
+                            this.context,
+                            "Recording failed to stop on device: $address!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    else -> {
+                        Toast.makeText(
+                            this.context,
+                            "RecordingState unexpected!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            } else {
+                Toast.makeText(
+                    this.context,
+                    "Addresses don't match up: $address and ${pair.second}!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
     private fun startRecording() {
         assert(recordingOnDevices)
         for (device in devices) {
@@ -117,12 +198,24 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             xsRecorders.add(Pair(mManager, device.address))
             mManager.enableDataRecordingNotification()
         }
-        //only start recording if all managers are set to active
+        // only start recording if all managers are set to active
         for (pair in xsRecorders) {
-            if (pair.first.isActive) {
-                pair.first.startRecording()
+            if (!pair.first.isActive) {
+                Toast.makeText(
+                    this.context,
+                    "Can't start recording yet, since some devices don't have enough storage left",
+                    Toast.LENGTH_SHORT).show()
+                return
             }
         }
+        // start recording
+        for (pair in xsRecorders) {
+            pair.first.startRecording()
+        }
+    }
+
+    private fun stopRecording() {
+
     }
 
     private fun startLogging() {
