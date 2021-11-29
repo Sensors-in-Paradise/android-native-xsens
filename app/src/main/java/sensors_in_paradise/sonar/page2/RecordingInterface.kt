@@ -11,14 +11,14 @@ interface RecordingInterface {
         address: String?,
         recordingId: Int,
         success: Boolean,
-        xsensDotRecordingState: XsensDotRecordingState?
+        xSensDotRecordingState: XsensDotRecordingState?
     ) {
     }
     fun recordingStopped(
         address: String?,
         recordingId: Int,
         success: Boolean,
-        xsensDotRecordingState: XsensDotRecordingState?
+        xSensDotRecordingState: XsensDotRecordingState?
     ) {
     }
 }

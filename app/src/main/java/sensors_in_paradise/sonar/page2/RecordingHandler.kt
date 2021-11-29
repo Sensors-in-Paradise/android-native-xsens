@@ -31,6 +31,7 @@ class RecordingHandler(private val callback: RecordingInterface) : XsensDotRecor
         isSuccess: Boolean,
         XSensDotRecordingState: XsensDotRecordingState?
     ) {
+        // can get other recording states here
         if (recordingId ==
             XsensDotRecordingManager.RECORDING_ID_START_RECORDING) {
             // start recording result, check recordingState, it should be success or fail.

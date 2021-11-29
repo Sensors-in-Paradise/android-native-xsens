@@ -23,7 +23,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.properties.Delegates
 
-
 class Page2Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface, RecordingInterface {
     private lateinit var context: Context
     private lateinit var timer: Chronometer
@@ -81,6 +80,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         xsLoggers = ArrayList()
         startButton.setOnClickListener {
+            recordingOnDevicesSwitch.isClickable = false
             if (!recordingOnDevices) {
                 if (numConnectedDevices >= numDevices) {
                     startLogging()
@@ -93,7 +93,12 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         }
 
         endButton.setOnClickListener {
-            stopLogging()
+            when (recordingOnDevices) {
+                true -> { stopRecording() }
+                false -> { stopLogging() }
+            }
+
+            recordingOnDevicesSwitch.isClickable = true
         }
     }
 
@@ -113,12 +118,11 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         address: String?,
         recordingId: Int,
         success: Boolean,
-        xsensDotRecordingState: XsensDotRecordingState?
+        xSensDotRecordingState: XsensDotRecordingState?
     ) {
-        val pair = xsRecorders.find { pair: Pair<XsensDotRecordingManager, String> -> pair.second == address }
-        if (pair != null && xsensDotRecordingState != null) {
-            if (address == pair.second) {
-                when (xsensDotRecordingState) {
+        xsRecorders.find { pair: Pair<XsensDotRecordingManager, String> -> pair.second == address }.let {
+            if (it != null && xSensDotRecordingState != null) {
+                when (xSensDotRecordingState) {
                     XsensDotRecordingState.success -> {
                         Toast.makeText(
                             this.context,
@@ -127,11 +131,9 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                         ).show()
                     }
                     XsensDotRecordingState.fail -> {
-                        Toast.makeText(
-                            this.context,
-                            "Recording failed to start on device: $address!",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        uiHelper.buildAndShowAlert(
+                            "Recording failed to start on device: $address!"
+                        )
                     }
                     else -> {
                         Toast.makeText(
@@ -141,12 +143,6 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                         ).show()
                     }
                 }
-            } else {
-                Toast.makeText(
-                    this.context,
-                    "Addresses don't match up: $address and ${pair.second}!",
-                    Toast.LENGTH_SHORT
-                ).show()
             }
         }
     }
@@ -154,12 +150,11 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         address: String?,
         recordingId: Int,
         success: Boolean,
-        xsensDotRecordingState: XsensDotRecordingState?
+        xSensDotRecordingState: XsensDotRecordingState?
     ) {
-        val pair = xsRecorders.find { pair: Pair<XsensDotRecordingManager, String> -> pair.second == address }
-        if (pair != null && xsensDotRecordingState != null) {
-            if (address == pair.second) {
-                when (xsensDotRecordingState) {
+        xsRecorders.find { pair: Pair<XsensDotRecordingManager, String> -> pair.second == address }.let {
+            if (it != null && xSensDotRecordingState != null) {
+                when (xSensDotRecordingState) {
                     XsensDotRecordingState.success -> {
                         Toast.makeText(
                             this.context,
@@ -168,11 +163,9 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                         ).show()
                     }
                     XsensDotRecordingState.fail -> {
-                        Toast.makeText(
-                            this.context,
-                            "Recording failed to stop on device: $address!",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        uiHelper.buildAndShowAlert(
+                            "Recording failed to start on device: $address!"
+                        )
                     }
                     else -> {
                         Toast.makeText(
@@ -182,12 +175,6 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                         ).show()
                     }
                 }
-            } else {
-                Toast.makeText(
-                    this.context,
-                    "Addresses don't match up: $address and ${pair.second}!",
-                    Toast.LENGTH_SHORT
-                ).show()
             }
         }
     }
@@ -215,7 +202,9 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     private fun stopRecording() {
-
+        for (pair in xsRecorders) {
+            pair.first.stopRecording()
+        }
     }
 
     private fun startLogging() {
