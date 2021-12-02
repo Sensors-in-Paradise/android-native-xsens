@@ -15,6 +15,7 @@ import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.ml.XsensTest02
+import sensors_in_paradise.sonar.ml.XsensTestNoQuat
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.page1.XSENSArrayList
 import kotlin.collections.ArrayList
@@ -82,7 +83,10 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             val rawNormalize = (dataArray[i].toDouble() - minArray[i]) / (maxArray[i] - minArray[i])
             val clippedNormalize = max(min(upperBound, rawNormalize), lowerBound)
 
-            normalizedArray[i] = clippedNormalize.toFloat()
+            if (i >= 4)
+                normalizedArray[i] = clippedNormalize.toFloat()
+            else
+                normalizedArray[i] = 0.0.toFloat()
         }
         return normalizedArray
     }
@@ -212,7 +216,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         predictButton.setOnClickListener {
             if (sensorDataByteBuffer != null) {
                 // get data and model
-                val model = XsensTest02.newInstance(context)
+                val model = XsensTestNoQuat.newInstance(context)
 
                 // Creates inputs for reference.
                 val inputFeature0 = TensorBuffer.createFixedSize(
