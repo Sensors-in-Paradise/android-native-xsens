@@ -8,10 +8,7 @@ import android.view.MenuItem
 import android.widget.ViewAnimator
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
-import com.xsens.dot.android.sdk.events.XsensDotData
-import sensors_in_paradise.sonar.file_uploader.FileUploader
-import sensors_in_paradise.sonar.file_uploader.FileUploaderDialog
-import sensors_in_paradise.sonar.page1.ConnectionInterface
+import sensors_in_paradise.sonar.uploader.FileUploaderDialog
 import sensors_in_paradise.sonar.page1.Page1Handler
 import sensors_in_paradise.sonar.page2.Page2Handler
 import sensors_in_paradise.sonar.page3.Page3Handler
@@ -42,8 +39,6 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
             handler.activityCreated(this)
         }
         supportActionBar?.setBackgroundDrawable(ColorDrawable(getColor(R.color.colorPrimary)))
-
-
     }
 
     override fun onResume() {
@@ -75,7 +70,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
         return true
     }
 
-    fun onFileUploadMenuItemClicked(menuItem: MenuItem){
+    fun onFileUploadMenuItemClicked(ignored: MenuItem) {
         FileUploaderDialog(this).show()
     }
 }

@@ -3,15 +3,15 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import sensors_in_paradise.sonar.file_uploader.FileUploader
+import sensors_in_paradise.sonar.uploader.FileUploader
 import java.io.File
 
 class FileUploaderTest {
-    private val rootDir =  File(".").resolve("testTempDir")
+    private val rootDir = File(".").resolve("testTempDir")
     private val uploader = FileUploader(rootDir, null)
 
     @Before
-    fun init(){
+    fun init() {
         rootDir.mkdir()
         val dirA = rootDir.resolve("dirA0").resolve("dirA00").resolve("dirA000")
         val dirB = rootDir.resolve("dirB0").resolve("dirB00").resolve("dirB000")
@@ -27,18 +27,18 @@ class FileUploaderTest {
         dirA.resolve("dirB_f0.csv").createNewFile()
     }
     @Test
-    fun resolveSuffixFromFile(){
+    fun resolveSuffixFromFile() {
         val testFile = rootDir.resolve("dirC0").resolve("dirC00").resolve("dirC000").resolve("dirC_f0.csv")
         assertEquals(uploader.getURLSuffixForFile(testFile), "dirC0/dirC00/dirC000/dirC_f0.csv")
     }
     @Test
-    fun detectFilesToBeUploaded(){
+    fun detectFilesToBeUploaded() {
         val detectedFiles = uploader.getFilesToBeUploaded(rootDir)
         assertEquals(detectedFiles.size, 4)
     }
 
     @After
-    fun cleanUp(){
+    fun cleanUp() {
         rootDir.deleteRecursively()
     }
 }

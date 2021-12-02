@@ -1,20 +1,17 @@
-package sensors_in_paradise.sonar.file_uploader
+package sensors_in_paradise.sonar.uploader
 
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import androidx.annotation.VisibleForTesting
 import com.android.volley.*
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import java.io.File
 import com.android.volley.toolbox.HttpHeaderParser
 
-import sensors_in_paradise.sonar.GlobalValues
 import java.io.UnsupportedEncodingException
 import java.io.IOException
 import java.nio.file.Files
-
 
 class FileUploader(private val rootDir: File, private val callback: FileUploaderInterface?) {
     private var queue: RequestQueue? = null
@@ -22,7 +19,7 @@ class FileUploader(private val rootDir: File, private val callback: FileUploader
 
     fun uploadFiles(context: Context) {
         if (hasWifiConnection(context)) {
-            if(queue==null){
+            if (queue == null) {
                 queue = Volley.newRequestQueue(context)
             }
             val files = getFilesToBeUploaded(rootDir)
@@ -66,7 +63,8 @@ class FileUploader(private val rootDir: File, private val callback: FileUploader
                 return try {
                     requestBody.toByteArray(charset("utf-8"))
                 } catch (uee: UnsupportedEncodingException) {
-                    VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s", requestBody, "utf-8")
+                    uee.printStackTrace()
+                    VolleyLog.wtf("Unsupported Encoding of body: %s using %s", requestBody, "utf-8")
                     null
                 }
             }
@@ -77,7 +75,7 @@ class FileUploader(private val rootDir: File, private val callback: FileUploader
             }
         }
         queue?.add(stringRequest)
-        if(queue==null){
+        if (queue == null) {
             onError.onErrorResponse(VolleyError("RequestQueue not initialized"))
         }
     }

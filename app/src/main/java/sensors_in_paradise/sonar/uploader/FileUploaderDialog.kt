@@ -1,10 +1,8 @@
-package sensors_in_paradise.sonar.file_uploader
+package sensors_in_paradise.sonar.uploader
 
 import android.app.Activity
-import android.app.Dialog
 import android.view.View
 import android.widget.Button
-import android.view.LayoutInflater
 import android.widget.TextView
 import android.widget.ViewSwitcher
 import androidx.appcompat.app.AlertDialog
@@ -14,17 +12,16 @@ import sensors_in_paradise.sonar.R
 import java.io.File
 import java.lang.Exception
 
-
-class FileUploaderDialog(activity: Activity): AlertDialog(activity), FileUploaderInterface{
+class FileUploaderDialog(activity: Activity) : AlertDialog(activity), FileUploaderInterface {
     val context = activity
     private val uploader = FileUploader(GlobalValues.getSensorDataBaseDir(context), this)
     private val fileItems = FileUIItemArrayList()
     private val adapter = FilesAdapter(fileItems)
     private var hintTV: TextView
     private var noFilesTV: TextView
-    private var switcher:ViewSwitcher
-    private var uploadButton:Button
-    init{
+    private var switcher: ViewSwitcher
+    private var uploadButton: Button
+    init {
 
         val inflater = activity.layoutInflater
         val rootView = inflater.inflate(R.layout.upload_dialog, null)
@@ -36,25 +33,25 @@ class FileUploaderDialog(activity: Activity): AlertDialog(activity), FileUploade
         hintTV = rootView.findViewById(R.id.tv_hint_uploadFilesDialog)
         noFilesTV = rootView.findViewById(R.id.tv_noFilesToUpload_uploadDialog)
         recyclerView.adapter = adapter
-        val filesToBeUploaded =  uploader.getFilesToBeUploaded(GlobalValues.getSensorDataBaseDir(context))
-        for(file in filesToBeUploaded){
+        val filesToBeUploaded = uploader.getFilesToBeUploaded(GlobalValues.getSensorDataBaseDir(context))
+        for (file in filesToBeUploaded) {
             val suffix = uploader.getURLSuffixForFile(file)
             fileItems.add(FileUIItem(file, suffix))
         }
-        if(filesToBeUploaded.size>0){
+        if (filesToBeUploaded.size> 0) {
             noFilesTV.visibility = View.GONE
             uploadButton.visibility = View.VISIBLE
         }
         uploadButton.setOnClickListener {
             setCancelable(false)
-            uploadButton.isEnabled  = false
+            uploadButton.isEnabled = false
             uploadButton.text = "Uploading"
             uploader.uploadFiles(context)
         }
         retryButton.setOnClickListener {
             switcher.displayedChild = 0
             fileItems.setStatusOfAllItems(UploadStatus.NOT_UPLOADED)
-            uploadButton.isEnabled  = false
+            uploadButton.isEnabled = false
             uploadButton.text = "Uploading"
             uploader.uploadFiles(context)
         }
@@ -75,20 +72,19 @@ class FileUploaderDialog(activity: Activity): AlertDialog(activity), FileUploade
     override fun onFileUploadStarted(file: File) {
         updateStatus(file, UploadStatus.UPLOADING, null)
     }
-    private fun updateStatus(file: File, status: UploadStatus, error: Exception?){
+    private fun updateStatus(file: File, status: UploadStatus, error: Exception?) {
         val item = fileItems.get(file)
         item?.status = status
         item?.error = error
         adapter.notifyItemChanged(file)
-        if(fileItems.areAllUploadedOrFailed()){
-            uploadButton.isEnabled  = true
+        if (fileItems.areAllUploadedOrFailed()) {
+            uploadButton.isEnabled = true
             uploadButton.text = "Upload"
             setCancelable(true)
-            if(fileItems.areAllUploaded()){
+            if (fileItems.areAllUploaded()) {
                 uploadButton.text = "All uploaded"
-                uploadButton.isEnabled  = false
+                uploadButton.isEnabled = false
             }
         }
-
     }
 }

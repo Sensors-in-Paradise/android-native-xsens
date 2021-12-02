@@ -18,7 +18,6 @@ import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.page1.XSENSArrayList
-import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import sensors_in_paradise.sonar.UIHelper
@@ -83,7 +82,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         timer.start()
         val time = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())
         val tag = "dev"
-        val fileDir =GlobalValues.getSensorDataBaseDir(context).resolve(
+        val fileDir = GlobalValues.getSensorDataBaseDir(context).resolve(
                 spinner.selectedItem.toString()).resolve(time).resolve(tag)
         fileDir.mkdirs()
         spinner.setSelection(0)

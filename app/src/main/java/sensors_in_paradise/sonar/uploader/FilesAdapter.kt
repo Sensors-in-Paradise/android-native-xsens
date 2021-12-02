@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.file_uploader
+package sensors_in_paradise.sonar.uploader
 
 import android.view.LayoutInflater
 import android.view.View
@@ -48,9 +48,9 @@ class FilesAdapter(
     override fun getItemCount(): Int {
         return fileItems.size
     }
-    fun notifyItemChanged(file : File){
+    fun notifyItemChanged(file: File) {
         val index = fileItems.indexOf(file)
-        if(index!=-1){
+        if (index != -1) {
             notifyItemChanged(index)
         }
     }
