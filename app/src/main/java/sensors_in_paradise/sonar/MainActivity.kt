@@ -2,17 +2,22 @@ package sensors_in_paradise.sonar
 
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.widget.ViewAnimator
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
 import com.xsens.dot.android.sdk.events.XsensDotData
+import sensors_in_paradise.sonar.file_uploader.FileUploader
+import sensors_in_paradise.sonar.file_uploader.FileUploaderDialog
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.page1.Page1Handler
 import sensors_in_paradise.sonar.page2.Page2Handler
 import sensors_in_paradise.sonar.page3.Page3Handler
 import sensors_in_paradise.sonar.page1.XSENSArrayList
 
-class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface {
+class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
 
     private lateinit var switcher: ViewAnimator
     private lateinit var tabLayout: TabLayout
@@ -37,6 +42,8 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
             handler.activityCreated(this)
         }
         supportActionBar?.setBackgroundDrawable(ColorDrawable(getColor(R.color.colorPrimary)))
+
+
     }
 
     override fun onResume() {
@@ -62,15 +69,13 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         // TODO("Not yet implemented")
     }
 
-    override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
-        // TODO("Not yet implemented")
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.activity_main_menu, menu)
+        return true
     }
 
-    override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
-        // TODO("Not yet implemented")
-    }
-
-    override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
-        // TODO("Not yet implemented")
+    fun onFileUploadMenuItemClicked(menuItem: MenuItem){
+        FileUploaderDialog(this).show()
     }
 }
