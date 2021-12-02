@@ -8,8 +8,10 @@ import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.os.Build
 import android.view.View
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.XsensDotSdk
@@ -42,7 +44,8 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
     private var isSyncing = false
     private val unsyncedColor = Color.parseColor("#FF5722")
     private val syncedColor = Color.parseColor("#00e676")
-    private val _requiredPermissions = arrayOf(
+
+    private val _requiredPermissions = arrayListOf(
         Manifest.permission.BLUETOOTH,
         Manifest.permission.BLUETOOTH_ADMIN,
         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -52,11 +55,16 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
     )
 
     override fun onXsensDotConnectionChanged(address: String, state: Int) {
-        for (connectionInterface in connectionInterfaces) {
-        connectionInterface.onConnectedDevicesChanged(address,
-            state == XsensDotDevice.CONN_STATE_CONNECTED)
+        activity.runOnUiThread {
+            for (connectionInterface in connectionInterfaces) {
+                connectionInterface.onConnectedDevicesChanged(address,
+                state == XsensDotDevice.CONN_STATE_CONNECTED)
+            }
+            updateSyncButtonState()
+            if (state != XsensDotDevice.CONN_STATE_CONNECTED) {
+                sensorAdapter.notifyItemChanged(address)
+            }
         }
-       updateSyncButtonState()
     }
     override fun onXsensDotServicesDiscovered(address: String, status: Int) {
     }
@@ -102,6 +110,7 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
             linearLayoutCenter.visibility = View.INVISIBLE
         }
     }
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun activityCreated(activity: Activity) {
         this.context = activity
         this.activity = activity
@@ -119,6 +128,9 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
             isSyncing = true
             scannedDevices.getConnected()[0].isRootDevice = true
             XsensDotSyncManager.getInstance(SyncHandler(this)).startSyncing(scannedDevices.getConnected(), 0)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            _requiredPermissions.add(Manifest.permission.BLUETOOTH_SCAN)
         }
     }
     override fun activityResumed() {
@@ -154,11 +166,11 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
         device: XsensDotDevice,
         wantsConnection: Boolean
     ) {
-       if (wantsConnection) {
-           device.connect()
-       } else {
-           device.disconnect()
-       }
+        if (wantsConnection) {
+            device.connect()
+        } else {
+            device.disconnect()
+        }
         activity.runOnUiThread {
             sensorAdapter.notifyItemChanged(device.address)
         }
@@ -203,10 +215,13 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
         isSuccess: Boolean,
         requestCode: Int
     ) {
-        Toast.makeText(context, "Finished syncing, success: $isSuccess", Toast.LENGTH_LONG).show()
         isSyncing = false
-        updateSyncButtonState()
+        for (device in scannedDevices.getConnected()) {
+                device.setOutputRate(60)
+        }
         activity.runOnUiThread {
+            Toast.makeText(context, "Finished syncing, success: $isSuccess", Toast.LENGTH_LONG).show()
+            updateSyncButtonState()
             syncPb.progress = 100
             if (syncingResultMap != null) {
                 for (key in syncingResultMap.keys) {

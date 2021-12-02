@@ -2,7 +2,7 @@
 <resources>
     <string-array name="activities_array">
         <item>Choose an activity…</item>
-        <item>Running</item>
+        <item>Walking</item>
         <item>Squats</item>
     </string-array>
 </resources>
