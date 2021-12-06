@@ -10,9 +10,9 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
 import sensors_in_paradise.sonar.uploader.FileUploaderDialog
 import sensors_in_paradise.sonar.page1.Page1Handler
+import sensors_in_paradise.sonar.page1.XSENSArrayList
 import sensors_in_paradise.sonar.page2.Page2Handler
 import sensors_in_paradise.sonar.page3.Page3Handler
-import sensors_in_paradise.sonar.page1.XSENSArrayList
 
 class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
 
@@ -30,11 +30,14 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
         tabLayout = findViewById(R.id.tab_layout_activity_main)
 
         initClickListeners()
-
-        val page2 = Page2Handler(scannedDevices)
-        pageHandlers.add(Page1Handler(scannedDevices, page2))
-        pageHandlers.add(page2)
-        pageHandlers.add(Page3Handler())
+        val page1Handler = Page1Handler(scannedDevices)
+        pageHandlers.add(page1Handler)
+        val page2Handler = Page2Handler(scannedDevices)
+        pageHandlers.add(page2Handler)
+        val page3Handler = Page3Handler(scannedDevices)
+        pageHandlers.add(page3Handler)
+        page1Handler.addConnectionInterface(page2Handler)
+        page1Handler.addConnectionInterface(page3Handler)
         for (handler in pageHandlers) {
             handler.activityCreated(this)
         }

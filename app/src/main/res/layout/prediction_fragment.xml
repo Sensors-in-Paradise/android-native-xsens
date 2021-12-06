@@ -18,7 +18,7 @@
             android:layout_height="match_parent">
 
             <Chronometer
-                android:id="@+id/timer"
+                android:id="@+id/timer_predict_predict"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="TextView"
@@ -35,7 +35,7 @@
                 android:orientation="vertical"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/timer">
+                app:layout_constraintTop_toBottomOf="@+id/timer_predict_predict">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -49,12 +49,12 @@
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="16dp"
                         android:layout_weight=".5"
-                        android:enabled="false"
+                        android:enabled="true"
                         android:text="Start"
                         app:icon="@drawable/ic_baseline_play_arrow_24"></com.google.android.material.button.MaterialButton>
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/buttonEnd"
+                        android:id="@+id/button_stop_predict"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="16dp"
@@ -70,7 +70,7 @@
                     android:layout_marginHorizontal="16dp"
 
                     android:layout_marginBottom="16dp"
-                    android:enabled="false"
+                    android:enabled="true"
                     android:text="Predict"
                     app:backgroundTint="#FF5722"
                     app:icon="@drawable/ic_baseline_local_fire_department_24"></com.google.android.material.button.MaterialButton>
