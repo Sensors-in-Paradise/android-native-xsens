@@ -27,11 +27,12 @@ import sensors_in_paradise.sonar.R
 import java.util.ArrayList
 import java.util.HashMap
 
-class Page1Handler(private val scannedDevices: XSENSArrayList, private val connectionInterface: ConnectionInterface) :
+class Page1Handler(val scannedDevices: XSENSArrayList) :
     XsensDotScannerCallback, XsensDotDeviceCallback, PageInterface,
     UIDeviceConnectionInterface, SyncInterface {
     private lateinit var context: Context
     private lateinit var activity: Activity
+    private val connectionInterfaces = ArrayList<ConnectionInterface>()
     private lateinit var tv: TextView
     private lateinit var pb: ProgressBar
     private lateinit var rv: RecyclerView
@@ -55,11 +56,13 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
 
     override fun onXsensDotConnectionChanged(address: String, state: Int) {
         activity.runOnUiThread {
-            connectionInterface.onConnectedDevicesChanged(address,
-            state == XsensDotDevice.CONN_STATE_CONNECTED)
+            for (connectionInterface in connectionInterfaces) {
+                connectionInterface.onConnectedDevicesChanged(address,
+                state == XsensDotDevice.CONN_STATE_CONNECTED)
+            }
             updateSyncButtonState()
-        if (state != XsensDotDevice.CONN_STATE_CONNECTED) {
-            sensorAdapter.notifyItemChanged(address)
+            if (state != XsensDotDevice.CONN_STATE_CONNECTED) {
+                sensorAdapter.notifyItemChanged(address)
             }
         }
     }
@@ -73,7 +76,9 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
     }
     override fun onXsensDotBatteryChanged(s: String, i: Int, i1: Int) {}
     override fun onXsensDotDataChanged(address: String, xsensDotData: XsensDotData) {
-        connectionInterface.onXsensDotDataChanged(address, xsensDotData)
+        for (connectionInterface in connectionInterfaces) {
+            connectionInterface.onXsensDotDataChanged(address, xsensDotData)
+        }
     }
     override fun onXsensDotInitDone(address: String) {
         activity.runOnUiThread {
@@ -84,8 +89,9 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
     override fun onXsensDotPowerSavingTriggered(s: String) {}
     override fun onReadRemoteRssi(s: String, i: Int) {}
     override fun onXsensDotOutputRateUpdate(address: String, outputRate: Int) {
-        connectionInterface.onXsensDotOutputRateUpdate(address, outputRate)
-        activity.runOnUiThread { sensorAdapter.notifyItemChanged(address) }
+        for (connectionInterface in connectionInterfaces) {
+            connectionInterface.onXsensDotOutputRateUpdate(address, outputRate)
+        }
     }
     override fun onXsensDotFilterProfileUpdate(s: String, i: Int) {}
     override fun onXsensDotGetFilterProfileInfo(
@@ -239,5 +245,9 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
             val bgColor = if (scannedDevices.areAllConnectedDevicesSynced()) syncedColor else unsyncedColor
             syncBtn.setBackgroundColor(bgColor)
         }
+    }
+
+    public fun addConnectionInterface(connectionInterface: ConnectionInterface) {
+        connectionInterfaces.add(connectionInterface)
     }
 }
