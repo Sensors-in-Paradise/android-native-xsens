@@ -72,6 +72,52 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         sensorDataByteBuffer = null
     }
 
+    private fun fillEmptyDataLines() {
+        val frequency = 60
+        val epsilon = 5
+
+        val startingTimestamp = rawSensorDataMap.maxOfOrNull { it.value.first().first }
+        val finishingTimestamp = rawSensorDataMap.minOfOrNull { it.value.last().first }
+
+        for ((_, v) in rawSensorDataMap) {
+            Log.d("SensorLists", v.size.toString())
+        }
+
+        for ((_, deviceDataList) in rawSensorDataMap) {
+
+            while (deviceDataList.first().first < startingTimestamp!!) {
+                deviceDataList.removeFirst()
+            }
+
+            while (deviceDataList.last().first > finishingTimestamp!!) {
+                deviceDataList.removeLast()
+            }
+        }
+
+        for ((_, v) in rawSensorDataMap) {
+            Log.d("SensorLists", v.size.toString())
+        }
+
+        // sensor data gets checked for null lists before
+        val numLines = (finishingTimestamp!! - startingTimestamp!!) / frequency
+        val timeStep = 1000 / frequency
+        for ((_, deviceDataList) in rawSensorDataMap) {
+
+            var iterator = 0
+            for (i in 0..numLines - 1) {
+                val timestamp = (i * timeStep + startingTimestamp).toLong()
+
+                if (deviceDataList[iterator].first > timestamp + epsilon) {
+                    val fillValues = deviceDataList[iterator - 1].second
+                    val fillEntry = Pair(timestamp, fillValues)
+
+                    deviceDataList.add(iterator, fillEntry)
+                }
+                iterator ++
+            }
+        }
+    }
+
     private fun normalizeLine(dataArray: FloatArray, minArray: DoubleArray, maxArray: DoubleArray): FloatArray {
         val numElements = numQuats + numFreeAccs
         val normalizedArray = FloatArray(numElements)
@@ -89,9 +135,14 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
     @Suppress("MaxLineLength")
     private fun createByteBuffer() {
-        // TODO deal with empty lines of Data Collection
+
         val minDataLines = rawSensorDataMap.minOfOrNull { it.value.size }
-        if (minDataLines == null) return
+        if (minDataLines == null || minDataLines == 0) {
+            Toast.makeText(context, "Not every sensor did collect data!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        fillEmptyDataLines()
 
         for ((_, v) in rawSensorDataMap) {
             Log.d("SensorLists", v.size.toString())
@@ -165,6 +216,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     override fun activityCreated(activity: Activity) {
+
         this.activity = activity
         this.context = activity
 
@@ -176,7 +228,6 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         // Initialising data array
         for ((_, address) in sensorTagMap) {
             rawSensorDataMap.put(address, mutableListOf<Pair<Long, FloatArray>>())
-            Log.d("SensorAddress", address)
         }
 
         // Buttons and Timer
