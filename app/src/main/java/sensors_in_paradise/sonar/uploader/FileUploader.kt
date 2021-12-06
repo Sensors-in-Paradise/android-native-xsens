@@ -3,6 +3,7 @@ package sensors_in_paradise.sonar.uploader
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.util.Log
 import com.android.volley.*
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
@@ -63,7 +64,7 @@ class FileUploader(private val rootDir: File, private val callback: FileUploader
                 return try {
                     requestBody.toByteArray(charset("utf-8"))
                 } catch (uee: UnsupportedEncodingException) {
-                    uee.printStackTrace()
+                    uee.message?.let { Log.e("Network ERROR", it) }
                     VolleyLog.wtf("Unsupported Encoding of body: %s using %s", requestBody, "utf-8")
                     null
                 }
