@@ -50,16 +50,19 @@
                     android:visibility="visible" />
             </LinearLayout>
         </LinearLayout>
-
-
-        <Button
+        
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_delete"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Delete"
+            app:icon="@drawable/ic_baseline_delete_forever_24"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="16dp"
+            android:text="Delete"
+            android:padding="6dp"
+            app:iconPadding="0dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>
