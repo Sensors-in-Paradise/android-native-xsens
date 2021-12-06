@@ -39,7 +39,7 @@ class RecordingsAdapter(private val recordingsManager: RecordingFilesManager) :
         }
 
         var activityName = recordingsManager.getActivityFromRecording(dataSet[position])
-        var activityDuration = recordingsManager.getStartingTimeFromRecording(dataSet[position])
+        var activityDuration = recordingsManager.getDurationFromRecording(dataSet[position])
         viewHolder.activityTextView.text = activityName
         viewHolder.durationTextView.text = activityDuration
     }

@@ -2,8 +2,9 @@ package sensors_in_paradise.sonar.page2
 
 import android.util.Log
 import java.io.File
+import java.time.Duration
 
-class RecordingFilesManager(val filePath: String) {
+class RecordingFilesManager(val filePath: String, val recordingPreferences: RecordingPreferences) {
 
     fun getRecordings(): ArrayList<String> {
         var recordingsList = ArrayList<String>()
@@ -37,13 +38,25 @@ class RecordingFilesManager(val filePath: String) {
         return startTime
     }
 
+    fun getDurationFromRecording(recording: String): String? {
+        return recordingPreferences.getRecordingDuration(recording)
+    }
+
+    fun saveDuration(recording: String, duration: String) {
+        recordingPreferences.setRecordingDuration(recording, duration)
+    }
+
     fun deleteRecording(fileOrDir: File) {
+        var filename = fileOrDir.toString()
+
         if (fileOrDir.isDirectory())
             for (child in fileOrDir.listFiles()) {
                 deleteRecording(child)
             }
 
         fileOrDir.delete()
+
+        recordingPreferences.deleteRecordingDuration(filename)
     }
 
 }

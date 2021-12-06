@@ -41,6 +41,9 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private var numConnectedDevices = 0
     private var numDevices = 5
 
+    private lateinit var recordingName: String
+    private lateinit var recordingsManager: RecordingFilesManager
+
     override fun activityCreated(activity: Activity) {
         this.context = activity
         this.uiHelper = UIHelper(this.context)
@@ -51,7 +54,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         endButton = activity.findViewById(R.id.buttonEnd)
         spinner = activity.findViewById(R.id.spinner)
 
-        var recordingsManager = RecordingFilesManager(fileDirectory)
+        recordingsManager = RecordingFilesManager(fileDirectory, RecordingPreferences(context))
         recyclerViewRecordings = activity.findViewById(R.id.recyclerViewRecordings)
         val linearLayoutManager = LinearLayoutManager(context)
         recyclerViewRecordings.layoutManager = linearLayoutManager
@@ -108,6 +111,9 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                 "/${spinner.selectedItem}/" +
                 "${DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())}/dev/")
         filename.mkdirs()
+
+        recordingName = filename.toString()
+
         spinner.setSelection(0)
         for (device in devices.getConnected()) {
             device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
@@ -148,6 +154,8 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         }, waitTime)
 
         endButton.isEnabled = false
+
+        recordingsManager.saveDuration(recordingName, timer.text.toString())
         recordingsAdapter.update()
     }
 
