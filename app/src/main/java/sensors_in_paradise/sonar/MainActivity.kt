@@ -2,9 +2,13 @@ package sensors_in_paradise.sonar
 
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.widget.ViewAnimator
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
+import sensors_in_paradise.sonar.uploader.FileUploaderDialog
 import sensors_in_paradise.sonar.page1.Page1Handler
 import sensors_in_paradise.sonar.page1.XSENSArrayList
 import sensors_in_paradise.sonar.page2.Page2Handler
@@ -61,5 +65,15 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
 
     override fun onTabReselected(tab: TabLayout.Tab?) {
         // TODO("Not yet implemented")
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.activity_main_menu, menu)
+        return true
+    }
+
+    fun onFileUploadMenuItemClicked(ignored: MenuItem) {
+        FileUploaderDialog(this).show()
     }
 }

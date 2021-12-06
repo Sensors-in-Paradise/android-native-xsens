@@ -13,11 +13,11 @@ import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
+import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.page1.XSENSArrayList
-import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import sensors_in_paradise.sonar.UIHelper
@@ -80,21 +80,22 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         timer.base = SystemClock.elapsedRealtime()
         timer.format = "Time Running - %s" // set the format for a chronometer
         timer.start()
-        val filename = File(this.context.getExternalFilesDir(null).toString() +
-                "/${spinner.selectedItem}/" +
-                "${DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())}/dev/")
-        filename.mkdirs()
+        val time = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())
+        val tag = "dev"
+        val fileDir = GlobalValues.getSensorDataBaseDir(context).resolve(
+                spinner.selectedItem.toString()).resolve(time).resolve(tag)
+        fileDir.mkdirs()
         spinner.setSelection(0)
         for (device in devices.getConnected()) {
             device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
             device.startMeasuring()
-
+            val file = fileDir.resolve("${device.address}.csv")
             xsLoggers.add(
                 XsensDotLogger(
                     this.context,
                     XsensDotLogger.TYPE_CSV,
                     XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION,
-                    filename.absolutePath + "${device.address}.csv",
+                        file.absolutePath,
                     device.address,
                     "1",
                     false,

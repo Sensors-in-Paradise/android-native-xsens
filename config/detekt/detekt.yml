@@ -212,6 +212,7 @@ exceptions:
     active: false
   PrintStackTrace:
     active: true
+
   RethrowCaughtException:
     active: true
   ReturnFromFinally:
@@ -800,3 +801,4 @@ style:
       - 'java.util.*'
       - 'kotlinx.android.synthetic.*'
       - 'android.widget.*'
+      - 'com.android.volley.*'
