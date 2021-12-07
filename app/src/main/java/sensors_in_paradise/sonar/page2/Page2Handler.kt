@@ -104,12 +104,12 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         endButton.isEnabled = true
 
         timer.base = SystemClock.elapsedRealtime()
-        timer.format = "Time Running - %s" // set the format for a chronometer
+        timer.format = "%s" // set the format for a chronometer
         timer.start()
 
         val filename = File(fileDirectory +
                 "/${spinner.selectedItem}/" +
-                "${DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())}/dev/")
+                "${DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())}")
         filename.mkdirs()
 
         recordingName = filename.toString()

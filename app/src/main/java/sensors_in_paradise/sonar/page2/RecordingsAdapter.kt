@@ -16,11 +16,13 @@ class RecordingsAdapter(private val recordingsManager: RecordingFilesManager) :
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val activityTextView: TextView
         val durationTextView: TextView
+        val startTimeTextView: TextView
         val deleteButton: Button
 
         init {
             activityTextView = view.findViewById(R.id.tv_activity)
             durationTextView = view.findViewById(R.id.tv_duration)
+            startTimeTextView = view.findViewById(R.id.tv_start)
             deleteButton = view.findViewById(R.id.button_delete)
         }
     }
@@ -40,8 +42,10 @@ class RecordingsAdapter(private val recordingsManager: RecordingFilesManager) :
 
         var activityName = recordingsManager.getActivityFromRecording(dataSet[position])
         var activityDuration = recordingsManager.getDurationFromRecording(dataSet[position])
+        var activityStart = recordingsManager.getStartingTimeFromRecording(dataSet[position])
         viewHolder.activityTextView.text = activityName
         viewHolder.durationTextView.text = activityDuration
+        viewHolder.startTimeTextView.text = activityStart
     }
 
     override fun getItemCount() = dataSet.size
