@@ -1,7 +1,6 @@
 package sensors_in_paradise.sonar.page2
 
 import android.graphics.Color
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -67,5 +66,4 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
         dataSet = recordingsManager.getRecordings()
         notifyDataSetChanged()
     }
-
 }

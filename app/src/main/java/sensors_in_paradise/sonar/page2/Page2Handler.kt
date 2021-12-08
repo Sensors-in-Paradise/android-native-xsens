@@ -15,7 +15,6 @@ import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
-import org.w3c.dom.Text
 import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.page1.ConnectionInterface
@@ -113,7 +112,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         val filename = File(fileDirectory +
                 "/${spinner.selectedItem}/" +
-                "${DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())}")
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()))
         filename.mkdirs()
 
         recordingName = filename.toString()

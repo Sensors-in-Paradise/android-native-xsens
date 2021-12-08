@@ -1,10 +1,8 @@
 package sensors_in_paradise.sonar.page2
 
-import android.util.Log
 import java.io.File
-import java.time.Duration
 
-class RecordingDataManager(val filePath: String, val recordingPreferences: RecordingPreferences) {
+class RecordingDataManager(private val filePath: String, private val recordingPreferences: RecordingPreferences) {
 
     fun getRecordings(): ArrayList<String> {
         var recordingsList = ArrayList<String>()
@@ -32,9 +30,7 @@ class RecordingDataManager(val filePath: String, val recordingPreferences: Recor
             activities.add(getActivityFromRecording(rec))
         }
 
-        var frequencies = activities.groupingBy{ it }.eachCount()
-
-        return frequencies
+        return activities.groupingBy { it }.eachCount()
     }
 
     fun getActivityFromRecording(recording: String): String {
@@ -63,28 +59,28 @@ class RecordingDataManager(val filePath: String, val recordingPreferences: Recor
     fun deleteRecording(fileOrDir: File) {
         var filename = fileOrDir.toString()
 
-        if (fileOrDir.isDirectory())
+        if (fileOrDir.isDirectory()) {
             for (child in fileOrDir.listFiles()) {
                 deleteRecording(child)
             }
+        }
 
         fileOrDir.delete()
 
         recordingPreferences.deleteRecordingDuration(filename)
     }
 
-    fun checkEmptyFiles(fileOrDir: File) : Boolean {
+    fun checkEmptyFiles(fileOrDir: File): Boolean {
         var emptyFileSize = 430
 
-        if (fileOrDir.isDirectory())
+        if (fileOrDir.isDirectory()) {
             for (child in fileOrDir.listFiles()) {
-                if (child.length() < emptyFileSize)
+                if (child.length() < emptyFileSize) {
                     return true
+                }
             }
+        }
 
         return false
     }
-
-
-
 }

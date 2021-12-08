@@ -1,7 +1,6 @@
 package sensors_in_paradise.sonar.page2
 
 import android.content.Context
-import android.util.Log
 
 class RecordingPreferences(context: Context) {
 
