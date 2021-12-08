@@ -42,7 +42,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private var numDevices = 5
 
     private lateinit var recordingName: String
-    private lateinit var recordingsManager: RecordingFilesManager
+    private lateinit var recordingsManager: RecordingDataManager
 
     override fun activityCreated(activity: Activity) {
         this.context = activity
@@ -54,7 +54,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         endButton = activity.findViewById(R.id.buttonEnd)
         spinner = activity.findViewById(R.id.spinner)
 
-        recordingsManager = RecordingFilesManager(fileDirectory, RecordingPreferences(context))
+        recordingsManager = RecordingDataManager(fileDirectory, RecordingPreferences(context))
         recyclerViewRecordings = activity.findViewById(R.id.recyclerViewRecordings)
         val linearLayoutManager = LinearLayoutManager(context)
         recyclerViewRecordings.layoutManager = linearLayoutManager
@@ -124,7 +124,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                     this.context,
                     XsensDotLogger.TYPE_CSV,
                     XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION,
-                    filename.absolutePath + "${device.address}.csv",
+                    filename.absolutePath + "/${device.address}.csv",
                     device.address,
                     "1",
                     false,

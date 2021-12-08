@@ -4,7 +4,7 @@ import android.util.Log
 import java.io.File
 import java.time.Duration
 
-class RecordingFilesManager(val filePath: String, val recordingPreferences: RecordingPreferences) {
+class RecordingDataManager(val filePath: String, val recordingPreferences: RecordingPreferences) {
 
     fun getRecordings(): ArrayList<String> {
         var recordingsList = ArrayList<String>()
@@ -57,6 +57,18 @@ class RecordingFilesManager(val filePath: String, val recordingPreferences: Reco
         fileOrDir.delete()
 
         recordingPreferences.deleteRecordingDuration(filename)
+    }
+
+    fun checkEmptyFiles(fileOrDir: File) : Boolean {
+        var emptyFileSize = 430
+
+        if (fileOrDir.isDirectory())
+            for (child in fileOrDir.listFiles()) {
+                if (child.length() < emptyFileSize)
+                    return true
+            }
+
+        return false
     }
 
 }
