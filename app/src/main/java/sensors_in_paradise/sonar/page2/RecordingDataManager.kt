@@ -23,6 +23,20 @@ class RecordingDataManager(val filePath: String, val recordingPreferences: Recor
         return recordingsList
     }
 
+    fun getNumberOfRecordings(): Map<String, Int> {
+        var recordings = getRecordings()
+
+        var activities = ArrayList<String>()
+
+        for (rec in recordings) {
+            activities.add(getActivityFromRecording(rec))
+        }
+
+        var frequencies = activities.groupingBy{ it }.eachCount()
+
+        return frequencies
+    }
+
     fun getActivityFromRecording(recording: String): String {
         var preIndex = recording.indexOf("/files/")
         var postIndex = recording.lastIndexOf("/")
@@ -70,5 +84,7 @@ class RecordingDataManager(val filePath: String, val recordingPreferences: Recor
 
         return false
     }
+
+
 
 }

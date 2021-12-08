@@ -15,6 +15,7 @@ import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
+import org.w3c.dom.Text
 import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.page1.ConnectionInterface
@@ -34,6 +35,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var uiHelper: UIHelper
     private lateinit var spinner: Spinner
     private lateinit var recyclerViewRecordings: RecyclerView
+    private lateinit var activityCountTextView: TextView
 
     private var fileDirectory: String = ""
     private lateinit var recordingsAdapter: RecordingsAdapter
@@ -53,6 +55,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         startButton = activity.findViewById(R.id.buttonStart)
         endButton = activity.findViewById(R.id.buttonEnd)
         spinner = activity.findViewById(R.id.spinner)
+        activityCountTextView = activity.findViewById(R.id.tv_activity_counts)
 
         recordingsManager = RecordingDataManager(fileDirectory, RecordingPreferences(context))
         recyclerViewRecordings = activity.findViewById(R.id.recyclerViewRecordings)
@@ -97,10 +100,11 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         endButton.setOnClickListener {
             stopLogging()
         }
+
+        updateActivityCounts()
     }
 
     private fun startLogging() {
-        // disable startButton
         endButton.isEnabled = true
 
         timer.base = SystemClock.elapsedRealtime()
@@ -157,6 +161,11 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         recordingsManager.saveDuration(recordingName, timer.text.toString())
         recordingsAdapter.update()
+        updateActivityCounts()
+    }
+
+    private fun updateActivityCounts() {
+        activityCountTextView.text = recordingsManager.getNumberOfRecordings().toString()
     }
 
     override fun activityResumed() {
