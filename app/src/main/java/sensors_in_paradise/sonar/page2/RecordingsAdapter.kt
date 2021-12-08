@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.page2
 
+import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -50,7 +51,14 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
         viewHolder.activityTextView.text = activityName
         viewHolder.durationTextView.text = "Duration: " + activityDuration
         viewHolder.startTimeTextView.text = "Start: " + activityStart
-        viewHolder.checkFilesTextView.text = filesEmpty.toString()
+
+        if (filesEmpty) {
+            viewHolder.checkFilesTextView.setTextColor(Color.parseColor("#E53935"))
+            viewHolder.checkFilesTextView.text = "Some files are empty"
+        } else {
+            viewHolder.checkFilesTextView.setTextColor(Color.parseColor("#4CAF50"))
+            viewHolder.checkFilesTextView.text = "Files checked"
+        }
     }
 
     override fun getItemCount() = dataSet.size
