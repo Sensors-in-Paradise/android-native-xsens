@@ -797,3 +797,4 @@ style:
       - 'kotlinx.android.synthetic.*'
       - 'android.widget.*'
       - 'com.android.volley.*'
+      - 'sensors_in_paradise.sonar.*'

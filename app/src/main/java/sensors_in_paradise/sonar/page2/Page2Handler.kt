@@ -12,14 +12,12 @@ import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
-import sensors_in_paradise.sonar.GlobalValues
-import sensors_in_paradise.sonar.PageInterface
-import sensors_in_paradise.sonar.R
+import sensors_in_paradise.sonar.*
+import sensors_in_paradise.sonar.TextInputDialog.AcceptanceInterface
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.page1.XSENSArrayList
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import sensors_in_paradise.sonar.UIHelper
 import kotlin.collections.ArrayList
 
 class Page2Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface {
@@ -41,7 +39,8 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
     private lateinit var recordingName: String
     private lateinit var recordingsManager: RecordingDataManager
-
+    private lateinit var labelsStorage: RecordingLabelsStorage
+    private lateinit var labelsAdapter: RecordingLabelsAdapter
     override fun activityCreated(activity: Activity) {
         this.context = activity
         this.uiHelper = UIHelper(this.context)
@@ -60,18 +59,26 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         recordingsAdapter = RecordingsAdapter(recordingsManager)
         recyclerViewRecordings.adapter = recordingsAdapter
 
-        // Create an ArrayAdapter using the string array and a default spinner layout
-        ArrayAdapter.createFromResource(
-                context,
-                R.array.activities_array,
-                android.R.layout.simple_spinner_item
-        ).also { adapter ->
-            // Specify the layout to use when the list of choices appears
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            // Apply the adapter to the spinner
-            spinner.adapter = adapter
-        }
+        labelsStorage = RecordingLabelsStorage(context)
 
+        labelsAdapter = RecordingLabelsAdapter(activity)
+        labelsAdapter.setDeleteButtonClickListener(object : RecordingLabelsAdapter.ClickInterface {
+            override fun onDeleteButtonPressed(label: String) {
+               ApproveDialog(context, "Do you really want to delete the label $label?"
+               ) { p0, p1 ->
+                   labelsStorage.removeLabel(label)
+                   spinner.setSelection(0)
+                   labelsAdapter.remove(label)
+               }
+            }
+        })
+
+        spinner.adapter = labelsAdapter
+        labelsAdapter.add("Select label")
+        for (s in labelsStorage.getLabelsArray()) {
+            labelsAdapter.add(s)
+        }
+        labelsAdapter.add("Add new label")
         endButton.isEnabled = false
 
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -80,7 +87,11 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             }
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                startButton.isEnabled = position != 0
+                val isAddNewLabel = position == spinner.count - 1
+                startButton.isEnabled = position != 0 && !isAddNewLabel
+                if (isAddNewLabel) {
+                    handleCreateLabelRequested()
+                }
             }
         }
 
@@ -99,7 +110,36 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         updateActivityCounts()
     }
+    private fun handleCreateLabelRequested() {
+        val currentLabels = labelsStorage.getLabelsArray()
+        val promptInterface = object : TextInputDialog.PromptInterface {
+            override fun onInputSubmitted(input: String) {
+                labelsStorage.addLabel(input.toLowerCase())
+                labelsAdapter.insert(input.toLowerCase(), 1)
+                spinner.setSelection(1)
+            }
+        }
 
+        val acceptanceInterface = object : AcceptanceInterface {
+            override fun onInputChanged(text: String): Pair<Boolean, String?> {
+                val alreadyAdded = currentLabels.contains(text)
+                val valid = text != ""
+                if (valid) {
+                    return Pair(
+                        !alreadyAdded,
+                        if (alreadyAdded) "Label already added" else null
+                    )
+                }
+                return Pair(
+                    false,
+                    "Invalid label"
+                )
+            }
+        }
+        TextInputDialog(context, "Add new label",
+            promptInterface, "Label", acceptanceInterface = acceptanceInterface
+        ).setCancelListener { _, -> spinner.setSelection(0) }
+    }
     private fun startLogging() {
         endButton.isEnabled = true
 
