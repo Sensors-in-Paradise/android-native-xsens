@@ -3,7 +3,6 @@ package sensors_in_paradise.sonar.page3
 import android.app.Activity
 import android.content.Context
 import android.os.SystemClock
-import android.util.Log
 import android.widget.Button
 import android.widget.Chronometer
 import android.widget.Toast
@@ -74,47 +73,65 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
     private fun fillEmptyDataLines() {
         val frequency = 60
-        val epsilon = 5
+        val epsilon = 10
 
-        val startingTimestamp = rawSensorDataMap.maxOfOrNull { it.value.first().first }
-        val finishingTimestamp = rawSensorDataMap.minOfOrNull { it.value.last().first }
+        // '!!' possible, because sensor data gets checked for null lists before
+        val startingTimestamp = rawSensorDataMap.maxOf { it.value.first().first }!!
+        val finishingTimestamp = rawSensorDataMap.minOf { it.value.last().first }!!
 
-        for ((_, v) in rawSensorDataMap) {
-            Log.d("SensorLists", v.size.toString())
+        if (finishingTimestamp - startingTimestamp <= 0) {
+            Toast.makeText(context, "Timestamps not in sync", Toast.LENGTH_SHORT).show()
+            return
         }
 
-        for ((_, deviceDataList) in rawSensorDataMap) {
+        // cut off every entry outside of 'starting-' and 'finishingTimestamp'
+        // use 'startingEntries' to ensure having a starting value if entry at 'startingTimestamp' is missing
+        val startingEntries = mutableMapOf<String, FloatArray>()
+        for ((deviceAddress, deviceDataList) in rawSensorDataMap) {
 
-            while (deviceDataList.first().first < startingTimestamp!!) {
+            while (deviceDataList.first().first < startingTimestamp - epsilon) {
+                startingEntries[deviceAddress] = deviceDataList.first().second
                 deviceDataList.removeFirst()
             }
 
-            while (deviceDataList.last().first > finishingTimestamp!!) {
+            while (deviceDataList.last().first > finishingTimestamp + epsilon) {
                 deviceDataList.removeLast()
             }
         }
 
-        for ((_, v) in rawSensorDataMap) {
-            Log.d("SensorLists", v.size.toString())
-        }
+        // Fill empty data lines for all devices
+        val numLines = (((finishingTimestamp - startingTimestamp) * frequency) / 1000000).toInt()
+        val timeStep = 1000000.toDouble() / frequency.toDouble()
+        for ((deviceAddress, oldDeviceDataList) in rawSensorDataMap) {
+            val newDeviceDataList = mutableListOf<Pair<Long, FloatArray>>()
 
-        // sensor data gets checked for null lists before
-        val numLines = (finishingTimestamp!! - startingTimestamp!!) / frequency
-        val timeStep = 1000 / frequency
-        for ((_, deviceDataList) in rawSensorDataMap) {
-
-            var iterator = 0
-            for (i in 0..numLines - 1) {
-                val timestamp = (i * timeStep + startingTimestamp).toLong()
-
-                if (deviceDataList[iterator].first > timestamp + epsilon) {
-                    val fillValues = deviceDataList[iterator - 1].second
-                    val fillEntry = Pair(timestamp, fillValues)
-
-                    deviceDataList.add(iterator, fillEntry)
-                }
-                iterator ++
+            // ensure entry at 'startingTimestamp'
+            if (oldDeviceDataList.first().first - startingTimestamp > epsilon) {
+                val fillEntry = Pair(startingTimestamp, startingEntries[deviceAddress]!!)
+                newDeviceDataList.add(fillEntry.copy())
             }
+
+            // Iterating over all Timestamps from 'starting-' to 'finishingTimestamp'#
+            // Using last values if one is missing
+            // beginning at 1, because 0 entry is already filled and maybe needed for entry 1
+            for (it in 1..numLines) {
+                var isEntryNullorEmpty = true
+                if (oldDeviceDataList.getOrNull(it) != null) {
+                    val lastTimestamp = oldDeviceDataList.get(it - 1).first
+                    val actualTimestamp = oldDeviceDataList.get(it).first
+                    isEntryNullorEmpty = actualTimestamp - lastTimestamp > timeStep + epsilon
+                }
+                if (isEntryNullorEmpty) {
+                    val fillTimestamp = (oldDeviceDataList.get(it - 1).first + timeStep).toLong()
+                    val fillValues = oldDeviceDataList.get(it - 1).second
+                    val fillEntry = Pair(fillTimestamp, fillValues)
+
+                    newDeviceDataList.add(fillEntry.copy())
+                } else {
+                    newDeviceDataList.add(oldDeviceDataList.get(it).copy())
+                }
+            }
+            rawSensorDataMap[deviceAddress] = newDeviceDataList
         }
     }
 
@@ -136,18 +153,19 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     @Suppress("MaxLineLength")
     private fun createByteBuffer() {
 
-        val minDataLines = rawSensorDataMap.minOfOrNull { it.value.size }
+        var minDataLines = rawSensorDataMap.minOfOrNull { it.value.size }
         if (minDataLines == null || minDataLines == 0) {
             Toast.makeText(context, "Not every sensor did collect data!", Toast.LENGTH_SHORT).show()
             return
         }
 
-        fillEmptyDataLines()
-
-        for ((_, v) in rawSensorDataMap) {
-            Log.d("SensorLists", v.size.toString())
+        try {
+            fillEmptyDataLines()
+        } finally {
+            Toast.makeText(context, "Filling of empty data failed!", Toast.LENGTH_SHORT).show()
         }
 
+        minDataLines = rawSensorDataMap.minOfOrNull { it.value.size }!!
         if (minDataLines < dataVectorSize) {
             Toast.makeText(context, "Not enough data collected!", Toast.LENGTH_SHORT).show()
             return
