@@ -1,11 +1,7 @@
 name: linter
 
 # Controls when the workflow will run
-on:
-  push:
-    branches:
-      - master
-  pull_request:
+on: [push]
 
 # Controls what will run
 jobs:
