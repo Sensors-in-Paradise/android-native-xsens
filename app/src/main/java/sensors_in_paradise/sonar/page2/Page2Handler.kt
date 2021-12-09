@@ -114,9 +114,9 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         val fileDir = GlobalValues.getSensorDataBaseDir(context).resolve(
                 spinner.selectedItem.toString()).resolve(time)
         fileDir.mkdirs()
-        //recordingName = fileDir.toString()
+        // recordingName = fileDir.toString()
         recordingName = fileDir.toString()
-        
+
         spinner.setSelection(0)
         for (device in devices.getConnected()) {
             device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
@@ -149,12 +149,12 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         }
         endButton.isEnabled = false
         xsLoggers.clear()
-        
+
         recordingsManager.saveDuration(recordingName, timer.text.toString())
         recordingsAdapter.update()
         updateActivityCounts()
     }
-  
+
     private fun updateActivityCounts() {
         activityCountTextView.text = recordingsManager.getNumberOfRecordings().toString()
     }
