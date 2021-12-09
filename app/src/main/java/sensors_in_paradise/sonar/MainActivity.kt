@@ -2,17 +2,19 @@ package sensors_in_paradise.sonar
 
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.widget.ViewAnimator
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
-import com.xsens.dot.android.sdk.events.XsensDotData
-import sensors_in_paradise.sonar.page1.ConnectionInterface
+import sensors_in_paradise.sonar.uploader.FileUploaderDialog
 import sensors_in_paradise.sonar.page1.Page1Handler
+import sensors_in_paradise.sonar.page1.XSENSArrayList
 import sensors_in_paradise.sonar.page2.Page2Handler
 import sensors_in_paradise.sonar.page3.Page3Handler
-import sensors_in_paradise.sonar.page1.XSENSArrayList
 
-class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface {
+class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
 
     private lateinit var switcher: ViewAnimator
     private lateinit var tabLayout: TabLayout
@@ -28,11 +30,14 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         tabLayout = findViewById(R.id.tab_layout_activity_main)
 
         initClickListeners()
-
-        val page2 = Page2Handler(scannedDevices)
-        pageHandlers.add(Page1Handler(scannedDevices, page2))
-        pageHandlers.add(page2)
-        pageHandlers.add(Page3Handler())
+        val page1Handler = Page1Handler(scannedDevices)
+        pageHandlers.add(page1Handler)
+        val page2Handler = Page2Handler(scannedDevices)
+        pageHandlers.add(page2Handler)
+        val page3Handler = Page3Handler(scannedDevices)
+        pageHandlers.add(page3Handler)
+        page1Handler.addConnectionInterface(page2Handler)
+        page1Handler.addConnectionInterface(page3Handler)
         for (handler in pageHandlers) {
             handler.activityCreated(this)
         }
@@ -62,15 +67,13 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         // TODO("Not yet implemented")
     }
 
-    override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
-        // TODO("Not yet implemented")
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.activity_main_menu, menu)
+        return true
     }
 
-    override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
-        // TODO("Not yet implemented")
-    }
-
-    override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
-        // TODO("Not yet implemented")
+    fun onFileUploadMenuItemClicked(ignored: MenuItem) {
+        FileUploaderDialog(this).show()
     }
 }

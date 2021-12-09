@@ -2,10 +2,7 @@ package sensors_in_paradise.sonar.page2
 
 import android.app.Activity
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.os.SystemClock
-import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,11 +12,11 @@ import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
+import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.page1.XSENSArrayList
-import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import sensors_in_paradise.sonar.UIHelper
@@ -109,25 +106,28 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         timer.base = SystemClock.elapsedRealtime()
         timer.format = "%s" // set the format for a chronometer
         timer.start()
-
-        val filename = File(fileDirectory +
+        /*val filename = File(fileDirectory +
                 "/${spinner.selectedItem}/" +
                 DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()))
-        filename.mkdirs()
-
-        recordingName = filename.toString()
-
+        filename.mkdirs()*/
+        val time = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())
+        val fileDir = GlobalValues.getSensorDataBaseDir(context).resolve(
+                spinner.selectedItem.toString()).resolve(time)
+        fileDir.mkdirs()
+        //recordingName = fileDir.toString()
+        recordingName = fileDir.toString()
+        
         spinner.setSelection(0)
         for (device in devices.getConnected()) {
             device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
             device.startMeasuring()
-
+            val file = fileDir.resolve("/${device.address}.csv")
             xsLoggers.add(
                 XsensDotLogger(
                     this.context,
                     XsensDotLogger.TYPE_CSV,
                     XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION,
-                    filename.absolutePath + "/${device.address}.csv",
+                    file.absolutePath,
                     device.address,
                     "1",
                     false,
@@ -141,28 +141,20 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private fun stopLogging() {
         spinner.setSelection(0)
         timer.stop()
-
+        for (logger in xsLoggers) {
+            logger.stop()
+        }
         for (device in devices.getConnected()) {
             device.stopMeasuring()
         }
-
-        // Quick Fix: Waiting so logger can finish writing files
-        Log.d("Logging", "Start")
-        val waitTime: Long = 3000
-        Handler(Looper.getMainLooper()).postDelayed({
-            for (logger in xsLoggers) {
-                logger.stop()
-            }
-            Log.d("Logging", "Stop")
-        }, waitTime)
-
         endButton.isEnabled = false
-
+        xsLoggers.clear()
+        
         recordingsManager.saveDuration(recordingName, timer.text.toString())
         recordingsAdapter.update()
         updateActivityCounts()
     }
-
+  
     private fun updateActivityCounts() {
         activityCountTextView.text = recordingsManager.getNumberOfRecordings().toString()
     }

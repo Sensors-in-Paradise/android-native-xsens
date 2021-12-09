@@ -139,8 +139,8 @@ complexity:
   TooManyFunctions:
     active: true
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
-    thresholdInFiles: 27
-    thresholdInClasses: 27
+    thresholdInFiles: 30
+    thresholdInClasses: 30
     thresholdInInterfaces: 11
     thresholdInObjects: 11
     thresholdInEnums: 11
@@ -212,6 +212,7 @@ exceptions:
     active: false
   PrintStackTrace:
     active: true
+
   RethrowCaughtException:
     active: true
   ReturnFromFinally:
@@ -305,7 +306,7 @@ formatting:
     indentSize: 4
     continuationIndentSize: 4
   MaximumLineLength:
-    active: true
+    active: false
     maxLineLength: 120
     ignoreBackTickedIdentifier: false
   ModifierOrdering:
@@ -795,3 +796,4 @@ style:
       - 'java.util.*'
       - 'kotlinx.android.synthetic.*'
       - 'android.widget.*'
+      - 'com.android.volley.*'

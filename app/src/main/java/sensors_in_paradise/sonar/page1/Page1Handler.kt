@@ -8,8 +8,10 @@ import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.os.Build
 import android.view.View
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.XsensDotSdk
@@ -20,16 +22,18 @@ import com.xsens.dot.android.sdk.models.FilterProfileInfo
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.models.XsensDotSyncManager
 import com.xsens.dot.android.sdk.utils.XsensDotScanner
+import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
 import java.util.ArrayList
 import java.util.HashMap
 
-class Page1Handler(private val scannedDevices: XSENSArrayList, private val connectionInterface: ConnectionInterface) :
+class Page1Handler(val scannedDevices: XSENSArrayList) :
     XsensDotScannerCallback, XsensDotDeviceCallback, PageInterface,
     UIDeviceConnectionInterface, SyncInterface {
     private lateinit var context: Context
     private lateinit var activity: Activity
+    private val connectionInterfaces = ArrayList<ConnectionInterface>()
     private lateinit var tv: TextView
     private lateinit var pb: ProgressBar
     private lateinit var rv: RecyclerView
@@ -41,23 +45,16 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
     private var isSyncing = false
     private val unsyncedColor = Color.parseColor("#FF5722")
     private val syncedColor = Color.parseColor("#00e676")
-    private val _requiredPermissions = arrayOf(
-        Manifest.permission.BLUETOOTH,
-        Manifest.permission.BLUETOOTH_ADMIN,
-        Manifest.permission.BLUETOOTH_SCAN,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE
-    )
 
     override fun onXsensDotConnectionChanged(address: String, state: Int) {
         activity.runOnUiThread {
-            connectionInterface.onConnectedDevicesChanged(address,
-            state == XsensDotDevice.CONN_STATE_CONNECTED)
+            for (connectionInterface in connectionInterfaces) {
+                connectionInterface.onConnectedDevicesChanged(address,
+                state == XsensDotDevice.CONN_STATE_CONNECTED)
+            }
             updateSyncButtonState()
-        if (state != XsensDotDevice.CONN_STATE_CONNECTED) {
-            sensorAdapter.notifyItemChanged(address)
+            if (state != XsensDotDevice.CONN_STATE_CONNECTED) {
+                sensorAdapter.notifyItemChanged(address)
             }
         }
     }
@@ -71,7 +68,9 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
     }
     override fun onXsensDotBatteryChanged(s: String, i: Int, i1: Int) {}
     override fun onXsensDotDataChanged(address: String, xsensDotData: XsensDotData) {
-        connectionInterface.onXsensDotDataChanged(address, xsensDotData)
+        for (connectionInterface in connectionInterfaces) {
+            connectionInterface.onXsensDotDataChanged(address, xsensDotData)
+        }
     }
     override fun onXsensDotInitDone(address: String) {
         activity.runOnUiThread {
@@ -82,8 +81,9 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
     override fun onXsensDotPowerSavingTriggered(s: String) {}
     override fun onReadRemoteRssi(s: String, i: Int) {}
     override fun onXsensDotOutputRateUpdate(address: String, outputRate: Int) {
-        connectionInterface.onXsensDotOutputRateUpdate(address, outputRate)
-        activity.runOnUiThread { sensorAdapter.notifyItemChanged(address) }
+        for (connectionInterface in connectionInterfaces) {
+            connectionInterface.onXsensDotOutputRateUpdate(address, outputRate)
+        }
     }
     override fun onXsensDotFilterProfileUpdate(s: String, i: Int) {}
     override fun onXsensDotGetFilterProfileInfo(
@@ -102,6 +102,7 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
             linearLayoutCenter.visibility = View.INVISIBLE
         }
     }
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun activityCreated(activity: Activity) {
         this.context = activity
         this.activity = activity
@@ -119,6 +120,9 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
             isSyncing = true
             scannedDevices.getConnected()[0].isRootDevice = true
             XsensDotSyncManager.getInstance(SyncHandler(this)).startSyncing(scannedDevices.getConnected(), 0)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            GlobalValues.requiredPermissions.add(Manifest.permission.BLUETOOTH_SCAN)
         }
     }
     override fun activityResumed() {
@@ -154,11 +158,11 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
         device: XsensDotDevice,
         wantsConnection: Boolean
     ) {
-       if (wantsConnection) {
-           device.connect()
-       } else {
-           device.disconnect()
-       }
+        if (wantsConnection) {
+            device.connect()
+        } else {
+            device.disconnect()
+        }
         activity.runOnUiThread {
             sensorAdapter.notifyItemChanged(device.address)
         }
@@ -175,7 +179,7 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
     }
     private fun getRequiredButUngrantedPermissions(): ArrayList<String> {
         val result = ArrayList<String>()
-        for (permission in _requiredPermissions) {
+        for (permission in GlobalValues.requiredPermissions) {
             if (!isPermissionGranted(permission)) {
                 result.add(permission)
             }
@@ -207,9 +211,9 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
         for (device in scannedDevices.getConnected()) {
                 device.setOutputRate(60)
         }
-        updateSyncButtonState()
         activity.runOnUiThread {
             Toast.makeText(context, "Finished syncing, success: $isSuccess", Toast.LENGTH_LONG).show()
+            updateSyncButtonState()
             syncPb.progress = 100
             if (syncingResultMap != null) {
                 for (key in syncingResultMap.keys) {
@@ -233,5 +237,9 @@ class Page1Handler(private val scannedDevices: XSENSArrayList, private val conne
             val bgColor = if (scannedDevices.areAllConnectedDevicesSynced()) syncedColor else unsyncedColor
             syncBtn.setBackgroundColor(bgColor)
         }
+    }
+
+    public fun addConnectionInterface(connectionInterface: ConnectionInterface) {
+        connectionInterfaces.add(connectionInterface)
     }
 }
