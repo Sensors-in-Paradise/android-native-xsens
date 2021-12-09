@@ -114,14 +114,14 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         val fileDir = GlobalValues.getSensorDataBaseDir(context).resolve(
                 spinner.selectedItem.toString()).resolve(time)
         fileDir.mkdirs()
-        // recordingName = fileDir.toString()
+        // recordingName = filename.toString()
         recordingName = fileDir.toString()
 
         spinner.setSelection(0)
         for (device in devices.getConnected()) {
             device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
             device.startMeasuring()
-            val file = fileDir.resolve("/${device.address}.csv")
+            val file = fileDir.resolve("${device.address}.csv")
             xsLoggers.add(
                 XsensDotLogger(
                     this.context,
