@@ -19,7 +19,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_weight="3"
-        android:text="TextView" />
+        android:paddingLeft="10dp"
+        android:text="TextView"
+        android:textSize="20sp" />
 
     <ImageButton
         android:id="@+id/btn_delete_spinnerItem"
