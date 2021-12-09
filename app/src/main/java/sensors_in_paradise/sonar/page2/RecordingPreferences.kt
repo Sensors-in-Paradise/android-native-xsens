@@ -4,9 +4,9 @@ import android.content.Context
 
 class RecordingPreferences(context: Context) {
 
-    val PREFERENCE_NAME = "RecordingPreferences"
+    val preferenceName = "RecordingPreferences"
 
-    val preference = context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
+    val preference = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE)
 
     fun getRecordingDuration(recordingID: String): String? {
         return preference.getString(recordingID, "No duration found.")
