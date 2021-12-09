@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar
 
+import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Menu
@@ -75,5 +76,10 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
 
     fun onFileUploadMenuItemClicked(ignored: MenuItem) {
         FileUploaderDialog(this).show()
+    }
+
+    fun onSettingsMenuItemClicked(ignored: MenuItem) {
+        val intent = Intent(this, SettingsActivity::class.java)
+        startActivity(intent)
     }
 }
