@@ -8,4 +8,9 @@
         android:onClick="onFileUploadMenuItemClicked"
         android:title="Item"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/menuItem_settings_activityMain"
+        android:onClick="onSettingsMenuItemClicked"
+        android:title="Settings" />
 </menu>
