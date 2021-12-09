@@ -150,7 +150,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         return normalizedArray
     }
 
-    @Suppress("MaxLineLength")
+    @Suppress("MaxLineLength", "TooGenericExceptionCaught", "SwallowedException")
     private fun createByteBuffer() {
 
         var minDataLines = rawSensorDataMap.minOfOrNull { it.value.size }
@@ -161,7 +161,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         try {
             fillEmptyDataLines()
-        } finally {
+        } catch (e: IndexOutOfBoundsException) {
             Toast.makeText(context, "Filling of empty data failed!", Toast.LENGTH_SHORT).show()
         }
 
