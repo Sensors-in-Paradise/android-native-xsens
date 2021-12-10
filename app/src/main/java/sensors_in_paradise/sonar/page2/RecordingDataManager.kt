@@ -1,6 +1,5 @@
 package sensors_in_paradise.sonar.page2
 
-import android.util.Log
 import java.io.File
 
 class RecordingDataManager(private val filePath: String, private val recordingPreferences: RecordingPreferences) {
