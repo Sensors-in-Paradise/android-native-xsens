@@ -75,11 +75,11 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         val frequency = 60
         val epsilon = 10
 
-        // '!!' possible, because sensor data gets checked for null lists before
+        // '!!' i.O., because sensor data gets checked for null lists before
         val startingTimestamp = rawSensorDataMap.maxOf { it.value.first().first }!!
         val finishingTimestamp = rawSensorDataMap.minOf { it.value.last().first }!!
 
-        if (finishingTimestamp - startingTimestamp <= 0) {
+        if (finishingTimestamp <= startingTimestamp) {
             Toast.makeText(context, "Timestamps not in sync", Toast.LENGTH_SHORT).show()
             return
         }
@@ -106,7 +106,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             val newDeviceDataList = mutableListOf<Pair<Long, FloatArray>>()
 
             // ensure entry at 'startingTimestamp'
-            if (oldDeviceDataList.first().first - startingTimestamp > epsilon) {
+            if (oldDeviceDataList.first().first > startingTimestamp + epsilon) {
                 val fillEntry = Pair(startingTimestamp, startingEntries[deviceAddress]!!)
                 newDeviceDataList.add(fillEntry.copy())
             }
