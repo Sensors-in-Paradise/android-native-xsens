@@ -22,6 +22,7 @@ import sensors_in_paradise.sonar.page1.XSENSArrayList
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import kotlin.collections.ArrayList
 import kotlin.properties.Delegates
 
 class Page2Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface, RecordingInterface {
@@ -35,7 +36,9 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var spinner: Spinner
     private lateinit var xsRecorders: ArrayList<Pair<XsensDotRecordingManager, String>>
     private lateinit var recordingOnDevicesSwitch: SwitchCompat
+    private lateinit var exportingList: XSensExportingList
     private var recordingOnDevices by Delegates.notNull<Boolean>()
+    private var readyToExport by Delegates.notNull<Boolean>()
 
     private var numConnectedDevices = 0
     private var numDevices = 5
@@ -83,6 +86,9 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         }
 
         xsLoggers = ArrayList()
+        xsRecorders = ArrayList()
+        exportingList = XSensExportingList()
+        readyToExport = false
         startButton.setOnClickListener {
             recordingOnDevicesSwitch.isClickable = false
             if (!recordingOnDevices) {
@@ -104,7 +110,6 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
             recordingOnDevicesSwitch.isClickable = true
         }
-
         exportButton.setOnClickListener {
             startExporting()
             exportButton.isClickable = false
@@ -209,6 +214,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         }
         // start recording
         for (pair in xsRecorders) {
+
             pair.first.startRecording()
         }
     }
@@ -227,11 +233,18 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     override fun canExport(address: String?, list: ArrayList<XsensDotRecordingFileInfo>?) {
-
+        Toast.makeText(
+            this.context,
+            "Can start exporting on device: $address" +
+                    " with fileId: ${list?.get(0)}," +
+                    " fileName: ${list?.get(1)}" +
+                    " and dataSize: ${list?.get(2)}",
+            Toast.LENGTH_SHORT).show()
+        exportingList.add(Triple(address, list, spinner.selectedItem.toString()))
     }
 
     override fun cantExport(address: String?, list: ArrayList<XsensDotRecordingFileInfo>?) {
-
+        uiHelper.buildAndShowAlert("Can't export to device: $address")
     }
 
     private fun startLogging() {

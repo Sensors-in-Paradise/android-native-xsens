@@ -27,7 +27,7 @@ import sensors_in_paradise.sonar.R
 import java.util.ArrayList
 import java.util.HashMap
 
-class Page1Handler(val scannedDevices: XSENSArrayList) :
+class Page1Handler(private val scannedDevices: XSENSArrayList) :
     XsensDotScannerCallback, XsensDotDeviceCallback, PageInterface,
     UIDeviceConnectionInterface, SyncInterface {
     private lateinit var context: Context
