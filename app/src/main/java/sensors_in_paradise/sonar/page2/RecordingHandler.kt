@@ -58,11 +58,11 @@ class RecordingHandler(private val callback: RecordingInterface) : XsensDotRecor
     }
 
     override fun onXsensDotRequestFileInfoDone(
-        p0: String?,
-        p1: ArrayList<XsensDotRecordingFileInfo>?,
-        p2: Boolean
+        address: String?,
+        list: ArrayList<XsensDotRecordingFileInfo>?,
+        isSuccess: Boolean
     ) {
-        TODO("Not yet implemented")
+        if (isSuccess) callback.canExport(address, list) else callback.cantExport(address, list)
     }
 
     override fun onXsensDotDataExported(

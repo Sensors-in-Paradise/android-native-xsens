@@ -14,6 +14,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="24dp"
+        android:minHeight="48dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -30,7 +31,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="271dp">
 
             <Chronometer
                 android:id="@+id/timer"
@@ -67,7 +68,7 @@
                         android:layout_weight=".5"
                         android:enabled="false"
                         android:text="Start"
-                        app:icon="@drawable/ic_baseline_play_arrow_24"></com.google.android.material.button.MaterialButton>
+                        app:icon="@drawable/ic_baseline_play_arrow_24" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/buttonEnd"
@@ -76,24 +77,37 @@
                         android:layout_marginHorizontal="16dp"
                         android:layout_weight=".5"
                         android:text="Stop"
-                        app:icon="@drawable/ic_baseline_stop_24"></com.google.android.material.button.MaterialButton>
+                        app:icon="@drawable/ic_baseline_stop_24" />
                 </LinearLayout>
 
             </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonExport"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_weight=".5"
+                android:text="Export"
+                android:visibility="visible"
+                app:icon="@android:drawable/ic_menu_send"
+                app:layout_constraintBaseline_toBaselineOf="@+id/switch1"
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/switch1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
-                android:layout_marginTop="24dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginBottom="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="12dp"
                 android:minHeight="48dp"
                 android:text="Record on devices"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/linearLayout"/>
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 

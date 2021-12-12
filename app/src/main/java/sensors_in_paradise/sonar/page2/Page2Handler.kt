@@ -10,6 +10,7 @@ import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.models.XsensDotPayload
+import com.xsens.dot.android.sdk.models.XsensDotRecordingFileInfo
 import com.xsens.dot.android.sdk.models.XsensDotRecordingState
 import com.xsens.dot.android.sdk.recording.XsensDotRecordingManager
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
@@ -28,6 +29,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var timer: Chronometer
     private lateinit var startButton: MaterialButton
     private lateinit var endButton: MaterialButton
+    private lateinit var exportButton: MaterialButton
     private lateinit var xsLoggers: ArrayList<XsensDotLogger>
     private lateinit var uiHelper: UIHelper
     private lateinit var spinner: Spinner
@@ -47,6 +49,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         endButton = activity.findViewById(R.id.buttonEnd)
         spinner = activity.findViewById(R.id.spinner)
         recordingOnDevicesSwitch = activity.findViewById(R.id.switch1)
+        exportButton = activity.findViewById(R.id.buttonExport)
 
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter.createFromResource(
@@ -64,6 +67,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             // do something, the isChecked will be
             // true if the switch is in the On position
             recordingOnDevices = b
+            exportButton.visibility =  if (b) View.VISIBLE else View.INVISIBLE
         }
 
         endButton.isEnabled = false
@@ -100,6 +104,11 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
             recordingOnDevicesSwitch.isClickable = true
         }
+
+        exportButton.setOnClickListener {
+            startExporting()
+            exportButton.isClickable = false
+        }
     }
 
     override fun requestFlashInfo() {
@@ -120,7 +129,8 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         success: Boolean,
         xSensDotRecordingState: XsensDotRecordingState?
     ) {
-        xsRecorders.find { pair: Pair<XsensDotRecordingManager, String> -> pair.second == address }.let {
+        xsRecorders.find { pair: Pair<XsensDotRecordingManager, String> -> pair.second == address }.
+        let {
             if (it != null && xSensDotRecordingState != null) {
                 when (xSensDotRecordingState) {
                     XsensDotRecordingState.success -> {
@@ -152,7 +162,8 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         success: Boolean,
         xSensDotRecordingState: XsensDotRecordingState?
     ) {
-        xsRecorders.find { pair: Pair<XsensDotRecordingManager, String> -> pair.second == address }.let {
+        xsRecorders.find { pair: Pair<XsensDotRecordingManager, String> -> pair.second == address }.
+        let {
             if (it != null && xSensDotRecordingState != null) {
                 when (xSensDotRecordingState) {
                     XsensDotRecordingState.success -> {
@@ -175,6 +186,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                         ).show()
                     }
                 }
+                // it.first.requestRecordingTime() can be called here if we want to ue the recording time somehow
             }
         }
     }
@@ -205,6 +217,21 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         for (pair in xsRecorders) {
             pair.first.stopRecording()
         }
+    }
+
+    // probably want to do this on all devices
+    private fun startExporting() {
+        for (pair in xsRecorders) {
+            pair.first.requestFileInfo()
+        }
+    }
+
+    override fun canExport(address: String?, list: ArrayList<XsensDotRecordingFileInfo>?) {
+
+    }
+
+    override fun cantExport(address: String?, list: ArrayList<XsensDotRecordingFileInfo>?) {
+
     }
 
     private fun startLogging() {

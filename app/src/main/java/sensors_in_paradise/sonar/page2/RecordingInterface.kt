@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.page2
 
+import com.xsens.dot.android.sdk.models.XsensDotRecordingFileInfo
 import com.xsens.dot.android.sdk.models.XsensDotRecordingState
 
 interface RecordingInterface {
@@ -20,5 +21,10 @@ interface RecordingInterface {
         success: Boolean,
         xSensDotRecordingState: XsensDotRecordingState?
     ) {
+    }
+    fun canExport(address: String?, list: ArrayList<XsensDotRecordingFileInfo>?){
+    }
+
+    fun cantExport(address: String?, list: ArrayList<XsensDotRecordingFileInfo>?){
     }
 }
