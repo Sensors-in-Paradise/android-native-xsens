@@ -264,8 +264,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             "Erasing successful on $address",
             Toast.LENGTH_SHORT).show()
             xsRecorders.find { pair -> pair.second == address }?.first?.clear()
-        }
-        else uiHelper.buildAndShowAlert("Erasing failed on $address")
+        } else uiHelper.buildAndShowAlert("Erasing failed on $address")
     }
 
     override fun canExport(address: String?, list: ArrayList<XsensDotRecordingFileInfo>?) {
