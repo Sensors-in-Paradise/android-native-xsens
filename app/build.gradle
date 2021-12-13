@@ -39,7 +39,9 @@ android {
     buildFeatures {
         mlModelBinding true
     }
-
+    testOptions {
+        unitTests.includeAndroidResources = true
+    }
 }
 
 dependencies {
@@ -62,6 +64,9 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.5.31")
     implementation("com.android.volley:volley:1.2.1")
+    testImplementation("junit:junit:4.12")
+    testImplementation('androidx.test:core:1.4.0')
+    testImplementation("org.mockito:mockito-core:1.10.19")
 }
 repositories {
     mavenCentral()
