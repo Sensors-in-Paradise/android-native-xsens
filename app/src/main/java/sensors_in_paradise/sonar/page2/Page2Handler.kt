@@ -7,6 +7,8 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.widget.SwitchCompat
 import com.google.android.material.button.MaterialButton
+import com.xsens.dataprocessor.XsQuaternion
+import com.xsens.dataprocessor.XsVector
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.models.XsensDotPayload
@@ -20,6 +22,7 @@ import sensors_in_paradise.sonar.UIHelper
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.page1.XSENSArrayList
 import java.io.File
+import java.nio.ByteBuffer
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.collections.ArrayList
@@ -37,6 +40,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var xsRecorders: ArrayList<Pair<XsensDotRecordingManager, String>>
     private lateinit var recordingOnDevicesSwitch: SwitchCompat
     private lateinit var exportingList: XSensExportingList
+    private lateinit var recordingActivityList: ArrayList<String>
     private var recordingOnDevices by Delegates.notNull<Boolean>()
     private var readyToExport by Delegates.notNull<Boolean>()
 
@@ -217,6 +221,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
             pair.first.startRecording()
         }
+        recordingActivityList.add(spinner.selectedItem.toString())
     }
 
     private fun stopRecording() {
@@ -227,8 +232,23 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
     // probably want to do this on all devices
     private fun startExporting() {
-        for (pair in xsRecorders) {
-            pair.first.requestFileInfo()
+        xsRecorders.forEach {
+            it.first.requestFileInfo()
+        }
+        if (exportingList.size == numConnectedDevices) {
+            xsRecorders.forEach { pair ->
+                val mSelectExportedDataIds = ByteArray(3)
+                with(pair) {
+                    mSelectExportedDataIds[0] = XsensDotRecordingManager.RECORDING_DATA_ID_TIMESTAMP
+                    mSelectExportedDataIds[1] = XsensDotRecordingManager.RECORDING_DATA_ID_ORIENTATION
+                    mSelectExportedDataIds[2] = XsensDotRecordingManager.RECORDING_DATA_ID_CALIBRATED_ACC
+                    first.selectExportedData(mSelectExportedDataIds)
+                    first.startExporting(
+                        ArrayList(exportingList
+                            .filter { triple ->  triple.first == second && triple.second != null}
+                            .map { t -> t.second }))
+                }
+            }
         }
     }
 
@@ -240,7 +260,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                     " fileName: ${list?.get(1)}" +
                     " and dataSize: ${list?.get(2)}",
             Toast.LENGTH_SHORT).show()
-        exportingList.add(Triple(address, list, spinner.selectedItem.toString()))
+        list?.forEachIndexed { index, recordingFile -> exportingList.add(Triple(address, recordingFile, recordingActivityList[index])) }
     }
 
     override fun cantExport(address: String?, list: ArrayList<XsensDotRecordingFileInfo>?) {

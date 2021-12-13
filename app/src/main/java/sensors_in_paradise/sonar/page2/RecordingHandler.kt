@@ -66,11 +66,13 @@ class RecordingHandler(private val callback: RecordingInterface) : XsensDotRecor
     }
 
     override fun onXsensDotDataExported(
-        p0: String?,
-        p1: XsensDotRecordingFileInfo?,
-        p2: XsensDotData?
+        address: String?,
+        fileInfo: XsensDotRecordingFileInfo,
+        exportedData: XsensDotData?
     ) {
-        TODO("Not yet implemented")
+        // When the export is in progress, this callback will be called,
+        // returning each exported data XsensDotData, corresponding to the selected field
+        // Data can be stored through and written to the csv file
     }
 
     override fun onXsensDotDataExported(p0: String?, p1: XsensDotRecordingFileInfo?) {
