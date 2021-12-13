@@ -27,4 +27,7 @@ interface RecordingInterface {
 
     fun cantExport(address: String?, list: ArrayList<XsensDotRecordingFileInfo>?) {
     }
+    fun stopExporting(address: String?)
+    fun deleteRecordings(address: String?)
+    fun notifyEraseDone(address: String?, isSuccess: Boolean)
 }

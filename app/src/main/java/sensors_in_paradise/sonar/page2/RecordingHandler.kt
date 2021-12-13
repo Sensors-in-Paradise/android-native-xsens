@@ -15,8 +15,8 @@ class RecordingHandler(private val callback: RecordingInterface) : XsensDotRecor
         }
     }
 
-    override fun onXsensDotEraseDone(p0: String?, p1: Boolean) {
-        TODO("Not yet implemented")
+    override fun onXsensDotEraseDone(address: String?, isSuccess: Boolean) {
+        callback.notifyEraseDone(address, isSuccess)
     }
 
     override fun onXsensDotRequestFlashInfoDone(address: String?, usedFlashSpace: Int, totalFlashSpace: Int) {
@@ -79,11 +79,11 @@ class RecordingHandler(private val callback: RecordingInterface) : XsensDotRecor
         TODO("Not yet implemented")
     }
 
-    override fun onXsensDotAllDataExported(p0: String?) {
-        TODO("Not yet implemented")
+    override fun onXsensDotAllDataExported(address: String?) {
+        callback.stopExporting(address)
     }
 
-    override fun onXsensDotStopExportingData(p0: String?) {
-        TODO("Not yet implemented")
+    override fun onXsensDotStopExportingData(address: String?) {
+        callback.deleteRecordings(address)
     }
 }

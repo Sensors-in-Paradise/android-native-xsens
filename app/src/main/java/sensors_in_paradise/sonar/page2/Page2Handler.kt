@@ -249,6 +249,22 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         }
     }
 
+    override fun stopExporting(address: String?) {
+        xsRecorders.find { pair -> pair.second == address }?.first?.stopExporting()
+    }
+
+    override fun deleteRecordings(address: String?) {
+        xsRecorders.find { pair -> pair.second == address }?.first?.eraseRecordingData()
+    }
+
+    override fun notifyEraseDone(address: String?, isSuccess: Boolean) {
+        if (isSuccess) Toast.makeText(
+            this.context,
+            "Erasing successful on $address",
+            Toast.LENGTH_SHORT).show()
+        else uiHelper.buildAndShowAlert("Erasing failed on $address")
+    }
+
     override fun canExport(address: String?, list: ArrayList<XsensDotRecordingFileInfo>?) {
         Toast.makeText(
             this.context,
