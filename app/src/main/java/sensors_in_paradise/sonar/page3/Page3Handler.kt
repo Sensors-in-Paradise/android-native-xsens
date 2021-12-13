@@ -59,6 +59,10 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         "RF" to "D4:22:CD:00:06:72"
     )
 
+    public fun sensorAddressToTag(address: String): String {
+        return sensorTagMap.filterValues { it == address }.keys.first()
+    }
+
     private fun toggleButtons() {
         startButton.isEnabled = !(startButton.isEnabled)
         stopButton.isEnabled = !(stopButton.isEnabled)
@@ -118,8 +122,8 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                 var isEntryNullorEmpty = true
                 if (oldDeviceDataList.getOrNull(it) != null) {
                     val lastTimestamp = oldDeviceDataList.get(it - 1).first
-                    val actualTimestamp = oldDeviceDataList.get(it).first
-                    isEntryNullorEmpty = actualTimestamp - lastTimestamp > timeStep + epsilon
+                    val currentTimestamp = oldDeviceDataList.get(it).first
+                    isEntryNullorEmpty = currentTimestamp - lastTimestamp > timeStep + epsilon
                 }
                 if (isEntryNullorEmpty) {
                     val fillTimestamp = (oldDeviceDataList.get(it - 1).first + timeStep).toLong()
@@ -151,21 +155,27 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     @Suppress("MaxLineLength", "TooGenericExceptionCaught", "SwallowedException")
-    private fun createByteBuffer() {
+    private fun processSensorData() {
 
-        var minDataLines = rawSensorDataMap.minOfOrNull { it.value.size }
-        if (minDataLines == null || minDataLines == 0) {
-            Toast.makeText(context, "Not every sensor did collect data!", Toast.LENGTH_SHORT).show()
-            return
+        // check for sensors without data
+        rawSensorDataMap.forEach {
+            val tag = sensorAddressToTag(it.key)
+            val listLen = it.value.size
+            if (listLen == 0 || listLen == null) {
+                Toast.makeText(context, "\'$tag\' did not collect data!", Toast.LENGTH_SHORT).show()
+                return
+            }
         }
 
+        // fill empty data lines
         try {
             fillEmptyDataLines()
-        } catch (e: IndexOutOfBoundsException) {
+        } catch (e: Exception) {
             Toast.makeText(context, "Filling of empty data failed!", Toast.LENGTH_SHORT).show()
         }
 
-        minDataLines = rawSensorDataMap.minOfOrNull { it.value.size }!!
+        // check for minimal length
+        val minDataLines = rawSensorDataMap.minOfOrNull { it.value.size }!!
         if (minDataLines < dataVectorSize) {
             Toast.makeText(context, "Not enough data collected!", Toast.LENGTH_SHORT).show()
             return
@@ -173,6 +183,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         numDataLines = dataVectorSize
 
+        // normalize
         var floatArray = FloatArray(0)
         for (row in 0..numDataLines - 1) {
             var lineFloatArray = FloatArray(0)
@@ -195,6 +206,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             floatArray = floatArray + lineFloatArray
         }
 
+        // create buffer
         sensorDataByteBuffer = ByteBuffer.allocate(numDataLines * dataLineByteSize)
         sensorDataByteBuffer!!.order(ByteOrder.LITTLE_ENDIAN)
         sensorDataByteBuffer!!.asFloatBuffer().put(floatArray, 0, numDataLines * dataLineFloatSize)
@@ -207,7 +219,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             device.stopMeasuring()
         }
 
-        createByteBuffer()
+        processSensorData()
 
         toggleButtons()
         isRunning = false
