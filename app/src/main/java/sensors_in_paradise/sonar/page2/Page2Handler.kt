@@ -258,10 +258,13 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     override fun notifyEraseDone(address: String?, isSuccess: Boolean) {
-        if (isSuccess) Toast.makeText(
+        if (isSuccess) {
+            Toast.makeText(
             this.context,
             "Erasing successful on $address",
             Toast.LENGTH_SHORT).show()
+            xsRecorders.find { pair -> pair.second == address }?.first?.clear()
+        }
         else uiHelper.buildAndShowAlert("Erasing failed on $address")
     }
 
