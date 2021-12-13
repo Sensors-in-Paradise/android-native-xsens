@@ -28,7 +28,7 @@ class MathHelper {
             freeAcc[1] = accL.value(1L).toFloat()
             freeAcc[2] = (accL.value(2L) - localGravity).toFloat()
         }
-        return  floatArray2ByteArray(freeAcc)
+        return floatArray2ByteArray(freeAcc)
     }
 
     private fun floatArray2ByteArray(values: FloatArray): ByteArray? {

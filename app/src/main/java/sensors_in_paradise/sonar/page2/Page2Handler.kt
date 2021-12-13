@@ -7,8 +7,6 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.widget.SwitchCompat
 import com.google.android.material.button.MaterialButton
-import com.xsens.dataprocessor.XsQuaternion
-import com.xsens.dataprocessor.XsVector
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.models.XsensDotPayload
@@ -22,7 +20,6 @@ import sensors_in_paradise.sonar.UIHelper
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.page1.XSENSArrayList
 import java.io.File
-import java.nio.ByteBuffer
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.collections.ArrayList
@@ -74,7 +71,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             // do something, the isChecked will be
             // true if the switch is in the On position
             recordingOnDevices = b
-            exportButton.visibility =  if (b) View.VISIBLE else View.INVISIBLE
+            exportButton.visibility = if (b) View.VISIBLE else View.INVISIBLE
         }
 
         endButton.isEnabled = false
@@ -138,8 +135,8 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         success: Boolean,
         xSensDotRecordingState: XsensDotRecordingState?
     ) {
-        xsRecorders.find { pair: Pair<XsensDotRecordingManager, String> -> pair.second == address }.
-        let {
+        xsRecorders.find { pair: Pair<XsensDotRecordingManager, String> -> pair.second == address }
+            .let {
             if (it != null && xSensDotRecordingState != null) {
                 when (xSensDotRecordingState) {
                     XsensDotRecordingState.success -> {
@@ -171,8 +168,8 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         success: Boolean,
         xSensDotRecordingState: XsensDotRecordingState?
     ) {
-        xsRecorders.find { pair: Pair<XsensDotRecordingManager, String> -> pair.second == address }.
-        let {
+        xsRecorders.find { pair: Pair<XsensDotRecordingManager, String> -> pair.second == address }
+        .let {
             if (it != null && xSensDotRecordingState != null) {
                 when (xSensDotRecordingState) {
                     XsensDotRecordingState.success -> {
@@ -245,7 +242,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                     first.selectExportedData(mSelectExportedDataIds)
                     first.startExporting(
                         ArrayList(exportingList
-                            .filter { triple ->  triple.first == second && triple.second != null}
+                            .filter { triple -> triple.first == second && triple.second != null }
                             .map { t -> t.second }))
                 }
             }
@@ -260,7 +257,8 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                     " fileName: ${list?.get(1)}" +
                     " and dataSize: ${list?.get(2)}",
             Toast.LENGTH_SHORT).show()
-        list?.forEachIndexed { index, recordingFile -> exportingList.add(Triple(address, recordingFile, recordingActivityList[index])) }
+        list?.forEachIndexed { index, recordingFile ->
+            exportingList.add(Triple(address, recordingFile, recordingActivityList[index])) }
     }
 
     override fun cantExport(address: String?, list: ArrayList<XsensDotRecordingFileInfo>?) {

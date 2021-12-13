@@ -22,9 +22,9 @@ interface RecordingInterface {
         xSensDotRecordingState: XsensDotRecordingState?
     ) {
     }
-    fun canExport(address: String?, list: ArrayList<XsensDotRecordingFileInfo>?){
+    fun canExport(address: String?, list: ArrayList<XsensDotRecordingFileInfo>?) {
     }
 
-    fun cantExport(address: String?, list: ArrayList<XsensDotRecordingFileInfo>?){
+    fun cantExport(address: String?, list: ArrayList<XsensDotRecordingFileInfo>?) {
     }
 }
