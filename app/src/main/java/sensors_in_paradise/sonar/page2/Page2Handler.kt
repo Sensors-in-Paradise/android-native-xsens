@@ -107,6 +107,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         }
 
         xsLoggers = ArrayList()
+        startButton.isEnabled = true
         startButton.setOnClickListener {
             if (numConnectedDevices >= numDevices) {
                 startLogging()
@@ -124,25 +125,21 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
     private fun handleCreateLabelRequested() {
         val currentLabels = labelsStorage.getLabelsArray()
-        val promptInterface = object : TextInputDialog.PromptInterface {
-            override fun onInputSubmitted(input: String) {
-                labelsStorage.addLabel(input.toLowerCase())
-                labelsAdapter.insert(input.toLowerCase(), 1)
-                spinner.setSelection(1)
-            }
-        }
+        val promptInterface =  {value:String -> labelsStorage.addLabel(value.toLowerCase())
+            labelsAdapter.insert(value.toLowerCase(), 1)
+            spinner.setSelection(1)}
 
-        val acceptanceInterface = object : AcceptanceInterface {
-            override fun onInputChanged(text: String): Pair<Boolean, String?> {
-                val alreadyAdded = currentLabels.contains(text)
-                val valid = text != ""
-                if (valid) {
-                    return Pair(
-                        !alreadyAdded,
-                        if (alreadyAdded) "Label already added" else null
-                    )
-                }
-                return Pair(
+        val acceptanceInterface = {
+                text:String->
+            val alreadyAdded = currentLabels.contains(text)
+            val valid = text != ""
+            if (valid) {
+                Pair(
+                    !alreadyAdded,
+                    if (alreadyAdded) "Label already added" else null
+                )
+            }else {
+                Pair(
                     false,
                     "Invalid label"
                 )
@@ -150,7 +147,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         }
         TextInputDialog(
             context, "Add new label",
-            promptInterface, "Label", acceptanceInterface = acceptanceInterface
+           promptInterface , "Label", acceptanceInterface = acceptanceInterface
         ).setCancelListener { _ -> spinner.setSelection(0) }
     }
 
@@ -237,22 +234,28 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         endButton.isEnabled = false
         xsLoggers.clear()
 
-        recordingsManager.saveDuration(recordingName, timer.text.toString())
-        recordingsAdapter.update()
-        updateActivityCounts()
+        addRecordingToUI(recordingName,timer.text.toString())
     }
     private fun moveUnlabelledTempFiles(label: String){
-        for (deviceAddress in unlabelledRecordingMap.keys) {
+        val keys = unlabelledRecordingMap.keys.asIterable()
+        for (deviceAddress in keys) {
                 // Label has been selected during recording -> file must be moved
                 val pair = unlabelledRecordingMap[deviceAddress]
                 val time = pair!!.first
                 val tempFile = pair.second
                 val file = getRecordingFile(time, label, deviceAddress )
-                file.mkdirs()
+                file.parentFile!!.mkdirs()
                 Files.copy(tempFile.toPath(), FileOutputStream(file))
                 tempFile.delete()
-                unlabelledRecordingMap.remove(deviceAddress)
         }
+        //TODO: change from label to recording name as in other method execution
+        addRecordingToUI(label,timer.text.toString())
+        unlabelledRecordingMap.clear()
+    }
+    private fun addRecordingToUI(name:String, duration:String){
+        recordingsManager.saveDuration(name, duration)
+        recordingsAdapter.update()
+        updateActivityCounts()
     }
     private fun updateActivityCounts() {
         activityCountTextView.text = recordingsManager.getNumberOfRecordings().toString()

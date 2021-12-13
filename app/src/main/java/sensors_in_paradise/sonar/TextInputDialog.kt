@@ -14,10 +14,10 @@ import androidx.core.widget.addTextChangedListener
 class TextInputDialog(
     context: Context,
     title: String,
-    promptInterface: PromptInterface,
+    promptInterface: (text: String) -> Unit,
     hint: String = "",
     errorMessage: String? = null,
-    val acceptanceInterface: AcceptanceInterface?
+    val acceptanceInterface: (text: String) -> Pair<Boolean, String?>
 ) {
     var dialog: AlertDialog
 
@@ -53,15 +53,14 @@ class TextInputDialog(
         dialog = builder.create()
 
         dialog.setButton(Dialog.BUTTON_POSITIVE, "OK") { _, _ ->
-            promptInterface.onInputSubmitted(input.text.toString())
+            promptInterface(input.text.toString())
         }
 
         dialog.show()
         input.addTextChangedListener { text ->
             val positiveBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-            acceptanceInterface?.onInputChanged(text.toString())
             if (acceptanceInterface != null) {
-                val result = acceptanceInterface.onInputChanged(text.toString())
+                val result = acceptanceInterface(text.toString())
                 positiveBtn.isEnabled = result.first
                 if (result.second != null) {
                     errorTV.text = result.second

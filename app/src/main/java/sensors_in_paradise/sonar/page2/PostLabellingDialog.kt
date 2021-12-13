@@ -51,7 +51,7 @@ class PostLabellingDialog(
 
         for(rb in radioButtons){
             rb.setOnCheckedChangeListener {_,_->
-                this.label = label
+                this.label = rb.text.toString()
                 positiveBtn.isEnabled = true
             }
         }
