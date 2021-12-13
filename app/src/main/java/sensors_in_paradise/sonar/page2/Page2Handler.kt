@@ -16,6 +16,9 @@ import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.TextInputDialog.AcceptanceInterface
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.page1.XSENSArrayList
+import java.io.File
+import java.io.FileOutputStream
+import java.nio.file.Files
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.collections.ArrayList
@@ -41,6 +44,8 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var recordingsManager: RecordingDataManager
     private lateinit var labelsStorage: RecordingLabelsStorage
     private lateinit var labelsAdapter: RecordingLabelsAdapter
+
+    private val unlabelledRecordingMap: MutableMap<String, Pair<LocalDateTime, File>> = mutableMapOf()
     override fun activityCreated(activity: Activity) {
         this.context = activity
         this.uiHelper = UIHelper(this.context)
@@ -64,12 +69,13 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         labelsAdapter = RecordingLabelsAdapter(activity)
         labelsAdapter.setDeleteButtonClickListener(object : RecordingLabelsAdapter.ClickInterface {
             override fun onDeleteButtonPressed(label: String) {
-               ApproveDialog(context, "Do you really want to delete the label $label?"
-               ) { p0, p1 ->
-                   labelsStorage.removeLabel(label)
-                   spinner.setSelection(0)
-                   labelsAdapter.remove(label)
-               }
+                ApproveDialog(
+                    context, "Do you really want to delete the label $label?"
+                ) { p0, p1 ->
+                    labelsStorage.removeLabel(label)
+                    spinner.setSelection(0)
+                    labelsAdapter.remove(label)
+                }
             }
         })
 
@@ -83,12 +89,17 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
-                startButton.isEnabled = false
+                //startButton.isEnabled = false
             }
 
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 val isAddNewLabel = position == spinner.count - 1
-                startButton.isEnabled = position != 0 && !isAddNewLabel
+                //startButton.isEnabled = position != 0 && !isAddNewLabel
                 if (isAddNewLabel) {
                     handleCreateLabelRequested()
                 }
@@ -110,6 +121,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         updateActivityCounts()
     }
+
     private fun handleCreateLabelRequested() {
         val currentLabels = labelsStorage.getLabelsArray()
         val promptInterface = object : TextInputDialog.PromptInterface {
@@ -136,32 +148,56 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                 )
             }
         }
-        TextInputDialog(context, "Add new label",
+        TextInputDialog(
+            context, "Add new label",
             promptInterface, "Label", acceptanceInterface = acceptanceInterface
-        ).setCancelListener { _, -> spinner.setSelection(0) }
+        ).setCancelListener { _ -> spinner.setSelection(0) }
     }
+
+    private fun getRecordingFileDir(time: LocalDateTime, label: String): File {
+        val timeStr = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(time)
+        return GlobalValues.getSensorDataBaseDir(context).resolve(
+            label
+        ).resolve(timeStr)
+    }
+
+    private fun getRecordingFile(time: LocalDateTime, label: String, deviceAddress: String): File {
+        return getRecordingFileDir(time, label).resolve("${deviceAddress}.csv")
+    }
+
+    private fun getRecordingFile(fileDir: File, deviceAddress: String): File {
+        return fileDir.resolve("${deviceAddress}.csv")
+    }
+
+    private fun getNewUnlabelledTempFile(fileDir: File, deviceAddress: String): File {
+        return fileDir.resolve("${System.currentTimeMillis()}_${deviceAddress}.csv")
+    }
+
     private fun startLogging() {
         endButton.isEnabled = true
 
         timer.base = SystemClock.elapsedRealtime()
         timer.format = "%s" // set the format for a chronometer
         timer.start()
-        /*val filename = File(fileDirectory +
-                "/${spinner.selectedItem}/" +
-                DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()))
-        filename.mkdirs()*/
-        val time = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())
-        val fileDir = GlobalValues.getSensorDataBaseDir(context).resolve(
-                spinner.selectedItem.toString()).resolve(time)
+        val isLabelSelected = spinner.selectedItemPosition != 0
+        val fileDir = if (isLabelSelected) getRecordingFileDir(
+            LocalDateTime.now(),
+            spinner.selectedItem.toString()
+        ) else GlobalValues.getSensorDataTempUnlabelledDir(context)
         fileDir.mkdirs()
-        // recordingName = filename.toString()
         recordingName = fileDir.toString()
 
-        spinner.setSelection(0)
+        //spinner.setSelection(0)
         for (device in devices.getConnected()) {
             device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
             device.startMeasuring()
-            val file = fileDir.resolve("${device.address}.csv")
+            val file = if (isLabelSelected) getRecordingFile(
+                fileDir,
+                device.address
+            ) else getNewUnlabelledTempFile(fileDir, device.address)
+            if(!isLabelSelected){
+                unlabelledRecordingMap[device.address] = Pair(LocalDateTime.now(), file)
+            }
             xsLoggers.add(
                 XsensDotLogger(
                     this.context,
@@ -174,12 +210,19 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                     1,
                     null as String?,
                     "appVersion",
-                    0))
+                    0
+                )
+            )
         }
     }
 
     private fun stopLogging() {
-        spinner.setSelection(0)
+        val isLabelSelected = spinner.selectedItemPosition != 0 && spinner.selectedItemPosition!= spinner.count-1
+        if (!isLabelSelected) {
+            val dialog =PostLabellingDialog(context, labelsStorage.getLabelsArray())
+            dialog.setOnLabelSelectedListener{ label ->moveUnlabelledTempFiles(label) }
+        }
+
         timer.stop()
         for (logger in xsLoggers) {
             logger.stop()
@@ -187,6 +230,10 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         for (device in devices.getConnected()) {
             device.stopMeasuring()
         }
+        if(isLabelSelected){
+            moveUnlabelledTempFiles(spinner.selectedItem.toString())
+        }
+        spinner.setSelection(0)
         endButton.isEnabled = false
         xsLoggers.clear()
 
@@ -194,7 +241,19 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         recordingsAdapter.update()
         updateActivityCounts()
     }
-
+    private fun moveUnlabelledTempFiles(label: String){
+        for (deviceAddress in unlabelledRecordingMap.keys) {
+                // Label has been selected during recording -> file must be moved
+                val pair = unlabelledRecordingMap[deviceAddress]
+                val time = pair!!.first
+                val tempFile = pair.second
+                val file = getRecordingFile(time, label, deviceAddress )
+                file.mkdirs()
+                Files.copy(tempFile.toPath(), FileOutputStream(file))
+                tempFile.delete()
+                unlabelledRecordingMap.remove(deviceAddress)
+        }
+    }
     private fun updateActivityCounts() {
         activityCountTextView.text = recordingsManager.getNumberOfRecordings().toString()
     }

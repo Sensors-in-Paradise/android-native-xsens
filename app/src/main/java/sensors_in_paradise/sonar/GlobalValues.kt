@@ -9,6 +9,9 @@ class GlobalValues private constructor() {
         fun getSensorDataBaseDir(context: Context): File {
             return context.getExternalFilesDir(null) ?: context.dataDir
         }
+        fun getSensorDataTempUnlabelledDir(context: Context): File {
+            return  context.dataDir.resolve("temp")
+        }
         val requiredPermissions = arrayListOf(
                 Manifest.permission.BLUETOOTH,
                 Manifest.permission.BLUETOOTH_ADMIN,
