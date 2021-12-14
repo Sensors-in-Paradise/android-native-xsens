@@ -48,7 +48,7 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
         val personName = recordingsManager.getPersonFromRecording(dataSet[position])
         val activityDuration = recordingsManager.getDurationFromRecording(dataSet[position])
         val activityStart = recordingsManager.getStartingTimeFromRecording(dataSet[position])
-        viewHolder.activityTextView.text = personName + " - " + activityName
+        viewHolder.activityTextView.text = activityName + " - " + personName
         viewHolder.durationTextView.text = "Duration: " + activityDuration
         viewHolder.startTimeTextView.text = "Start: " + activityStart
 

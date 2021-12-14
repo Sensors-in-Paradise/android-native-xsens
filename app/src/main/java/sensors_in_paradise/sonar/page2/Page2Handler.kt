@@ -215,8 +215,8 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         val time = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())
         val fileDir = GlobalValues.getSensorDataBaseDir(context).resolve(
-                spinnerPerson.selectedItem.toString()).resolve(
-                spinnerActivity.selectedItem.toString()).resolve(time)
+                spinnerActivity.selectedItem.toString()).resolve(
+                spinnerPerson.selectedItem.toString()).resolve(time)
         fileDir.mkdirs()
 
         recordingName = fileDir.toString()

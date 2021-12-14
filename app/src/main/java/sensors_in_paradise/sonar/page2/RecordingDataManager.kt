@@ -37,20 +37,20 @@ class RecordingDataManager(private val filePath: String, private val recordingPr
         return activities.groupingBy { it }.eachCount()
     }
 
-    fun getActivityFromRecording(recording: String): String {
-        val filePath = File(recording).parentFile!!.toString()
-        val index = filePath.lastIndexOf("/")
-        val activity = recording.slice(IntRange(index + 1, filePath.length - 1))
-
-        return activity
-    }
-
     fun getPersonFromRecording(recording: String): String {
-        val filePath = File(recording).parentFile!!.parentFile!!.toString()
+        val filePath = File(recording).parentFile!!.toString()
         val index = filePath.lastIndexOf("/")
         val person = recording.slice(IntRange(index + 1, filePath.length - 1))
 
         return person
+    }
+
+    fun getActivityFromRecording(recording: String): String {
+        val filePath = File(recording).parentFile!!.parentFile!!.toString()
+        val index = filePath.lastIndexOf("/")
+        val activity = recording.slice(IntRange(index + 1, filePath.length - 1))
+
+        return activity
     }
 
     fun getStartingTimeFromRecording(recording: String): String {
