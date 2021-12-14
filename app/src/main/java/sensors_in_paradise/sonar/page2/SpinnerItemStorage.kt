@@ -5,7 +5,7 @@ import org.json.JSONArray
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
 
-class RecordingLabelsStorage(context: Context, filename: String) : JSONStorage(File(context.dataDir, filename)) {
+class SpinnerItemStorage(context: Context, filename: String) : JSONStorage(File(context.dataDir, filename)) {
     lateinit var labels: JSONArray
     override fun onFileNewlyCreated() {
         json.put("labels", JSONArray())

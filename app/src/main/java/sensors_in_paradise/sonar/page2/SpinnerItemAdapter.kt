@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.*
 import sensors_in_paradise.sonar.R
 
-class RecordingLabelsAdapter(activity: Activity) :
+class SpinnerItemAdapter(activity: Activity) :
     ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item) {
     val selectIcon = context.getDrawable(R.drawable.ic_baseline_error_outline_24)
     val addIcon = context.getDrawable(R.drawable.ic_baseline_add_circle_outline_24)

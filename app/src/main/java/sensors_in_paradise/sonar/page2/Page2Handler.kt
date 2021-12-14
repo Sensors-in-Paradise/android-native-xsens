@@ -43,10 +43,10 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
     private lateinit var recordingName: String
     private lateinit var recordingsManager: RecordingDataManager
-    private lateinit var peopleSelectionStorage: RecordingLabelsStorage
-    private lateinit var peopleSelectionAdapter: RecordingLabelsAdapter
-    private lateinit var labelsStorage: RecordingLabelsStorage
-    private lateinit var labelsAdapter: RecordingLabelsAdapter
+    private lateinit var peopleSelectionStorage: SpinnerItemStorage
+    private lateinit var peopleSelectionAdapter: SpinnerItemAdapter
+    private lateinit var labelsStorage: SpinnerItemStorage
+    private lateinit var labelsAdapter: SpinnerItemAdapter
     override fun activityCreated(activity: Activity) {
         this.context = activity
         this.uiHelper = UIHelper(this.context)
@@ -67,87 +67,11 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         recordingsAdapter = RecordingsAdapter(recordingsManager)
         recyclerViewRecordings.adapter = recordingsAdapter
 
-        // Person selection
-        peopleSelectionStorage = RecordingLabelsStorage(context, "people.json")
-        peopleSelectionAdapter = RecordingLabelsAdapter(activity)
+        // Spinners
+        setUpSpinnerPeople(activity)
+        setUpSpinnerActivity(activity)
 
-        peopleSelectionAdapter.setDeleteButtonClickListener(object : RecordingLabelsAdapter.ClickInterface {
-            override fun onDeleteButtonPressed(person: String) {
-                ApproveDialog(context, "Do you really want to delete the person $person?"
-                ) { p0, p1 ->
-                    peopleSelectionStorage.removeLabel(person)
-                    spinnerPerson.setSelection(0)
-                    peopleSelectionAdapter.remove(person)
-                }
-            }
-        })
-
-        spinnerPerson.adapter = peopleSelectionAdapter
-        peopleSelectionAdapter.add("Select person...")
-        for (s in peopleSelectionStorage.getLabelsArray()) {
-            peopleSelectionAdapter.add(s)
-        }
-        peopleSelectionAdapter.add("Add new person...")
-
-        spinnerPerson.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                startButton.isEnabled = false
-            }
-
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                personSelected = position != 0
-                val isAddNewLabel = position == spinnerPerson.count - 1
-                startButton.isEnabled = position != 0 && !isAddNewLabel && labelSelected
-
-                if (isAddNewLabel) {
-                    handleCreateLabelRequested(spinnerPerson, peopleSelectionAdapter, peopleSelectionStorage)
-                }
-            }
-        }
-
-
-
-
-
-
-        // Activity label selection
-        labelsStorage = RecordingLabelsStorage(context, "recordingLabels.json")
-
-        labelsAdapter = RecordingLabelsAdapter(activity)
-        labelsAdapter.setDeleteButtonClickListener(object : RecordingLabelsAdapter.ClickInterface {
-            override fun onDeleteButtonPressed(label: String) {
-               ApproveDialog(context, "Do you really want to delete the label $label?"
-               ) { p0, p1 ->
-                   labelsStorage.removeLabel(label)
-                   spinnerActivity.setSelection(0)
-                   labelsAdapter.remove(label)
-               }
-            }
-        })
-
-        spinnerActivity.adapter = labelsAdapter
-        labelsAdapter.add("Select label...")
-        for (s in labelsStorage.getLabelsArray()) {
-            labelsAdapter.add(s)
-        }
-        labelsAdapter.add("Add new label...")
         endButton.isEnabled = false
-
-        spinnerActivity.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                startButton.isEnabled = false
-            }
-
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                labelSelected = position != 0
-                val isAddNewLabel = position == spinnerActivity.count - 1
-                startButton.isEnabled = position != 0 && !isAddNewLabel && personSelected
-
-                if (isAddNewLabel) {
-                    handleCreateLabelRequested(spinnerActivity, labelsAdapter, labelsStorage)
-                }
-            }
-        }
 
         xsLoggers = ArrayList()
         startButton.setOnClickListener {
@@ -165,7 +89,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         updateActivityCounts()
     }
 
-    private fun handleCreateLabelRequested(spinner: Spinner, spinnerAdapter: RecordingLabelsAdapter, spinnerStorage: RecordingLabelsStorage) {
+    private fun handleCreateLabelRequested(spinner: Spinner, spinnerAdapter: SpinnerItemAdapter, spinnerStorage: SpinnerItemStorage) {
         val currentLabels = spinnerStorage.getLabelsArray()
         val promptInterface = object : TextInputDialog.PromptInterface {
             override fun onInputSubmitted(input: String) {
@@ -194,6 +118,84 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         TextInputDialog(context, "Add new label",
             promptInterface, "Label", acceptanceInterface = acceptanceInterface
         ).setCancelListener { _, -> spinner.setSelection(0) }
+    }
+
+    private fun setUpSpinnerPeople(activity: Activity) {
+        peopleSelectionStorage = SpinnerItemStorage(context, "people.json")
+        peopleSelectionAdapter = SpinnerItemAdapter(activity)
+
+        setSpinnerDeleteButtonClickListener(spinnerPerson, peopleSelectionAdapter, peopleSelectionStorage, "person")
+
+        spinnerPerson.adapter = peopleSelectionAdapter
+
+        fillSpinner(peopleSelectionAdapter, peopleSelectionStorage, "person")
+
+        spinnerPerson.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                startButton.isEnabled = false
+            }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                personSelected = position != 0
+                val isAddNewLabel = position == spinnerPerson.count - 1
+                startButton.isEnabled = position != 0 && !isAddNewLabel && labelSelected
+
+                if (isAddNewLabel) {
+                    handleCreateLabelRequested(spinnerPerson, peopleSelectionAdapter, peopleSelectionStorage)
+                }
+            }
+        }
+    }
+
+    private fun setUpSpinnerActivity(activity: Activity) {
+        labelsStorage = SpinnerItemStorage(context, "recordingLabels.json")
+        labelsAdapter = SpinnerItemAdapter(activity)
+
+        setSpinnerDeleteButtonClickListener(spinnerActivity, labelsAdapter, labelsStorage, "label")
+
+        spinnerActivity.adapter = labelsAdapter
+
+        fillSpinner(labelsAdapter, labelsStorage, "label")
+
+        spinnerActivity.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                startButton.isEnabled = false
+            }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                labelSelected = position != 0
+                val isAddNewLabel = position == spinnerActivity.count - 1
+                startButton.isEnabled = position != 0 && !isAddNewLabel && personSelected
+
+                if (isAddNewLabel) {
+                    handleCreateLabelRequested(spinnerActivity, labelsAdapter, labelsStorage)
+                }
+            }
+        }
+    }
+
+    private fun setSpinnerDeleteButtonClickListener(spinner: Spinner,
+                                                    spinnerAdapter: SpinnerItemAdapter, spinnerStorage:
+                                                    SpinnerItemStorage, item: String) {
+
+        spinnerAdapter.setDeleteButtonClickListener(object : SpinnerItemAdapter.ClickInterface {
+            override fun onDeleteButtonPressed(label: String) {
+                ApproveDialog(context, "Do you really want to delete the $item $label?"
+                ) { p0, p1 ->
+                    spinnerStorage.removeLabel(label)
+                    spinner.setSelection(0)
+                    spinnerAdapter.remove(label)
+                }
+            }
+        })
+    }
+
+    private fun fillSpinner(spinnerAdapter: SpinnerItemAdapter, spinnerStorage: SpinnerItemStorage, item: String) {
+        spinnerAdapter.add("Select $item...")
+        for (s in spinnerStorage.getLabelsArray()) {
+            spinnerAdapter.add(s)
+        }
+        spinnerAdapter.add("Add new $item...")
     }
 
     private fun startLogging() {
