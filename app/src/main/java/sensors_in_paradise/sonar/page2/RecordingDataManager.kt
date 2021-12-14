@@ -6,7 +6,7 @@ import java.io.File
 class RecordingDataManager(private val filePath: String, private val recordingPreferences: RecordingPreferences) {
 
     fun getRecordings(): ArrayList<String> {
-        var recordingsList = ArrayList<String>()
+        val recordingsList = ArrayList<String>()
 
         File(filePath).walk().forEach {
             // This might have to be discussed
@@ -26,9 +26,9 @@ class RecordingDataManager(private val filePath: String, private val recordingPr
     }
 
     fun getNumberOfRecordings(): Map<String, Int> {
-        var recordings = getRecordings()
+        val recordings = getRecordings()
 
-        var activities = ArrayList<String>()
+        val activities = ArrayList<String>()
 
         for (rec in recordings) {
             activities.add(getActivityFromRecording(rec))
@@ -38,24 +38,24 @@ class RecordingDataManager(private val filePath: String, private val recordingPr
     }
 
     fun getActivityFromRecording(recording: String): String {
-        var filePath = File(recording).parentFile.toString()
-        var index = filePath.lastIndexOf("/")
-        var activity = recording.slice(IntRange(index + 1, filePath.length - 1))
+        val filePath = File(recording).parentFile!!.toString()
+        val index = filePath.lastIndexOf("/")
+        val activity = recording.slice(IntRange(index + 1, filePath.length - 1))
 
         return activity
     }
 
     fun getPersonFromRecording(recording: String): String {
-        var filePath = File(recording).parentFile.parentFile.toString()
-        var index = filePath.lastIndexOf("/")
-        var person = recording.slice(IntRange(index + 1, filePath.length - 1))
+        val filePath = File(recording).parentFile!!.parentFile!!.toString()
+        val index = filePath.lastIndexOf("/")
+        val person = recording.slice(IntRange(index + 1, filePath.length - 1))
 
         return person
     }
 
     fun getStartingTimeFromRecording(recording: String): String {
-        var index = recording.lastIndexOf("/")
-        var startTime = recording.slice(IntRange(index + 1, recording.length - 1))
+        val index = recording.lastIndexOf("/")
+        val startTime = recording.slice(IntRange(index + 1, recording.length - 1))
 
         return startTime
     }
@@ -69,7 +69,7 @@ class RecordingDataManager(private val filePath: String, private val recordingPr
     }
 
     fun deleteRecording(fileOrDir: File) {
-        var filename = fileOrDir.toString()
+        val filename = fileOrDir.toString()
 
         if (fileOrDir.isDirectory()) {
             for (child in fileOrDir.listFiles()) {
@@ -83,7 +83,7 @@ class RecordingDataManager(private val filePath: String, private val recordingPr
     }
 
     fun checkEmptyFiles(fileOrDir: File): Boolean {
-        var emptyFileSize = 430
+        val emptyFileSize = 430
 
         if (fileOrDir.isDirectory()) {
             for (child in fileOrDir.listFiles()) {

@@ -18,6 +18,7 @@ import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.page1.XSENSArrayList
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
 import kotlin.collections.ArrayList
 
 class Page2Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface {
@@ -89,12 +90,16 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         updateActivityCounts()
     }
 
-    private fun handleCreateLabelRequested(spinner: Spinner, spinnerAdapter: SpinnerItemAdapter, spinnerStorage: SpinnerItemStorage) {
+    private fun handleCreateLabelRequested(
+        spinner: Spinner,
+        spinnerAdapter: SpinnerItemAdapter,
+        spinnerStorage: SpinnerItemStorage
+    ) {
         val currentLabels = spinnerStorage.getLabelsArray()
         val promptInterface = object : TextInputDialog.PromptInterface {
             override fun onInputSubmitted(input: String) {
-                spinnerStorage.addLabel(input.toLowerCase())
-                spinnerAdapter.insert(input.toLowerCase(), 1)
+                spinnerStorage.addLabel(input.lowercase(Locale.getDefault()))
+                spinnerAdapter.insert(input.lowercase(Locale.getDefault()), 1)
                 spinner.setSelection(1)
             }
         }
@@ -174,14 +179,17 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         }
     }
 
-    private fun setSpinnerDeleteButtonClickListener(spinner: Spinner,
-                                                    spinnerAdapter: SpinnerItemAdapter, spinnerStorage:
-                                                    SpinnerItemStorage, item: String) {
+    private fun setSpinnerDeleteButtonClickListener(
+        spinner: Spinner,
+        spinnerAdapter: SpinnerItemAdapter,
+        spinnerStorage: SpinnerItemStorage,
+        item: String
+    ) {
 
         spinnerAdapter.setDeleteButtonClickListener(object : SpinnerItemAdapter.ClickInterface {
             override fun onDeleteButtonPressed(label: String) {
                 ApproveDialog(context, "Do you really want to delete the $item $label?"
-                ) { p0, p1 ->
+                ) { _, _ ->
                     spinnerStorage.removeLabel(label)
                     spinner.setSelection(0)
                     spinnerAdapter.remove(label)
