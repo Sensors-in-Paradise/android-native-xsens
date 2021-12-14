@@ -45,9 +45,10 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
 
         var filesEmpty = recordingsManager.checkEmptyFiles(File(dataSet[position]))
         var activityName = recordingsManager.getActivityFromRecording(dataSet[position])
+        var personName = recordingsManager.getPersonFromRecording(dataSet[position])
         var activityDuration = recordingsManager.getDurationFromRecording(dataSet[position])
         var activityStart = recordingsManager.getStartingTimeFromRecording(dataSet[position])
-        viewHolder.activityTextView.text = activityName
+        viewHolder.activityTextView.text = personName + " - " + activityName
         viewHolder.durationTextView.text = "Duration: " + activityDuration
         viewHolder.startTimeTextView.text = "Start: " + activityStart
 

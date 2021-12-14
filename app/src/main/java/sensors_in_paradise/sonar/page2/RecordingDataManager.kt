@@ -38,11 +38,19 @@ class RecordingDataManager(private val filePath: String, private val recordingPr
     }
 
     fun getActivityFromRecording(recording: String): String {
-        var preIndex = recording.indexOf("/files/")
-        var postIndex = recording.lastIndexOf("/")
-        var activity = recording.slice(IntRange(preIndex + "/files/".length, postIndex - 1))
+        var filePath = File(recording).parentFile.toString()
+        var index = filePath.lastIndexOf("/")
+        var activity = recording.slice(IntRange(index + 1, filePath.length - 1))
 
         return activity
+    }
+
+    fun getPersonFromRecording(recording: String): String {
+        var filePath = File(recording).parentFile.parentFile.toString()
+        var index = filePath.lastIndexOf("/")
+        var person = recording.slice(IntRange(index + 1, filePath.length - 1))
+
+        return person
     }
 
     fun getStartingTimeFromRecording(recording: String): String {
