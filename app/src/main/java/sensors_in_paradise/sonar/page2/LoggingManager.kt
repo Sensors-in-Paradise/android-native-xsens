@@ -20,6 +20,7 @@ class LoggingManager(
     val context: Context,
     private val devices: XSENSArrayList,
     private val labelsStorage: LabelsStorage,
+    private val startButton: Button,
     private val endButton: Button,
     private val timer: Chronometer,
     private val spinner: Spinner
@@ -52,7 +53,7 @@ class LoggingManager(
 
     fun startLogging() {
         endButton.isEnabled = true
-
+        startButton.isEnabled = false
         timer.base = SystemClock.elapsedRealtime()
         timer.format = "%s" // set the format for a chronometer
         timer.start()
@@ -105,6 +106,7 @@ class LoggingManager(
         }
         spinner.setSelection(0)
         endButton.isEnabled = false
+        startButton.isEnabled = true
         xsLoggers.clear()
     }
 
