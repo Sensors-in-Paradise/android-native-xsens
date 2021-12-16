@@ -16,10 +16,7 @@ class PostLabellingDialog(
     private var dialog: AlertDialog
     private var label: String? = null
     private val radioButtons = arrayListOf<RadioButton>()
-    interface PostLabellingInterface {
-        fun onLabelSelected(label: String)
 
-    }
 
     init {
 
@@ -29,6 +26,12 @@ class PostLabellingDialog(
 
         for(label in availableLabels){
             val rb = RadioButton(context)
+            rb.textSize= 20f
+            rb.layoutParams = RadioGroup.LayoutParams(
+                RadioGroup.LayoutParams.MATCH_PARENT,
+                RadioGroup.LayoutParams.WRAP_CONTENT
+            );
+
             rb.setText(label)
             radioButtons.add(rb)
             radioGroup.addView(rb)

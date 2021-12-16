@@ -9,14 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotDevice
-import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import java.io.File
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import kotlin.collections.ArrayList
 
 class Page2Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface {
     private lateinit var context: Context
@@ -35,7 +31,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private var numDevices = 5
 
     private lateinit var recordingsManager: RecordingDataManager
-    private lateinit var labelsStorage: RecordingLabelsStorage
+    private lateinit var labelsStorage: LabelsStorage
     private lateinit var labelsAdapter: RecordingLabelsAdapter
     private lateinit var loggingManager: LoggingManager
 
@@ -50,8 +46,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         activityCountTextView = activity.findViewById(R.id.tv_activity_counts)
 
         recordingsManager = RecordingDataManager(
-            GlobalValues.getSensorRecordingsBaseDir(context).path,
-            RecordingPreferences(context)
+            File(context.dataDir, "recordingDurations.json"), GlobalValues.getSensorRecordingsBaseDir(context)
         )
         recyclerViewRecordings = activity.findViewById(R.id.recyclerViewRecordings)
         val linearLayoutManager = LinearLayoutManager(context)
@@ -59,7 +54,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         recordingsAdapter = RecordingsAdapter(recordingsManager)
         recyclerViewRecordings.adapter = recordingsAdapter
 
-        labelsStorage = RecordingLabelsStorage(context)
+        labelsStorage = LabelsStorage(context)
         loggingManager = LoggingManager(context, devices, labelsStorage, endButton, timer, spinner)
         loggingManager.setOnRecordingDone { recordingName, duration ->
             addRecordingToUI(
@@ -154,8 +149,8 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     private fun addRecordingToUI(name: String, duration: String) {
-        recordingsManager.saveDuration(name, duration)
-        recordingsAdapter.update()
+        recordingsManager.addRecordingAt0(name, duration)
+        recordingsAdapter.notifyItemInserted(0)
         updateActivityCounts()
     }
 

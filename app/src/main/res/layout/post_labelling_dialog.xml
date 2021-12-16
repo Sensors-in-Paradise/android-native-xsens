@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Select a label"
+        android:textSize="20sp"
         android:textStyle="bold" />
 
     <RadioGroup

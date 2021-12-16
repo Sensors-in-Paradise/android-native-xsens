@@ -19,7 +19,7 @@ import java.util.*
 class LoggingManager(
     val context: Context,
     private val devices: XSENSArrayList,
-    private val labelsStorage: RecordingLabelsStorage,
+    private val labelsStorage: LabelsStorage,
     private val endButton: Button,
     private val timer: Chronometer,
     private val spinner: Spinner
