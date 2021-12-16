@@ -1,13 +1,12 @@
 package sensors_in_paradise.sonar.page2
 
-import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
 
-class RecordingDataManager(jsonFile: File, val recordingsDir: File): JSONStorage(jsonFile){
+class RecordingDataManager(jsonFile: File, val recordingsDir: File) : JSONStorage(jsonFile) {
     private val recordingsList = ArrayList<String>()
 
-    init{
+    init {
         loadRecordingsFromStorage()
     }
 
@@ -24,7 +23,7 @@ class RecordingDataManager(jsonFile: File, val recordingsDir: File): JSONStorage
             }
         }
     }
-    fun getRecordings(): ArrayList<String>{
+    fun getRecordings(): ArrayList<String> {
         return recordingsList
     }
     fun getNumberOfRecordings(): Map<String, Int> {
@@ -52,15 +51,15 @@ class RecordingDataManager(jsonFile: File, val recordingsDir: File): JSONStorage
 
     fun getDurationFromRecording(recording: String): String? {
 
-        return if(json.has(recording)) json.getString(recording) else "Unknown"
+        return if (json.has(recording)) json.getString(recording) else "Unknown"
     }
 
     fun addRecordingAt0(recording: String, duration: String) {
-        recordingsList.add(0,recording)
+        recordingsList.add(0, recording)
         json.put(recording, duration)
         save()
     }
-    fun deleteRecording(fileOrDir: File){
+    fun deleteRecording(fileOrDir: File) {
         val recordingName = fileOrDir.toString()
         deleteRecordingFilesAndDirs(fileOrDir)
         json.remove(recordingName)

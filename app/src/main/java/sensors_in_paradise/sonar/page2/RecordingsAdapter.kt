@@ -61,5 +61,4 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
     }
 
     override fun getItemCount() = dataSet.size
-
 }

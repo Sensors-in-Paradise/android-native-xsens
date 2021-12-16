@@ -85,7 +85,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
-                //startButton.isEnabled = false
+                // startButton.isEnabled = false
             }
 
             override fun onItemSelected(
@@ -95,13 +95,12 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                 id: Long
             ) {
                 val isAddNewLabel = position == spinner.count - 1
-                //startButton.isEnabled = position != 0 && !isAddNewLabel
+                // startButton.isEnabled = position != 0 && !isAddNewLabel
                 if (isAddNewLabel) {
                     handleCreateLabelRequested()
                 }
             }
         }
-
 
         startButton.isEnabled = true
         startButton.setOnClickListener {

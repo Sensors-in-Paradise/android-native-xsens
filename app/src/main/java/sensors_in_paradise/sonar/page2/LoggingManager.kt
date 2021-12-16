@@ -39,11 +39,11 @@ class LoggingManager(
     }
 
     private fun getRecordingFile(fileDir: File, deviceAddress: String): File {
-        return fileDir.resolve("${deviceAddress}.csv")
+        return fileDir.resolve("$deviceAddress.csv")
     }
 
     private fun getNewUnlabelledTempFile(fileDir: File, deviceAddress: String): File {
-        return fileDir.resolve("${System.currentTimeMillis()}_${deviceAddress}.csv")
+        return fileDir.resolve("${System.currentTimeMillis()}_$deviceAddress.csv")
     }
 
     private fun getRecordingName(fileDir: File): String {
@@ -58,7 +58,7 @@ class LoggingManager(
         timer.start()
         val fileDir = GlobalValues.getSensorRecordingsTempDir(context)
         fileDir.mkdirs()
-        //spinner.setSelection(0)
+        // spinner.setSelection(0)
         val recordingsKey = LocalDateTime.now()
         tempRecordingMap[recordingsKey] = arrayListOf()
 
@@ -122,8 +122,7 @@ class LoggingManager(
         }
         tempRecordingMap.clear()
     }
-    fun setOnRecordingDone(onRecordingDone: (String, String) -> Unit){
-        this.onRecordingDone=onRecordingDone
+    fun setOnRecordingDone(onRecordingDone: (String, String) -> Unit) {
+        this.onRecordingDone = onRecordingDone
     }
-
 }

@@ -12,11 +12,10 @@ class PostLabellingDialog(
     availableLabels: Array<String>
 ) {
 
-    private var listener: (value: String) -> Unit = {_->}
+    private var listener: (value: String) -> Unit = { _ -> }
     private var dialog: AlertDialog
     private var label: String? = null
     private val radioButtons = arrayListOf<RadioButton>()
-
 
     init {
 
@@ -24,13 +23,13 @@ class PostLabellingDialog(
         val root = LayoutInflater.from(context).inflate(R.layout.post_labelling_dialog, null)
         val radioGroup = root.findViewById<RadioGroup>(R.id.radioGroup_labels_postLabellingDialog)
 
-        for(label in availableLabels){
+        for (label in availableLabels) {
             val rb = RadioButton(context)
-            rb.textSize= 20f
+            rb.textSize = 20f
             rb.layoutParams = RadioGroup.LayoutParams(
                 RadioGroup.LayoutParams.MATCH_PARENT,
                 RadioGroup.LayoutParams.WRAP_CONTENT
-            );
+            )
 
             rb.setText(label)
             radioButtons.add(rb)
@@ -38,8 +37,6 @@ class PostLabellingDialog(
         }
 
         builder.setView(root)
-
-
 
         dialog = builder.create()
 
@@ -52,14 +49,14 @@ class PostLabellingDialog(
         positiveBtn.isEnabled = false
         dialog.setCancelable(false)
 
-        for(rb in radioButtons){
-            rb.setOnCheckedChangeListener {_,_->
+        for (rb in radioButtons) {
+            rb.setOnCheckedChangeListener { _, _ ->
                 this.label = rb.text.toString()
                 positiveBtn.isEnabled = true
             }
         }
     }
-    fun setOnLabelSelectedListener(listener: (value: String) -> Unit){
+    fun setOnLabelSelectedListener(listener: (value: String) -> Unit) {
         this.listener = listener
     }
 }

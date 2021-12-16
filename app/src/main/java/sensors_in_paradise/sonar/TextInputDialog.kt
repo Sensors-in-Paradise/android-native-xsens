@@ -21,7 +21,6 @@ class TextInputDialog(
 ) {
     var dialog: AlertDialog
 
-
     init {
 
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)

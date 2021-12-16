@@ -10,7 +10,7 @@ class GlobalValues private constructor() {
             return context.getExternalFilesDir(null) ?: context.dataDir
         }
         fun getSensorRecordingsTempDir(context: Context): File {
-            return  context.dataDir.resolve("temp")
+            return context.dataDir.resolve("temp")
         }
         val requiredPermissions = arrayListOf(
                 Manifest.permission.BLUETOOTH,
