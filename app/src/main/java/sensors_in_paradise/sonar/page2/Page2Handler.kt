@@ -20,7 +20,6 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var startButton: MaterialButton
     private lateinit var endButton: MaterialButton
 
-    private lateinit var uiHelper: UIHelper
     private lateinit var spinner: Spinner
     private lateinit var recyclerViewRecordings: RecyclerView
     private lateinit var activityCountTextView: TextView
@@ -37,7 +36,6 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
     override fun activityCreated(activity: Activity) {
         this.context = activity
-        this.uiHelper = UIHelper(this.context)
 
         timer = activity.findViewById(R.id.timer)
         startButton = activity.findViewById(R.id.buttonStart)
@@ -168,7 +166,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         if (!connected && deviceLogger != null) {
             devices.get(deviceAddress)?.let {
                 if (it.connectionState == XsensDotDevice.CONN_STATE_DISCONNECTED) {
-                    uiHelper.buildAndShowAlert(
+                    UIHelper.showAlert(context,
                         "The Device ${it.name} was disconnected!"
                     )
                     deviceLogger.stop()
