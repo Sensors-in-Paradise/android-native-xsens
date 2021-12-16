@@ -1,6 +1,5 @@
 package sensors_in_paradise.sonar.page2
 
-import android.util.Log
 import java.io.File
 
 class RecordingDataManager(private val filePath: String, private val recordingPreferences: RecordingPreferences) {
@@ -9,12 +8,9 @@ class RecordingDataManager(private val filePath: String, private val recordingPr
         val recordingsList = ArrayList<String>()
 
         File(filePath).walk().forEach {
-            // This might have to be discussed
             // Removes all directories from output that don't end with two numbers (millis)
             try {
                 it.toString().takeLast(2).toInt()
-
-                Log.d("TEST", it.toString())
 
                 recordingsList.add(it.toString())
             } catch (exception: NumberFormatException) {
