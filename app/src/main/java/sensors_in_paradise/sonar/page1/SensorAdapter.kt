@@ -82,8 +82,8 @@ class SensorAdapter(
 
         viewHolder.statusIV.setImageDrawable(statusDrawable)
     }
-    private fun getConnectionStateLabel(connectionState: Int): String{
-        return when(connectionState){
+    private fun getConnectionStateLabel(connectionState: Int): String {
+        return when (connectionState) {
             XsensDotDevice.CONN_STATE_CONNECTED -> "Connected"
             XsensDotDevice.CONN_STATE_CONNECTING -> "Connecting"
             XsensDotDevice.CONN_STATE_DISCONNECTED -> "Disconnected"
