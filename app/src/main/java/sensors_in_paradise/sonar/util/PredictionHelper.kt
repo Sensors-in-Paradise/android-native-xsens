@@ -1,6 +1,7 @@
 package sensors_in_paradise.sonar.util
 
 import android.content.Context
+import sensors_in_paradise.sonar.UIHelper
 import android.widget.Toast
 import sensors_in_paradise.sonar.GlobalValues
 import java.nio.ByteBuffer
@@ -32,8 +33,8 @@ class PredictionHelper(
         val finishingTimestamp = rawSensorDataMap.minOf { it.value.last().first }
 
         if (finishingTimestamp <= startingTimestamp) {
-            Toast.makeText(context, "Timestamps not in sync", Toast.LENGTH_SHORT).show()
-            Toast.makeText(context, "Data may be inconsistent!", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Timestamps not in sync", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Data may be inconsistent!", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -112,7 +113,7 @@ class PredictionHelper(
             val tag = GlobalValues.sensorAddressToTag(it.key)
             val listLen = it.value.size
             if (listLen == 0) {
-                Toast.makeText(context, "\'$tag\' did not collect data!", Toast.LENGTH_SHORT).show()
+                UIHelper.showAlert(context, "\'$tag\' did not collect data!")
                 return null
             }
         }
@@ -121,8 +122,8 @@ class PredictionHelper(
         try {
             fillEmptyDataLines()
         } catch (e: Exception) {
-            Toast.makeText(context, "Filling of empty data failed", Toast.LENGTH_SHORT).show()
-            Toast.makeText(context, "Data may be inconsistent!", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Filling of empty data failed", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Data may be inconsistent!", Toast.LENGTH_SHORT).show()
         }
 
         // check for minimal length
@@ -148,7 +149,7 @@ class PredictionHelper(
                     GlobalValues.sensorTagMap["RW"] -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-0.9208972, -0.8918428, -0.9212201, -0.9103423, -14.090326, -14.17955, -11.573973), doubleArrayOf(0.93993384, 0.888225, 0.9099328, 0.9181471, 14.901558, 11.34146, 15.649994))
                     GlobalValues.sensorTagMap["RF"] -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-0.8756618, -0.85241073, -0.8467437, -0.8629473, -31.345306, -31.825573, -16.296654), doubleArrayOf(0.8837259, 0.98513246, 0.9278882, 0.8547427, 31.27872, 30.43604, 20.430))
                     else -> { // Note the block
-                        Toast.makeText(context, "Unknown Device!", Toast.LENGTH_SHORT).show()
+                        UIHelper.showAlert(context, "Unknown Device!")
                     }
                 }
 

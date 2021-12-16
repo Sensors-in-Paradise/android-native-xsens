@@ -6,6 +6,7 @@ import android.os.SystemClock
 import android.widget.Button
 import android.widget.Chronometer
 import android.widget.Toast
+import sensors_in_paradise.sonar.UIHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotPayload
@@ -165,7 +166,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         if (isRunning && numConnectedDevices < numDevices) {
             stopDataCollection()
-            Toast.makeText(context, "Connection to device(s) lost!", Toast.LENGTH_SHORT).show()
+            UIHelper.showAlert(context, "Connection to device(s) lost!")
         }
     }
 
