@@ -95,7 +95,6 @@ class LoggingManager(
         for (device in devices.getConnected()) {
             device.stopMeasuring()
         }
-        
         val isLabelSelected =
             spinner.selectedItemPosition != 0 && spinner.selectedItemPosition != spinner.count - 1
         if (isLabelSelected) {
@@ -104,7 +103,6 @@ class LoggingManager(
             val dialog = PostLabellingDialog(context, labelsStorage.getLabelsArray())
             dialog.setOnLabelSelectedListener { label -> moveTempFiles(label) }
         }
-        
         spinner.setSelection(0)
         endButton.isEnabled = false
         startButton.isEnabled = true
