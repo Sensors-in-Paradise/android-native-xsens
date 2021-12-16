@@ -13,6 +13,7 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import sensors_in_paradise.sonar.R
+import sensors_in_paradise.sonar.XSENSArrayList
 
 class SensorAdapter(
     private val context: Context,
