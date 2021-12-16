@@ -12,6 +12,7 @@ import com.xsens.dot.android.sdk.models.XsensDotDevice
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
+import sensors_in_paradise.sonar.util.UIHelper
 import java.io.File
 
 class Page2Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface {

@@ -1,7 +1,6 @@
 package sensors_in_paradise.sonar.util
 
 import android.content.Context
-import sensors_in_paradise.sonar.UIHelper
 import android.widget.Toast
 import sensors_in_paradise.sonar.GlobalValues
 import java.nio.ByteBuffer

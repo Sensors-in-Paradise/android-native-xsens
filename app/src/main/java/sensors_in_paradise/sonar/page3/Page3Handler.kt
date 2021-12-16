@@ -6,7 +6,7 @@ import android.os.SystemClock
 import android.widget.Button
 import android.widget.Chronometer
 import android.widget.Toast
-import sensors_in_paradise.sonar.UIHelper
+import sensors_in_paradise.sonar.util.UIHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotPayload

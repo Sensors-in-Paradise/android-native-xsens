@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar
+package sensors_in_paradise.sonar.util
 
 import android.app.AlertDialog
 import android.content.Context
@@ -13,6 +13,5 @@ class UIHelper private constructor() {
             disconnectionAlertDialog = builder.create()
             disconnectionAlertDialog.show()
         }
-
     }
 }
