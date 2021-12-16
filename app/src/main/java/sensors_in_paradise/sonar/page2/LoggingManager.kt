@@ -15,7 +15,7 @@ import java.nio.file.Files
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-
+@Suppress("LongParameterList")
 class LoggingManager(
     val context: Context,
     private val devices: XSENSArrayList,
