@@ -21,14 +21,6 @@ class TextInputDialog(
 ) {
     var dialog: AlertDialog
 
-    interface AcceptanceInterface {
-        /**Returns if the current input is accepted and and optional error message*/
-        fun onInputChanged(text: String): Pair<Boolean, String?>
-    }
-
-    interface PromptInterface {
-        fun onInputSubmitted(text: String)
-    }
 
     init {
 

@@ -16,7 +16,7 @@ import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.ml.XsensTest02
 import sensors_in_paradise.sonar.page1.ConnectionInterface
-import sensors_in_paradise.sonar.page1.XSENSArrayList
+import sensors_in_paradise.sonar.XSENSArrayList
 import kotlin.collections.ArrayList
 import kotlin.math.round
 import kotlin.math.max
