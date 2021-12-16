@@ -6,8 +6,11 @@ import java.io.File
 
 class GlobalValues private constructor() {
     companion object {
-        fun getSensorDataBaseDir(context: Context): File {
+        fun getSensorRecordingsBaseDir(context: Context): File {
             return context.getExternalFilesDir(null) ?: context.dataDir
+        }
+        fun getSensorRecordingsTempDir(context: Context): File {
+            return context.dataDir.resolve("temp")
         }
         val requiredPermissions = arrayListOf(
                 Manifest.permission.BLUETOOTH,

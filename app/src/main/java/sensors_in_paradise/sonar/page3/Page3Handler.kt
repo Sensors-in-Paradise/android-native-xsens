@@ -18,7 +18,7 @@ import sensors_in_paradise.sonar.util.PredictionHelper
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.ml.XsensTest02
 import sensors_in_paradise.sonar.page1.ConnectionInterface
-import sensors_in_paradise.sonar.page1.XSENSArrayList
+import sensors_in_paradise.sonar.XSENSArrayList
 import kotlin.collections.ArrayList
 import java.nio.ByteBuffer
 import kotlin.math.round

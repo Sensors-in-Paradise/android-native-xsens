@@ -25,6 +25,7 @@ import com.xsens.dot.android.sdk.utils.XsensDotScanner
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
+import sensors_in_paradise.sonar.XSENSArrayList
 import java.util.ArrayList
 import java.util.HashMap
 
