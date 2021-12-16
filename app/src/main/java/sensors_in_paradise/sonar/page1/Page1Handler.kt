@@ -22,6 +22,7 @@ import com.xsens.dot.android.sdk.models.FilterProfileInfo
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.models.XsensDotSyncManager
 import com.xsens.dot.android.sdk.utils.XsensDotScanner
+import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
 import java.util.ArrayList
@@ -44,15 +45,6 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
     private var isSyncing = false
     private val unsyncedColor = Color.parseColor("#FF5722")
     private val syncedColor = Color.parseColor("#00e676")
-
-    private val _requiredPermissions = arrayListOf(
-        Manifest.permission.BLUETOOTH,
-        Manifest.permission.BLUETOOTH_ADMIN,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE
-    )
 
     override fun onXsensDotConnectionChanged(address: String, state: Int) {
         activity.runOnUiThread {
@@ -130,7 +122,7 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
             XsensDotSyncManager.getInstance(SyncHandler(this)).startSyncing(scannedDevices.getConnected(), 0)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            _requiredPermissions.add(Manifest.permission.BLUETOOTH_SCAN)
+            GlobalValues.requiredPermissions.add(Manifest.permission.BLUETOOTH_SCAN)
         }
     }
     override fun activityResumed() {
@@ -187,7 +179,7 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
     }
     private fun getRequiredButUngrantedPermissions(): ArrayList<String> {
         val result = ArrayList<String>()
-        for (permission in _requiredPermissions) {
+        for (permission in GlobalValues.requiredPermissions) {
             if (!isPermissionGranted(permission)) {
                 result.add(permission)
             }

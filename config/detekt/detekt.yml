@@ -212,6 +212,7 @@ exceptions:
     active: false
   PrintStackTrace:
     active: true
+
   RethrowCaughtException:
     active: true
   ReturnFromFinally:
@@ -661,11 +662,6 @@ style:
       - '-1'
       - '0'
       - '1'
-      - '2'
-      - '3'
-      - '4'
-      - '5'
-      - '100'
     ignoreHashCodeFunction: true
     ignorePropertyDeclaration: false
     ignoreLocalVariableDeclaration: false
@@ -800,3 +796,5 @@ style:
       - 'java.util.*'
       - 'kotlinx.android.synthetic.*'
       - 'android.widget.*'
+      - 'com.android.volley.*'
+      - 'sensors_in_paradise.sonar.*'
