@@ -5,13 +5,21 @@ import android.content.Context
 
 class UIHelper private constructor() {
     companion object {
-        fun showAlert(context: Context, message: String) {
-            lateinit var disconnectionAlertDialog: AlertDialog
+        fun showAlert(
+            context: Context,
+            message: String,
+            title: String? = null,
+            cancellable: Boolean = true
+        ): AlertDialog {
             val builder = AlertDialog.Builder(context)
-            builder.setCancelable(true)
+            builder.setCancelable(cancellable)
             builder.setMessage(message)
-            disconnectionAlertDialog = builder.create()
+            if (title != null) {
+                builder.setTitle(title)
+            }
+            val disconnectionAlertDialog = builder.create()
             disconnectionAlertDialog.show()
+            return disconnectionAlertDialog
         }
     }
 }
