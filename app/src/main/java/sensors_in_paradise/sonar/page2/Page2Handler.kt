@@ -55,7 +55,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         recyclerViewRecordings.adapter = recordingsAdapter
 
         labelsStorage = LabelsStorage(context)
-        loggingManager = LoggingManager(context, devices, labelsStorage, endButton, timer, spinner)
+        loggingManager = LoggingManager(context, devices, labelsStorage, startButton,endButton, timer, spinner)
         loggingManager.setOnRecordingDone { recordingName, duration ->
             addRecordingToUI(
                 recordingName,
