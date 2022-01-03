@@ -260,7 +260,12 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     private fun updateActivityCounts() {
-        activityCountTextView.text = recordingsManager.getNumberOfRecordings().toString()
+        val numberOfRecodings = recordingsManager.getNumberOfRecordings()
+        var text = "  "
+        for ((activity, number) in numberOfRecodings){
+            text += "$activity: $number  |  "
+        }
+        activityCountTextView.text = text.trimEnd('|', ' ')
     }
 
     override fun activityResumed() {
