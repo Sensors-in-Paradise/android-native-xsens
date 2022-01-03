@@ -40,7 +40,7 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         viewHolder.deleteButton.setOnClickListener {
             recordingsManager.deleteRecording(File(dataSet[position]))
-            update()
+            notifyItemRemoved(position)
         }
 
         val filesEmpty = recordingsManager.checkEmptyFiles(File(dataSet[position]))
@@ -62,9 +62,4 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
     }
 
     override fun getItemCount() = dataSet.size
-
-    fun update() {
-        dataSet = recordingsManager.getRecordings()
-        notifyDataSetChanged()
-    }
 }

@@ -2,6 +2,7 @@ package sensors_in_paradise.sonar.page2
 
 import android.app.Activity
 import android.content.Context
+import android.view.View
 import android.os.SystemClock
 import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -9,10 +10,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotDevice
-import com.xsens.dot.android.sdk.models.XsensDotPayload
-import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.page1.ConnectionInterface
+import sensors_in_paradise.sonar.XSENSArrayList
+import sensors_in_paradise.sonar.util.UIHelper
+import java.io.File
 import sensors_in_paradise.sonar.page1.XSENSArrayList
 import java.io.File
 import java.time.LocalDateTime
@@ -30,30 +32,30 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var recyclerViewRecordings: RecyclerView
     private lateinit var activityCountTextView: TextView
 
-    private var fileDirectory: String = ""
     private lateinit var recordingsAdapter: RecordingsAdapter
 
     private var numConnectedDevices = 0
     private var numDevices = 5
 
-    private lateinit var recordingName: String
     private lateinit var recordingsManager: RecordingDataManager
 
     private lateinit var labelTV: TextView
     private lateinit var personTV: TextView
+    private lateinit var loggingManager: LoggingManager
+
     override fun activityCreated(activity: Activity) {
         this.context = activity
         this.uiHelper = UIHelper(this.context)
-        fileDirectory = this.context.getExternalFilesDir(null).toString()
 
         timer = activity.findViewById(R.id.timer)
         startButton = activity.findViewById(R.id.buttonStart)
         endButton = activity.findViewById(R.id.buttonEnd)
-
+        spinner = activity.findViewById(R.id.spinner)
         activityCountTextView = activity.findViewById(R.id.tv_activity_counts)
 
-        // List of previous recordings
-        recordingsManager = RecordingDataManager(fileDirectory, RecordingPreferences(context))
+        recordingsManager = RecordingDataManager(
+            File(context.dataDir, "recordingDurations.json"), GlobalValues.getSensorRecordingsBaseDir(context)
+        )
         recyclerViewRecordings = activity.findViewById(R.id.recyclerViewRecordings)
         val linearLayoutManager = LinearLayoutManager(context)
         recyclerViewRecordings.layoutManager = linearLayoutManager
@@ -85,36 +87,57 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         xsLoggers = ArrayList()
         startButton.setOnClickListener {
             if (numConnectedDevices >= numDevices) {
-                startLogging()
+                loggingManager.startLogging()
             } else {
                 Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
             }
         }
-
+        startButton.isEnabled = true
         endButton.setOnClickListener {
-            stopLogging()
+            loggingManager.stopLogging()
         }
 
         updateActivityCounts()
     }
 
+        val acceptanceInterface = object : AcceptanceInterface {
+            override fun onInputChanged(text: String): Pair<Boolean, String?> {
+                val alreadyAdded = currentLabels.contains(text)
+                val valid = text != ""
+                if (valid) {
+                    return Pair(
+                        !alreadyAdded,
+                        if (alreadyAdded) "Label already added" else null
+                    )
+                }
+                return Pair(
+                    false,
+                    "Invalid label"
+                )
+            }
+        }
+        TextInputDialog(context, "Add new label",
+            promptInterface, "Label", acceptanceInterface = acceptanceInterface
+        ).setCancelListener { _, -> spinner.setSelection(0) }
+    }
     private fun startLogging() {
         endButton.isEnabled = true
 
         timer.base = SystemClock.elapsedRealtime()
         timer.format = "%s" // set the format for a chronometer
         timer.start()
-
+        /*val filename = File(fileDirectory +
+                "/${spinner.selectedItem}/" +
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()))
+        filename.mkdirs()*/
         val time = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())
         val fileDir = GlobalValues.getSensorDataBaseDir(context).resolve(
-            labelTV.text.toString()
-        ).resolve(
-            personTV.text.toString()
-        ).resolve(time)
+                spinner.selectedItem.toString()).resolve(time)
         fileDir.mkdirs()
-
+        // recordingName = filename.toString()
         recordingName = fileDir.toString()
 
+        spinner.setSelection(0)
         for (device in devices.getConnected()) {
             device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
             device.startMeasuring()
@@ -131,25 +154,13 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                     1,
                     null as String?,
                     "appVersion",
-                    0
-                )
-            )
+                    0))
         }
     }
 
-    private fun stopLogging() {
-        timer.stop()
-        for (logger in xsLoggers) {
-            logger.stop()
-        }
-        for (device in devices.getConnected()) {
-            device.stopMeasuring()
-        }
-        endButton.isEnabled = false
-        xsLoggers.clear()
-
-        recordingsManager.saveDuration(recordingName, timer.text.toString())
-        recordingsAdapter.update()
+    private fun addRecordingToUI(name: String, duration: String) {
+        recordingsManager.addRecordingAt0(name, duration)
+        recordingsAdapter.notifyItemInserted(0)
         updateActivityCounts()
     }
 
@@ -168,11 +179,12 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
         numConnectedDevices = devices.getConnected().size
 
-        val deviceLogger = xsLoggers.find { logger -> logger.filename.contains(deviceAddress) }
+        val deviceLogger =
+            loggingManager.xsLoggers.find { logger -> logger.filename.contains(deviceAddress) }
         if (!connected && deviceLogger != null) {
             devices.get(deviceAddress)?.let {
                 if (it.connectionState == XsensDotDevice.CONN_STATE_DISCONNECTED) {
-                    uiHelper.buildAndShowAlert(
+                    UIHelper.showAlert(context,
                         "The Device ${it.name} was disconnected!"
                     )
                     deviceLogger.stop()
@@ -184,7 +196,8 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
-        xsLoggers.find { logger -> logger.filename.contains(deviceAddress) }?.update(xsensDotData)
+        loggingManager.xsLoggers.find { logger -> logger.filename.contains(deviceAddress) }
+            ?.update(xsensDotData)
     }
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {}

@@ -3,16 +3,15 @@ package sensors_in_paradise.sonar.uploader
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.util.Log
 import com.android.volley.*
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import java.io.File
 import com.android.volley.toolbox.HttpHeaderParser
 
-import java.io.UnsupportedEncodingException
 import java.io.IOException
 import java.nio.file.Files
+import kotlin.collections.ArrayList
 
 class FileUploader(private val rootDir: File, private val callback: FileUploaderInterface?) {
     private var queue: RequestQueue? = null
@@ -41,19 +40,15 @@ class FileUploader(private val rootDir: File, private val callback: FileUploader
     }
 
     @Throws(IOException::class)
-    private fun readFile(file: File): String {
-        val lines = Files.readAllLines(file.toPath())
-        var result = ""
-        for (line in lines) {
-            result += line + "\n"
-        }
-        return result
+    private fun readFile(file: File): ByteArray {
+        return Files.readAllBytes(file.toPath())
     }
 
     @Throws(IOException::class)
     private fun uploadFile(file: File, onSuccess: Response.Listener<String>, onError: Response.ErrorListener) {
         val url = urlPrefix + getURLSuffixForFile(file)
         val requestBody = readFile(file)
+
         val stringRequest: StringRequest = object : StringRequest(Method.POST, url, onSuccess, onError) {
             override fun getBodyContentType(): String {
                 return "application/json; charset=utf-8"
@@ -61,13 +56,7 @@ class FileUploader(private val rootDir: File, private val callback: FileUploader
 
             @Throws(AuthFailureError::class)
             override fun getBody(): ByteArray? {
-                return try {
-                    requestBody.toByteArray(charset("utf-8"))
-                } catch (uee: UnsupportedEncodingException) {
-                    uee.message?.let { Log.e("Network ERROR", it) }
-                    VolleyLog.wtf("Unsupported Encoding of body: %s using %s", requestBody, "utf-8")
-                    null
-                }
+                return requestBody
             }
 
             override fun parseNetworkResponse(response: NetworkResponse): Response<String> {
@@ -76,6 +65,7 @@ class FileUploader(private val rootDir: File, private val callback: FileUploader
             }
         }
         queue?.add(stringRequest)
+
         if (queue == null) {
             onError.onErrorResponse(VolleyError("RequestQueue not initialized"))
         }

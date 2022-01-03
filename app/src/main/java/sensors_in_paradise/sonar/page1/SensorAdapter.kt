@@ -13,6 +13,7 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import sensors_in_paradise.sonar.R
+import sensors_in_paradise.sonar.XSENSArrayList
 
 class SensorAdapter(
     private val context: Context,
@@ -66,7 +67,7 @@ class SensorAdapter(
         val isConnectingOrReconnecting = isConnecting or isReconnecting
         viewHolder.flipper.displayedChild = if (isConnectingOrReconnecting) 1 else 0
         viewHolder.button.text = if (isConnected) "Disconnect" else "Connect"
-        var detailsText = "Disconnected"
+        var detailsText = getConnectionStateLabel(device.connectionState)
         if (isConnected) {
             detailsText = if (isSynced) "Synced" else "Connected"
             detailsText += " " + device.currentOutputRate + "Hz"
@@ -82,7 +83,16 @@ class SensorAdapter(
 
         viewHolder.statusIV.setImageDrawable(statusDrawable)
     }
-
+    private fun getConnectionStateLabel(connectionState: Int): String {
+        return when (connectionState) {
+            XsensDotDevice.CONN_STATE_CONNECTED -> "Connected"
+            XsensDotDevice.CONN_STATE_CONNECTING -> "Connecting"
+            XsensDotDevice.CONN_STATE_DISCONNECTED -> "Disconnected"
+            XsensDotDevice.CONN_STATE_RECONNECTING -> "Reconnecting"
+            XsensDotDevice.CONN_STATE_START_RECONNECTING -> "Starting to reconnect"
+            else -> "Unknown"
+        }
+    }
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount(): Int {
         return devices.size

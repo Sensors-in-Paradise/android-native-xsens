@@ -6,8 +6,11 @@ import java.io.File
 
 class GlobalValues private constructor() {
     companion object {
-        fun getSensorDataBaseDir(context: Context): File {
+        fun getSensorRecordingsBaseDir(context: Context): File {
             return context.getExternalFilesDir(null) ?: context.dataDir
+        }
+        fun getSensorRecordingsTempDir(context: Context): File {
+            return context.dataDir.resolve("temp")
         }
         val requiredPermissions = arrayListOf(
                 Manifest.permission.BLUETOOTH,
@@ -19,5 +22,15 @@ class GlobalValues private constructor() {
                 Manifest.permission.INTERNET,
                 Manifest.permission.ACCESS_NETWORK_STATE
         )
+        val sensorTagMap = mapOf(
+            "LF" to "D4:22:CD:00:06:7B",
+            "LW" to "D4:22:CD:00:06:89",
+            "ST" to "D4:22:CD:00:06:7F",
+            "RW" to "D4:22:CD:00:06:7D",
+            "RF" to "D4:22:CD:00:06:72"
+        )
+        fun sensorAddressToTag(address: String): String {
+            return sensorTagMap.filterValues { it == address }.keys.first()
+        }
     }
 }

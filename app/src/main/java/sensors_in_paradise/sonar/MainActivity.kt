@@ -11,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
 import sensors_in_paradise.sonar.uploader.FileUploaderDialog
 import sensors_in_paradise.sonar.page1.Page1Handler
-import sensors_in_paradise.sonar.page1.XSENSArrayList
 import sensors_in_paradise.sonar.page2.Page2Handler
 import sensors_in_paradise.sonar.page3.Page3Handler
 
@@ -39,6 +38,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
         pageHandlers.add(page3Handler)
         page1Handler.addConnectionInterface(page2Handler)
         page1Handler.addConnectionInterface(page3Handler)
+        pageHandlers.add(PermissionsHandler())
         for (handler in pageHandlers) {
             handler.activityCreated(this)
         }

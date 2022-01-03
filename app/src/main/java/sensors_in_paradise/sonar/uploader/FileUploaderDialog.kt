@@ -14,7 +14,7 @@ import java.lang.Exception
 
 class FileUploaderDialog(activity: Activity) : AlertDialog(activity), FileUploaderInterface {
     val context = activity
-    private val uploader = FileUploader(GlobalValues.getSensorDataBaseDir(context), this)
+    private val uploader = FileUploader(GlobalValues.getSensorRecordingsBaseDir(context), this)
     private val fileItems = FileUIItemArrayList()
     private val adapter = FilesAdapter(fileItems)
     private var hintTV: TextView
@@ -33,7 +33,7 @@ class FileUploaderDialog(activity: Activity) : AlertDialog(activity), FileUpload
         hintTV = rootView.findViewById(R.id.tv_hint_uploadFilesDialog)
         noFilesTV = rootView.findViewById(R.id.tv_noFilesToUpload_uploadDialog)
         recyclerView.adapter = adapter
-        val filesToBeUploaded = uploader.getFilesToBeUploaded(GlobalValues.getSensorDataBaseDir(context))
+        val filesToBeUploaded = uploader.getFilesToBeUploaded(GlobalValues.getSensorRecordingsBaseDir(context))
         for (file in filesToBeUploaded) {
             val suffix = uploader.getURLSuffixForFile(file)
             fileItems.add(FileUIItem(file, suffix))
