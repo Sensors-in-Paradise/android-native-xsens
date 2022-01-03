@@ -3,7 +3,6 @@ package sensors_in_paradise.sonar.page2
 import android.app.Activity
 import android.content.Context
 import android.os.SystemClock
-import android.view.View
 import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -13,12 +12,11 @@ import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.*
-import sensors_in_paradise.sonar.TextInputDialog.AcceptanceInterface
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.page1.XSENSArrayList
+import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
 import kotlin.collections.ArrayList
 
 class Page2Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface {
@@ -28,8 +26,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var endButton: MaterialButton
     private lateinit var xsLoggers: ArrayList<XsensDotLogger>
     private lateinit var uiHelper: UIHelper
-    private lateinit var spinnerActivity: Spinner
-    private lateinit var spinnerPerson: Spinner
+
     private lateinit var recyclerViewRecordings: RecyclerView
     private lateinit var activityCountTextView: TextView
 
@@ -39,15 +36,11 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private var numConnectedDevices = 0
     private var numDevices = 5
 
-    private var personSelected = false
-    private var labelSelected = false
-
     private lateinit var recordingName: String
     private lateinit var recordingsManager: RecordingDataManager
-    private lateinit var peopleSelectionStorage: SpinnerItemStorage
-    private lateinit var peopleSelectionAdapter: SpinnerItemAdapter
-    private lateinit var labelsStorage: SpinnerItemStorage
-    private lateinit var labelsAdapter: SpinnerItemAdapter
+
+    private lateinit var labelTV: TextView
+    private lateinit var personTV: TextView
     override fun activityCreated(activity: Activity) {
         this.context = activity
         this.uiHelper = UIHelper(this.context)
@@ -56,8 +49,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         timer = activity.findViewById(R.id.timer)
         startButton = activity.findViewById(R.id.buttonStart)
         endButton = activity.findViewById(R.id.buttonEnd)
-        spinnerActivity = activity.findViewById(R.id.spinner_activity)
-        spinnerPerson = activity.findViewById(R.id.spinner_person)
+
         activityCountTextView = activity.findViewById(R.id.tv_activity_counts)
 
         // List of previous recordings
@@ -68,10 +60,26 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         recordingsAdapter = RecordingsAdapter(recordingsManager)
         recyclerViewRecordings.adapter = recordingsAdapter
 
-        // Spinners
-        setUpSpinnerPeople(activity)
-        setUpSpinnerActivity(activity)
-
+        labelTV = activity.findViewById(R.id.tv_activity_captureFragment)
+        personTV = activity.findViewById(R.id.tv_person_captureFragment)
+        labelTV.setOnClickListener {
+            PersistentStringArrayDialog(
+                context,
+                "Activity Labels",
+                File(context.dataDir, "labels.json")
+            ) { label ->
+                labelTV.setText(label)
+            }
+        }
+        personTV.setOnClickListener {
+            PersistentStringArrayDialog(
+                context,
+                "Persons",
+                File(context.dataDir, "people2.json")
+            ) { person ->
+                personTV.setText(person)
+            }
+        }
         endButton.isEnabled = false
 
         xsLoggers = ArrayList()
@@ -90,122 +98,6 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         updateActivityCounts()
     }
 
-    private fun handleCreateLabelRequested(
-        spinner: Spinner,
-        spinnerAdapter: SpinnerItemAdapter,
-        spinnerStorage: SpinnerItemStorage
-    ) {
-        val currentLabels = spinnerStorage.getLabelsArray()
-        val promptInterface = object : TextInputDialog.PromptInterface {
-            override fun onInputSubmitted(input: String) {
-                spinnerStorage.addLabel(input.lowercase(Locale.getDefault()))
-                spinnerAdapter.insert(input.lowercase(Locale.getDefault()), 1)
-                spinner.setSelection(1)
-            }
-        }
-
-        val acceptanceInterface = object : AcceptanceInterface {
-            override fun onInputChanged(text: String): Pair<Boolean, String?> {
-                val alreadyAdded = currentLabels.contains(text)
-                val valid = text != ""
-                if (valid) {
-                    return Pair(
-                        !alreadyAdded,
-                        if (alreadyAdded) "Label already added" else null
-                    )
-                }
-                return Pair(
-                    false,
-                    "Invalid label"
-                )
-            }
-        }
-        TextInputDialog(context, "Add new label",
-            promptInterface, "Label", acceptanceInterface = acceptanceInterface
-        ).setCancelListener { _, -> spinner.setSelection(0) }
-    }
-
-    private fun setUpSpinnerPeople(activity: Activity) {
-        peopleSelectionStorage = SpinnerItemStorage(context, "people.json")
-        peopleSelectionAdapter = SpinnerItemAdapter(activity)
-
-        setSpinnerDeleteButtonClickListener(spinnerPerson, peopleSelectionAdapter, peopleSelectionStorage, "person")
-
-        spinnerPerson.adapter = peopleSelectionAdapter
-
-        fillSpinner(peopleSelectionAdapter, peopleSelectionStorage, "person")
-
-        spinnerPerson.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                startButton.isEnabled = false
-            }
-
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                personSelected = position != 0
-                val isAddNewLabel = position == spinnerPerson.count - 1
-                startButton.isEnabled = position != 0 && !isAddNewLabel && labelSelected
-
-                if (isAddNewLabel) {
-                    handleCreateLabelRequested(spinnerPerson, peopleSelectionAdapter, peopleSelectionStorage)
-                }
-            }
-        }
-    }
-
-    private fun setUpSpinnerActivity(activity: Activity) {
-        labelsStorage = SpinnerItemStorage(context, "recordingLabels.json")
-        labelsAdapter = SpinnerItemAdapter(activity)
-
-        setSpinnerDeleteButtonClickListener(spinnerActivity, labelsAdapter, labelsStorage, "label")
-
-        spinnerActivity.adapter = labelsAdapter
-
-        fillSpinner(labelsAdapter, labelsStorage, "label")
-
-        spinnerActivity.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                startButton.isEnabled = false
-            }
-
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                labelSelected = position != 0
-                val isAddNewLabel = position == spinnerActivity.count - 1
-                startButton.isEnabled = position != 0 && !isAddNewLabel && personSelected
-
-                if (isAddNewLabel) {
-                    handleCreateLabelRequested(spinnerActivity, labelsAdapter, labelsStorage)
-                }
-            }
-        }
-    }
-
-    private fun setSpinnerDeleteButtonClickListener(
-        spinner: Spinner,
-        spinnerAdapter: SpinnerItemAdapter,
-        spinnerStorage: SpinnerItemStorage,
-        item: String
-    ) {
-
-        spinnerAdapter.setDeleteButtonClickListener(object : SpinnerItemAdapter.ClickInterface {
-            override fun onDeleteButtonPressed(label: String) {
-                ApproveDialog(context, "Do you really want to delete the $item $label?"
-                ) { _, _ ->
-                    spinnerStorage.removeLabel(label)
-                    spinner.setSelection(0)
-                    spinnerAdapter.remove(label)
-                }
-            }
-        })
-    }
-
-    private fun fillSpinner(spinnerAdapter: SpinnerItemAdapter, spinnerStorage: SpinnerItemStorage, item: String) {
-        spinnerAdapter.add("Select $item...")
-        for (s in spinnerStorage.getLabelsArray()) {
-            spinnerAdapter.add(s)
-        }
-        spinnerAdapter.add("Add new $item...")
-    }
-
     private fun startLogging() {
         endButton.isEnabled = true
 
@@ -215,13 +107,14 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         val time = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())
         val fileDir = GlobalValues.getSensorDataBaseDir(context).resolve(
-                spinnerActivity.selectedItem.toString()).resolve(
-                spinnerPerson.selectedItem.toString()).resolve(time)
+            labelTV.text.toString()
+        ).resolve(
+            personTV.text.toString()
+        ).resolve(time)
         fileDir.mkdirs()
 
         recordingName = fileDir.toString()
 
-        spinnerActivity.setSelection(0)
         for (device in devices.getConnected()) {
             device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
             device.startMeasuring()
@@ -238,12 +131,13 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                     1,
                     null as String?,
                     "appVersion",
-                    0))
+                    0
+                )
+            )
         }
     }
 
     private fun stopLogging() {
-        spinnerActivity.setSelection(0)
         timer.stop()
         for (logger in xsLoggers) {
             logger.stop()
@@ -260,7 +154,12 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     private fun updateActivityCounts() {
-        activityCountTextView.text = recordingsManager.getNumberOfRecordings().toString()
+        val numberOfRecodings = recordingsManager.getNumberOfRecordings()
+        var text = " "
+        for ((activity, number) in numberOfRecodings) {
+            text += "$activity: $number | "
+        }
+        activityCountTextView.text = text.trimEnd('|', ' ')
     }
 
     override fun activityResumed() {
