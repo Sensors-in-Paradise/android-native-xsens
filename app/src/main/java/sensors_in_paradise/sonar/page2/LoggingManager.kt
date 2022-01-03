@@ -2,9 +2,8 @@ package sensors_in_paradise.sonar.page2
 
 import android.content.Context
 import android.os.SystemClock
-import android.widget.Button
-import android.widget.Chronometer
-import android.widget.Spinner
+import android.util.Log
+import android.widget.*
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.GlobalValues
@@ -19,11 +18,11 @@ import java.util.*
 class LoggingManager(
     val context: Context,
     private val devices: XSENSArrayList,
-    private val labelsStorage: LabelsStorage,
     private val startButton: Button,
     private val endButton: Button,
     private val timer: Chronometer,
-    private val spinner: Spinner
+    private val labelTV: TextView,
+    private val personTV: TextView
 ) {
     val xsLoggers: ArrayList<XsensDotLogger> = ArrayList()
 
@@ -32,11 +31,11 @@ class LoggingManager(
     private val tempRecordingMap: MutableMap<LocalDateTime, ArrayList<Pair<String, File>>> =
         mutableMapOf()
     private var onRecordingDone: ((String, String) -> Unit)? = null
-    private fun getRecordingFileDir(time: LocalDateTime, label: String): File {
+    private fun getRecordingFileDir(time: LocalDateTime, label: String, person: String): File {
         val timeStr = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(time)
         return GlobalValues.getSensorRecordingsBaseDir(context).resolve(
             label
-        ).resolve(timeStr)
+        ).resolve(person).resolve(timeStr)
     }
 
     private fun getRecordingFile(fileDir: File, deviceAddress: String): File {
@@ -59,7 +58,6 @@ class LoggingManager(
         timer.start()
         val fileDir = GlobalValues.getSensorRecordingsTempDir(context)
         fileDir.mkdirs()
-        // spinner.setSelection(0)
         val recordingsKey = LocalDateTime.now()
         tempRecordingMap[recordingsKey] = arrayListOf()
 
@@ -95,25 +93,51 @@ class LoggingManager(
         for (device in devices.getConnected()) {
             device.stopMeasuring()
         }
-        val isLabelSelected =
-            spinner.selectedItemPosition != 0 && spinner.selectedItemPosition != spinner.count - 1
-        if (isLabelSelected) {
-            moveTempFiles(spinner.selectedItem.toString())
-        } else {
-            val dialog = PostLabellingDialog(context, labelsStorage.getLabelsArray())
-            dialog.setOnLabelSelectedListener { label -> moveTempFiles(label) }
-        }
-        spinner.setSelection(0)
-        endButton.isEnabled = false
-        startButton.isEnabled = true
-        xsLoggers.clear()
-    }
 
-    private fun moveTempFiles(label: String) {
+        resolveMissingFields {
+            moveTempFiles(labelTV.text.toString(), personTV.text.toString())
+            labelTV.text = ""
+            personTV.text = ""
+            endButton.isEnabled = false
+            startButton.isEnabled = true
+            xsLoggers.clear()
+        }
+    }
+    private fun resolveMissingFields(onAllResolved: () -> Unit) {
+        val labelText = labelTV.text.toString()
+        val personText = personTV.text.toString()
+        val isLabelSelected =
+            labelText != ""
+        val isPersonSelected =
+            personText != ""
+        Log.d("LOGGING MANAGER", "Label: $labelText Person: $personText")
+        if (!isLabelSelected) {
+            PersistentStringArrayDialog(
+                context,
+                "Select an activity label",
+                GlobalValues.getActivityLabelsJSONFile(context), cancellable = false
+            ) { label ->
+                labelTV.text = label
+                resolveMissingFields(onAllResolved)
+            }
+        } else if (!isPersonSelected) {
+            PersistentStringArrayDialog(
+                context,
+                "Select a person",
+                GlobalValues.getPeopleJSONFile(context), cancellable = false
+            ) { person ->
+                personTV.text = person
+                resolveMissingFields(onAllResolved)
+            }
+        } else {
+            onAllResolved()
+        }
+    }
+    private fun moveTempFiles(label: String, person: String) {
         val keys = tempRecordingMap.keys.asIterable()
         for (timestamp in keys) {
             val recordingFiles = tempRecordingMap[timestamp]
-            val destFileDir = getRecordingFileDir(timestamp, label)
+            val destFileDir = getRecordingFileDir(timestamp, label, person)
             destFileDir.mkdirs()
             for ((deviceAddress, tempFile) in recordingFiles!!) {
                 val destFile = getRecordingFile(destFileDir, deviceAddress)

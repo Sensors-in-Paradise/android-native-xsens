@@ -17,13 +17,8 @@ class PersistentStringArrayAdapter(private val itemsStorage: StringItemStorage) 
     private var onItemClicked: ((value: String) -> Unit)? = null
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val label: TextView
-        val deleteButton: ImageButton
-
-        init {
-            label = view.findViewById(R.id.tv_stringsDialogItem)
-            deleteButton = view.findViewById(R.id.btn_delete_stringsDialogItem)
-        }
+        val label: TextView = view.findViewById(R.id.tv_stringsDialogItem)
+        val deleteButton: ImageButton = view.findViewById(R.id.btn_delete_stringsDialogItem)
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
@@ -37,14 +32,16 @@ class PersistentStringArrayAdapter(private val itemsStorage: StringItemStorage) 
         val item = getFilteredItemAt(position)
         if (item != null) {
             viewHolder.deleteButton.setOnClickListener {
+                val index = getFilteredItemIndex(item)
                 itemsStorage.removeItem(item)
-                notifyItemRemoved(position)
+                if (index != -1) {
+                    notifyItemRemoved(index)
+                }
             }
             viewHolder.label.text = item
             viewHolder.label.setOnClickListener {
                 onItemClicked?.let { it1 -> it1(item) }
             }
-
         } else {
             viewHolder.itemView.setBackgroundColor(Color.RED)
         }
@@ -69,7 +66,20 @@ class PersistentStringArrayAdapter(private val itemsStorage: StringItemStorage) 
         }
         return count
     }
+    private fun getFilteredItemIndex(item: String): Int {
+        var count = 0
 
+        for (i in 0 until dataSet.length()) {
+            val currentItem = dataSet[i].toString()
+            if (isItemMatchedByFilter(item)) {
+                if (currentItem == item) {
+                    return count
+                }
+                count++
+            }
+        }
+        return -1
+    }
     private fun getFilteredItemAt(index: Int): String? {
         var count = 0
         if (index < 0 || index >= getFilteredItemCount()) {

@@ -16,7 +16,8 @@ class PersistentStringArrayDialog(
     val context: Context,
     title: String,
     storageFile: File,
-    callback: (value: String) -> Unit
+    cancellable: Boolean = true,
+    callback: (value: String) -> Unit = {},
 ) {
     var dialog: AlertDialog
     val storage = StringItemStorage(storageFile)
@@ -42,6 +43,7 @@ class PersistentStringArrayDialog(
         }
 
         dialog.setOnShowListener {
+            dialog.setCancelable(cancellable)
             val button: Button =
                 (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE)
             button.isEnabled = false

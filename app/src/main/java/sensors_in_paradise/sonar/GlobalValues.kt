@@ -12,6 +12,12 @@ class GlobalValues private constructor() {
         fun getSensorRecordingsTempDir(context: Context): File {
             return context.dataDir.resolve("temp")
         }
+        fun getActivityLabelsJSONFile(context: Context): File {
+            return File(context.dataDir, "labels.json")
+        }
+        fun getPeopleJSONFile(context: Context): File {
+            return File(context.dataDir, "people2.json")
+        }
         val requiredPermissions = arrayListOf(
                 Manifest.permission.BLUETOOTH,
                 Manifest.permission.BLUETOOTH_ADMIN,
