@@ -32,7 +32,7 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.recording, viewGroup, false)
+            .inflate(R.layout.recording_category, viewGroup, false)
 
         return ViewHolder(view)
     }
