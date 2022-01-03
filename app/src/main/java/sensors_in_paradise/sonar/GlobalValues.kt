@@ -22,5 +22,15 @@ class GlobalValues private constructor() {
                 Manifest.permission.INTERNET,
                 Manifest.permission.ACCESS_NETWORK_STATE
         )
+        val sensorTagMap = mapOf(
+            "LF" to "D4:22:CD:00:06:7B",
+            "LW" to "D4:22:CD:00:06:89",
+            "ST" to "D4:22:CD:00:06:7F",
+            "RW" to "D4:22:CD:00:06:7D",
+            "RF" to "D4:22:CD:00:06:72"
+        )
+        fun sensorAddressToTag(address: String): String {
+            return sensorTagMap.filterValues { it == address }.keys.first()
+        }
     }
 }

@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
         pageHandlers.add(page3Handler)
         page1Handler.addConnectionInterface(page2Handler)
         page1Handler.addConnectionInterface(page3Handler)
+        pageHandlers.add(PermissionsHandler())
         for (handler in pageHandlers) {
             handler.activityCreated(this)
         }

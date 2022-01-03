@@ -1,18 +1,15 @@
 package sensors_in_paradise.sonar.page1
 
-import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.ScanSettings
 import android.content.Context
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.view.View
 import android.widget.*
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.XsensDotSdk
 import com.xsens.dot.android.sdk.events.XsensDotData
@@ -22,10 +19,10 @@ import com.xsens.dot.android.sdk.models.FilterProfileInfo
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.models.XsensDotSyncManager
 import com.xsens.dot.android.sdk.utils.XsensDotScanner
-import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.XSENSArrayList
+import sensors_in_paradise.sonar.util.PermissionsHelper
 import java.util.ArrayList
 import java.util.HashMap
 
@@ -122,13 +119,9 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
             scannedDevices.getConnected()[0].isRootDevice = true
             XsensDotSyncManager.getInstance(SyncHandler(this)).startSyncing(scannedDevices.getConnected(), 0)
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            GlobalValues.requiredPermissions.add(Manifest.permission.BLUETOOTH_SCAN)
-        }
     }
     override fun activityResumed() {
-        if (checkPermissions()) {
-            // Permissions granted, starting scan
+        if (PermissionsHelper.areAllPermissionsGranted(context)) {
             val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
             if (mBluetoothAdapter == null) {
                 // Device does not support Bluetooth
@@ -167,31 +160,6 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
         activity.runOnUiThread {
             sensorAdapter.notifyItemChanged(device.address)
         }
-    }
-    private fun checkPermissions(): Boolean {
-        val requiredPermissions = getRequiredButUngrantedPermissions()
-        if (requiredPermissions.size > 0) {
-            // Not all permissions granted
-            val s = requiredPermissions.joinToString(separator = ", \n")
-            tv.text = "Scan started: false\nThe following permissions need to be granted:\n$s"
-            return false
-        }
-        return true
-    }
-    private fun getRequiredButUngrantedPermissions(): ArrayList<String> {
-        val result = ArrayList<String>()
-        for (permission in GlobalValues.requiredPermissions) {
-            if (!isPermissionGranted(permission)) {
-                result.add(permission)
-            }
-        }
-        return result
-    }
-    private fun isPermissionGranted(permission: String): Boolean {
-        return (ContextCompat.checkSelfPermission(
-            context,
-            permission
-        ) == PackageManager.PERMISSION_GRANTED)
     }
 
     override fun onFinishedSyncOfDevice(address: String?, isSuccess: Boolean) {
@@ -240,7 +208,7 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
         }
     }
 
-    public fun addConnectionInterface(connectionInterface: ConnectionInterface) {
+    fun addConnectionInterface(connectionInterface: ConnectionInterface) {
         connectionInterfaces.add(connectionInterface)
     }
 }
