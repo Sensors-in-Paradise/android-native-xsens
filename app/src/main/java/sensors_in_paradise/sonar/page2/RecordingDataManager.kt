@@ -34,10 +34,18 @@ class RecordingDataManager(jsonFile: File, val recordingsDir: File) : JSONStorag
         return activities.groupingBy { it }.eachCount()
     }
 
+    fun getPersonFromRecording(recording: String): String {
+        val filePath = File(recording).parentFile!!.toString()
+        val index = filePath.lastIndexOf("/")
+        val person = recording.slice(IntRange(index + 1, filePath.length - 1))
+
+        return person
+    }
+
     fun getActivityFromRecording(recording: String): String {
-        val preIndex = recording.indexOf("/files/")
-        val postIndex = recording.lastIndexOf("/")
-        val activity = recording.slice(IntRange(preIndex + "/files/".length, postIndex - 1))
+        val filePath = File(recording).parentFile!!.parentFile!!.toString()
+        val index = filePath.lastIndexOf("/")
+        val activity = recording.slice(IntRange(index + 1, filePath.length - 1))
 
         return activity
     }

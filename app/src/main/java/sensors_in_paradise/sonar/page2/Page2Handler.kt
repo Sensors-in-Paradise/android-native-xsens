@@ -2,7 +2,6 @@ package sensors_in_paradise.sonar.page2
 
 import android.app.Activity
 import android.content.Context
-import android.view.View
 import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,7 +20,6 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var startButton: MaterialButton
     private lateinit var endButton: MaterialButton
 
-    private lateinit var spinner: Spinner
     private lateinit var recyclerViewRecordings: RecyclerView
     private lateinit var activityCountTextView: TextView
 
@@ -31,8 +29,9 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private var numDevices = 5
 
     private lateinit var recordingsManager: RecordingDataManager
-    private lateinit var labelsStorage: LabelsStorage
-    private lateinit var labelsAdapter: RecordingLabelsAdapter
+
+    private lateinit var labelTV: TextView
+    private lateinit var personTV: TextView
     private lateinit var loggingManager: LoggingManager
 
     override fun activityCreated(activity: Activity) {
@@ -41,7 +40,6 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         timer = activity.findViewById(R.id.timer)
         startButton = activity.findViewById(R.id.buttonStart)
         endButton = activity.findViewById(R.id.buttonEnd)
-        spinner = activity.findViewById(R.id.spinner)
         activityCountTextView = activity.findViewById(R.id.tv_activity_counts)
 
         recordingsManager = RecordingDataManager(
@@ -53,55 +51,28 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         recordingsAdapter = RecordingsAdapter(recordingsManager)
         recyclerViewRecordings.adapter = recordingsAdapter
 
-        labelsStorage = LabelsStorage(context)
-        loggingManager = LoggingManager(context, devices, labelsStorage, startButton, endButton, timer, spinner)
-        loggingManager.setOnRecordingDone { recordingName, duration ->
-            addRecordingToUI(
-                recordingName,
-                duration
-            )
-        }
-        labelsAdapter = RecordingLabelsAdapter(activity)
-        labelsAdapter.setDeleteButtonClickListener(object : RecordingLabelsAdapter.ClickInterface {
-            override fun onDeleteButtonPressed(label: String) {
-                ApproveDialog(
-                    context, "Do you really want to delete the label $label?"
-                ) { p0, p1 ->
-                    labelsStorage.removeLabel(label)
-                    spinner.setSelection(0)
-                    labelsAdapter.remove(label)
-                }
+        labelTV = activity.findViewById(R.id.tv_activity_captureFragment)
+        personTV = activity.findViewById(R.id.tv_person_captureFragment)
+        labelTV.setOnClickListener {
+            PersistentStringArrayDialog(
+                context,
+                "Select an activity Label",
+                GlobalValues.getActivityLabelsJSONFile(context)
+            ) { label ->
+                labelTV.setText(label)
             }
-        })
-
-        spinner.adapter = labelsAdapter
-        labelsAdapter.add("Select label")
-        for (s in labelsStorage.getLabelsArray()) {
-            labelsAdapter.add(s)
         }
-        labelsAdapter.add("Add new label")
+        personTV.setOnClickListener {
+            PersistentStringArrayDialog(
+                context,
+                "Select a Person",
+                GlobalValues.getPeopleJSONFile(context)
+            ) { person ->
+                personTV.setText(person)
+            }
+        }
         endButton.isEnabled = false
 
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                // startButton.isEnabled = false
-            }
-
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                val isAddNewLabel = position == spinner.count - 1
-                // startButton.isEnabled = position != 0 && !isAddNewLabel
-                if (isAddNewLabel) {
-                    handleCreateLabelRequested()
-                }
-            }
-        }
-
-        startButton.isEnabled = true
         startButton.setOnClickListener {
             if (numConnectedDevices >= numDevices) {
                 loggingManager.startLogging()
@@ -109,41 +80,19 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                 Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
             }
         }
-
+        startButton.isEnabled = true
         endButton.setOnClickListener {
             loggingManager.stopLogging()
         }
 
+        loggingManager = LoggingManager(context, devices, startButton, endButton, timer, labelTV, personTV)
+        loggingManager.setOnRecordingDone { recordingName, duration ->
+            addRecordingToUI(
+                recordingName,
+                duration
+            )
+        }
         updateActivityCounts()
-    }
-
-    private fun handleCreateLabelRequested() {
-        val currentLabels = labelsStorage.getLabelsArray()
-        val promptInterface = { value: String ->
-            labelsStorage.addLabel(value.toLowerCase())
-            labelsAdapter.insert(value.toLowerCase(), 1)
-            spinner.setSelection(1)
-        }
-
-        val acceptanceInterface = { text: String ->
-            val alreadyAdded = currentLabels.contains(text)
-            val valid = text != ""
-            if (valid) {
-                Pair(
-                    !alreadyAdded,
-                    if (alreadyAdded) "Label already added" else null
-                )
-            } else {
-                Pair(
-                    false,
-                    "Invalid label"
-                )
-            }
-        }
-        TextInputDialog(
-            context, "Add new label",
-            promptInterface, "Label", acceptanceInterface = acceptanceInterface
-        ).setCancelListener { _ -> spinner.setSelection(0) }
     }
 
     private fun addRecordingToUI(name: String, duration: String) {
@@ -153,7 +102,12 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     private fun updateActivityCounts() {
-        activityCountTextView.text = recordingsManager.getNumberOfRecordings().toString()
+        val numberOfRecodings = recordingsManager.getNumberOfRecordings()
+        var text = " "
+        for ((activity, number) in numberOfRecodings) {
+            text += "$activity: $number | "
+        }
+        activityCountTextView.text = text.trimEnd('|', ' ')
     }
 
     override fun activityResumed() {

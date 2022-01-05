@@ -38,16 +38,19 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+        val recording = dataSet[position]
         viewHolder.deleteButton.setOnClickListener {
-            recordingsManager.deleteRecording(File(dataSet[position]))
-            notifyItemRemoved(position)
+            val index = dataSet.indexOf(recording)
+            recordingsManager.deleteRecording(File(recording))
+            notifyItemRemoved(index)
         }
 
-        val filesEmpty = recordingsManager.checkEmptyFiles(File(dataSet[position]))
+        val filesEmpty = recordingsManager.checkEmptyFiles(File(recording))
         val activityName = recordingsManager.getActivityFromRecording(dataSet[position])
+        val personName = recordingsManager.getPersonFromRecording(dataSet[position])
         val activityDuration = recordingsManager.getDurationFromRecording(dataSet[position])
         val activityStart = recordingsManager.getStartingTimeFromRecording(dataSet[position])
-        viewHolder.activityTextView.text = activityName
+        viewHolder.activityTextView.text = activityName + " - " + personName
         viewHolder.durationTextView.text = "Duration: " + activityDuration
         viewHolder.startTimeTextView.text = "Start: " + activityStart
 
