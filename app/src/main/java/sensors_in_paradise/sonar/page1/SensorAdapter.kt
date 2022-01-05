@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.ViewFlipper
 import android.widget.ImageView
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import sensors_in_paradise.sonar.R
@@ -30,6 +31,7 @@ class SensorAdapter(
      * (custom ViewHolder).
      */
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val card: CardView = view.findViewById(R.id.card_sensorDevice)
         val nameTextView: TextView = view.findViewById(R.id.tv_name_sensorDevice)
         val detailsTextView: TextView = view.findViewById(R.id.tv_details_sensorDevice)
         val button: Button = view.findViewById(R.id.switch_connect_sensorDevice)
@@ -59,6 +61,9 @@ class SensorAdapter(
         viewHolder.button.setOnClickListener {
             val isConnectedState = (viewHolder.button.text == "Connect")
             connectionCallbackUI.onConnectionUpdateRequested(device, isConnectedState)
+        }
+        viewHolder.card.setOnLongClickListener {
+            device.identifyDevice()
         }
         val isConnected = (device.connectionState == XsensDotDevice.CONN_STATE_CONNECTED)
         val isConnecting = (device.connectionState == XsensDotDevice.CONN_STATE_CONNECTING)
