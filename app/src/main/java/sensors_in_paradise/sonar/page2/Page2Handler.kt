@@ -57,7 +57,8 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             PersistentStringArrayDialog(
                 context,
                 "Select an activity Label",
-                GlobalValues.getActivityLabelsJSONFile(context)
+                GlobalValues.getActivityLabelsJSONFile(context),
+                defaultItem = GlobalValues.NULL_ACTIVITY
             ) { label ->
                 labelTV.setText(label)
             }
@@ -66,7 +67,8 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             PersistentStringArrayDialog(
                 context,
                 "Select a Person",
-                GlobalValues.getPeopleJSONFile(context)
+                GlobalValues.getPeopleJSONFile(context),
+                defaultItem = GlobalValues.UNKNOWN_PERSON
             ) { person ->
                 personTV.setText(person)
             }

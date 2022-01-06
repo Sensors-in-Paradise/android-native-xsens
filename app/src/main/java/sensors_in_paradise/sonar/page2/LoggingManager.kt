@@ -14,6 +14,7 @@ import java.nio.file.Files
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+
 @Suppress("LongParameterList")
 class LoggingManager(
     val context: Context,
@@ -103,6 +104,7 @@ class LoggingManager(
             xsLoggers.clear()
         }
     }
+
     private fun resolveMissingFields(onAllResolved: () -> Unit) {
         val labelText = labelTV.text.toString()
         val personText = personTV.text.toString()
@@ -110,12 +112,13 @@ class LoggingManager(
             labelText != ""
         val isPersonSelected =
             personText != ""
-        Log.d("LOGGING MANAGER", "Label: $labelText Person: $personText")
         if (!isLabelSelected) {
             PersistentStringArrayDialog(
                 context,
                 "Select an activity label",
-                GlobalValues.getActivityLabelsJSONFile(context), cancellable = false
+                GlobalValues.getActivityLabelsJSONFile(context),
+                cancellable = false,
+                defaultItem = GlobalValues.NULL_ACTIVITY
             ) { label ->
                 labelTV.text = label
                 resolveMissingFields(onAllResolved)
@@ -124,7 +127,9 @@ class LoggingManager(
             PersistentStringArrayDialog(
                 context,
                 "Select a person",
-                GlobalValues.getPeopleJSONFile(context), cancellable = false
+                GlobalValues.getPeopleJSONFile(context),
+                cancellable = false,
+                defaultItem = GlobalValues.UNKNOWN_PERSON
             ) { person ->
                 personTV.text = person
                 resolveMissingFields(onAllResolved)
@@ -133,6 +138,7 @@ class LoggingManager(
             onAllResolved()
         }
     }
+
     private fun moveTempFiles(label: String, person: String) {
         val keys = tempRecordingMap.keys.asIterable()
         for (timestamp in keys) {
@@ -147,6 +153,7 @@ class LoggingManager(
         }
         tempRecordingMap.clear()
     }
+
     fun setOnRecordingDone(onRecordingDone: (String, String) -> Unit) {
         this.onRecordingDone = onRecordingDone
     }

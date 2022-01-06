@@ -3,6 +3,7 @@ package sensors_in_paradise.sonar.page2
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.EditText
@@ -17,14 +18,16 @@ class PersistentStringArrayDialog(
     title: String,
     storageFile: File,
     cancellable: Boolean = true,
+    defaultItem: String ,
     callback: (value: String) -> Unit = {},
 ) {
     var dialog: AlertDialog
-    val storage = StringItemStorage(storageFile)
+    private val storage = StringItemStorage(storageFile)
     var adapter: PersistentStringArrayAdapter
 
     init {
-
+        storage.addItemIfNotAdded(defaultItem, false)
+        Log.d("STRING_STORAGE_DIALOG","defaultItem: $defaultItem")
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         builder.setTitle(title)
 

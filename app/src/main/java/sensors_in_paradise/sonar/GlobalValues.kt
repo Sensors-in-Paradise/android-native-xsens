@@ -6,6 +6,8 @@ import java.io.File
 
 class GlobalValues private constructor() {
     companion object {
+        const val NULL_ACTIVITY = "null - activity"
+        const val UNKNOWN_PERSON = "unknown"
         fun getSensorRecordingsBaseDir(context: Context): File {
             return context.getExternalFilesDir(null) ?: context.dataDir
         }
@@ -18,6 +20,7 @@ class GlobalValues private constructor() {
         fun getPeopleJSONFile(context: Context): File {
             return File(context.dataDir, "people2.json")
         }
+
         val requiredPermissions = arrayListOf(
                 Manifest.permission.BLUETOOTH,
                 Manifest.permission.BLUETOOTH_ADMIN,

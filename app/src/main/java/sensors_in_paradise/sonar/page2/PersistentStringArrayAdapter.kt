@@ -38,6 +38,8 @@ class PersistentStringArrayAdapter(private val itemsStorage: StringItemStorage) 
                     notifyItemRemoved(index)
                 }
             }
+            val isDeletable = !itemsStorage.nonDeletableItems.contains(item)
+            viewHolder.deleteButton.visibility = if(isDeletable) View.VISIBLE else View.INVISIBLE
             viewHolder.label.text = item
             viewHolder.label.setOnClickListener {
                 onItemClicked?.let { it1 -> it1(item) }
