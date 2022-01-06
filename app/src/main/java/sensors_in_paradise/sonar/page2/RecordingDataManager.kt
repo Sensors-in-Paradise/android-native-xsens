@@ -1,10 +1,11 @@
 package sensors_in_paradise.sonar.page2
 
+import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
 
-class RecordingDataManager(jsonFile: File, val recordingsDir: File) : JSONStorage(jsonFile) {
-    private val recordingsList = ArrayList<String>()
+class RecordingDataManager(val recordingsDir: File) {
+    val recordingsList = ArrayList<Pair<File, RecordingMetadataStorage>>()
 
     init {
         loadRecordingsFromStorage()
@@ -13,72 +14,46 @@ class RecordingDataManager(jsonFile: File, val recordingsDir: File) : JSONStorag
     private fun loadRecordingsFromStorage() {
         recordingsList.clear()
         recordingsDir.walk().forEach {
-            // This might have to be discussed
-            // Removes all directories from output that don't end with two numbers (millis)
-            try {
-                it.toString().takeLast(2).toInt()
-                recordingsList.add(it.toString())
-            } catch (exception: NumberFormatException) {
-                return@forEach // continue
+            //TODO: find out why it does not load stored recordings
+            if(it.isDirectory) {
+                val childDirs = recordingsDir.listFiles { file, _ -> file.isDirectory }
+
+                if (childDirs == null || childDirs.isEmpty()) {
+                    val metadataFile = it.resolve(GlobalValues.METADATA_JSON_FILENAME)
+                    val hasMetadataJson = metadataFile.exists()
+                        if(hasMetadataJson){
+                            recordingsList.add(Pair(it, RecordingMetadataStorage(metadataFile)))
+                        }
+                }
             }
         }
     }
-    fun getRecordings(): ArrayList<String> {
-        return recordingsList
-    }
-    fun getNumberOfRecordings(): Map<String, Int> {
+
+    fun getNumberOfRecordingsPerActivity(): Map<String, Int> {
         val activities = ArrayList<String>()
         for (rec in recordingsList) {
-            activities.add(getActivityFromRecording(rec))
+            activities.addAll(rec.second.getActivities().map{(_, label)-> label})
         }
         return activities.groupingBy { it }.eachCount()
     }
-
-    fun getPersonFromRecording(recording: String): String {
-        val filePath = File(recording).parentFile!!.toString()
-        val index = filePath.lastIndexOf("/")
-        val person = recording.slice(IntRange(index + 1, filePath.length - 1))
-
-        return person
+    fun deleteRecording(recordingDir:File){
+        deleteRecordingFilesAndDirs(recordingDir)
+        val recording = recordingsList.find{(dir, _)-> dir.absolutePath == recordingDir.absolutePath}
+        recordingsList.remove(recording)
     }
 
-    fun getActivityFromRecording(recording: String): String {
-        val filePath = File(recording).parentFile!!.parentFile!!.toString()
-        val index = filePath.lastIndexOf("/")
-        val activity = recording.slice(IntRange(index + 1, filePath.length - 1))
-
-        return activity
-    }
-
-    fun getStartingTimeFromRecording(recording: String): String {
-        val index = recording.lastIndexOf("/")
-        val startTime = recording.slice(IntRange(index + 1, recording.length - 1))
-
-        return startTime
-    }
-
-    fun getDurationFromRecording(recording: String): String? {
-
-        return if (json.has(recording)) json.getString(recording) else "Unknown"
-    }
-
-    fun addRecordingAt0(recording: String, duration: String) {
-        recordingsList.add(0, recording)
-        json.put(recording, duration)
-        save()
-    }
-    fun deleteRecording(fileOrDir: File) {
-        val recordingName = fileOrDir.toString()
-        deleteRecordingFilesAndDirs(fileOrDir)
-        json.remove(recordingName)
-        recordingsList.remove(recordingName)
-        save()
+    fun deleteRecording(recording: Pair<File, RecordingMetadataStorage>){
+        deleteRecordingFilesAndDirs(recording.first)
+        recordingsList.remove(recording)
     }
     private fun deleteRecordingFilesAndDirs(fileOrDir: File) {
         if (fileOrDir.isDirectory()) {
-            for (child in fileOrDir.listFiles()) {
-                deleteRecordingFilesAndDirs(child)
-            }
+            val children = fileOrDir.listFiles()
+           if(children!=null){
+               for (child in children) {
+                   deleteRecordingFilesAndDirs(child)
+               }
+           }
         }
         fileOrDir.delete()
     }
@@ -87,17 +62,17 @@ class RecordingDataManager(jsonFile: File, val recordingsDir: File) : JSONStorag
         val emptyFileSize = 430
 
         if (fileOrDir.isDirectory) {
-            for (child in fileOrDir.listFiles()) {
-                if (child.length() < emptyFileSize) {
-                    return true
-                }
-            }
+            val childCSVs = fileOrDir.listFiles { _, name -> name.endsWith(".csv") }
+           if(childCSVs!=null){
+               for (child in childCSVs) {
+                   if (child.length() < emptyFileSize) {
+                       return true
+                   }
+               }
+           }
         }
 
         return false
     }
 
-    override fun onFileNewlyCreated() {}
-
-    override fun onJSONInitialized() {}
 }

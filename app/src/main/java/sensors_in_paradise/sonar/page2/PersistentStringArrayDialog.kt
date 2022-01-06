@@ -27,7 +27,6 @@ class PersistentStringArrayDialog(
 
     init {
         storage.addItemIfNotAdded(defaultItem, false)
-        Log.d("STRING_STORAGE_DIALOG","defaultItem: $defaultItem")
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         builder.setTitle(title)
 

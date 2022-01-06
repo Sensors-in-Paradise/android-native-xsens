@@ -7,27 +7,29 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 import java.io.File
+import java.text.DateFormat
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.util.*
+import kotlin.collections.ArrayList
 
 class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
+
     RecyclerView.Adapter<RecordingsAdapter.ViewHolder>() {
-    private var dataSet: ArrayList<String> = recordingsManager.getRecordings()
+    private  val sdf = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    private var dataSet: ArrayList<Pair<File, RecordingMetadataStorage>> = recordingsManager.recordingsList
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val activityTextView: TextView
-        val durationTextView: TextView
-        val startTimeTextView: TextView
-        val checkFilesTextView: TextView
-        val deleteButton: Button
-
-        init {
-            activityTextView = view.findViewById(R.id.tv_activity)
-            durationTextView = view.findViewById(R.id.tv_duration)
-            startTimeTextView = view.findViewById(R.id.tv_start)
-            checkFilesTextView = view.findViewById(R.id.tv_check_files)
-            deleteButton = view.findViewById(R.id.button_delete)
-        }
+        val activityTextView: TextView = view.findViewById(R.id.tv_activity)
+        val personTextView: TextView = view.findViewById(R.id.tv_person)
+        val durationTextView: TextView = view.findViewById(R.id.tv_duration)
+        val startTimeTextView: TextView = view.findViewById(R.id.tv_start)
+        val checkFilesTextView: TextView = view.findViewById(R.id.tv_check_files)
+        val deleteButton: Button = view.findViewById(R.id.button_delete)
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
@@ -39,21 +41,26 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val recording = dataSet[position]
+        val metadata = recording.second
+        val dir = recording.first
         viewHolder.deleteButton.setOnClickListener {
             val index = dataSet.indexOf(recording)
-            recordingsManager.deleteRecording(File(recording))
+            recordingsManager.deleteRecording(recording)
             notifyItemRemoved(index)
         }
 
-        val filesEmpty = recordingsManager.checkEmptyFiles(File(recording))
-        val activityName = recordingsManager.getActivityFromRecording(dataSet[position])
-        val personName = recordingsManager.getPersonFromRecording(dataSet[position])
-        val activityDuration = recordingsManager.getDurationFromRecording(dataSet[position])
-        val activityStart = recordingsManager.getStartingTimeFromRecording(dataSet[position])
-        viewHolder.activityTextView.text = activityName + " - " + personName
-        viewHolder.durationTextView.text = "Duration: " + activityDuration
-        viewHolder.startTimeTextView.text = "Start: " + activityStart
+        val filesEmpty = recordingsManager.checkEmptyFiles(dir)
+        val activityNames =
+            metadata.getActivities().joinToString(", ") { (_, activity) -> activity }
+        val personName = metadata.getPerson()
+        val activityDuration = metadata.getDuration()
 
+        val start = DateFormat.getDateTimeInstance().format(Date(metadata.getTimeStarted()))
+
+        viewHolder.activityTextView.text = activityNames
+        viewHolder.durationTextView.text = "Duration: " + GlobalValues.getDurationAsString(activityDuration)
+        viewHolder.startTimeTextView.text = "Start: " + start
+        viewHolder.personTextView.text = "Person: "+personName
         if (filesEmpty) {
             viewHolder.checkFilesTextView.setTextColor(Color.parseColor("#E53935"))
             viewHolder.checkFilesTextView.text = "Some files are empty"
@@ -64,4 +71,6 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
     }
 
     override fun getItemCount() = dataSet.size
+
+
 }
