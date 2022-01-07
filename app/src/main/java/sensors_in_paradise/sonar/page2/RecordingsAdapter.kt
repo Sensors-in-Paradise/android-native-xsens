@@ -46,6 +46,8 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
         }
 
         val filesEmpty = recordingsManager.checkEmptyFiles(File(recording))
+        val filesSynchronized = recordingsManager.checkSynchronizedTimeStamps(File(recording))
+
         val activityName = recordingsManager.getActivityFromRecording(dataSet[position])
         val personName = recordingsManager.getPersonFromRecording(dataSet[position])
         val activityDuration = recordingsManager.getDurationFromRecording(dataSet[position])
@@ -57,9 +59,12 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
         if (filesEmpty) {
             viewHolder.checkFilesTextView.setTextColor(Color.parseColor("#E53935"))
             viewHolder.checkFilesTextView.text = "Some files are empty"
+        } else if (!filesSynchronized) {
+            viewHolder.checkFilesTextView.setTextColor(Color.parseColor("#E53935"))
+            viewHolder.checkFilesTextView.text = "Files are not synchronized"
         } else {
             viewHolder.checkFilesTextView.setTextColor(Color.parseColor("#4CAF50"))
-            viewHolder.checkFilesTextView.text = "Files checked"
+            viewHolder.checkFilesTextView.text = "Files checked and synchronized"
         }
     }
 

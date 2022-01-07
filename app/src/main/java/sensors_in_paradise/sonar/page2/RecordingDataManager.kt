@@ -1,7 +1,11 @@
 package sensors_in_paradise.sonar.page2
 
+import android.util.Log
 import sensors_in_paradise.sonar.JSONStorage
+import java.io.BufferedReader
 import java.io.File
+import java.io.FileReader
+import kotlin.random.Random
 
 class RecordingDataManager(jsonFile: File, val recordingsDir: File) : JSONStorage(jsonFile) {
     private val recordingsList = ArrayList<String>()
@@ -13,7 +17,6 @@ class RecordingDataManager(jsonFile: File, val recordingsDir: File) : JSONStorag
     private fun loadRecordingsFromStorage() {
         recordingsList.clear()
         recordingsDir.walk().forEach {
-            // This might have to be discussed
             // Removes all directories from output that don't end with two numbers (millis)
             try {
                 it.toString().takeLast(2).toInt()
@@ -23,9 +26,11 @@ class RecordingDataManager(jsonFile: File, val recordingsDir: File) : JSONStorag
             }
         }
     }
+
     fun getRecordings(): ArrayList<String> {
         return recordingsList
     }
+
     fun getNumberOfRecordings(): Map<String, Int> {
         val activities = ArrayList<String>()
         for (rec in recordingsList) {
@@ -67,6 +72,7 @@ class RecordingDataManager(jsonFile: File, val recordingsDir: File) : JSONStorag
         json.put(recording, duration)
         save()
     }
+
     fun deleteRecording(fileOrDir: File) {
         val recordingName = fileOrDir.toString()
         deleteRecordingFilesAndDirs(fileOrDir)
@@ -74,6 +80,7 @@ class RecordingDataManager(jsonFile: File, val recordingsDir: File) : JSONStorag
         recordingsList.remove(recordingName)
         save()
     }
+
     private fun deleteRecordingFilesAndDirs(fileOrDir: File) {
         if (fileOrDir.isDirectory()) {
             for (child in fileOrDir.listFiles()) {
@@ -95,6 +102,80 @@ class RecordingDataManager(jsonFile: File, val recordingsDir: File) : JSONStorag
         }
 
         return false
+    }
+
+    private fun getAbsoluteLineNumber(file: File): Int {
+        var lineNumber = 0
+
+        val reader = BufferedReader(FileReader(file))
+        while (reader.readLine() != null) lineNumber++
+        reader.close()
+
+        return lineNumber
+    }
+
+    private fun getTimeStampAtLine(file: File, lineNumber: Int): String {
+        var timestamp = ""
+
+        var counter = 0
+
+        // Exception is used to break out of the loop as it's not possible otherwise
+        try {
+            file.forEachLine{
+                if (counter == lineNumber) {
+                    Log.d("TEST", it)
+                    val columns = it.split(",")
+                    timestamp = columns[1]
+
+                    throw Exception()
+                }
+                counter++
+            }
+        } catch (exception: Exception) {
+            return timestamp
+        }
+
+        return timestamp
+    }
+
+    private fun findTimeStamp(file: File, timestamp: String): Boolean {
+        var headerSize = 9
+        try {
+            file.forEachLine {
+                if (headerSize <= 0) {
+                    val columns = it.split(",")
+                    if (columns[1] == timestamp) {
+                        throw Exception()
+                    }
+                }
+                headerSize--
+            }
+        } catch(exception: Exception) {
+            return true
+        }
+
+        return false
+    }
+
+    fun checkSynchronizedTimeStamps(fileOrDir: File): Boolean {
+        val headerSize = 9
+        val margin = 10
+
+        if (fileOrDir.isDirectory) {
+            val firstFile = fileOrDir.listFiles()[0]
+
+            var lineNumber = getAbsoluteLineNumber(firstFile)
+            var randomLine = Random.nextInt(headerSize + margin, lineNumber - margin)
+            var timestamp = getTimeStampAtLine(firstFile, randomLine)
+
+            for (child in fileOrDir.listFiles()) {
+                if (!findTimeStamp(child, timestamp)) {
+                    return false
+                }
+            }
+        }
+
+        return true
     }
 
     override fun onFileNewlyCreated() {}
