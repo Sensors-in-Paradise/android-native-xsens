@@ -1,13 +1,12 @@
 package sensors_in_paradise.sonar.page2
 
-import android.util.Log
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
 import kotlin.random.Random
 
-class RecordingDataManager(jsonFile: File, val recordingsDir: File) : JSONStorage(jsonFile) {
+class RecordingDataManager(jsonFile: File, private val recordingsDir: File) : JSONStorage(jsonFile) {
     private val recordingsList = ArrayList<String>()
 
     init {
@@ -82,7 +81,7 @@ class RecordingDataManager(jsonFile: File, val recordingsDir: File) : JSONStorag
     }
 
     private fun deleteRecordingFilesAndDirs(fileOrDir: File) {
-        if (fileOrDir.isDirectory()) {
+        if (fileOrDir.isDirectory) {
             for (child in fileOrDir.listFiles()) {
                 deleteRecordingFilesAndDirs(child)
             }
@@ -115,43 +114,39 @@ class RecordingDataManager(jsonFile: File, val recordingsDir: File) : JSONStorag
     }
 
     private fun getTimeStampAtLine(file: File, lineNumber: Int): String {
-        var timestamp = ""
-
         var counter = 0
 
-        // Exception is used to break out of the loop as it's not possible otherwise
-        try {
-            file.forEachLine{
-                if (counter == lineNumber) {
-                    Log.d("TEST", it)
-                    val columns = it.split(",")
-                    timestamp = columns[1]
+        val reader = BufferedReader(FileReader(file))
+        var line: String
+        while (true) {
+            line = reader.readLine() ?: break
 
-                    throw Exception()
-                }
-                counter++
+            if (counter == lineNumber) {
+                val columns = line.split(",")
+                return columns[1]
             }
-        } catch (exception: Exception) {
-            return timestamp
+
+            counter++
         }
 
-        return timestamp
+        return ""
     }
 
     private fun findTimeStamp(file: File, timestamp: String): Boolean {
         var headerSize = 9
-        try {
-            file.forEachLine {
-                if (headerSize <= 0) {
-                    val columns = it.split(",")
-                    if (columns[1] == timestamp) {
-                        throw Exception()
-                    }
+
+        val reader = BufferedReader(FileReader(file))
+        var line: String
+        while (true) {
+            line = reader.readLine() ?: break
+
+            if (headerSize <= 0) {
+                val columns = line.split(",")
+                if (columns[1] == timestamp) {
+                    return true
                 }
-                headerSize--
             }
-        } catch(exception: Exception) {
-            return true
+            headerSize--
         }
 
         return false
@@ -164,9 +159,11 @@ class RecordingDataManager(jsonFile: File, val recordingsDir: File) : JSONStorag
         if (fileOrDir.isDirectory) {
             val firstFile = fileOrDir.listFiles()[0]
 
-            var lineNumber = getAbsoluteLineNumber(firstFile)
-            var randomLine = Random.nextInt(headerSize + margin, lineNumber - margin)
-            var timestamp = getTimeStampAtLine(firstFile, randomLine)
+            val lineNumber = getAbsoluteLineNumber(firstFile)
+            val randomLine = Random.nextInt(headerSize + margin, lineNumber - margin)
+            val timestamp = getTimeStampAtLine(firstFile, randomLine)
+
+            assert(timestamp != "") { "No initial timestamp could be found." }
 
             for (child in fileOrDir.listFiles()) {
                 if (!findTimeStamp(child, timestamp)) {
