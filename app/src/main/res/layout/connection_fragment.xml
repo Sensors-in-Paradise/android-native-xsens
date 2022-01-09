@@ -46,7 +46,7 @@
         android:gravity="top"
         android:orientation="horizontal"
         android:paddingHorizontal="24dp"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/textView"

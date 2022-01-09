@@ -89,15 +89,30 @@
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
                     android:text="Disconnect" />
+
             </LinearLayout>
 
-            <ProgressBar
-                style="?android:attr/progressBarStyle"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:scaleX="0.5"
-                android:scaleY="0.5" />
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <ProgressBar
+                    style="?android:attr/progressBarStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:scaleX="0.5"
+                    android:scaleY="0.5" />
+
+                <Button
+                    android:id="@+id/button_cancel_connection_sensor_device"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Button"
+                    app:icon="@drawable/ic_baseline_close_24" />
+            </LinearLayout>
+
         </ViewFlipper>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
