@@ -123,12 +123,14 @@ class RecordingDataManager(jsonFile: File, private val recordingsDir: File) : JS
 
             if (counter == lineNumber) {
                 val columns = line.split(",")
+                reader.close()
                 return columns[1]
             }
 
             counter++
         }
 
+        reader.close()
         return ""
     }
 
@@ -143,12 +145,14 @@ class RecordingDataManager(jsonFile: File, private val recordingsDir: File) : JS
             if (headerSize <= 0) {
                 val columns = line.split(",")
                 if (columns[1] == timestamp) {
+                    reader.close()
                     return true
                 }
             }
             headerSize--
         }
 
+        reader.close()
         return false
     }
 
