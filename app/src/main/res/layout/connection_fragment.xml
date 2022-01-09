@@ -40,6 +40,41 @@
 
 
     <LinearLayout
+        android:id="@+id/linearLayout_refresh_connection_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="top"
+        android:orientation="horizontal"
+        android:paddingHorizontal="24dp"
+        android:visibility="visible">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Reload devices"
+            android:textAlignment="textStart"
+            android:textSize="20sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_refresh_connection_fragment"
+            style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:contentDescription="refreshes connection devices"
+            android:textStyle="bold"
+            app:backgroundTint="#404040"
+            app:cornerRadius="21dp"
+            app:icon="@drawable/ic_baseline_refresh_24"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="28dp"
+            tools:ignore="TouchTargetSizeCheck" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/linearLayout_sync_connection_fragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
