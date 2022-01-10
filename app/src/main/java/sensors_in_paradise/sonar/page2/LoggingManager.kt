@@ -34,7 +34,7 @@ class LoggingManager(
     private var onRecordingDone: ((String, String) -> Unit)? = null
 
     private fun getRecordingFile(fileDir: File, deviceAddress: String): File {
-        return fileDir.resolve("$deviceAddress.csv")    }
+        return fileDir.resolve("$deviceAddress.csv") }
 
     private fun getNewUnlabelledTempFile(fileDir: File, deviceAddress: String): File {
         return fileDir.resolve("${System.currentTimeMillis()}_$deviceAddress.csv")

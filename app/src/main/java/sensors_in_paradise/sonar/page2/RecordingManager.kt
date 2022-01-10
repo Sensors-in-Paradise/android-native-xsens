@@ -1,7 +1,9 @@
 package sensors_in_paradise.sonar.page2
 
 import android.R.attr.tag
+import android.app.Activity
 import android.content.Context
+import android.widget.Toast
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.models.XsensDotRecordingFileInfo
@@ -13,7 +15,6 @@ import sensors_in_paradise.sonar.GlobalValues
 import java.time.Instant
 import java.time.LocalDateTime
 import java.util.*
-
 
 class RecordingManager(
     val manager: XsensDotRecordingManager,
@@ -81,7 +82,8 @@ class RecordingManager(
                     TimeZone.getDefault().toZoneId()
                 ), label, person, context
             )
-            val fileName = fileDir.absolutePath
+            fileDir.mkdirs()
+            val fileName = fileDir.resolve(device.address + ".csv").absolutePath
             logger = XsensDotLogger.createRecordingsLogger(
                 context,
                 dataFormat,
@@ -91,6 +93,14 @@ class RecordingManager(
                 BuildConfig.VERSION_NAME,
                 System.currentTimeMillis()
             )
+        }
+        val activity: Activity = context as Activity
+        activity.runOnUiThread {
+            Toast.makeText(
+                context,
+                "Logging",
+                Toast.LENGTH_SHORT
+            ).show()
         }
         logger?.update(exportedData)
     }

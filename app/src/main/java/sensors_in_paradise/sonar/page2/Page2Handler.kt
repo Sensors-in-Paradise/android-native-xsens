@@ -2,8 +2,6 @@ package sensors_in_paradise.sonar.page2
 
 import android.app.Activity
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
-import android.content.Context.MODE_WORLD_READABLE
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Chronometer
@@ -114,7 +112,6 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         val sharedPreferences = GlobalValues.getDefaultPreferences(context)
         recordingOnDevice = sharedPreferences.getBoolean("onDevice", false)
         if (recordingOnDevice) exportButton.visibility = VISIBLE else exportButton.visibility = GONE
-
     }
 
     private fun addRecordingToUI(name: String, duration: String) {
@@ -168,15 +165,21 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     override fun startRecording() {
         recordingHandler = RecordingHandler(context, devices, this)
         recordingHandler.startRecording()
+        startButton.isEnabled = false
+        endButton.isEnabled = true
     }
 
     override fun stopRecording() {
         recordingHandler.stopRecording()
+        endButton.isEnabled = false
+        startButton.isEnabled = true
     }
 
     override fun startExporting() {
         recordingHandler.startExporting()
         disableAllButtons()
+        startButton.isEnabled = false
+        endButton.isEnabled = false
     }
 
     private fun disableAllButtons() {
@@ -192,5 +195,4 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private fun enableButtons() {
         startButton.isEnabled = true
     }
-
 }

@@ -2,6 +2,7 @@ package sensors_in_paradise.sonar.page2
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.interfaces.XsensDotRecordingCallback
@@ -17,12 +18,11 @@ class RecordingHandler(
     private val callback: RecordingInterface
 ) : XsensDotRecordingCallback {
     private val xsRecorders: ArrayList<RecordingManager> = ArrayList()
-    private lateinit var activity: Activity
+    private var activity: Activity = context as Activity
 
     init {
-        createLoggers()
+        createRecordingManagers()
         enableNotifications()
-
     }
 
     private fun findManager(address: String): RecordingManager? {
@@ -51,7 +51,7 @@ class RecordingHandler(
         }
     }
 
-    private fun createLoggers() {
+    private fun createRecordingManagers() {
         for (device in devices) {
             xsRecorders.add(
                 RecordingManager(
@@ -61,7 +61,7 @@ class RecordingHandler(
                     person = "",
                     logger = null,
                     recordingAck = false,
-                    canRecord = false,
+                    canRecord = true,
                     dataFormat = null,
                     ArrayList()
                 )
@@ -86,7 +86,7 @@ class RecordingHandler(
         usedFlashSpace: Int,
         totalFlashSpace: Int
     ) {
-        if (1 - usedFlashSpace / totalFlashSpace > 0.10) {
+        if (usedFlashSpace / totalFlashSpace < .90) {
             address?.let {
                 findManager(it)?.canRecord =
                     true
@@ -114,7 +114,6 @@ class RecordingHandler(
             TODO()
         }
     }
-
 
     override fun onXsensDotGetRecordingTime(
         address: String?,
@@ -145,11 +144,31 @@ class RecordingHandler(
     }
 
     fun startExporting() {
+        activity.runOnUiThread {
+            Toast.makeText(
+                context,
+                "Requesting file info.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
         requestFileInfo()
+        activity.runOnUiThread {
+            Toast.makeText(
+                context,
+                "Selecting export quantities.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
         selectStdExportQuantities()
+        activity.runOnUiThread {
+            Toast.makeText(
+                context,
+                "Exporting",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
         exportOnAll()
     }
-
 
     override fun onXsensDotRequestFileInfoDone(
         address: String?,
@@ -157,15 +176,10 @@ class RecordingHandler(
         isSuccess: Boolean
     ) {
         if (list != null && address != null) {
+            Log.d("RecordingHandler", "RequestFileInfoDone")
             findManager(address)?.addRecordings(list)
         } else {
-            activity.runOnUiThread {
-                Toast.makeText(
-                    context,
-                    "No recording Files Found",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+            Log.d("RecordingHandler", "addRecording failed")
         }
     }
 
@@ -187,7 +201,6 @@ class RecordingHandler(
             )
         }
     }
-
 
     override fun onXsensDotDataExported(
         address: String?,
@@ -236,5 +249,12 @@ class RecordingHandler(
 
     private fun exportingFinished() {
         callback.exportingFinished()
+        activity.runOnUiThread {
+            Toast.makeText(
+                context,
+                "Successfully exported all Files.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 }

@@ -63,7 +63,5 @@ class GlobalValues private constructor() {
                 label
             ).resolve(person).resolve(timeStr)
         }
-
-
     }
 }
