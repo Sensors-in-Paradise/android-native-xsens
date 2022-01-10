@@ -105,8 +105,9 @@ class RecordingDataManager(private val recordingsDir: File) {
                     reader.close()
                     return true
                 }
+            } else {
+                headerSize--
             }
-            headerSize--
         }
 
         reader.close()
