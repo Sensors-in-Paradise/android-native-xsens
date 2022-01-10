@@ -3,7 +3,7 @@ package sensors_in_paradise.sonar.page2
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
 
-class RecordingDataManager(jsonFile: File, val recordingsDir: File) : JSONStorage(jsonFile) {
+class RecordingDataManager(jsonFile: File, private val recordingsDir: File) : JSONStorage(jsonFile) {
     private val recordingsList = ArrayList<String>()
 
     init {
@@ -37,24 +37,21 @@ class RecordingDataManager(jsonFile: File, val recordingsDir: File) : JSONStorag
     fun getPersonFromRecording(recording: String): String {
         val filePath = File(recording).parentFile!!.toString()
         val index = filePath.lastIndexOf("/")
-        val person = recording.slice(IntRange(index + 1, filePath.length - 1))
 
-        return person
+        return recording.slice(IntRange(index + 1, filePath.length - 1))
     }
 
     fun getActivityFromRecording(recording: String): String {
         val filePath = File(recording).parentFile!!.parentFile!!.toString()
         val index = filePath.lastIndexOf("/")
-        val activity = recording.slice(IntRange(index + 1, filePath.length - 1))
 
-        return activity
+        return recording.slice(IntRange(index + 1, filePath.length - 1))
     }
 
     fun getStartingTimeFromRecording(recording: String): String {
         val index = recording.lastIndexOf("/")
-        val startTime = recording.slice(IntRange(index + 1, recording.length - 1))
 
-        return startTime
+        return recording.slice(IntRange(index + 1, recording.length - 1))
     }
 
     fun getDurationFromRecording(recording: String): String? {
@@ -75,7 +72,7 @@ class RecordingDataManager(jsonFile: File, val recordingsDir: File) : JSONStorag
         save()
     }
     private fun deleteRecordingFilesAndDirs(fileOrDir: File) {
-        if (fileOrDir.isDirectory()) {
+        if (fileOrDir.isDirectory) {
             for (child in fileOrDir.listFiles()) {
                 deleteRecordingFilesAndDirs(child)
             }

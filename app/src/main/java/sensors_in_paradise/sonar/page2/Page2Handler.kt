@@ -3,6 +3,7 @@ package sensors_in_paradise.sonar.page2
 import android.app.Activity
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
+import android.content.Context.MODE_WORLD_READABLE
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Chronometer
@@ -72,7 +73,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                 "Select an activity Label",
                 GlobalValues.getActivityLabelsJSONFile(context)
             ) { label ->
-                labelTV.setText(label)
+                labelTV.text = label
             }
         }
         personTV.setOnClickListener {
@@ -81,11 +82,11 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                 "Select a Person",
                 GlobalValues.getPeopleJSONFile(context)
             ) { person ->
-                personTV.setText(person)
+                personTV.text = person
             }
         }
         endButton.isEnabled = false
-
+        recordingHandler = RecordingHandler(context, devices, this)
         startButton.setOnClickListener {
             if (numConnectedDevices >= numDevices) {
                 if (recordingOnDevice) startRecording() else loggingManager.startLogging()
@@ -109,6 +110,11 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             )
         }
         updateActivityCounts()
+
+        val sharedPreferences = GlobalValues.getDefaultPreferences(context)
+        recordingOnDevice = sharedPreferences.getBoolean("onDevice", false)
+        if (recordingOnDevice) exportButton.visibility = VISIBLE else exportButton.visibility = GONE
+
     }
 
     private fun addRecordingToUI(name: String, duration: String) {
@@ -118,16 +124,16 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     private fun updateActivityCounts() {
-        val numberOfRecodings = recordingsManager.getNumberOfRecordings()
+        val numberOfRecordings = recordingsManager.getNumberOfRecordings()
         var text = " "
-        for ((activity, number) in numberOfRecodings) {
+        for ((activity, number) in numberOfRecordings) {
             text += "$activity: $number | "
         }
         activityCountTextView.text = text.trimEnd('|', ' ')
     }
 
     override fun activityResumed() {
-        val sharedPreferences = context.getSharedPreferences("Recording", MODE_PRIVATE)
+        val sharedPreferences = GlobalValues.getDefaultPreferences(context)
         recordingOnDevice = sharedPreferences.getBoolean("onDevice", false)
         if (recordingOnDevice) exportButton.visibility = VISIBLE else exportButton.visibility = GONE
     }
@@ -184,7 +190,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     private fun enableButtons() {
-
+        startButton.isEnabled = true
     }
 
 }
