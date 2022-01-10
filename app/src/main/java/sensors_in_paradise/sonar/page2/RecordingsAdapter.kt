@@ -1,16 +1,17 @@
 package sensors_in_paradise.sonar.page2
 
-import android.graphics.Color
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.R
 import java.io.File
 
-class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
+class RecordingsAdapter(private val recordingsManager: RecordingDataManager, private val context: Context) :
     RecyclerView.Adapter<RecordingsAdapter.ViewHolder>() {
     private var dataSet: ArrayList<String> = recordingsManager.getRecordings()
 
@@ -57,13 +58,13 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
         viewHolder.startTimeTextView.text = "Start: " + activityStart
 
         if (filesEmpty) {
-            viewHolder.checkFilesTextView.setTextColor(Color.parseColor("#E53935"))
+            viewHolder.checkFilesTextView.setTextColor(ContextCompat.getColor(context, R.color.red))
             viewHolder.checkFilesTextView.text = "Some files are empty"
         } else if (!filesSynchronized) {
-            viewHolder.checkFilesTextView.setTextColor(Color.parseColor("#E53935"))
+            viewHolder.checkFilesTextView.setTextColor(ContextCompat.getColor(context, R.color.yellow))
             viewHolder.checkFilesTextView.text = "Files are not synchronized"
         } else {
-            viewHolder.checkFilesTextView.setTextColor(Color.parseColor("#4CAF50"))
+            viewHolder.checkFilesTextView.setTextColor(ContextCompat.getColor(context, R.color.green))
             viewHolder.checkFilesTextView.text = "Files checked and synchronized"
         }
     }

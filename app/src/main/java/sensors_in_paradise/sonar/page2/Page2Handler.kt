@@ -48,7 +48,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         recyclerViewRecordings = activity.findViewById(R.id.recyclerViewRecordings)
         val linearLayoutManager = LinearLayoutManager(context)
         recyclerViewRecordings.layoutManager = linearLayoutManager
-        recordingsAdapter = RecordingsAdapter(recordingsManager)
+        recordingsAdapter = RecordingsAdapter(recordingsManager, context)
         recyclerViewRecordings.adapter = recordingsAdapter
 
         labelTV = activity.findViewById(R.id.tv_activity_captureFragment)
