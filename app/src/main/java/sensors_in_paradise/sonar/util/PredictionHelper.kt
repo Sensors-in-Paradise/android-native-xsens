@@ -15,12 +15,11 @@ class PredictionHelper(
 
     private val numDevices = 5
     private val sizeOfFloat = 4
-    private val numQuats = 4
     private val numFreeAccs = 3
     private var numDataLines = 0
 
-    private val dataLineByteSize = sizeOfFloat * (numQuats + numFreeAccs) * numDevices
-    val dataLineFloatSize = (numQuats + numFreeAccs) * numDevices
+    private val dataLineByteSize = sizeOfFloat * numFreeAccs * numDevices
+    val dataLineFloatSize = numFreeAccs * numDevices
     val dataVectorSize = 180
 
     private fun fillEmptyDataLines() {
@@ -91,7 +90,7 @@ class PredictionHelper(
     }
 
     private fun normalizeLine(dataArray: FloatArray, minArray: DoubleArray, maxArray: DoubleArray): FloatArray {
-        val numElements = numQuats + numFreeAccs
+        val numElements = numFreeAccs
         val normalizedArray = FloatArray(numElements)
 
         val lowerBound = 0.0001
@@ -142,11 +141,11 @@ class PredictionHelper(
 
                 var normalizedFloatArray = FloatArray(0)
                 when (deviceAddress) {
-                    GlobalValues.sensorTagMap["LF"] -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-0.8126836, -0.79424906, -0.7957623, -0.8094078, -31.278593, -32.166283, -18.486694), doubleArrayOf(0.8145418, 0.79727143, 0.81989765, 0.8027102, 28.956848, 30.199568, 22.69250))
-                    GlobalValues.sensorTagMap["LW"] -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-0.8398707, -0.8926556, -0.9343553, -0.9552342, -11.258037, -10.1190405, -8.37381), doubleArrayOf(0.7309214, 0.9186623, 0.97258735, 0.9084077, 10.640987, 11.26736, 12.94717))
-                    GlobalValues.sensorTagMap["ST"] -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-0.87042844, -0.6713179, -0.6706054, -0.80093706, -20.164385, -20.21316, -8.670398), doubleArrayOf(0.87503606, 0.686213, 0.67588365, 0.8398282, 15.221635, 13.93141, 11.75221))
-                    GlobalValues.sensorTagMap["RW"] -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-0.9208972, -0.8918428, -0.9212201, -0.9103423, -14.090326, -14.17955, -11.573973), doubleArrayOf(0.93993384, 0.888225, 0.9099328, 0.9181471, 14.901558, 11.34146, 15.649994))
-                    GlobalValues.sensorTagMap["RF"] -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-0.8756618, -0.85241073, -0.8467437, -0.8629473, -31.345306, -31.825573, -16.296654), doubleArrayOf(0.8837259, 0.98513246, 0.9278882, 0.8547427, 31.27872, 30.43604, 20.430))
+                    GlobalValues.sensorTagMap["LF"] -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-31.278593, -32.166283, -18.486694), doubleArrayOf(28.956848, 30.199568, 22.69250))
+                    GlobalValues.sensorTagMap["LW"] -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-11.258037, -10.1190405, -8.37381), doubleArrayOf(10.640987, 11.26736, 12.94717))
+                    GlobalValues.sensorTagMap["ST"] -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-20.164385, -20.21316, -8.670398), doubleArrayOf(15.221635, 13.93141, 11.75221))
+                    GlobalValues.sensorTagMap["RW"] -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-14.090326, -14.17955, -11.573973), doubleArrayOf(14.901558, 11.34146, 15.649994))
+                    GlobalValues.sensorTagMap["RF"] -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-31.345306, -31.825573, -16.296654), doubleArrayOf(31.27872, 30.43604, 20.430))
                     else -> { // Note the block
                         UIHelper.showAlert(context, "Unknown Device!")
                     }

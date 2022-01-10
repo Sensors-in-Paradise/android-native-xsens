@@ -173,10 +173,9 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
 
         val timeStamp: Long = xsensDotData.getSampleTimeFine()
-        val quat: FloatArray = xsensDotData.getQuat()
         val freeAcc: FloatArray = xsensDotData.getFreeAcc()
 
-        rawSensorDataMap[deviceAddress]?.add(Pair(timeStamp, quat + freeAcc))
+        rawSensorDataMap[deviceAddress]?.add(Pair(timeStamp, freeAcc))
     }
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
