@@ -7,6 +7,7 @@ import android.widget.*
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.GlobalValues
+import sensors_in_paradise.sonar.GlobalValues.Companion.getRecordingFileDir
 import sensors_in_paradise.sonar.XSENSArrayList
 import java.io.File
 import java.io.FileOutputStream
@@ -31,16 +32,9 @@ class LoggingManager(
     private val tempRecordingMap: MutableMap<LocalDateTime, ArrayList<Pair<String, File>>> =
         mutableMapOf()
     private var onRecordingDone: ((String, String) -> Unit)? = null
-    private fun getRecordingFileDir(time: LocalDateTime, label: String, person: String): File {
-        val timeStr = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(time)
-        return GlobalValues.getSensorRecordingsBaseDir(context).resolve(
-            label
-        ).resolve(person).resolve(timeStr)
-    }
 
     private fun getRecordingFile(fileDir: File, deviceAddress: String): File {
-        return fileDir.resolve("$deviceAddress.csv")
-    }
+        return fileDir.resolve("$deviceAddress.csv")    }
 
     private fun getNewUnlabelledTempFile(fileDir: File, deviceAddress: String): File {
         return fileDir.resolve("${System.currentTimeMillis()}_$deviceAddress.csv")
@@ -137,7 +131,7 @@ class LoggingManager(
         val keys = tempRecordingMap.keys.asIterable()
         for (timestamp in keys) {
             val recordingFiles = tempRecordingMap[timestamp]
-            val destFileDir = getRecordingFileDir(timestamp, label, person)
+            val destFileDir = getRecordingFileDir(timestamp, label, person, context)
             destFileDir.mkdirs()
             for ((deviceAddress, tempFile) in recordingFiles!!) {
                 val destFile = getRecordingFile(destFileDir, deviceAddress)

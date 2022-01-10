@@ -97,6 +97,16 @@
                         app:icon="@drawable/ic_baseline_stop_24"></com.google.android.material.button.MaterialButton>
                 </LinearLayout>
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonExport"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginHorizontal="16dp"
+                    android:text="Export"
+                    app:icon="@android:drawable/ic_menu_upload"
+                    tools:visibility="gone"></com.google.android.material.button.MaterialButton>
+
             </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>

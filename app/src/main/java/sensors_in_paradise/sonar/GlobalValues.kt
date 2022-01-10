@@ -3,6 +3,8 @@ package sensors_in_paradise.sonar
 import android.Manifest
 import android.content.Context
 import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class GlobalValues private constructor() {
     companion object {
@@ -37,6 +39,13 @@ class GlobalValues private constructor() {
         )
         fun sensorAddressToTag(address: String): String {
             return sensorTagMap.filterValues { it == address }.keys.first()
+        }
+
+        fun getRecordingFileDir(time: LocalDateTime, label: String, person: String, context: Context): File {
+            val timeStr = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(time)
+            return getSensorRecordingsBaseDir(context).resolve(
+                label
+            ).resolve(person).resolve(timeStr)
         }
     }
 }

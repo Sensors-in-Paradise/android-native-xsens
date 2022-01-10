@@ -13,17 +13,22 @@ import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.util.UIHelper
 import java.io.File
+import kotlin.properties.Delegates
 
-class Page2Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface {
+class Page2Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface,
+    RecordingInterface {
     private lateinit var context: Context
     private lateinit var timer: Chronometer
     private lateinit var startButton: MaterialButton
     private lateinit var endButton: MaterialButton
+    private lateinit var exportButton: MaterialButton
+    private var recordingOnDevice: Boolean = false
 
     private lateinit var recyclerViewRecordings: RecyclerView
     private lateinit var activityCountTextView: TextView
 
     private lateinit var recordingsAdapter: RecordingsAdapter
+    private lateinit var recordingHandler: RecordingHandler
 
     private var numConnectedDevices = 0
     private var numDevices = 5
@@ -40,10 +45,12 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         timer = activity.findViewById(R.id.timer)
         startButton = activity.findViewById(R.id.buttonStart)
         endButton = activity.findViewById(R.id.buttonEnd)
+        exportButton = activity.findViewById(R.id.buttonExport)
         activityCountTextView = activity.findViewById(R.id.tv_activity_counts)
 
         recordingsManager = RecordingDataManager(
-            File(context.dataDir, "recordingDurations.json"), GlobalValues.getSensorRecordingsBaseDir(context)
+            File(context.dataDir, "recordingDurations.json"),
+            GlobalValues.getSensorRecordingsBaseDir(context)
         )
         recyclerViewRecordings = activity.findViewById(R.id.recyclerViewRecordings)
         val linearLayoutManager = LinearLayoutManager(context)
@@ -85,7 +92,10 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             loggingManager.stopLogging()
         }
 
-        loggingManager = LoggingManager(context, devices, startButton, endButton, timer, labelTV, personTV)
+        exportButton.setOnClickListener { startExporting() }
+
+        loggingManager =
+            LoggingManager(context, devices, startButton, endButton, timer, labelTV, personTV)
         loggingManager.setOnRecordingDone { recordingName, duration ->
             addRecordingToUI(
                 recordingName,
@@ -121,7 +131,8 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         if (!connected && deviceLogger != null) {
             devices.get(deviceAddress)?.let {
                 if (it.connectionState == XsensDotDevice.CONN_STATE_DISCONNECTED) {
-                    UIHelper.showAlert(context,
+                    UIHelper.showAlert(
+                        context,
                         "The Device ${it.name} was disconnected!"
                     )
                     deviceLogger.stop()
@@ -138,4 +149,22 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {}
+
+    override fun startRecording() {
+        recordingHandler = RecordingHandler(context, devices, this)
+        recordingHandler.startRecording()
+    }
+
+    override fun stopRecording() {
+        recordingHandler.stopRecording()
+    }
+
+    override fun startExporting() {
+        recordingHandler.startExporting()
+    }
+
+    override fun exportingFinished() {
+
+    }
+
 }
