@@ -1,2 +1,3 @@
 rootProject.name='XSens'
 include ':app', ':Xsens_DOT_Core'
+include ':owncloudComLibrary'

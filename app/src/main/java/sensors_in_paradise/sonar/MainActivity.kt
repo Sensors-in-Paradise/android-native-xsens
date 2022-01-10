@@ -2,19 +2,29 @@ package sensors_in_paradise.sonar
 
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.Toast
 import android.widget.ViewAnimator
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
+import com.owncloud.android.lib.common.OwnCloudClientFactory
+import com.owncloud.android.lib.common.authentication.OwnCloudCredentialsFactory
+import com.owncloud.android.lib.common.operations.OnRemoteOperationListener
+import com.owncloud.android.lib.common.operations.RemoteOperation
+import com.owncloud.android.lib.common.operations.RemoteOperationResult
 import sensors_in_paradise.sonar.uploader.FileUploaderDialog
 import sensors_in_paradise.sonar.page1.Page1Handler
 import sensors_in_paradise.sonar.page2.Page2Handler
 import sensors_in_paradise.sonar.page3.Page3Handler
+import com.owncloud.android.lib.resources.files.CreateRemoteFolderOperation
+import com.owncloud.android.lib.resources.files.FileUtils
 
-class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
+
+class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, OnRemoteOperationListener {
 
     private lateinit var switcher: ViewAnimator
     private lateinit var tabLayout: TabLayout
@@ -43,6 +53,16 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
             handler.activityCreated(this)
         }
         supportActionBar?.setBackgroundDrawable(ColorDrawable(getColor(R.color.colorPrimary)))
+
+        val serverUri: Uri = Uri.parse("https://owncloud.hpi.de/")
+        val client = OwnCloudClientFactory.createOwnCloudClient(
+            serverUri,
+            this,
+            // Activity or Service context
+            true);
+        client.credentials = OwnCloudCredentialsFactory.newBasicCredentials("tobias.fiedler", "EniXSSatM8")
+        val createOperation = CreateRemoteFolderOperation("/Hallo", false)
+        createOperation.execute(client, this, null)
     }
 
     override fun onResume() {
@@ -81,5 +101,18 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
     fun onSettingsMenuItemClicked(ignored: MenuItem) {
         val intent = Intent(this, SettingsActivity::class.java)
         startActivity(intent)
+    }
+
+    override fun onRemoteOperationFinish(
+        operation: RemoteOperation<*>?,
+        result: RemoteOperationResult<*>?
+    ) {
+        if (operation is CreateRemoteFolderOperation) {
+            if (result != null) {
+                val success = result.isSuccess
+                Toast.makeText(this, "folder creation successful: $success", Toast.LENGTH_LONG).show()
+
+            }
+        }
     }
 }
