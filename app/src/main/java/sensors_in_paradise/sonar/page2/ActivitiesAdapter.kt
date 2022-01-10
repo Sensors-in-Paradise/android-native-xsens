@@ -36,7 +36,6 @@ class ActivitiesAdapter(private val activities: java.util.ArrayList<Pair<Long, S
     override fun getItemCount() = activities.size
 
     private fun getStartTimeAsString(activity: Pair<Long, String>):String{
-        // TODO: find out why Time is shown incorrectly (seconds grow to fast) - verifiy if this is an issue at all
         if(activities.size>0){
             val recordingStartTime = activities[0].first
             val activityStartTime = activity.first

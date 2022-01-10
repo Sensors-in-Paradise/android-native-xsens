@@ -74,8 +74,7 @@ class LoggingManager(
         startButton.isEnabled = true
         endButton.setOnClickListener {
             stopLogging()
-            labels.clear()
-            activitiesAdapter.notifyDataSetChanged()
+
         }
     }
 
@@ -180,6 +179,8 @@ class LoggingManager(
             endButton.isEnabled = false
             startButton.isEnabled = true
             xsLoggers.clear()
+            labels.clear()
+            activitiesAdapter.notifyDataSetChanged()
         }
     }
 
@@ -220,7 +221,7 @@ class LoggingManager(
                 val destFile = getRecordingFile(destFileDir, deviceAddress)
                 Files.copy(tempFile.toPath(), FileOutputStream(destFile))
             }
-            val metadataStorage = RecordingMetadataStorage(destFileDir.resolve("metadata.json"))
+            val metadataStorage = RecordingMetadataStorage(destFileDir.resolve(GlobalValues.METADATA_JSON_FILENAME))
             metadataStorage.setData(labels, recordingStartTime, recordingEndTime, person, GlobalValues.sensorTagMap)
             onRecordingDone?.let { it(Pair(destFileDir, metadataStorage)) }
         }

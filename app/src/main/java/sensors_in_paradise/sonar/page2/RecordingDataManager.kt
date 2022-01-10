@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.page2
 
+import android.util.Log
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
@@ -13,11 +14,10 @@ class RecordingDataManager(val recordingsDir: File) {
 
     private fun loadRecordingsFromStorage() {
         recordingsList.clear()
-        recordingsDir.walk().forEach {
-            //TODO: find out why it does not load stored recordings
-            if(it.isDirectory) {
-                val childDirs = recordingsDir.listFiles { file, _ -> file.isDirectory }
 
+        recordingsDir.walk().forEach {
+            if(it.isDirectory) {
+                val childDirs = it.listFiles { dir, filename -> dir.resolve(filename).isDirectory }
                 if (childDirs == null || childDirs.isEmpty()) {
                     val metadataFile = it.resolve(GlobalValues.METADATA_JSON_FILENAME)
                     val hasMetadataJson = metadataFile.exists()
