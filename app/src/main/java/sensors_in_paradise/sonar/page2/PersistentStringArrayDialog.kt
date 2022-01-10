@@ -17,14 +17,15 @@ class PersistentStringArrayDialog(
     title: String,
     storageFile: File,
     cancellable: Boolean = true,
+    defaultItem: String,
     callback: (value: String) -> Unit = {},
 ) {
     var dialog: AlertDialog
-    val storage = StringItemStorage(storageFile)
+    private val storage = StringItemStorage(storageFile)
     var adapter: PersistentStringArrayAdapter
 
     init {
-
+        storage.addItemIfNotAdded(defaultItem, false)
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         builder.setTitle(title)
 
