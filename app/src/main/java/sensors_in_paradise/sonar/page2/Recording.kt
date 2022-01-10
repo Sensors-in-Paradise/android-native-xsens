@@ -9,9 +9,9 @@ class Recording(val dir: File, val metadataStorage: RecordingMetadataStorage) {
         RecordingMetadataStorage(dir.resolve(GlobalValues.METADATA_JSON_FILENAME))
     )
 
-    val areFilesValid = areFilesValid(dir)
+    val areFilesValid = !areFilesEmpty(dir)
 
-    private fun areFilesValid(dir: File): Boolean {
+    private fun areFilesEmpty(dir: File): Boolean {
         val emptyFileSize = 430
         val childCSVs = dir.listFiles { _, name -> name.endsWith(".csv") }
         if (childCSVs != null) {
