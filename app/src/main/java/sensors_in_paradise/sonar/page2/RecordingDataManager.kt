@@ -1,12 +1,10 @@
 package sensors_in_paradise.sonar.page2
 
-import sensors_in_paradise.sonar.JSONStorage
 import java.io.BufferedReader
 import sensors_in_paradise.sonar.GlobalValues
 import java.io.File
 import java.io.FileReader
 import kotlin.random.Random
-
 
 class RecordingDataManager(private val recordingsDir: File) {
     val recordingsList = ArrayList<Recording>()
@@ -119,20 +117,19 @@ class RecordingDataManager(private val recordingsDir: File) {
         val margin = 10
 
         if (fileOrDir.isDirectory) {
-            val childCSVs = fileOrDir.listFiles { _, name -> name.endsWith(".csv") }
-            if (childCSVs != null) {
-                val firstFile = childCSVs[0]
+            val childCSVs = fileOrDir.listFiles { _, name -> name.endsWith(".csv") } ?: return false
 
-                val lineNumber = getAbsoluteLineNumber(firstFile)
-                val randomLine = Random.nextInt(headerSize + margin, lineNumber - margin)
-                val timestamp = getTimeStampAtLine(firstFile, randomLine)
+            val firstFile = childCSVs[0]
 
-                assert(timestamp != "") { "No initial timestamp could be found." }
+            val lineNumber = getAbsoluteLineNumber(firstFile)
+            val randomLine = Random.nextInt(headerSize + margin, lineNumber - margin)
+            val timestamp = getTimeStampAtLine(firstFile, randomLine)
 
-                for (child in childCSVs) {
-                    if (!findTimeStamp(child, timestamp)) {
-                        return false
-                    }
+            assert(timestamp != "") { "No initial timestamp could be found." }
+
+            for (child in childCSVs) {
+                if (!findTimeStamp(child, timestamp)) {
+                    return false
                 }
             }
         }

@@ -10,7 +10,6 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
-import java.io.File
 import java.text.DateFormat
 import java.util.*
 import kotlin.collections.ArrayList
