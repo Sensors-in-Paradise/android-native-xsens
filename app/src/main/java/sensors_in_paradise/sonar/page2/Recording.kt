@@ -23,4 +23,8 @@ class Recording(val dir: File, val metadataStorage: RecordingMetadataStorage) {
         }
         return false
     }
+
+    fun getDirectory(): File {
+        return dir
+    }
 }

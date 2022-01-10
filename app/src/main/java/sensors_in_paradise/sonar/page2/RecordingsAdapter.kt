@@ -1,11 +1,12 @@
 package sensors_in_paradise.sonar.page2
 
-import android.graphics.Color
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
@@ -13,7 +14,7 @@ import java.text.DateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
+class RecordingsAdapter(private val recordingsManager: RecordingDataManager, private val context: Context) :
 
     RecyclerView.Adapter<RecordingsAdapter.ViewHolder>() {
     private val dateFormat = DateFormat.getDateTimeInstance()
@@ -49,6 +50,7 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
             metadata.getActivities().joinToString(", ") { (_, activity) -> activity }
         val personName = metadata.getPerson()
         val activityDuration = metadata.getDuration()
+        val filesSynchronized = recordingsManager.checkSynchronizedTimeStamps(recording.getDirectory())
 
         val start = dateFormat.format(Date(metadata.getTimeStarted()))
 
@@ -57,11 +59,14 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager) :
         viewHolder.startTimeTextView.text = "Start: $start"
         viewHolder.personTextView.text = "Person: " + personName
         if (!isValid) {
-            viewHolder.checkFilesTextView.setTextColor(Color.parseColor("#E53935"))
+            viewHolder.checkFilesTextView.setTextColor(ContextCompat.getColor(context, R.color.red))
             viewHolder.checkFilesTextView.text = "Some files are empty"
+        } else if (!filesSynchronized) {
+            viewHolder.checkFilesTextView.setTextColor(ContextCompat.getColor(context, R.color.yellow))
+            viewHolder.checkFilesTextView.text = "Files are not synchronized"
         } else {
-            viewHolder.checkFilesTextView.setTextColor(Color.parseColor("#4CAF50"))
-            viewHolder.checkFilesTextView.text = "Files checked"
+            viewHolder.checkFilesTextView.setTextColor(ContextCompat.getColor(context, R.color.green))
+            viewHolder.checkFilesTextView.text = "Files checked and synchronized"
         }
     }
 

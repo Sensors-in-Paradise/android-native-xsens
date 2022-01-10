@@ -44,7 +44,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         recyclerViewRecordings = activity.findViewById(R.id.recyclerView_recordings_captureFragment)
         val linearLayoutManager = LinearLayoutManager(context)
         recyclerViewRecordings.layoutManager = linearLayoutManager
-        recordingsAdapter = RecordingsAdapter(recordingsManager)
+        recordingsAdapter = RecordingsAdapter(recordingsManager, context)
         recyclerViewRecordings.adapter = recordingsAdapter
         viewSwitcher = activity.findViewById(R.id.viewSwitcher_captureFragment)
         tabLayout = activity.findViewById(R.id.tabLayout_captureFragment)
