@@ -32,4 +32,13 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/recording_header">
+
+        <SwitchPreference
+            app:key="onDevice"
+            app:title="@string/onDevice_title" />
+
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

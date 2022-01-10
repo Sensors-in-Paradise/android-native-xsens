@@ -2,18 +2,24 @@ package sensors_in_paradise.sonar.page2
 
 import android.app.Activity
 import android.content.Context
-import android.widget.*
+import android.content.Context.MODE_PRIVATE
+import android.view.View.GONE
+import android.view.View.VISIBLE
+import android.widget.Chronometer
+import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotDevice
-import sensors_in_paradise.sonar.*
-import sensors_in_paradise.sonar.page1.ConnectionInterface
+import sensors_in_paradise.sonar.GlobalValues
+import sensors_in_paradise.sonar.PageInterface
+import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.XSENSArrayList
+import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.util.UIHelper
 import java.io.File
-import kotlin.properties.Delegates
 
 class Page2Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface,
     RecordingInterface {
@@ -82,14 +88,14 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         startButton.setOnClickListener {
             if (numConnectedDevices >= numDevices) {
-                loggingManager.startLogging()
+                if (recordingOnDevice) startRecording() else loggingManager.startLogging()
             } else {
                 Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
             }
         }
         startButton.isEnabled = true
         endButton.setOnClickListener {
-            loggingManager.stopLogging()
+            if (recordingOnDevice) stopRecording() else loggingManager.stopLogging()
         }
 
         exportButton.setOnClickListener { startExporting() }
@@ -121,6 +127,9 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     override fun activityResumed() {
+        val sharedPreferences = context.getSharedPreferences("Recording", MODE_PRIVATE)
+        recordingOnDevice = sharedPreferences.getBoolean("onDevice", false)
+        if (recordingOnDevice) exportButton.visibility = VISIBLE else exportButton.visibility = GONE
     }
 
     override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
@@ -161,9 +170,20 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
     override fun startExporting() {
         recordingHandler.startExporting()
+        disableAllButtons()
+    }
+
+    private fun disableAllButtons() {
+        startButton.isEnabled = false
+        endButton.isEnabled = false
+        exportButton.isEnabled = false
     }
 
     override fun exportingFinished() {
+        enableButtons()
+    }
+
+    private fun enableButtons() {
 
     }
 
