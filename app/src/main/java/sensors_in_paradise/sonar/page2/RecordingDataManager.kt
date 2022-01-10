@@ -118,17 +118,20 @@ class RecordingDataManager(private val recordingsDir: File) {
         val margin = 10
 
         if (fileOrDir.isDirectory) {
-            val firstFile = fileOrDir.listFiles()[0]
+            val childCSVs = fileOrDir.listFiles { _, name -> name.endsWith(".csv") }
+            if (childCSVs != null) {
+                val firstFile = childCSVs[0]
 
-            val lineNumber = getAbsoluteLineNumber(firstFile)
-            val randomLine = Random.nextInt(headerSize + margin, lineNumber - margin)
-            val timestamp = getTimeStampAtLine(firstFile, randomLine)
+                val lineNumber = getAbsoluteLineNumber(firstFile)
+                val randomLine = Random.nextInt(headerSize + margin, lineNumber - margin)
+                val timestamp = getTimeStampAtLine(firstFile, randomLine)
 
-            assert(timestamp != "") { "No initial timestamp could be found." }
+                assert(timestamp != "") { "No initial timestamp could be found." }
 
-            for (child in fileOrDir.listFiles()) {
-                if (!findTimeStamp(child, timestamp)) {
-                    return false
+                for (child in childCSVs) {
+                    if (!findTimeStamp(child, timestamp)) {
+                        return false
+                    }
                 }
             }
         }
