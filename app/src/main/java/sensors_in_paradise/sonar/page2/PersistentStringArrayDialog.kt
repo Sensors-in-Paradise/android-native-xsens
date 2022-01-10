@@ -3,7 +3,6 @@ package sensors_in_paradise.sonar.page2
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
-import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.EditText
@@ -18,7 +17,7 @@ class PersistentStringArrayDialog(
     title: String,
     storageFile: File,
     cancellable: Boolean = true,
-    defaultItem: String ,
+    defaultItem: String,
     callback: (value: String) -> Unit = {},
 ) {
     var dialog: AlertDialog

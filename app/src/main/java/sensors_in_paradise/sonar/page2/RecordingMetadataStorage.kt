@@ -18,8 +18,11 @@ class RecordingMetadataStorage(file: File) : JSONStorage(file) {
     }
 
     fun setData(
-        activities: ArrayList<Pair<Long, String>>, totalStartTime: Long, endTime: Long,
-        person: String, sensorMacMap: Map<String, String>
+        activities: ArrayList<Pair<Long, String>>,
+        totalStartTime: Long,
+        endTime: Long,
+        person: String,
+        sensorMacMap: Map<String, String>
     ) {
         for (activity in activities) {
             addActivity(activity)
@@ -32,24 +35,24 @@ class RecordingMetadataStorage(file: File) : JSONStorage(file) {
     }
     fun getActivities(): ArrayList<Pair<Long, String>> {
         val result = ArrayList<Pair<Long, String>>()
-        for(i in 0 until activities.length()){
+        for (i in 0 until activities.length()) {
             val activityObj = activities[i] as JSONObject
             val timeStarted = activityObj.getLong("timeStarted")
             val label = activityObj.getString("label")
-            result.add(Pair(timeStarted,label))
+            result.add(Pair(timeStarted, label))
         }
         return result
     }
-    fun getDuration(): Long{
-        return getTimeEnded()-getTimeStarted()
+    fun getDuration(): Long {
+        return getTimeEnded() - getTimeStarted()
     }
-    fun getTimeStarted(): Long{
+    fun getTimeStarted(): Long {
         return json.getLong("startTimestamp")
     }
-    fun getTimeEnded(): Long{
+    fun getTimeEnded(): Long {
         return json.getLong("endTimestamp")
     }
-    fun getPerson(): String{
+    fun getPerson(): String {
         return json.getString("person")
     }
     private fun addActivity(activity: Pair<Long, String>) {
@@ -57,7 +60,6 @@ class RecordingMetadataStorage(file: File) : JSONStorage(file) {
         obj.put("timeStarted", activity.first)
         obj.put("label", activity.second)
         activities.put(obj)
-
     }
 
     private fun setTimeStarted(startTime: Long) {
@@ -66,16 +68,15 @@ class RecordingMetadataStorage(file: File) : JSONStorage(file) {
 
     private fun setTimeFinished(endTime: Long) {
         json.put("endTimestamp", endTime)
-
     }
 
     private fun setPerson(person: String) {
         json.put("person", person)
     }
-    private fun setSensorMacMap( sensorMacMap: Map<String, String>) {
+    private fun setSensorMacMap(sensorMacMap: Map<String, String>) {
         val obj = JSONObject()
-        for(key in sensorMacMap.keys){
-            if(sensorMacMap[key]!=null){
+        for (key in sensorMacMap.keys) {
+            if (sensorMacMap[key] != null) {
                 obj.put(sensorMacMap[key], key)
             }
         }

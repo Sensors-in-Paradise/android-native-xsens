@@ -1,6 +1,5 @@
 package sensors_in_paradise.sonar.page2
 
-import android.util.Log
 import org.json.JSONArray
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
@@ -15,19 +14,21 @@ class StringItemStorage(file: File) : JSONStorage(file) {
     override fun onJSONInitialized() {
         items = json.getJSONArray("items")
     }
-    fun addItemIfNotAdded(item:String, deletable: Boolean=true): Boolean{
+    fun addItemIfNotAdded(item: String, deletable: Boolean = true): Boolean {
         var alreadyAdded = false
-        for(i in 0 until items.length()){
-            if(items[i]==item){
+        for (i in 0 until items.length()) {
+            if (items[i] == item) {
                 alreadyAdded = true
                 break
             }
         }
-        if(!alreadyAdded){
+        if (!alreadyAdded) {
             addItem(item)
             save()
         }
-        nonDeletableItems.add(item)
+        if (!deletable) {
+            nonDeletableItems.add(item)
+        }
         return !alreadyAdded
     }
     fun addItem(item: String) {

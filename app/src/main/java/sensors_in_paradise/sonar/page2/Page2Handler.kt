@@ -12,7 +12,6 @@ import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.util.UIHelper
-import java.io.File
 
 class Page2Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface,
     TabLayout.OnTabSelectedListener {
@@ -78,7 +77,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         updateActivityCounts()
     }
 
-    private fun addRecordingToUI(recording:Pair<File, RecordingMetadataStorage>) {
+    private fun addRecordingToUI(recording: Recording) {
         recordingsManager.recordingsList.add(0, recording)
         recordingsAdapter.notifyItemInserted(0)
         updateActivityCounts()
@@ -124,17 +123,16 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {}
     override fun onTabSelected(tab: TabLayout.Tab?) {
-        if(tab!=null) {
+        if (tab != null) {
             viewSwitcher.displayedChild = tab.position
-
         }
     }
 
     override fun onTabUnselected(tab: TabLayout.Tab?) {
-        //TODO("Not yet implemented")
+        // TODO("Not yet implemented")
     }
 
     override fun onTabReselected(tab: TabLayout.Tab?) {
-        //TODO("Not yet implemented")
+        // TODO("Not yet implemented")
     }
 }

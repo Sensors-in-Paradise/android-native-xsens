@@ -1,19 +1,15 @@
 package sensors_in_paradise.sonar.page2
 
-
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 
-
 class ActivitiesAdapter(private val activities: java.util.ArrayList<Pair<Long, String>>) :
     RecyclerView.Adapter<ActivitiesAdapter.ViewHolder>() {
-
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val activityTV: TextView = view.findViewById(R.id.tv_activity_recordingActivityItem)
@@ -35,15 +31,13 @@ class ActivitiesAdapter(private val activities: java.util.ArrayList<Pair<Long, S
 
     override fun getItemCount() = activities.size
 
-    private fun getStartTimeAsString(activity: Pair<Long, String>):String{
-        if(activities.size>0){
+    private fun getStartTimeAsString(activity: Pair<Long, String>): String {
+        if (activities.size> 0) {
             val recordingStartTime = activities[0].first
             val activityStartTime = activity.first
 
-            return GlobalValues.getDurationAsString(activityStartTime- recordingStartTime)
-
+            return GlobalValues.getDurationAsString(activityStartTime - recordingStartTime)
         }
         return "??:??"
     }
-
 }

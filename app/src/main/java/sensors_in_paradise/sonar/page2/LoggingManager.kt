@@ -34,7 +34,7 @@ class LoggingManager(
      * deviceAddress and associated recording file*/
     private val tempRecordingMap: MutableMap<LocalDateTime, ArrayList<Pair<String, File>>> =
         mutableMapOf()
-    private var onRecordingDone: ((Pair<File, RecordingMetadataStorage>) -> Unit)? = null
+    private var onRecordingDone: ((Recording) -> Unit)? = null
     private var onRecordingStarted: (() -> Unit)? = null
     private val labels = ArrayList<Pair<Long, String>>()
     private var recordingStartTime = 0L
@@ -46,7 +46,7 @@ class LoggingManager(
             showActivityDialog({ label, openedTimestamp ->
                 labelTV.text = label
                 labels.add(Pair(openedTimestamp, label))
-                activitiesAdapter.notifyItemInserted(labels.size-1)
+                activitiesAdapter.notifyItemInserted(labels.size - 1)
             })
         }
         personTV.setOnClickListener {
@@ -64,7 +64,7 @@ class LoggingManager(
                     showActivityDialog(cancellable = false, onSelected = { label, openedTimestamp ->
                         labelTV.text = label
                         labels.add(Pair(openedTimestamp, label))
-                        activitiesAdapter.notifyItemInserted(labels.size-1)
+                        activitiesAdapter.notifyItemInserted(labels.size - 1)
                     })
                 }
             } else {
@@ -74,7 +74,6 @@ class LoggingManager(
         startButton.isEnabled = true
         endButton.setOnClickListener {
             stopLogging()
-
         }
     }
 
@@ -117,10 +116,6 @@ class LoggingManager(
 
     private fun getNewUnlabelledTempFile(fileDir: File, deviceAddress: String): File {
         return fileDir.resolve("${System.currentTimeMillis()}_$deviceAddress.csv")
-    }
-
-    private fun getRecordingName(fileDir: File): String {
-        return fileDir.toString()
     }
 
     private fun startLogging() {
@@ -173,7 +168,7 @@ class LoggingManager(
         }
 
         resolveMissingFields {
-            moveTempFiles(personTV.text.toString(),recordingEndTime)
+            moveTempFiles(personTV.text.toString(), recordingEndTime)
             labelTV.text = ""
             personTV.text = ""
             endButton.isEnabled = false
@@ -223,12 +218,13 @@ class LoggingManager(
             }
             val metadataStorage = RecordingMetadataStorage(destFileDir.resolve(GlobalValues.METADATA_JSON_FILENAME))
             metadataStorage.setData(labels, recordingStartTime, recordingEndTime, person, GlobalValues.sensorTagMap)
-            onRecordingDone?.let { it(Pair(destFileDir, metadataStorage)) }
+
+            onRecordingDone?.let { it(Recording(destFileDir, metadataStorage)) }
         }
         tempRecordingMap.clear()
     }
 
-    fun setOnRecordingDone(onRecordingDone: (Pair<File, RecordingMetadataStorage>) -> Unit) {
+    fun setOnRecordingDone(onRecordingDone: (Recording) -> Unit) {
         this.onRecordingDone = onRecordingDone
     }
     fun setOnRecordingStarted(onRecordingStarted: () -> Unit) {
