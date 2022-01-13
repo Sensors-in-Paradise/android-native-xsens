@@ -6,4 +6,5 @@ import com.xsens.dot.android.sdk.models.XsensDotDevice
 interface UIDeviceConnectionInterface {
     @AnyThread
     fun onConnectionUpdateRequested(device: XsensDotDevice, wantsConnection: Boolean)
+    fun onConnectionCancelRequested(device: XsensDotDevice)
 }

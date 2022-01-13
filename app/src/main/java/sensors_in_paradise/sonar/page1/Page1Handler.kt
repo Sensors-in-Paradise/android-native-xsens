@@ -40,6 +40,8 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
     private lateinit var syncLinearLayout: LinearLayout
     private lateinit var syncPb: ProgressBar
     private lateinit var syncBtn: Button
+    private lateinit var refreshLinearLayout: LinearLayout
+    private lateinit var refreshButton: Button
     private var isSyncing = false
     private val unsyncedColor = Color.parseColor("#FF5722")
     private val syncedColor = Color.parseColor("#00e676")
@@ -98,6 +100,7 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
 
         activity.runOnUiThread {
             linearLayoutCenter.visibility = View.INVISIBLE
+            refreshLinearLayout.visibility = View.VISIBLE
         }
     }
     @RequiresApi(Build.VERSION_CODES.S)
@@ -113,12 +116,21 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
         linearLayoutCenter = activity.findViewById(R.id.linearLayout_center_activity_main)
         sensorAdapter = SensorAdapter(context, scannedDevices, this)
         rv.adapter = sensorAdapter
+        refreshLinearLayout = activity.findViewById(R.id.linearLayout_refresh_connection_fragment)
+        refreshButton = activity.findViewById(R.id.button_refresh_connection_fragment)
 
         syncBtn.setOnClickListener {
             isSyncing = true
             scannedDevices.getConnected()[0].isRootDevice = true
             XsensDotSyncManager.getInstance(SyncHandler(this)).startSyncing(scannedDevices.getConnected(), 0)
         }
+
+        refreshButton.setOnClickListener {
+            // TODO
+            // mXsScanner!!.stopScan()
+            //
+        }
+
     }
     override fun activityResumed() {
         if (PermissionsHelper.areAllPermissionsGranted(context)) {
@@ -157,6 +169,15 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
         } else {
             device.disconnect()
         }
+        activity.runOnUiThread {
+            sensorAdapter.notifyItemChanged(device.address)
+        }
+    }
+
+    override fun onConnectionCancelRequested(device: XsensDotDevice) {
+        // TODO Check if works
+        device.disconnect()
+
         activity.runOnUiThread {
             sensorAdapter.notifyItemChanged(device.address)
         }
