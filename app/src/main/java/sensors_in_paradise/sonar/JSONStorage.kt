@@ -14,7 +14,7 @@ abstract class JSONStorage @Throws(
     JSONException::class
 ) constructor(val file: File) {
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    var json: JSONObject
+    lateinit var json: JSONObject
 
     init {
         if (!file.exists()) {

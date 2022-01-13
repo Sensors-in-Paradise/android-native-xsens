@@ -2,6 +2,6 @@
 
 # android-native-xsens
 
-This is a Tool for recording data through Xsens DOT Sensors and Labeling it when Saving on the Device.
+This is a tool for recording data through Xsens DOT sensors and labeling it when saving on the Device.
 
-May extended in the future with more functionality.
+May be extended in the future with more functionality.
