@@ -50,7 +50,7 @@
             android:layout_marginTop="10dp"
             android:gravity="start"
             android:orientation="horizontal"
-            android:paddingHorizontal="24dp"
+            android:paddingHorizontal="18dp"
             android:visibility="visible">
 
             <TextView
@@ -58,12 +58,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Reload devices"
+                android:text="Scanned devices"
                 android:textAlignment="textStart"
                 android:textAllCaps="true"
                 android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textSize="18sp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_refresh_connection_fragment"

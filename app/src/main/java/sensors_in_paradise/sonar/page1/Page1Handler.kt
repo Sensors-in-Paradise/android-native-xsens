@@ -127,9 +127,9 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
         }
 
         refreshButton.setOnClickListener {
-            val deg: Float = refreshButton.rotation + 720f
+            val deg: Float = refreshButton.rotation + 1080f
             refreshButton.animate().rotation(deg).interpolator = AccelerateDecelerateInterpolator()
-            refreshButton.animate().duration = 800
+            refreshButton.animate().duration = 1500
 
             mXsScanner!!.stopScan()
             scannedDevices.forEach { it.disconnect() }
