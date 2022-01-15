@@ -7,4 +7,5 @@ interface UIDeviceConnectionInterface {
     @AnyThread
     fun onConnectionUpdateRequested(device: XsensDotDevice, wantsConnection: Boolean)
     fun onConnectionCancelRequested(device: XsensDotDevice)
+    var isSyncing: Boolean
 }

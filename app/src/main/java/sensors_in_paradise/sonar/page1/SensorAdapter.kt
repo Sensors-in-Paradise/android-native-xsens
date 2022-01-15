@@ -85,6 +85,8 @@ class SensorAdapter(
         viewHolder.batteryPB.progress = if (isConnected) device.batteryPercentage else 0
         viewHolder.batteryPB.visibility = if (isConnected) View.VISIBLE else View.INVISIBLE
 
+        viewHolder.cancelButton.visibility = if (connectionCallbackUI.isSyncing) View.GONE else View.VISIBLE
+
         var statusDrawable = disconnectedDrawable
         if (isConnected) {
             statusDrawable = if (isSynced) syncedDrawable else connectedDrawable

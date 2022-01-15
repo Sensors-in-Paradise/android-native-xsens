@@ -71,28 +71,6 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
-                <ProgressBar
-                    style="?android:attr/progressBarStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:scaleX="0.5"
-                    android:scaleY="0.5" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_cancel_connection_sensor_device"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    app:background="@android:color/transparent"
-                    app:icon="@drawable/ic_baseline_close_24" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
@@ -114,6 +92,33 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="right"
+                android:orientation="horizontal">
+
+                <ProgressBar
+                    style="?android:attr/progressBarStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:scaleX="0.5"
+                    android:scaleY="0.5" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_cancel_connection_sensor_device"
+                    android:layout_width="50dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="right"
+                    android:background="@android:color/transparent"
+                    android:scaleX="1.15"
+                    android:scaleY="1.15"
+                    app:icon="@drawable/ic_baseline_close_24"
+                    app:iconGravity="end"
+                    app:iconTint="#FF5722" />
+
+            </LinearLayout>
 
 
         </ViewFlipper>
