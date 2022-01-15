@@ -63,7 +63,7 @@ class SensorAdapter(
             val isConnectedState = (viewHolder.connectButton.text == "Connect")
             connectionCallbackUI.onConnectionUpdateRequested(device, isConnectedState)
         }
-        viewHolder.cancelButton.setOnClickListener{
+        viewHolder.cancelButton.setOnClickListener {
             connectionCallbackUI.onConnectionCancelRequested(device)
         }
         viewHolder.card.setOnLongClickListener {

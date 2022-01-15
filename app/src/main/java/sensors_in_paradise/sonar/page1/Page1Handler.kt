@@ -1,7 +1,5 @@
 package sensors_in_paradise.sonar.page1
 
-import android.R.attr
-import android.R.attr.*
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -9,7 +7,6 @@ import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.graphics.Color
 import android.os.Build
-import android.util.AttributeSet
 import android.view.View
 import android.widget.*
 import androidx.annotation.RequiresApi
@@ -29,7 +26,6 @@ import sensors_in_paradise.sonar.util.PermissionsHelper
 import java.util.ArrayList
 import java.util.HashMap
 import android.view.animation.AccelerateDecelerateInterpolator
-
 
 class Page1Handler(val scannedDevices: XSENSArrayList) :
     XsensDotScannerCallback, XsensDotDeviceCallback, PageInterface,
