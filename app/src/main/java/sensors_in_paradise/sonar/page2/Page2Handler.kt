@@ -163,6 +163,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {}
 
     override fun startRecording() {
+        timer.start()
         recordingHandler = RecordingHandler(context, devices, this)
         recordingHandler.startRecording()
         startButton.isEnabled = false
@@ -170,6 +171,7 @@ class Page2Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     override fun stopRecording() {
+        timer.stop()
         recordingHandler.stopRecording()
         endButton.isEnabled = false
         startButton.isEnabled = true

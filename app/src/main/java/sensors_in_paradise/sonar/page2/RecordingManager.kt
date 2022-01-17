@@ -3,6 +3,7 @@ package sensors_in_paradise.sonar.page2
 import android.R.attr.tag
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotDevice
@@ -66,6 +67,7 @@ class RecordingManager(
     }
 
     fun startExporting() {
+        Log.d("RecordingManager", "exporting from $manager")
         manager.startExporting(recordingFiles)
     }
 
@@ -94,15 +96,8 @@ class RecordingManager(
                 System.currentTimeMillis()
             )
         }
-        val activity: Activity = context as Activity
-        activity.runOnUiThread {
-            Toast.makeText(
-                context,
-                "Logging",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
         logger?.update(exportedData)
+        Log.d("RecordingManager", "Logging export from ${device.address} with $logger")
     }
 
     fun isIdle(): Boolean {
@@ -110,11 +105,17 @@ class RecordingManager(
     }
 
     fun dropLogger() {
+        Log.d("RecordingManager", "dropping logger $logger")
         logger?.stop()
         logger = null
     }
 
     fun clear() {
+        Log.d("RecordingManager", "clearing manager $manager")
         manager.clear()
+    }
+
+    fun requestFlashInfo() {
+        manager.requestFlashInfo()
     }
 }

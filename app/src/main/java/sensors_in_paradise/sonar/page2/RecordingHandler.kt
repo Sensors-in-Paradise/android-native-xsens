@@ -1,9 +1,7 @@
 package sensors_in_paradise.sonar.page2
 
-import android.app.Activity
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.interfaces.XsensDotRecordingCallback
 import com.xsens.dot.android.sdk.models.XsensDotDevice
@@ -18,7 +16,6 @@ class RecordingHandler(
     private val callback: RecordingInterface
 ) : XsensDotRecordingCallback {
     private val xsRecorders: ArrayList<RecordingManager> = ArrayList()
-    private var activity: Activity = context as Activity
 
     init {
         createRecordingManagers()
@@ -31,23 +28,24 @@ class RecordingHandler(
 
     fun startRecording() {
         if (xsRecorders.all { manager: RecordingManager -> manager.canRecord }) {
-            xsRecorders.forEach { manager: RecordingManager -> manager.manager.startRecording() }
-        } else {
-            activity.runOnUiThread {
-                Toast.makeText(
-                    context,
-                    "Deleting files on overcrowded Dots",
-                    Toast.LENGTH_SHORT
-                ).show()
+            xsRecorders.forEach { manager: RecordingManager ->
+                manager.manager.startRecording()
+                Log.d("RecordingHandler", "start recording on $manager")
             }
+        } else {
             xsRecorders.filter { manager: RecordingManager -> !manager.canRecord }
-                .forEach { it.manager.eraseRecordingData() }
+                .forEach {
+                    it.manager.eraseRecordingData()
+                    Log.d("RecordingHandler", "deleting data on $it")
+                }
         }
     }
 
     fun stopRecording() {
-        if (xsRecorders.all { manager: RecordingManager -> manager.isRecording() }) {
-            xsRecorders.forEach { manager: RecordingManager -> manager.stopRecording() }
+        xsRecorders.forEach { manager: RecordingManager ->
+            manager.stopRecording()
+            Log.d("RecordingHandler", "stop recording on $manager")
+
         }
     }
 
@@ -66,18 +64,23 @@ class RecordingHandler(
                     ArrayList()
                 )
             )
+            Log.d("RecordingHandler", "adding recorder for $device")
         }
     }
 
     private fun enableNotifications() {
         for (recorder in xsRecorders) {
             recorder.manager.enableDataRecordingNotification()
+            Log.d("RecordingHandler", "enabling data recording notification for $recorder")
         }
     }
 
     override fun onXsensDotRecordingNotification(address: String, isEnabled: Boolean) {
         if (isEnabled) {
-            findManager(address)?.manager?.requestFlashInfo()
+            with(findManager(address), {
+                this?.requestFlashInfo()
+                Log.d("RecordingHandler", "requesting flash info for $this")
+            })
         }
     }
 
@@ -88,8 +91,10 @@ class RecordingHandler(
     ) {
         if (usedFlashSpace / totalFlashSpace < .90) {
             address?.let {
-                findManager(it)?.canRecord =
-                    true
+                with(findManager(it), {
+                    this?.canRecord = true
+                    Log.d("RecordingHandler", "can record on $this")
+                })
             }
         }
     }
@@ -103,15 +108,15 @@ class RecordingHandler(
         if (recordingId == XsensDotRecordingManager.RECORDING_ID_START_RECORDING) {
             // start recording result, check recordingState, it should be success or fail. ... }
             if (recordingState == XsensDotRecordingState.success) {
-                TODO()
+                Log.d("RecordingHandler", "successful start recording on ${address?.let { findManager(it) }}")
             }
             if (recordingState == XsensDotRecordingState.fail) {
-                TODO()
+                Log.d("RecordingHandler", "fail start recording on ${address?.let { findManager(it) }}")
             }
         }
         if (recordingId == XsensDotRecordingManager.RECORDING_ID_STOP_RECORDING) {
             // stop recording result, check recordingState, it should be success or fail. ... }
-            TODO()
+            Log.d("RecordingHandler", "stop recording on ${address?.let { findManager(it) }} was $isSuccess")
         }
     }
 
@@ -124,49 +129,33 @@ class RecordingHandler(
     }
 
     private fun requestFileInfo() {
-        xsRecorders.forEach { manager: RecordingManager -> manager.requestFileInfo() }
+        xsRecorders.forEach { manager: RecordingManager ->
+            manager.requestFileInfo()
+            Log.d("RecordingHandler", "requesting File info on $manager")
+        }
+
     }
 
     private fun selectStdExportQuantities() {
         xsRecorders.forEach { manager: RecordingManager ->
             manager.stdDataFormat()
             manager.dataFormat?.let { manager.selectExportedData(it) }
+            Log.d("RecordingHandler", "std export quantities selected on $manager")
         }
     }
 
     private fun exportOnAll() {
-        if (recordersIdle())
         xsRecorders.forEach { manager: RecordingManager -> manager.startExporting() }
     }
 
     private fun recordersIdle(): Boolean {
-       return xsRecorders.all { manager: RecordingManager -> manager.isIdle() }
+        return xsRecorders.all { manager: RecordingManager -> manager.isIdle() }
     }
 
     fun startExporting() {
-        activity.runOnUiThread {
-            Toast.makeText(
-                context,
-                "Requesting file info.",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+        Log.d("RecordingHandler", "starting export")
         requestFileInfo()
-        activity.runOnUiThread {
-            Toast.makeText(
-                context,
-                "Selecting export quantities.",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
         selectStdExportQuantities()
-        activity.runOnUiThread {
-            Toast.makeText(
-                context,
-                "Exporting",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
         exportOnAll()
     }
 
@@ -176,7 +165,7 @@ class RecordingHandler(
         isSuccess: Boolean
     ) {
         if (list != null && address != null) {
-            Log.d("RecordingHandler", "RequestFileInfoDone")
+            Log.d("RecordingHandler", "RequestFileInfoDone with $list")
             findManager(address)?.addRecordings(list)
         } else {
             Log.d("RecordingHandler", "addRecording failed")
@@ -199,6 +188,7 @@ class RecordingHandler(
                 fileInfo,
                 exportedData
             )
+            Log.d("RecordingHandler", "Export to $address with $fileInfo")
         }
     }
 
@@ -215,6 +205,7 @@ class RecordingHandler(
     ) {
         val manager = findManager(address)
         if (manager != null) {
+            Log.d("RecordingHandler", "Exported one file on $manager")
             manager.dropLogger()
             manager.hasExported = true
         }
@@ -227,6 +218,7 @@ class RecordingHandler(
 
     override fun onXsensDotAllDataExported(address: String?) {
         if (address != null) fileExported(address)
+        Log.d("RecordingHandler", "All Data exported on ${address?.let { findManager(it) }}")
         if (xsRecorders.all { manager: RecordingManager -> manager.hasExported }) {
             xsRecorders.forEach { manager: RecordingManager -> manager.clear() }
             exportingFinished()
@@ -234,27 +226,22 @@ class RecordingHandler(
     }
 
     override fun onXsensDotStopExportingData(p0: String?) {
-        TODO("Not yet implemented")
     }
 
-    override fun onXsensDotEraseDone(p0: String?, isSuccess: Boolean) {
-        if (isSuccess) activity.runOnUiThread {
-            Toast.makeText(
-                context,
-                "Successfully deleted some Files.",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+    override fun onXsensDotEraseDone(address: String?, isSuccess: Boolean) {
+        if (isSuccess) Log.d(
+            "RecordingHandler", "Successfully erased data on ${
+                address?.let {
+                    findDevice(
+                        it
+                    )
+                }
+            }"
+        )
     }
 
     private fun exportingFinished() {
         callback.exportingFinished()
-        activity.runOnUiThread {
-            Toast.makeText(
-                context,
-                "Successfully exported all Files.",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+        Log.d("RecordingHandler", "Exported All Files")
     }
 }
