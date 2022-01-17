@@ -9,7 +9,7 @@ class RecordingUIItem(recording: Recording): Recording(recording) {
     var error: Exception? = null
     val filesToBeUploaded = getFilesToBeUploadedList()
     private val fileUploadStatus: MutableMap<File, UploadStatus> =
-        recording.getRecordingFiles().associate { it to UploadStatus.NOT_UPLOADED } as MutableMap<File, UploadStatus>
+        getFilesToBeUploadedList().associateWith { UploadStatus.NOT_UPLOADED } as MutableMap<File, UploadStatus>
        fun getStatusOfDir(): UploadStatus{
         return dirStatus
     }
@@ -29,6 +29,15 @@ class RecordingUIItem(recording: Recording): Recording(recording) {
         if(dirStatus == UploadStatus.NOT_UPLOADED){
             return UploadStatus.NOT_UPLOADED
         }
+        var areAllUploaded = true
+        for((file, status) in fileUploadStatus){
+            if(status!=UploadStatus.UPLOADED){
+                areAllUploaded = false
+            }
+        }
+        if(areAllUploaded){
+            return UploadStatus.UPLOADED
+        }
         for((file, status) in fileUploadStatus){
             if(status == UploadStatus.UPLOADING){
                 return UploadStatus.UPLOADING
@@ -40,6 +49,7 @@ class RecordingUIItem(recording: Recording): Recording(recording) {
                 areAllFailed = false
             }
         }
+
         if(areAllFailed){
             return UploadStatus.FAILED
         }

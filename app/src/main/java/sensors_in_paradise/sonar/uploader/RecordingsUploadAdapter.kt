@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.uploader
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,7 +45,9 @@ class RecordingsUploadAdapter(
         if(recording.getStatusOfDir()==UploadStatus.UPLOADED){
             for(file in recording.filesToBeUploaded){
                 status += recording.getEmojiStatusOfFile(file)+" ${file.name}\n"
+
             }
+            Log.d("OWNCLOUD", "files: ${recording.filesToBeUploaded.joinToString()}")
         }
         else{
             status = recording.getStatusLabelOfDir()

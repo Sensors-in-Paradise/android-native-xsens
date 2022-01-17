@@ -31,6 +31,6 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
         return dir
     }
     fun getRecordingFiles(): Array<File>{
-        return dir.listFiles{file -> file.isFile && file.endsWith(".csv")}?: emptyArray()
+        return dir.listFiles{file -> file.isFile && file.name.endsWith(".csv")}?: emptyArray()
     }
 }
