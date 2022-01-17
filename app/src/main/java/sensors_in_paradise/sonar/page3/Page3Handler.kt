@@ -2,7 +2,9 @@ package sensors_in_paradise.sonar.page3
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.os.SystemClock
+import android.provider.Settings
 import android.widget.Button
 import android.widget.Chronometer
 import android.widget.Toast
@@ -19,9 +21,12 @@ import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.ml.XsensTest02
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
+import java.io.File
+import java.io.FileWriter
 import kotlin.collections.ArrayList
 import java.nio.ByteBuffer
 import kotlin.math.round
+import kotlin.math.floor
 
 class Page3Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface {
     private lateinit var activity: Activity
@@ -38,7 +43,6 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private val rawSensorDataMap = mutableMapOf<String, MutableList<Pair<Long, FloatArray>>>()
     private var sensorDataByteBuffer: ByteBuffer? = null
 
-    private val numDevices = 5
     private var numConnectedDevices = 0
     private var isRunning = false
 
@@ -62,6 +66,8 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         sensorDataByteBuffer = predictionHelper.processSensorData()
 
+        exportPreprocessedData()
+
         toggleButtons()
         isRunning = false
     }
@@ -84,6 +90,39 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             predictions.add(prediction)
         }
         adapter.notifyDataSetChanged()
+    }
+
+    private fun exportPreprocessedData() {
+        val outputDir = context.cacheDir
+        File.createTempFile("record", "csv", outputDir)
+
+        val numUnits = GlobalValues.unitLabels.size
+        val lineSize = GlobalValues.NUM_DEVICES + numUnits
+        val sensorTags = GlobalValues.sensorTagMap.toList()
+
+        var csvHeader = ""
+        (0..lineSize).forEach {
+            val tagOffset = floor(it.toFloat()/numUnits).toInt()
+            val unitOffset = it%numUnits
+            val trailing = if (it == lineSize-1) "\n" else ", "
+            csvHeader += "${sensorTags[tagOffset]}-${GlobalValues.unitLabels[unitOffset]}$trailing"}
+
+        try {
+            val fileWriter = FileWriter("record.csv")
+            fileWriter.append(csvHeader)
+
+            val floatBuffer = sensorDataByteBuffer!!.asFloatBuffer()
+            for (it in 0 until floatBuffer.position()) {
+                fileWriter.append(floatBuffer[it].toString())
+
+                val trailing = if (it%lineSize == lineSize-1) "\n" else ", "
+                fileWriter.append(trailing)
+            }
+            fileWriter.close()
+        } catch (e: Exception) {
+                println("Writing CSV error!")
+                e.printStackTrace()
+        }
     }
 
     override fun activityCreated(activity: Activity) {
@@ -110,7 +149,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         stopButton.isEnabled = false
 
         startButton.setOnClickListener {
-            if (numConnectedDevices >= numDevices) {
+            if (numConnectedDevices >= GlobalValues.NUM_DEVICES) {
 
                 clearBuffers()
 
@@ -164,7 +203,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         numConnectedDevices = devices.getConnected().size
 
-        if (isRunning && numConnectedDevices < numDevices) {
+        if (isRunning && numConnectedDevices < GlobalValues.NUM_DEVICES) {
             stopDataCollection()
             UIHelper.showAlert(context, "Connection to device(s) lost!")
         }

@@ -12,15 +12,13 @@ class PredictionHelper(
     private val context: Context,
     private val rawSensorDataMap: MutableMap<String, MutableList<Pair<Long, FloatArray>>>
 ) {
-
-    private val numDevices = 5
     private val sizeOfFloat = 4
     private val numQuats = 4
     private val numFreeAccs = 3
     private var numDataLines = 0
 
-    private val dataLineByteSize = sizeOfFloat * (numQuats + numFreeAccs) * numDevices
-    val dataLineFloatSize = (numQuats + numFreeAccs) * numDevices
+    private val dataLineByteSize = sizeOfFloat * (numQuats + numFreeAccs) * GlobalValues.NUM_DEVICES
+    val dataLineFloatSize = (numQuats + numFreeAccs) * GlobalValues.NUM_DEVICES
     val dataVectorSize = 180
 
     private fun fillEmptyDataLines() {
