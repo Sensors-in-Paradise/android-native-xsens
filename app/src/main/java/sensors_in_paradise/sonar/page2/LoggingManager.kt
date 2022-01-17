@@ -12,6 +12,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Files
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
 
@@ -105,9 +106,10 @@ class LoggingManager(
         )
     }
 
-    private fun getRecordingFileDir(time: LocalDateTime, person: String): File {
-        val timeStr = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(time)
-        return GlobalValues.getSensorRecordingsBaseDir(context).resolve(person).resolve(timeStr)
+    private fun getRecordingFileDir(time: LocalDateTime): File {
+        val timeStr = time.toInstant(ZoneOffset.UTC).toEpochMilli().toString()//DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(time)
+
+        return GlobalValues.getSensorRecordingsBaseDir(context)/*.resolve(person)*/.resolve(timeStr)
     }
 
     private fun getRecordingFile(fileDir: File, deviceAddress: String): File {
@@ -210,7 +212,7 @@ class LoggingManager(
         val keys = tempRecordingMap.keys.asIterable()
         for (timestamp in keys) {
             val recordingFiles = tempRecordingMap[timestamp]
-            val destFileDir = getRecordingFileDir(timestamp, person)
+            val destFileDir = getRecordingFileDir(timestamp)
             destFileDir.mkdirs()
             for ((deviceAddress, tempFile) in recordingFiles!!) {
                 val destFile = getRecordingFile(destFileDir, deviceAddress)

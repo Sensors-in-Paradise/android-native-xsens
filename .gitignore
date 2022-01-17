@@ -91,3 +91,6 @@ lint/tmp/
 # BP custom
 /Xsens_DOT_Core/build
 
+# Secrets
+apikey.properties
+

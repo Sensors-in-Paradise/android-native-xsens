@@ -2,47 +2,47 @@ package sensors_in_paradise.sonar
 
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
-import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.widget.Toast
 import android.widget.ViewAnimator
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
-import com.owncloud.android.lib.common.OwnCloudClientFactory
-import com.owncloud.android.lib.common.authentication.OwnCloudCredentialsFactory
-import com.owncloud.android.lib.common.operations.OnRemoteOperationListener
-import com.owncloud.android.lib.common.operations.RemoteOperation
-import com.owncloud.android.lib.common.operations.RemoteOperationResult
-import sensors_in_paradise.sonar.uploader.FileUploaderDialog
 import sensors_in_paradise.sonar.page1.Page1Handler
 import sensors_in_paradise.sonar.page2.Page2Handler
+import sensors_in_paradise.sonar.page2.RecordingDataManager
 import sensors_in_paradise.sonar.page3.Page3Handler
-import com.owncloud.android.lib.resources.files.CreateRemoteFolderOperation
-import com.owncloud.android.lib.resources.files.FileUtils
+import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
+import sensors_in_paradise.sonar.uploader.OwnCloudRecordingsUploader
+import java.io.File
 
 
-class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, OnRemoteOperationListener {
+class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
 
     private lateinit var switcher: ViewAnimator
     private lateinit var tabLayout: TabLayout
+    private lateinit var ownCloudUploader: OwnCloudRecordingsUploader
+    private lateinit var  recordingsManager :RecordingDataManager
 
     private val pageHandlers = ArrayList<PageInterface>()
 
     private val scannedDevices = XSENSArrayList()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         switcher = findViewById(R.id.switcher_activity_main)
         tabLayout = findViewById(R.id.tab_layout_activity_main)
+        recordingsManager = RecordingDataManager(
+            GlobalValues.getSensorRecordingsBaseDir(this)
+        )
 
         initClickListeners()
         val page1Handler = Page1Handler(scannedDevices)
         pageHandlers.add(page1Handler)
-        val page2Handler = Page2Handler(scannedDevices)
+        val page2Handler = Page2Handler(scannedDevices, recordingsManager)
         pageHandlers.add(page2Handler)
         val page3Handler = Page3Handler(scannedDevices)
         pageHandlers.add(page3Handler)
@@ -54,15 +54,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, OnRem
         }
         supportActionBar?.setBackgroundDrawable(ColorDrawable(getColor(R.color.colorPrimary)))
 
-        val serverUri: Uri = Uri.parse("https://owncloud.hpi.de/")
-        val client = OwnCloudClientFactory.createOwnCloudClient(
-            serverUri,
-            this,
-            // Activity or Service context
-            true);
-        client.credentials = OwnCloudCredentialsFactory.newBasicCredentials("tobias.fiedler", "EniXSSatM8")
-        val createOperation = CreateRemoteFolderOperation("/Hallo", false)
-        createOperation.execute(client, this, null)
+        ownCloudUploader = OwnCloudRecordingsUploader(this, recordingsManager)
     }
 
     override fun onResume() {
@@ -95,24 +87,12 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, OnRem
     }
 
     fun onFileUploadMenuItemClicked(ignored: MenuItem) {
-        FileUploaderDialog(this).show()
+        RecordingsUploaderDialog(this,  ownCloudUploader ).show()
+
     }
 
     fun onSettingsMenuItemClicked(ignored: MenuItem) {
         val intent = Intent(this, SettingsActivity::class.java)
         startActivity(intent)
-    }
-
-    override fun onRemoteOperationFinish(
-        operation: RemoteOperation<*>?,
-        result: RemoteOperationResult<*>?
-    ) {
-        if (operation is CreateRemoteFolderOperation) {
-            if (result != null) {
-                val success = result.isSuccess
-                Toast.makeText(this, "folder creation successful: $success", Toast.LENGTH_LONG).show()
-
-            }
-        }
     }
 }

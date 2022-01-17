@@ -8,7 +8,7 @@ import java.io.File
 
 class JSONStorageTest {
     val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-    val file = File(appContext.dataDir, "test.json")
+    val file = File(appContext.cacheDir,"test.json")
     @Before
     fun init() {
         file.delete()
