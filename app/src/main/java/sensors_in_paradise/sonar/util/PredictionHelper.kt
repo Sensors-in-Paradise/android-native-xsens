@@ -15,7 +15,7 @@ class PredictionHelper(
 
     private val numDevices = 5
     private val sizeOfFloat = 4
-    private val numQuats = 4
+    private val numQuats = 0
     private val numFreeAccs = 3
     private var numDataLines = 0
 
@@ -91,7 +91,8 @@ class PredictionHelper(
     }
 
     private fun normalizeLine(dataArray: FloatArray, minArray: DoubleArray, maxArray: DoubleArray): FloatArray {
-        val numElements = numQuats + numFreeAccs
+        // val numElements = numQuats + numFreeAccs
+        val numElements = 4 + numFreeAccs
         val normalizedArray = FloatArray(numElements)
 
         val lowerBound = 0.0001
@@ -152,7 +153,8 @@ class PredictionHelper(
                     }
                 }
 
-                lineFloatArray += normalizedFloatArray
+                // Take only free acc
+                lineFloatArray += normalizedFloatArray.takeLast(3)
             }
             floatArray += lineFloatArray
         }
