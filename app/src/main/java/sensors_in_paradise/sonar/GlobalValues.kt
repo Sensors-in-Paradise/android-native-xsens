@@ -35,12 +35,21 @@ class GlobalValues private constructor() {
             Manifest.permission.INTERNET,
             Manifest.permission.ACCESS_NETWORK_STATE
         )
-        val sensorTagMap = mapOf(
+
+        // TODO: Find nice solution for detecting the used sensor set and using the matching list
+        val sensorTagMap_v1 = mapOf(
             "LF" to "D4:22:CD:00:06:7B",
             "LW" to "D4:22:CD:00:06:89",
             "ST" to "D4:22:CD:00:06:7F",
             "RW" to "D4:22:CD:00:06:7D",
             "RF" to "D4:22:CD:00:06:72"
+        )
+        val sensorTagMap = mapOf(
+            "LF" to "D4:22:CD:00:38:2F",
+            "LW" to "D4:22:CD:00:38:90",
+            "ST" to "D4:22:CD:00:38:31",
+            "RW" to "D4:22:CD:00:38:40",
+            "RF" to "D4:22:CD:00:38:0A"
         )
 
         fun sensorAddressToTag(address: String): String {
