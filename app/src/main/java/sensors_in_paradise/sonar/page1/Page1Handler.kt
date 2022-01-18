@@ -25,6 +25,7 @@ import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.util.PermissionsHelper
 import java.util.ArrayList
 import java.util.HashMap
+import android.view.animation.AccelerateDecelerateInterpolator
 
 class Page1Handler(val scannedDevices: XSENSArrayList) :
     XsensDotScannerCallback, XsensDotDeviceCallback, PageInterface,
@@ -40,9 +41,11 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
     private lateinit var syncLinearLayout: LinearLayout
     private lateinit var syncPb: ProgressBar
     private lateinit var syncBtn: Button
-    private var isSyncing = false
+    private lateinit var refreshLinearLayout: LinearLayout
+    private lateinit var refreshButton: Button
     private val unsyncedColor = Color.parseColor("#FF5722")
     private val syncedColor = Color.parseColor("#00e676")
+    override var isSyncing = false
 
     override fun onXsensDotConnectionChanged(address: String, state: Int) {
         activity.runOnUiThread {
@@ -98,6 +101,7 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
 
         activity.runOnUiThread {
             linearLayoutCenter.visibility = View.INVISIBLE
+            refreshLinearLayout.visibility = View.VISIBLE
         }
     }
     @RequiresApi(Build.VERSION_CODES.S)
@@ -113,11 +117,25 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
         linearLayoutCenter = activity.findViewById(R.id.linearLayout_center_activity_main)
         sensorAdapter = SensorAdapter(context, scannedDevices, this)
         rv.adapter = sensorAdapter
+        refreshLinearLayout = activity.findViewById(R.id.linearLayout_refresh_connection_fragment)
+        refreshButton = activity.findViewById(R.id.button_refresh_connection_fragment)
 
         syncBtn.setOnClickListener {
             isSyncing = true
             scannedDevices.getConnected()[0].isRootDevice = true
             XsensDotSyncManager.getInstance(SyncHandler(this)).startSyncing(scannedDevices.getConnected(), 0)
+        }
+
+        refreshButton.setOnClickListener {
+            val deg: Float = refreshButton.rotation + 1080f
+            refreshButton.animate().rotation(deg).interpolator = AccelerateDecelerateInterpolator()
+            refreshButton.animate().duration = 1500
+
+            mXsScanner!!.stopScan()
+            scannedDevices.forEach { it.disconnect() }
+            scannedDevices.clear()
+            sensorAdapter.notifyDataSetChanged()
+            mXsScanner!!.startScan()
         }
     }
     override fun activityResumed() {
@@ -157,6 +175,15 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
         } else {
             device.disconnect()
         }
+        activity.runOnUiThread {
+            sensorAdapter.notifyItemChanged(device.address)
+        }
+    }
+
+    override fun onConnectionCancelRequested(device: XsensDotDevice) {
+        // TODO Check if works
+        device.disconnect()
+
         activity.runOnUiThread {
             sensorAdapter.notifyItemChanged(device.address)
         }

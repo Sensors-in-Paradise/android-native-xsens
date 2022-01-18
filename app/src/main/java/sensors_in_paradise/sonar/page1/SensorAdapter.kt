@@ -34,9 +34,10 @@ class SensorAdapter(
         val card: CardView = view.findViewById(R.id.card_sensorDevice)
         val nameTextView: TextView = view.findViewById(R.id.tv_name_sensorDevice)
         val detailsTextView: TextView = view.findViewById(R.id.tv_details_sensorDevice)
-        val button: Button = view.findViewById(R.id.switch_connect_sensorDevice)
+        val connectButton: Button = view.findViewById(R.id.switch_connect_sensorDevice)
         val flipper: ViewFlipper = view.findViewById(R.id.flipper_sensorDevice)
         val batteryPB: ProgressBar = view.findViewById(R.id.pb_battery_sensorDevice)
+        val cancelButton: Button = view.findViewById(R.id.button_cancel_connection_sensor_device)
         val statusIV: ImageView = view.findViewById(R.id.imageView_status_connection_fragment)
     }
 
@@ -58,9 +59,12 @@ class SensorAdapter(
         val device = devices[position]
         viewHolder.nameTextView.text = "${device.name} ${device.tag}"
 
-        viewHolder.button.setOnClickListener {
-            val isConnectedState = (viewHolder.button.text == "Connect")
+        viewHolder.connectButton.setOnClickListener {
+            val isConnectedState = (viewHolder.connectButton.text == "Connect")
             connectionCallbackUI.onConnectionUpdateRequested(device, isConnectedState)
+        }
+        viewHolder.cancelButton.setOnClickListener {
+            connectionCallbackUI.onConnectionCancelRequested(device)
         }
         viewHolder.card.setOnLongClickListener {
             device.identifyDevice()
@@ -71,7 +75,7 @@ class SensorAdapter(
         val isReconnecting = (device.connectionState == XsensDotDevice.CONN_STATE_RECONNECTING)
         val isConnectingOrReconnecting = isConnecting or isReconnecting
         viewHolder.flipper.displayedChild = if (isConnectingOrReconnecting) 1 else 0
-        viewHolder.button.text = if (isConnected) "Disconnect" else "Connect"
+        viewHolder.connectButton.text = if (isConnected) "Disconnect" else "Connect"
         var detailsText = getConnectionStateLabel(device.connectionState)
         if (isConnected) {
             detailsText = if (isSynced) "Synced" else "Connected"
@@ -80,6 +84,8 @@ class SensorAdapter(
         viewHolder.detailsTextView.text = detailsText
         viewHolder.batteryPB.progress = if (isConnected) device.batteryPercentage else 0
         viewHolder.batteryPB.visibility = if (isConnected) View.VISIBLE else View.INVISIBLE
+
+        viewHolder.cancelButton.visibility = if (connectionCallbackUI.isSyncing) View.GONE else View.VISIBLE
 
         var statusDrawable = disconnectedDrawable
         if (isConnected) {
