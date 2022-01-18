@@ -70,12 +70,12 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         predictions.clear()
 
         val outputLabelMap = mapOf(
-            0 to "Walking",
+            0 to "Running",
             1 to "Squats",
-            2 to "Running",
-            3 to "Stairs Down",
-            4 to "Stairs up",
-            5 to "Standing"
+            2 to "Stairs Down",
+            3 to "Stairs Up",
+            4 to "Standing",
+            5 to "Walking"
         ).withDefault { "" }
 
         for (i in 0..output.size - 1) {
