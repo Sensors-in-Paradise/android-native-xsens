@@ -19,7 +19,7 @@ import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.ml.XsensTest02
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
-import sensors_in_paradise.sonar.ml.AutoModel220118131706399968Lstmmodel
+import sensors_in_paradise.sonar.ml.Lstmmodel118
 import kotlin.collections.ArrayList
 import java.nio.ByteBuffer
 import kotlin.math.round
@@ -137,7 +137,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         predictButton.setOnClickListener {
             if (sensorDataByteBuffer != null) {
                 // get data and model
-                val model = AutoModel220118131706399968Lstmmodel.newInstance(context)
+                val model = Lstmmodel118.newInstance(context)
 
                 // Creates inputs for reference.
                 val inputFeature0 = TensorBuffer.createFixedSize(
