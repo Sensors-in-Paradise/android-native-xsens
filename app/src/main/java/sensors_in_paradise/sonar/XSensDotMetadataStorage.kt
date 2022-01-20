@@ -22,7 +22,7 @@ class XSensDotMetadataStorage(context: Context) : JSONStorage(File(context.dataD
     }
 
     fun getAddressForTag(tag: String): String {
-        json.keys().forEach { if (getTagForAddress(it) == tag) { return it }}
+        json.keys().forEach { if (getTagForAddress(it) == tag) { return it } }
         return ""
     }
 
@@ -30,7 +30,7 @@ class XSensDotMetadataStorage(context: Context) : JSONStorage(File(context.dataD
         val deviceSetKeys = connectedDevices.map { getTagForAddress(it.address).last() }.toSet()
         return if (deviceSetKeys.size == 1) {
             deviceSetKeys.first().toString()
-        } else if (deviceSetKeys.isEmpty()){
+        } else if (deviceSetKeys.isEmpty()) {
             Toast.makeText(context, "No device of known set connected!", Toast.LENGTH_SHORT).show()
             null
         } else {
@@ -38,5 +38,4 @@ class XSensDotMetadataStorage(context: Context) : JSONStorage(File(context.dataD
             null
         }
     }
-
 }
