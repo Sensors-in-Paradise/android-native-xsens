@@ -17,7 +17,7 @@ import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.XSENSArrayList
 
 class SensorAdapter(
-    private val context: Context,
+    context: Context,
     private val devices: XSENSArrayList,
     private val connectionCallbackUI: UIDeviceConnectionInterface
 ) :
