@@ -41,7 +41,7 @@ class LoggingManager(
     private var recordingStartTime = 0L
     private val activitiesAdapter = ActivitiesAdapter(labels)
     private lateinit var xSenseMetadataStorage: XSensDotMetadataStorage
-    private lateinit var tempSensorMacMap: MutableMap<String, String>
+    private val tempSensorMacMap = mutableMapOf<String, String>()
     init {
         activitiesRV.adapter = activitiesAdapter
 
@@ -76,6 +76,7 @@ class LoggingManager(
         endButton.setOnClickListener {
             stopLogging()
         }
+        xSenseMetadataStorage = XSensDotMetadataStorage(context)
     }
 
     private fun showActivityDialog(
@@ -124,11 +125,12 @@ class LoggingManager(
             Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
             return false
         }
-        val deviceSetKey = xSenseMetadataStorage.tryGetDeviceSetKey(devices) ?: return false
+        val deviceSetKey = xSenseMetadataStorage.tryGetDeviceSetKey(devices.getConnected()) ?: return false
 
-        for (tag in GlobalValues.sensorTags) {
-            val address = xSenseMetadataStorage.getTagForAddress("$tag$deviceSetKey")
-            tempSensorMacMap[address] = "$tag$deviceSetKey"
+        for (tagPrefix in GlobalValues.sensorTagPrefixes) {
+            val tag = GlobalValues.formatTag(tagPrefix, deviceSetKey)
+            val address = xSenseMetadataStorage.getAddressForTag(tag)
+            tempSensorMacMap[address] = tag
         }
         return true
     }

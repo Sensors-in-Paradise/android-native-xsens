@@ -55,10 +55,10 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
             return false
         }
-        val deviceSetKey = metadataStorage.tryGetDeviceSetKey(devices) ?: return false
+        val deviceSetKey = metadataStorage.tryGetDeviceSetKey(devices.getConnected()) ?: return false
 
-        for (tag in GlobalValues.sensorTags) {
-            rawSensorDataMap["$tag$deviceSetKey"] = mutableListOf<Pair<Long, FloatArray>>()
+        for (tagPrefix in GlobalValues.sensorTagPrefixes) {
+            rawSensorDataMap[GlobalValues.formatTag(tagPrefix, deviceSetKey)] = mutableListOf<Pair<Long, FloatArray>>()
         }
         return true
     }

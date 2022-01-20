@@ -14,6 +14,7 @@ class XSensDotDeviceWithOfflineMetadata(
     private val defaultTag = "Xsens DOT"
 
     override fun getTag(): String {
-        return if ((super.getTag() == "" || super.getTag() == defaultTag) && _tag != null) _tag else super.getTag()
+        val shouldUseOfflineTag = ((super.getTag() == "" || super.getTag() == defaultTag) && _tag != null)
+        return if (shouldUseOfflineTag) _tag!! else super.getTag()
     }
 }

@@ -36,8 +36,17 @@ class GlobalValues private constructor() {
             Manifest.permission.ACCESS_NETWORK_STATE
         )
 
-        val sensorTags = listOf("LF", "LW", "ST", "RW", "RF")
+        val sensorTagPrefixes = listOf("LF", "LW", "ST", "RW", "RF")
 
+        fun formatTag(tagPrefix: String, deviceSetKey: String): String {
+            return "$tagPrefix-$deviceSetKey"
+        }
+        fun extractTagPrefixFromTag(tag: String): String {
+            return tag.substring(0, 2)
+        }
+        fun extractDeviceSetKeyFromTag(tag: String): String {
+            return tag.last().toString()
+        }
         fun getDurationAsString(durationMS: Long): String {
 
             val diffSecs = (durationMS) / 1000
