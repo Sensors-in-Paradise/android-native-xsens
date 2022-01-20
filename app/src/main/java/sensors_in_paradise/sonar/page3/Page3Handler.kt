@@ -10,6 +10,7 @@ import sensors_in_paradise.sonar.util.UIHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotPayload
+import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import sensors_in_paradise.sonar.GlobalValues
@@ -19,6 +20,7 @@ import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.ml.XsensTest02
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
+import java.io.File
 import kotlin.collections.ArrayList
 import java.nio.ByteBuffer
 import java.time.LocalDateTime
@@ -44,6 +46,9 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private var numConnectedDevices = 0
     private var isRunning = false
 
+    private val xsLoggers: java.util.ArrayList<XsensDotLogger> = ArrayList()
+    private lateinit var fileDir: File
+
     private fun toggleButtons() {
         startButton.isEnabled = !(startButton.isEnabled)
         stopButton.isEnabled = !(stopButton.isEnabled)
@@ -58,6 +63,11 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
     private fun stopDataCollection() {
         timer.stop()
+
+        for (logger in xsLoggers) {
+            logger.stop()
+        }
+
         for (device in devices.getConnected()) {
             device.stopMeasuring()
         }
@@ -88,11 +98,18 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         adapter.notifyDataSetChanged()
     }
 
+    private fun createDirectory(): File {
+        if (!fileDir.exists()) {
+            val timeStr = DateTimeFormatter.ofPattern("yyyy-MM-yy-HH-mm-ss").format(LocalDateTime.now())
+            fileDir = GlobalValues.getSensorRecordingsBaseDir(context).resolve("prediction").resolve(timeStr)
+        }
+
+        return fileDir
+    }
+
     private fun exportPreprocessedData() {
-        val timeStr = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())
-        val destFileDir = GlobalValues.getSensorRecordingsBaseDir(context).resolve(" prediction")
-        destFileDir.mkdirs()
-        val file = destFileDir.resolve("${timeStr}_preprocessed.txt")
+        val destFileDir = createDirectory()
+        val file = destFileDir.resolve("preprocessed_data.txt")
 
         val byteArray = sensorDataByteBuffer?.array()
         if (byteArray != null) {
@@ -131,6 +148,22 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                 for (device in devices.getConnected()) {
                     device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
                     device.startMeasuring()
+
+                    // Logging data before preprocessing (quick solution without LoggingManager)
+                    val filepath = createDirectory().resolve("${device.address}.csv").toString()
+                    xsLoggers.add(
+                        XsensDotLogger(
+                            this.context,
+                            XsensDotLogger.TYPE_CSV,
+                            XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION,
+                            filepath,
+                            device.address,
+                            "1",
+                            false,
+                            1,
+                            null as String?,
+                            "appVersion",
+                            0))
                 }
                 timer.base = SystemClock.elapsedRealtime()
                 timer.start()

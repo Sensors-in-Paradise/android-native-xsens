@@ -218,7 +218,7 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
                 device.setOutputRate(60)
         }
         activity.runOnUiThread {
-            Toast.makeText(context, "Finished syncing, success: $isSuccess", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Finished syncing, success: $isSuccess", Toast.LENGTH_SHORT).show()
             updateSyncButtonState()
             syncPb.progress = 100
             if (syncingResultMap != null) {
