@@ -75,10 +75,8 @@ class RecordingMetadataStorage(file: File) : JSONStorage(file) {
     }
     private fun setSensorMacMap(sensorMacMap: Map<String, String>) {
         val obj = JSONObject()
-        for (key in sensorMacMap.keys) {
-            if (sensorMacMap[key] != null) {
-                obj.put(sensorMacMap[key], key)
-            }
+        for (entry in sensorMacMap.entries) {
+            obj.put(entry.key, entry.value)
         }
         json.put("sensorMapping", obj)
     }

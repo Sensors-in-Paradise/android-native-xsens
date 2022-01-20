@@ -1,9 +1,12 @@
 package sensors_in_paradise.sonar
 
 import android.content.Context
+import android.widget.Toast
 import java.io.File
 
 class XSensDotMetadataStorage(context: Context) : JSONStorage(File(context.dataDir, "xsensDotMetadata.json")) {
+    private val context = context
+
     override fun onFileNewlyCreated() {
     }
 
@@ -17,4 +20,23 @@ class XSensDotMetadataStorage(context: Context) : JSONStorage(File(context.dataD
     fun getTagForAddress(address: String): String {
         return json.optString(address)
     }
+
+    fun getAddressForTag(tag: String): String {
+        json.keys().forEach { if (getTagForAddress(it) == tag) { return it }}
+        return ""
+    }
+
+    fun tryGetDeviceSetKey(connectedDevices: XSENSArrayList): String? {
+        val deviceSetKeys = connectedDevices.map { getTagForAddress(it.address).last() }.toSet()
+        return if (deviceSetKeys.size == 1) {
+            deviceSetKeys.first().toString()
+        } else if (deviceSetKeys.isEmpty()){
+            Toast.makeText(context, "No device of known set connected!", Toast.LENGTH_SHORT).show()
+            null
+        } else {
+            Toast.makeText(context, "Devices from multiple sets connected!", Toast.LENGTH_SHORT).show()
+            null
+        }
+    }
+
 }
