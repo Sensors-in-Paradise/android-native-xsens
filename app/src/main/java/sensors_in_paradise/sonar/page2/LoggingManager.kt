@@ -109,7 +109,7 @@ class LoggingManager(
     private fun getRecordingFileDir(time: LocalDateTime): File {
         val timeStr = time.toInstant(ZoneOffset.UTC).toEpochMilli().toString()//DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(time)
 
-        return GlobalValues.getSensorRecordingsBaseDir(context)/*.resolve(person)*/.resolve(timeStr)
+        return GlobalValues.getSensorRecordingsBaseDir(context).resolve("Recordings")/*.resolve(person)*/.resolve(timeStr)
     }
 
     private fun getRecordingFile(fileDir: File, deviceAddress: String): File {

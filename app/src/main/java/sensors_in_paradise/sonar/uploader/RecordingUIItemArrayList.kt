@@ -4,7 +4,16 @@ import java.io.File
 
 class RecordingUIItemArrayList : ArrayList<RecordingUIItem>() {
 
-    fun getByDir(dir: File): RecordingUIItem? {
+    fun getRecordingsInDir(dir: File): ArrayList<RecordingUIItem> {
+        val recordings = ArrayList<RecordingUIItem>()
+        for (fileUIItem in this) {
+            if (fileUIItem.dir.path.contains(dir.path)) {
+                recordings.add(fileUIItem)
+            }
+        }
+        return recordings
+    }
+    fun getByRecordingDir(dir: File): RecordingUIItem? {
         for (fileUIItem in this) {
             if (fileUIItem.dir == dir) {
                 return fileUIItem

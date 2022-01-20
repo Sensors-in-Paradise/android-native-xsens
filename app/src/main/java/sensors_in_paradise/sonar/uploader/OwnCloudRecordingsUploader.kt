@@ -23,11 +23,14 @@ class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
     val recordingUiItems = RecordingUIItemArrayList()
 
     init {
+        // TODO: Make work with parent dirs
         for (recording in recordingsManager.recordingsList) {
             val recording = RecordingUIItem(recording)
+            val isRemoteDirCreated = ownCloudMetadata.isDirCreated(recording.dir)
             recordingUiItems.add(recording)
             recording.dirStatus =
-                if (ownCloudMetadata.isDirCreated(recording.dir)) UploadStatus.UPLOADED else UploadStatus.NOT_UPLOADED
+                if (isRemoteDirCreated) UploadStatus.UPLOADED else UploadStatus.NOT_UPLOADED
+
             for (file in recording.filesToBeUploaded) {
                 recording.setStatusOfFile(
                     file,
@@ -44,7 +47,17 @@ class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
             }
         }
     }
-
+    private fun getPathOfParent(path:String): String{
+       val result = path.removeSuffix("/")
+        return result.substringBeforeLast("/")
+    }
+    private fun getAlreadyCreatedParentDir(dir: File): File{
+        var result = dir
+        while(!ownCloudMetadata.isDirCreated(result)){
+            result = result.parentFile
+        }
+        return dir
+    }
     private fun uploadRecording(recording: RecordingUIItem) {
         val dir = recording.dir
         if (ownCloudMetadata.isDirCreated(dir)) {
@@ -54,7 +67,8 @@ class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
         } else {
             val path = ownCloudMetadata.getRelativePath(dir)
             recording.dirStatus = UploadStatus.UPLOADING
-            ownCloud.createDir(path, dir)
+            val dirToCreatePath = getNotCreatedChildDirWithCreatedParent(path)
+            ownCloud.createDir(dirToCreatePath, dir)
         }
         onItemChanged?.let { it(recording) }
     }
@@ -80,26 +94,28 @@ class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
 
     override fun onDirCreated(dirPath: String, localReferenceDir: File?) {
         ownCloudMetadata.setDirCreated(localReferenceDir!!)
-        val recording = recordingUiItems.getByDir(localReferenceDir)!!
-        uploadFilesOfRecording(recording)
-        recording.dirStatus = UploadStatus.UPLOADED
-        onItemChanged?.let { it(recording) }
-        Log.d("OWNCLOUD", "Dir created: $dirPath")
+        val recordings = recordingUiItems.getRecordingsInDir(localReferenceDir)
+        for(recording in recordings){
+            uploadRecording(recording)
+        }
 
+        Log.d("OWNCLOUD", "Dir created: $dirPath")
     }
 
     override fun onDirCreationFailed(dirPath: String, localReferenceDir: File?, e: Exception) {
         Log.e("OWNCLOUD", "Dir creation failed: ${e.message}")
-        val recording = recordingUiItems.getByDir(localReferenceDir!!)!!
-        recording.error = e
-        recording.dirStatus = UploadStatus.FAILED
-        onItemChanged?.let { it(recording) }
+        val recordings = recordingUiItems.getRecordingsInDir(localReferenceDir!!)
+        for(recording in recordings){
+            recording.error = e
+            recording.dirStatus = UploadStatus.FAILED
+            onItemChanged?.let { it(recording) }
+        }
     }
 
     override fun onFileUploaded(localFile: File, remoteFilePath: String) {
         ownCloudMetadata.setFileUploaded(localFile)
         Log.d("OWNCLOUD", "File Uploaded: $remoteFilePath")
-        val recording = recordingUiItems.getByDir(localFile.parentFile!!)!!
+        val recording = recordingUiItems.getByRecordingDir(localFile.parentFile!!)!!
         recording.setStatusOfFile(localFile, UploadStatus.UPLOADED)
         onItemChanged?.let { it(recording) }
     }
@@ -107,7 +123,7 @@ class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
     override fun onFileUploadFailed(localFile: File, filePath: String, e: Exception) {
         e.printStackTrace()
         Log.e("OWNCLOUD", "Dir creation failed: ${e.message}")
-        val recording = recordingUiItems.getByDir(localFile.parentFile!!)!!
+        val recording = recordingUiItems.getByRecordingDir(localFile.parentFile!!)!!
         recording.error = e
         recording.setStatusOfFile(localFile, UploadStatus.FAILED)
         onItemChanged?.let { it(recording) }
