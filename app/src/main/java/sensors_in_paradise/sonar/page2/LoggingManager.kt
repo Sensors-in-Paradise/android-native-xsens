@@ -39,6 +39,7 @@ class LoggingManager(
     private val labels = ArrayList<Pair<Long, String>>()
     private var recordingStartTime = 0L
     private val activitiesAdapter = ActivitiesAdapter(labels)
+
     init {
         activitiesRV.adapter = activitiesAdapter
 
@@ -119,6 +120,14 @@ class LoggingManager(
     }
 
     private fun startLogging() {
+        while (labels.size > 1) {
+            labels.removeAt(0)
+        }
+        recordingStartTime = System.currentTimeMillis()
+        if (labels.size == 1) {
+            val pair = labels[0]
+            labels[0] = Pair(recordingStartTime, pair.second)
+        }
         endButton.isEnabled = true
         startButton.isEnabled = false
         timer.base = SystemClock.elapsedRealtime()
@@ -128,7 +137,7 @@ class LoggingManager(
         fileDir.mkdirs()
         val recordingsKey = LocalDateTime.now()
         tempRecordingMap[recordingsKey] = arrayListOf()
-        recordingStartTime = System.currentTimeMillis()
+
         for (device in devices.getConnected()) {
             device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
             device.startMeasuring()
@@ -215,8 +224,15 @@ class LoggingManager(
                 val destFile = getRecordingFile(destFileDir, deviceAddress)
                 Files.copy(tempFile.toPath(), FileOutputStream(destFile))
             }
-            val metadataStorage = RecordingMetadataStorage(destFileDir.resolve(GlobalValues.METADATA_JSON_FILENAME))
-            metadataStorage.setData(labels, recordingStartTime, recordingEndTime, person, GlobalValues.sensorTagMap)
+            val metadataStorage =
+                RecordingMetadataStorage(destFileDir.resolve(GlobalValues.METADATA_JSON_FILENAME))
+            metadataStorage.setData(
+                labels,
+                recordingStartTime,
+                recordingEndTime,
+                person,
+                GlobalValues.sensorTagMap
+            )
 
             onRecordingDone?.let { it(Recording(destFileDir, metadataStorage)) }
         }
@@ -226,6 +242,7 @@ class LoggingManager(
     fun setOnRecordingDone(onRecordingDone: (Recording) -> Unit) {
         this.onRecordingDone = onRecordingDone
     }
+
     fun setOnRecordingStarted(onRecordingStarted: () -> Unit) {
         this.onRecordingStarted = onRecordingStarted
     }
