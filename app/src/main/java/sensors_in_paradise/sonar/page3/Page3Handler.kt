@@ -98,18 +98,14 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         adapter.notifyDataSetChanged()
     }
 
-    private fun createDirectory(): File {
-        if (!fileDir.exists()) {
-            val timeStr = DateTimeFormatter.ofPattern("yyyy-MM-yy-HH-mm-ss").format(LocalDateTime.now())
-            fileDir = GlobalValues.getSensorRecordingsBaseDir(context).resolve("prediction").resolve(timeStr)
-        }
-
-        return fileDir
+    private fun createFileDir() {
+        val timeStr = DateTimeFormatter.ofPattern("yyyy-MM-yy-HH-mm-ss").format(LocalDateTime.now())
+        fileDir = GlobalValues.getSensorRecordingsBaseDir(context).resolve("prediction").resolve(timeStr)
+        fileDir.mkdirs()
     }
 
     private fun exportPreprocessedData() {
-        val destFileDir = createDirectory()
-        val file = destFileDir.resolve("preprocessed_data.txt")
+        val file = fileDir.resolve("preprocessed_data.txt")
 
         val byteArray = sensorDataByteBuffer?.array()
         if (byteArray != null) {
@@ -150,7 +146,8 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                     device.startMeasuring()
 
                     // Logging data before preprocessing (quick solution without LoggingManager)
-                    val filepath = createDirectory().resolve("${device.address}.csv").toString()
+                    createFileDir()
+                    val filepath = fileDir.resolve("${device.address}.csv").toString()
                     xsLoggers.add(
                         XsensDotLogger(
                             this.context,
@@ -164,6 +161,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                             null as String?,
                             "appVersion",
                             0))
+
                 }
                 timer.base = SystemClock.elapsedRealtime()
                 timer.start()
@@ -219,6 +217,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
+        xsLoggers.find { logger -> logger.filename.contains(deviceAddress) }?.update(xsensDotData)
 
         val timeStamp: Long = xsensDotData.getSampleTimeFine()
         val quat: FloatArray = xsensDotData.getQuat()
