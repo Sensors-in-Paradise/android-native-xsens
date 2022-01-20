@@ -64,8 +64,8 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
     }
     override fun onXsensDotFirmwareVersionRead(s: String, s1: String) {}
     override fun onXsensDotTagChanged(address: String, tag: String) {
-        val device  = scannedDevices.get(address)
-        if(device!=null) {
+        val device = scannedDevices.get(address)
+        if (device != null) {
             Log.d("CONNECTION_SCREEN", "setting tag for device $address tag: $tag")
             xsensDotMetadata.setTagForAddress(address, tag)
         }
@@ -133,7 +133,7 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
         syncBtn.setOnClickListener {
             isSyncing = true
             scannedDevices.getConnected()[0].isRootDevice = true
-            XsensDotSyncManager.getInstance(SyncHandler(this)).startSyncing(scannedDevices.getConnected() , 0)
+            XsensDotSyncManager.getInstance(SyncHandler(this)).startSyncing(scannedDevices.getConnected(), 0)
         }
 
         refreshButton.setOnClickListener {
