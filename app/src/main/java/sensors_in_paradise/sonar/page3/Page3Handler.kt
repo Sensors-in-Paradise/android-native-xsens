@@ -21,6 +21,8 @@ import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import kotlin.collections.ArrayList
 import java.nio.ByteBuffer
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.math.round
 
 class Page3Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface {
@@ -86,6 +88,18 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         adapter.notifyDataSetChanged()
     }
 
+    private fun exportPreprocessedData() {
+        val timeStr = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now())
+        val destFileDir = GlobalValues.getSensorRecordingsBaseDir(context).resolve(" prediction")
+        destFileDir.mkdirs()
+        val file = destFileDir.resolve("${timeStr}_preprocessed.txt")
+
+        val byteArray = sensorDataByteBuffer?.array()
+        if (byteArray != null) {
+            file.writeBytes(byteArray)
+        }
+    }
+
     override fun activityCreated(activity: Activity) {
 
         this.activity = activity
@@ -130,6 +144,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         stopButton.setOnClickListener {
             stopDataCollection()
+            exportPreprocessedData()
         }
 
         predictButton = activity.findViewById(R.id.button_predict_predict)
