@@ -3,39 +3,43 @@ package sensors_in_paradise.sonar.uploader
 import android.app.Activity
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import com.google.common.net.MediaType
 import sensors_in_paradise.sonar.GlobalValues
-import sensors_in_paradise.sonar.page2.Recording
 import sensors_in_paradise.sonar.page2.RecordingDataManager
 import java.io.File
-import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
-import java.time.temporal.TemporalAccessor
 
 class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: RecordingDataManager) :
     OwnCloudClientInterface {
     val context: Context = activity
     var onItemChanged: ((recording: RecordingUIItem) -> Unit)? = null
+    var onAllItemsFinishedWork: (() -> Unit)? = null
     private val ownCloudMetadata =
         LocalOwnCloudMetadataStorage(activity, GlobalValues.getSensorRecordingsBaseDir(context))
     private val ownCloud = OwnCloudClient(activity, this)
     val recordingUiItems = RecordingUIItemArrayList()
-
+    private val dirCreationRequests = mutableSetOf<File>()
     init {
-        // TODO: Make work with parent dirs
+        reloadRecordings()
+    }
+    fun reloadRecordings() {
+        recordingUiItems.clear()
         for (recording in recordingsManager.recordingsList) {
-            val recording = RecordingUIItem(recording)
-            val isRemoteDirCreated = ownCloudMetadata.isDirCreated(recording.dir)
-            recordingUiItems.add(recording)
-            recording.dirStatus =
-                if (isRemoteDirCreated) UploadStatus.UPLOADED else UploadStatus.NOT_UPLOADED
+            val recording = RecordingUIItem(recording, ownCloudMetadata.localUploadedFilesBaseDir)
 
-            for (file in recording.filesToBeUploaded) {
-                recording.setStatusOfFile(
+            for (file in recording.filesAndDirsToBeUploaded) {
+                val isUploaded =
+                    if (file.isFile) ownCloudMetadata.isFileUploaded(file) else ownCloudMetadata.isDirCreated(
+                        file
+                    )
+                recording.setStatusOfFileOrDir(
                     file,
-                    if (ownCloudMetadata.isFileUploaded(file)) UploadStatus.UPLOADED else UploadStatus.NOT_UPLOADED
+                    if (isUploaded) UploadStatus.UPLOADED else UploadStatus.NOT_UPLOADED
                 )
+            }
+            if (recording.isUploaded()) {
+                recordingUiItems.add(recording)
+            } else {
+                recordingUiItems.add(0, recording)
             }
         }
     }
@@ -46,29 +50,27 @@ class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
                 uploadRecording(recordingUiItem)
             }
         }
-    }
-    private fun getPathOfParent(path:String): String{
-       val result = path.removeSuffix("/")
-        return result.substringBeforeLast("/")
-    }
-    private fun getAlreadyCreatedParentDir(dir: File): File{
-        var result = dir
-        while(!ownCloudMetadata.isDirCreated(result)){
-            result = result.parentFile
+        if (onAllItemsFinishedWork != null) {
+            if (areAllRecordingsFinished()) {
+                onAllItemsFinishedWork?.let { it() }
+            }
         }
-        return dir
     }
-    private fun uploadRecording(recording: RecordingUIItem) {
-        val dir = recording.dir
-        if (ownCloudMetadata.isDirCreated(dir)) {
-            recording.dirStatus = UploadStatus.UPLOADED
 
+    private fun uploadRecording(recording: RecordingUIItem) {
+        if (ownCloudMetadata.isDirCreated(recording.dir)) {
             uploadFilesOfRecording(recording)
         } else {
-            val path = ownCloudMetadata.getRelativePath(dir)
-            recording.dirStatus = UploadStatus.UPLOADING
-            val dirToCreatePath = getNotCreatedChildDirWithCreatedParent(path)
-            ownCloud.createDir(dirToCreatePath, dir)
+            for (dir in recording.dirsToBeCreated) {
+                val isCreated = ownCloudMetadata.isDirCreated(dir)
+                val isCreationAlreadyRequested = dirCreationRequests.contains(dir)
+                if (!isCreated && !isCreationAlreadyRequested) {
+                    dirCreationRequests.add(dir)
+                    recording.setStatusOfFileOrDir(dir, UploadStatus.UPLOADING)
+                    ownCloud.createDir(ownCloudMetadata.getRelativePath(dir), dir)
+                    break
+                }
+            }
         }
         onItemChanged?.let { it(recording) }
     }
@@ -77,55 +79,74 @@ class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
         for (file in recording.filesToBeUploaded) {
             if (!ownCloudMetadata.isFileUploaded(file)) {
                 Log.d("OWNCLOUD", "Uploading file: ${file.name}")
-                recording.setStatusOfFile(file, UploadStatus.UPLOADING)
-
+                recording.setStatusOfFileOrDir(file, UploadStatus.UPLOADING)
                 ownCloud.uploadFile(
                     file,
                     ownCloudMetadata.getRelativePath(file),
                     MediaType.CSV_UTF_8
                 )
             } else {
-                Log.d("OWNCLOUD", "File already uploaded: ${file.name}")
-                recording.setStatusOfFile(file, UploadStatus.UPLOADED)
+                // Log.d("OWNCLOUD", "File already uploaded: ${file.name}")
+                recording.setStatusOfFileOrDir(file, UploadStatus.UPLOADED)
             }
             onItemChanged?.let { it(recording) }
         }
     }
 
     override fun onDirCreated(dirPath: String, localReferenceDir: File?) {
+        Log.d("OWNCLOUD", "Dir created: $dirPath")
         ownCloudMetadata.setDirCreated(localReferenceDir!!)
         val recordings = recordingUiItems.getRecordingsInDir(localReferenceDir)
-        for(recording in recordings){
+        for (recording in recordings) {
+            recording.setStatusOfFileOrDir(localReferenceDir, UploadStatus.UPLOADED)
             uploadRecording(recording)
-        }
 
-        Log.d("OWNCLOUD", "Dir created: $dirPath")
+            onRecordingStatusChanged(recording)
+        }
     }
 
     override fun onDirCreationFailed(dirPath: String, localReferenceDir: File?, e: Exception) {
         Log.e("OWNCLOUD", "Dir creation failed: ${e.message}")
         val recordings = recordingUiItems.getRecordingsInDir(localReferenceDir!!)
-        for(recording in recordings){
-            recording.error = e
-            recording.dirStatus = UploadStatus.FAILED
-            onItemChanged?.let { it(recording) }
+        for (recording in recordings) {
+            if (recording.getStatusOfFileOrDir(localReferenceDir) != UploadStatus.UPLOADED) {
+                recording.error = e
+                recording.setStatusOfFileOrDir(localReferenceDir, UploadStatus.FAILED)
+                onRecordingStatusChanged(recording)
+            }
         }
     }
 
     override fun onFileUploaded(localFile: File, remoteFilePath: String) {
-        ownCloudMetadata.setFileUploaded(localFile)
         Log.d("OWNCLOUD", "File Uploaded: $remoteFilePath")
+        ownCloudMetadata.setFileUploaded(localFile)
         val recording = recordingUiItems.getByRecordingDir(localFile.parentFile!!)!!
-        recording.setStatusOfFile(localFile, UploadStatus.UPLOADED)
-        onItemChanged?.let { it(recording) }
+        recording.setStatusOfFileOrDir(localFile, UploadStatus.UPLOADED)
+        onRecordingStatusChanged(recording)
     }
 
     override fun onFileUploadFailed(localFile: File, filePath: String, e: Exception) {
-        e.printStackTrace()
         Log.e("OWNCLOUD", "Dir creation failed: ${e.message}")
+
         val recording = recordingUiItems.getByRecordingDir(localFile.parentFile!!)!!
         recording.error = e
-        recording.setStatusOfFile(localFile, UploadStatus.FAILED)
+        recording.setStatusOfFileOrDir(localFile, UploadStatus.FAILED)
+        onRecordingStatusChanged(recording)
+    }
+    private fun onRecordingStatusChanged(recording: RecordingUIItem) {
         onItemChanged?.let { it(recording) }
+        if (onAllItemsFinishedWork != null) {
+            if (areAllRecordingsFinished()) {
+                onAllItemsFinishedWork?.let { it() }
+            }
+        }
+    }
+    private fun areAllRecordingsFinished(): Boolean {
+        for (recording in recordingUiItems) {
+           if (!recording.isUploaded() && !recording.isFailed()) {
+               return false
+           }
+        }
+        return true
     }
 }

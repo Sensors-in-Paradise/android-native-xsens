@@ -61,7 +61,6 @@ class OwnCloudMetadataStorageTest {
         assertFalse(storageA.isDirCreated(testDir))
         storageA.setDirCreated(testDir)
 
-
         val testFile = File(baseDir.resolve("fancyDir").resolve("deeperDir"), "test.txt")
         assertFalse(storageA.isFileUploaded(testFile))
         storageA.setFileUploaded(testFile)
@@ -72,5 +71,4 @@ class OwnCloudMetadataStorageTest {
 
         storageB.file.delete()
     }
-
 }

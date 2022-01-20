@@ -7,9 +7,9 @@ interface OwnCloudClientInterface {
     @UiThread
     fun onDirCreated(dirPath: String, localReferenceDir: File?)
     @UiThread
-    fun onDirCreationFailed(dirPath: String, localReferenceDir: File?, e:Exception)
+    fun onDirCreationFailed(dirPath: String, localReferenceDir: File?, e: Exception)
     @UiThread
-    fun onFileUploaded(localFile:File,filePath: String)
+    fun onFileUploaded(localFile: File, filePath: String)
     @UiThread
-    fun onFileUploadFailed(localFile: File, filePath: String, e:Exception)
+    fun onFileUploadFailed(localFile: File, filePath: String, e: Exception)
 }

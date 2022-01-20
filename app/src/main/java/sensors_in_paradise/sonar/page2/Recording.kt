@@ -8,7 +8,7 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
         dir,
         RecordingMetadataStorage(dir.resolve(GlobalValues.METADATA_JSON_FILENAME))
     )
-    constructor(recording:Recording) : this(
+    constructor(recording: Recording) : this(
         recording.dir,
         recording.metadataStorage
     )
@@ -30,7 +30,7 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
     fun getDirectory(): File {
         return dir
     }
-    fun getRecordingFiles(): Array<File>{
-        return dir.listFiles{file -> file.isFile && file.name.endsWith(".csv")}?: emptyArray()
+    fun getRecordingFiles(): Array<File> {
+        return dir.listFiles { file -> file.isFile && file.name.endsWith(".csv") } ?: emptyArray()
     }
 }

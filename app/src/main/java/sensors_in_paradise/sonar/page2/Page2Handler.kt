@@ -13,7 +13,10 @@ import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.util.UIHelper
 
-class Page2Handler(private val devices: XSENSArrayList, private val recordingsManager:RecordingDataManager) : PageInterface, ConnectionInterface,
+class Page2Handler(
+    private val devices: XSENSArrayList,
+    private val recordingsManager: RecordingDataManager
+) : PageInterface, ConnectionInterface,
     TabLayout.OnTabSelectedListener {
     private lateinit var context: Context
     private lateinit var timer: Chronometer
@@ -28,7 +31,6 @@ class Page2Handler(private val devices: XSENSArrayList, private val recordingsMa
     private var numConnectedDevices = 0
     private var numDevices = 5
 
-
     private lateinit var loggingManager: LoggingManager
 
     override fun activityCreated(activity: Activity) {
@@ -37,7 +39,6 @@ class Page2Handler(private val devices: XSENSArrayList, private val recordingsMa
         timer = activity.findViewById(R.id.timer)
 
         activityCountTextView = activity.findViewById(R.id.tv_activity_counts)
-
 
         recyclerViewRecordings = activity.findViewById(R.id.recyclerView_recordings_captureFragment)
         val linearLayoutManager = LinearLayoutManager(context)

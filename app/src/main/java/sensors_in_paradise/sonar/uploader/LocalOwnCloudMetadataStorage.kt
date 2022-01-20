@@ -18,18 +18,18 @@ class LocalOwnCloudMetadataStorage(context: Context, val localUploadedFilesBaseD
         uploadedFilesAndDirsObj = json.getJSONObject("uploadedFilesAndDirs")
     }
     fun setFileUploaded(file: File) {
-        setFileUploaded(getRelativePath(file.parentFile?:localUploadedFilesBaseDir), file.name)
+        setFileUploaded(getRelativePath(file.parentFile ?: localUploadedFilesBaseDir), file.name)
     }
     fun isFileUploaded(file: File): Boolean {
-        return isFileUploaded(getRelativePath(file.parentFile?:localUploadedFilesBaseDir), file.name)
+        return isFileUploaded(getRelativePath(file.parentFile ?: localUploadedFilesBaseDir), file.name)
     }
     fun setDirCreated(dir: File) {
         setDirCreated(getRelativePath(dir))
     }
-    fun isDirCreated(dir: File):Boolean {
+    fun isDirCreated(dir: File): Boolean {
         return isDirUploaded(getRelativePath(dir))
     }
-    fun getRelativePath(dirOrFile:File): String{
+    fun getRelativePath(dirOrFile: File): String {
         return dirOrFile.absolutePath.removePrefix(localUploadedFilesBaseDir.absolutePath)
     }
     private fun setDirCreated(dirPath: String) {
@@ -52,7 +52,7 @@ class LocalOwnCloudMetadataStorage(context: Context, val localUploadedFilesBaseD
         val dirs = path.split("/")
         var dirObj = uploadedFilesAndDirsObj
         for (dir in dirs) {
-            if(dir!="") {
+            if (dir != "") {
                 var childObj = dirObj.optJSONObject(dir)
                 if (childObj == null) {
                     childObj = JSONObject()
@@ -78,7 +78,7 @@ class LocalOwnCloudMetadataStorage(context: Context, val localUploadedFilesBaseD
         var dirObj = uploadedFilesAndDirsObj
 
         for (dir in dirs) {
-            if(dir!="") {
+            if (dir != "") {
                 val childObj = dirObj.optJSONObject(dir)
                 if (childObj != null) {
                     dirObj = childObj

@@ -13,7 +13,6 @@ import java.io.FileOutputStream
 import java.nio.file.Files
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Suppress("LongParameterList")
@@ -40,6 +39,7 @@ class LoggingManager(
     private val labels = ArrayList<Pair<Long, String>>()
     private var recordingStartTime = 0L
     private val activitiesAdapter = ActivitiesAdapter(labels)
+
     init {
         activitiesRV.adapter = activitiesAdapter
 
@@ -107,9 +107,10 @@ class LoggingManager(
     }
 
     private fun getRecordingFileDir(time: LocalDateTime): File {
-        val timeStr = time.toInstant(ZoneOffset.UTC).toEpochMilli().toString()//DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(time)
+        val timeStr = time.toInstant(ZoneOffset.UTC).toEpochMilli().toString()
 
-        return GlobalValues.getSensorRecordingsBaseDir(context).resolve("Recordings")/*.resolve(person)*/.resolve(timeStr)
+        return GlobalValues.getSensorRecordingsBaseDir(context).resolve("ML Prototype Recordings")
+            .resolve(timeStr)
     }
 
     private fun getRecordingFile(fileDir: File, deviceAddress: String): File {
@@ -218,8 +219,15 @@ class LoggingManager(
                 val destFile = getRecordingFile(destFileDir, deviceAddress)
                 Files.copy(tempFile.toPath(), FileOutputStream(destFile))
             }
-            val metadataStorage = RecordingMetadataStorage(destFileDir.resolve(GlobalValues.METADATA_JSON_FILENAME))
-            metadataStorage.setData(labels, recordingStartTime, recordingEndTime, person, GlobalValues.sensorTagMap)
+            val metadataStorage =
+                RecordingMetadataStorage(destFileDir.resolve(GlobalValues.METADATA_JSON_FILENAME))
+            metadataStorage.setData(
+                labels,
+                recordingStartTime,
+                recordingEndTime,
+                person,
+                GlobalValues.sensorTagMap
+            )
 
             onRecordingDone?.let { it(Recording(destFileDir, metadataStorage)) }
         }
@@ -229,6 +237,7 @@ class LoggingManager(
     fun setOnRecordingDone(onRecordingDone: (Recording) -> Unit) {
         this.onRecordingDone = onRecordingDone
     }
+
     fun setOnRecordingStarted(onRecordingStarted: () -> Unit) {
         this.onRecordingStarted = onRecordingStarted
     }

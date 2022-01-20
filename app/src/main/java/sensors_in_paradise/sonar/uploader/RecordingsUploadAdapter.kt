@@ -1,6 +1,5 @@
 package sensors_in_paradise.sonar.uploader
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -38,20 +37,10 @@ class RecordingsUploadAdapter(
 
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
-       val recording = recordingUiItems[position]
-        viewHolder.labelTV.text = recording.dir.name
+        val recording = recordingUiItems[position]
+        viewHolder.labelTV.text = recording.label
 
-        var status = ""
-        if(recording.getStatusOfDir()==UploadStatus.UPLOADED){
-            for(file in recording.filesToBeUploaded){
-                status += recording.getEmojiStatusOfFile(file)+" ${file.name}\n"
-
-            }
-            Log.d("OWNCLOUD", "files: ${recording.filesToBeUploaded.joinToString()}")
-        }
-        else{
-            status = recording.getStatusLabelOfDir()
-        }
+        val status = recording.getStatusLabel()
         viewHolder.statusTV.text = status
         viewHolder.animator.displayedChild = recording.getSummarizedStatus().ordinal
     }
@@ -60,5 +49,4 @@ class RecordingsUploadAdapter(
     override fun getItemCount(): Int {
         return recordingUiItems.size
     }
-
 }

@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.uploader
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.view.View
 import android.widget.Button
@@ -7,15 +8,12 @@ import android.widget.TextView
 import android.widget.ViewSwitcher
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
-import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
-import sensors_in_paradise.sonar.page2.RecordingDataManager
-import java.io.File
-import java.lang.Exception
 
+@SuppressLint("NotifyDataSetChanged")
 class RecordingsUploaderDialog(activity: Activity, uploader: OwnCloudRecordingsUploader) : AlertDialog(activity) {
     val context = activity
-    private val uploader = OwnCloudRecordingsUploader(activity, uploader.recordingsManager)
+
     private val recordings = uploader.recordingUiItems
     private val adapter = RecordingsUploadAdapter(recordings)
     private var hintTV: TextView
@@ -40,7 +38,6 @@ class RecordingsUploaderDialog(activity: Activity, uploader: OwnCloudRecordingsU
             uploadButton.visibility = View.VISIBLE
         }
         uploadButton.setOnClickListener {
-            setCancelable(false)
             uploadButton.isEnabled = false
             uploadButton.text = "Uploading"
             uploader.synchronize()
@@ -52,10 +49,17 @@ class RecordingsUploaderDialog(activity: Activity, uploader: OwnCloudRecordingsU
             uploadButton.text = "Uploading"
             uploader.synchronize()
         }
-        uploader.onItemChanged =  this::onRecordingItemChanged
+        uploader.onItemChanged = this::onRecordingItemChanged
+        uploader.onAllItemsFinishedWork = this::onRecordingsFinishedWorking
+        uploader.reloadRecordings()
+        adapter.notifyDataSetChanged()
     }
 
-    private fun onRecordingItemChanged(recording: RecordingUIItem){
+    private fun onRecordingItemChanged(recording: RecordingUIItem) {
         adapter.notifyItemChanged(recordings.indexOf(recording))
+    }
+    private fun onRecordingsFinishedWorking() {
+        uploadButton.isEnabled = true
+        uploadButton.text = "Upload"
     }
 }

@@ -1,103 +1,122 @@
 package sensors_in_paradise.sonar.uploader
 
+import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.page2.Recording
 import java.io.File
 import java.lang.Exception
 
-class RecordingUIItem(recording: Recording): Recording(recording) {
-    var dirStatus = UploadStatus.NOT_UPLOADED
+class RecordingUIItem(recording: Recording, private val recordingsBaseDir: File) :
+    Recording(recording) {
     var error: Exception? = null
-    val filesToBeUploaded = getFilesToBeUploadedList()
-    private val fileUploadStatus: MutableMap<File, UploadStatus> =
-        getFilesToBeUploadedList().associateWith { UploadStatus.NOT_UPLOADED } as MutableMap<File, UploadStatus>
-       fun getStatusOfDir(): UploadStatus{
-        return dirStatus
-    }
-    private fun getFilesToBeUploadedList(): ArrayList<File>{
-        val files = ArrayList<File>( )
+    val filesAndDirsToBeUploaded = getFilesAndDirsToBeUploadedList()
+    val dirsToBeCreated = filesAndDirsToBeUploaded.filter { file -> file.isDirectory }
+    val filesToBeUploaded = filesAndDirsToBeUploaded.filter { file -> file.isFile }
+    val label = "${metadataStorage.getPerson()} - ${
+        metadataStorage.getActivities().joinToString { it.second }
+    }"
+    private val filesAndDirsUploadStatus: MutableMap<File, UploadStatus> =
+        getFilesAndDirsToBeUploadedList().associateWith { UploadStatus.NOT_UPLOADED } as MutableMap<File, UploadStatus>
+
+    private fun getFilesAndDirsToBeUploadedList(): ArrayList<File> {
+        val files = ArrayList<File>()
         files.addAll(getRecordingFiles())
         files.add(metadataStorage.file)
+        var dirToBeCreated = dir
+        while (dirToBeCreated != recordingsBaseDir) {
+            files.add(0, dirToBeCreated)
+            dirToBeCreated = dirToBeCreated.parentFile ?: recordingsBaseDir
+        }
         return files
     }
-    fun getSummarizedStatus(): UploadStatus{
-        if(dirStatus == UploadStatus.UPLOADING){
-            return UploadStatus.UPLOADING
-        }
-        if(dirStatus == UploadStatus.FAILED){
-            return UploadStatus.FAILED
-        }
-        if(dirStatus == UploadStatus.NOT_UPLOADED){
-            return UploadStatus.NOT_UPLOADED
-        }
+
+    fun getSummarizedStatus(): UploadStatus {
         var areAllUploaded = true
-        for((file, status) in fileUploadStatus){
-            if(status!=UploadStatus.UPLOADED){
+        for ((_, status) in filesAndDirsUploadStatus) {
+            if (status != UploadStatus.UPLOADED) {
                 areAllUploaded = false
+                break
             }
         }
-        if(areAllUploaded){
+        if (areAllUploaded) {
             return UploadStatus.UPLOADED
         }
-        for((file, status) in fileUploadStatus){
-            if(status == UploadStatus.UPLOADING){
+        for ((_, status) in filesAndDirsUploadStatus) {
+            if (status == UploadStatus.UPLOADING) {
                 return UploadStatus.UPLOADING
             }
         }
-        var areAllFailed = true
-        for((file, status) in fileUploadStatus){
-            if(status!=UploadStatus.FAILED){
-                areAllFailed = false
-            }
-        }
 
-        if(areAllFailed){
-            return UploadStatus.FAILED
-        }
-        return UploadStatus.UNKNOWN
-    }
-    fun getEmojiStatusOfFile(file: File): String{
-       return statusEmoji(getStatusOfFile(file))
-    }
-    fun setStatusOfFile(file: File, status: UploadStatus){
-        fileUploadStatus[file] = status
-    }
-    fun getStatusOfFile(file: File): UploadStatus{
-        if(dirStatus != UploadStatus.UPLOADED){
-            return UploadStatus.WAITING_FOR_PARENT
-        }
-        if(fileUploadStatus.containsKey(file)) {
-            return fileUploadStatus[file]!!
-        }
-        return UploadStatus.UNKNOWN
-    }
-    fun getStatusLabelOfDir():String{
-        return "Directory Status: ${statusLabel(dirStatus)}"
-    }
-    fun getStatusLabelOfFile(file: File):String{
-        return statusLabel(getStatusOfFile(file))
-    }
-    fun isUploaded(): Boolean{
-        if(dirStatus == UploadStatus.UPLOADED){
-            for(file in getRecordingFiles()){
-                if(getStatusOfFile(file)!=UploadStatus.UPLOADED){
-                    return false
-                }
+        for ((_, status) in filesAndDirsUploadStatus) {
+            if (status == UploadStatus.FAILED) {
+                return UploadStatus.FAILED
             }
-            return true
         }
-        return false
+        var areAllWaiting = true
+        for ((_, status) in filesAndDirsUploadStatus) {
+            if (status != UploadStatus.NOT_UPLOADED) {
+                areAllWaiting = false
+                break
+            }
+        }
+        if (areAllWaiting) {
+            return UploadStatus.NOT_UPLOADED
+        }
+        return UploadStatus.UNKNOWN
     }
-    fun isFailed(): Boolean{
-        if(dirStatus == UploadStatus.FAILED){
-           return true
+
+    fun getStatusLabel(): String {
+        var result = ""
+        var indent = 0
+        for (dir in dirsToBeCreated) {
+            result += " ".repeat(indent * 4) + "${getEmojiStatusOfFileOrDir(dir)} \uD83D\uDCC1${dir.name}\n"
+            indent++
         }
-        for(file in getRecordingFiles()){
-            if(getStatusOfFile(file)==UploadStatus.FAILED){
+        val metadataEmoji = "\uD83D\uDCD8"
+        val fileEmoji = "\uD83D\uDCC4"
+
+        for (file in filesToBeUploaded) {
+            val docItem = if (file.name == GlobalValues.METADATA_JSON_FILENAME) metadataEmoji else fileEmoji
+            result += " ".repeat(indent * 4) + "${getEmojiStatusOfFileOrDir(file)}  $docItem${file.name}\n"
+        }
+        return result
+    }
+    fun getEmojiStatusOfFileOrDir(file: File): String {
+        return statusEmoji(getStatusOfFileOrDir(file))
+    }
+
+    fun setStatusOfFileOrDir(fileOrDir: File, status: UploadStatus) {
+        filesAndDirsUploadStatus[fileOrDir] = status
+    }
+
+    fun getStatusOfFileOrDir(file: File): UploadStatus {
+        if (filesAndDirsUploadStatus.containsKey(file)) {
+            return filesAndDirsUploadStatus[file]!!
+        }
+        return UploadStatus.UNKNOWN
+    }
+
+    fun getStatusLabelOfFileOrDir(file: File): String {
+        return statusLabel(getStatusOfFileOrDir(file))
+    }
+    fun isUploaded(): Boolean {
+
+        for (file in getRecordingFiles()) {
+            if (getStatusOfFileOrDir(file) != UploadStatus.UPLOADED) {
+                return false
+            }
+        }
+        return true
+    }
+
+    fun isFailed(): Boolean {
+        for (file in getRecordingFiles()) {
+            if (getStatusOfFileOrDir(file) == UploadStatus.FAILED) {
                 return true
             }
         }
         return false
     }
+
     private fun statusEmoji(status: UploadStatus): String {
         return when (status) {
             UploadStatus.NOT_UPLOADED -> "\uD83D\uDCC5"
@@ -105,18 +124,17 @@ class RecordingUIItem(recording: Recording): Recording(recording) {
             UploadStatus.FAILED -> "❌"
             UploadStatus.UPLOADING -> "⏫"
             UploadStatus.UNKNOWN -> "❓"
-            UploadStatus.WAITING_FOR_PARENT -> "⏳"
         }
     }
+
     private fun statusLabel(status: UploadStatus): String {
         val errorString = if (error != null) error!!.message else ""
-        return "${statusEmoji(status)} "+when (status) {
+        return "${statusEmoji(status)} " + when (status) {
             UploadStatus.NOT_UPLOADED -> "Not uploaded yet"
             UploadStatus.UPLOADED -> "Uploaded"
             UploadStatus.FAILED -> "Upload failed: $errorString"
             UploadStatus.UPLOADING -> "Uploading"
             UploadStatus.UNKNOWN -> "Unknown"
-            UploadStatus.WAITING_FOR_PARENT -> "Waiting for parent dir to be uploaded"
         }
     }
 }
