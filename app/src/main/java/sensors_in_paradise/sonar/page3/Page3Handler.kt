@@ -109,7 +109,12 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         val byteArray = sensorDataByteBuffer?.array()
         if (byteArray != null) {
-            file.writeBytes(byteArray)
+            try {
+                file.writeBytes(byteArray)
+            } catch (e: Exception) {
+                println("Writing .txt-file error.")
+                e.printStackTrace()
+            }
         }
     }
 
