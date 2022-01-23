@@ -39,7 +39,8 @@
             android:id="@+id/rv_bluetoothDevices_activity_main"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layoutManager="LinearLayoutManager">
+            app:layoutManager="LinearLayoutManager"
+            android:paddingBottom="48dp">
 
         </androidx.recyclerview.widget.RecyclerView>
 

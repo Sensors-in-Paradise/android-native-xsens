@@ -2,7 +2,7 @@ package sensors_in_paradise.sonar
 
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 
-class XSENSArrayList : ArrayList<XsensDotDevice>() {
+class XSENSArrayList : ArrayList<XSensDotDeviceWithOfflineMetadata>() {
     fun contains(deviceAddress: String): Boolean {
 
         for (device in this) {
@@ -12,7 +12,7 @@ class XSENSArrayList : ArrayList<XsensDotDevice>() {
         }
         return false
     }
-    fun get(deviceAddress: String): XsensDotDevice? {
+    fun get(deviceAddress: String): XSensDotDeviceWithOfflineMetadata? {
         for (device in this) {
             if (device.address == deviceAddress) {
                 return device
@@ -28,8 +28,8 @@ class XSENSArrayList : ArrayList<XsensDotDevice>() {
         }
         return -1
     }
-    fun getConnected(): XSENSArrayList {
-        val devices = XSENSArrayList()
+    fun getConnected(): ArrayList<XsensDotDevice> {
+        val devices = ArrayList<XsensDotDevice>()
         for (device in this) {
             if (device.connectionState == XsensDotDevice.CONN_STATE_CONNECTED) {
                 devices.add(device)
