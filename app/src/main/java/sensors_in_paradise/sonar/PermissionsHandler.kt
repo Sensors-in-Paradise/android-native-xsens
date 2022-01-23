@@ -19,7 +19,7 @@ class PermissionsHandler(private val requestPermissionLauncher: ActivityResultLa
             GlobalValues.requiredPermissions.add(Manifest.permission.BLUETOOTH_SCAN)
         }
         val missingPermissions = PermissionsHelper.getRequiredButUngrantedPermissions(context)
-        requestPermissionLauncher.launch(missingPermissions.toArray( arrayOf<String>()))
+        requestPermissionLauncher.launch(missingPermissions.toArray(arrayOf<String>()))
     }
 
     override fun activityResumed() {

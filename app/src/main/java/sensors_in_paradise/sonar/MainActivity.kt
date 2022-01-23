@@ -39,8 +39,10 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
         pageHandlers.add(page3Handler)
         page1Handler.addConnectionInterface(page2Handler)
         page1Handler.addConnectionInterface(page3Handler)
-        pageHandlers.add(PermissionsHandler(registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()
-        ) { _ -> {} }))
+        val permissionLauncher = registerForActivityResult(
+                ActivityResultContracts.RequestMultiplePermissions()) {}
+        pageHandlers.add(PermissionsHandler(permissionLauncher))
+
         for (handler in pageHandlers) {
             handler.activityCreated(this)
         }
@@ -53,9 +55,11 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
             handler.activityResumed()
         }
     }
+
     private fun initClickListeners() {
         tabLayout.addOnTabSelectedListener(this)
     }
+
     override fun onTabSelected(tab: TabLayout.Tab?) {
         if (tab != null) {
             switcher.displayedChild = tab.position
