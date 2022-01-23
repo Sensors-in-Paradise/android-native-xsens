@@ -7,6 +7,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.ViewAnimator
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
 import sensors_in_paradise.sonar.uploader.FileUploaderDialog
@@ -20,8 +21,8 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
     private lateinit var tabLayout: TabLayout
 
     private val pageHandlers = ArrayList<PageInterface>()
-
     private val scannedDevices = XSENSArrayList()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -38,7 +39,8 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
         pageHandlers.add(page3Handler)
         page1Handler.addConnectionInterface(page2Handler)
         page1Handler.addConnectionInterface(page3Handler)
-        pageHandlers.add(PermissionsHandler())
+        pageHandlers.add(PermissionsHandler(registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()
+        ) { _ -> {} }))
         for (handler in pageHandlers) {
             handler.activityCreated(this)
         }
