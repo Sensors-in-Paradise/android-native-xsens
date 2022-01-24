@@ -127,17 +127,18 @@ class PredictionHelper(
         }
 
         // check for minimal length
-        val minDataLines = rawSensorDataMap.minOfOrNull { it.value.size }!!
-        if (minDataLines < dataVectorSize) {
+        val recordedLinesCount = rawSensorDataMap.minOfOrNull { it.value.size }!!
+        if (recordedLinesCount < dataVectorSize) {
             Toast.makeText(context, "Not enough data collected!", Toast.LENGTH_SHORT).show()
             return null
         }
 
         numDataLines = dataVectorSize
+        val predictionStartIndex = recordedLinesCount - numDataLines
 
         // normalize
         var floatArray = FloatArray(0)
-        for (row in 0 until numDataLines) {
+        for (row in predictionStartIndex until recordedLinesCount) {
             var lineFloatArray = FloatArray(0)
             for ((deviceAddress, deviceDataList) in rawSensorDataMap) {
 

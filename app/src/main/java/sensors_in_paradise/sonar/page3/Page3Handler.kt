@@ -16,7 +16,6 @@ import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.PageInterface
 import sensors_in_paradise.sonar.util.PredictionHelper
 import sensors_in_paradise.sonar.R
-import sensors_in_paradise.sonar.ml.XsensTest02
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.ml.Lstmmodel118
@@ -39,9 +38,14 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private val rawSensorDataMap = mutableMapOf<String, MutableList<Pair<Long, FloatArray>>>()
     private var sensorDataByteBuffer: ByteBuffer? = null
 
+    private lateinit var masterSensorAddress: String
+    private var lastPrediction: Long = 0
+
     private val numDevices = 5
     private var numConnectedDevices = 0
     private var isRunning = false
+
+    private lateinit var predictionModel: Lstmmodel118
 
     private fun toggleButtons() {
         startButton.isEnabled = !(startButton.isEnabled)
@@ -55,13 +59,31 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         sensorDataByteBuffer = null
     }
 
+    private fun startDataCollection() {
+        if (numConnectedDevices >= numDevices) {
+            clearBuffers()
+            lastPrediction = 0L
+
+            for (device in devices.getConnected()) {
+                masterSensorAddress = device.address
+                device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
+                device.startMeasuring()
+            }
+            timer.base = SystemClock.elapsedRealtime()
+            timer.start()
+
+            toggleButtons()
+            isRunning = true
+        } else {
+            Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun stopDataCollection() {
         timer.stop()
         for (device in devices.getConnected()) {
             device.stopMeasuring()
         }
-
-        sensorDataByteBuffer = predictionHelper.processSensorData()
 
         toggleButtons()
         isRunning = false
@@ -79,12 +101,40 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             5 to "Walking"
         ).withDefault { "" }
 
-        for (i in 0..output.size - 1) {
-            val procentage = round(output[i] * 10000) / 100
-            val prediction = Prediction(outputLabelMap[i]!!, procentage.toString() + "%")
+        for (i in output.indices) {
+            val percentage = round(output[i] * 10000) / 100
+            val prediction = Prediction(outputLabelMap[i]!!, "$percentage%")
             predictions.add(prediction)
         }
         adapter.notifyDataSetChanged()
+    }
+
+    private fun processAndPredict() {
+        sensorDataByteBuffer = predictionHelper.processSensorData()
+        predict()
+    }
+
+    private fun predict() {
+        if (sensorDataByteBuffer == null) {
+            Toast.makeText(
+                context, "Please measure an activity first!",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+        // Creates inputs for reference.
+        val inputFeature0 = TensorBuffer.createFixedSize(
+            intArrayOf(1, predictionHelper.dataVectorSize, predictionHelper.dataLineFloatSize),
+            DataType.FLOAT32)
+        inputFeature0.loadBuffer(sensorDataByteBuffer!!)
+
+        // Runs model inference and gets result
+        val outputs = predictionModel.process(inputFeature0)
+        val outputFeature0 = outputs.outputFeature0AsTensorBuffer
+        // TODO: Do this when handler gets destroyed
+        // predictionModel.close()
+
+        addPredictionViews(outputFeature0.floatArray)
     }
 
     override fun activityCreated(activity: Activity) {
@@ -101,7 +151,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         // Initialising data array
         for ((_, address) in GlobalValues.sensorTagMap) {
-            rawSensorDataMap.put(address, mutableListOf<Pair<Long, FloatArray>>())
+            rawSensorDataMap[address] = mutableListOf<Pair<Long, FloatArray>>()
         }
 
         // Buttons and Timer
@@ -111,22 +161,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         stopButton.isEnabled = false
 
         startButton.setOnClickListener {
-            if (numConnectedDevices >= numDevices) {
-
-                clearBuffers()
-
-                for (device in devices.getConnected()) {
-                    device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
-                    device.startMeasuring()
-                }
-                timer.base = SystemClock.elapsedRealtime()
-                timer.start()
-
-                toggleButtons()
-                isRunning = true
-            } else {
-                Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
-            }
+            startDataCollection()
         }
 
         stopButton.setOnClickListener {
@@ -135,27 +170,9 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         predictButton = activity.findViewById(R.id.button_predict_predict)
         predictButton.setOnClickListener {
-            if (sensorDataByteBuffer != null) {
-                // get data and model
-                val model = Lstmmodel118.newInstance(context)
-
-                // Creates inputs for reference.
-                val inputFeature0 = TensorBuffer.createFixedSize(
-                    intArrayOf(1, predictionHelper.dataVectorSize, predictionHelper.dataLineFloatSize),
-                    DataType.FLOAT32)
-                inputFeature0.loadBuffer(sensorDataByteBuffer!!)
-
-                // Runs model inference and gets result
-                val outputs = model.process(inputFeature0)
-                val outputFeature0 = outputs.outputFeature0AsTensorBuffer
-                model.close()
-
-                addPredictionViews(outputFeature0.floatArray)
-            } else {
-                Toast.makeText(context, "Please measure an activity first!",
-                    Toast.LENGTH_SHORT).show()
-            }
+            processAndPredict()
         }
+        predictionModel = Lstmmodel118.newInstance(context)
     }
 
     override fun activityResumed() {
@@ -173,11 +190,20 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
 
-        val timeStamp: Long = xsensDotData.getSampleTimeFine()
-        val quat: FloatArray = xsensDotData.getQuat()
-        val freeAcc: FloatArray = xsensDotData.getFreeAcc()
+        val timeStamp: Long = xsensDotData.sampleTimeFine
+        val quat: FloatArray = xsensDotData.quat
+        val freeAcc: FloatArray = xsensDotData.freeAcc
 
         rawSensorDataMap[deviceAddress]?.add(Pair(timeStamp, quat + freeAcc))
+//        if(deviceAddress == masterSensorAddress) {
+//            if(lastPrediction == 0L) {
+//                lastPrediction = timeStamp
+//            // TODO: This is not working with different output rates and models:
+//            } else if (timeStamp - lastPrediction >= 16667 * 180) {
+//                lastPrediction = timeStamp
+//                processAndPredict()
+//            }
+//        }
     }
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
