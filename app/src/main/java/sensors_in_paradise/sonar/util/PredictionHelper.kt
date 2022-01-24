@@ -3,6 +3,7 @@ package sensors_in_paradise.sonar.util
 import android.content.Context
 import android.widget.Toast
 import sensors_in_paradise.sonar.GlobalValues
+import sensors_in_paradise.sonar.XSensDotDeviceWithOfflineMetadata
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.max
@@ -142,7 +143,7 @@ class PredictionHelper(
 
                 var normalizedFloatArray = FloatArray(0)
 
-                when (GlobalValues.extractTagPrefixFromTag(deviceTag)) {
+                when (XSensDotDeviceWithOfflineMetadata.extractTagPrefixFromTag(deviceTag)) {
                     "LF" -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-0.8126836, -0.79424906, -0.7957623, -0.8094078, -31.278593, -32.166283, -18.486694), doubleArrayOf(0.8145418, 0.79727143, 0.81989765, 0.8027102, 28.956848, 30.199568, 22.69250))
                     "LW" -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-0.8398707, -0.8926556, -0.9343553, -0.9552342, -11.258037, -10.1190405, -8.37381), doubleArrayOf(0.7309214, 0.9186623, 0.97258735, 0.9084077, 10.640987, 11.26736, 12.94717))
                     "ST" -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-0.87042844, -0.6713179, -0.6706054, -0.80093706, -20.164385, -20.21316, -8.670398), doubleArrayOf(0.87503606, 0.686213, 0.67588365, 0.8398282, 15.221635, 13.93141, 11.75221))

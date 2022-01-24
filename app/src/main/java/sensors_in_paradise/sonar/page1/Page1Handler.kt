@@ -102,9 +102,8 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
     override fun onXsensDotScanned(device: BluetoothDevice, i: Int) {
         if (!scannedDevices.contains(device.address)) {
             val tag = xsensDotMetadata.getTagForAddress(device.address)
-            Log.d("CONNECTION_SCREEN", "Offline tag for device ${device.address}: $tag")
-            scannedDevices.add(XSensDotDeviceWithOfflineMetadata(context, device, this, tag))
-            sensorAdapter.notifyItemInserted(scannedDevices.size - 1)
+            val index = scannedDevices.insertSortedBySet(XSensDotDeviceWithOfflineMetadata(context, device, this, tag))
+            sensorAdapter.notifyItemInserted(index)
         }
 
         activity.runOnUiThread {

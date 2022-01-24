@@ -33,9 +33,9 @@ class XSensDotMetadataStorage(context: Context) :
         return ""
     }
 
-    fun tryGetDeviceSetKey(connectedDevices: ArrayList<XsensDotDevice>): String? {
+    fun tryGetDeviceSetKey(connectedDevices: XSENSArrayList): String? {
         val deviceSetKeys =
-            connectedDevices.map { GlobalValues.extractDeviceSetKeyFromTag(getTagForAddress(it.address)) }
+            connectedDevices.map { it.getSet()?:"0" }
                 .toSet()
         return if (deviceSetKeys.size == 1) {
             deviceSetKeys.first().toString()

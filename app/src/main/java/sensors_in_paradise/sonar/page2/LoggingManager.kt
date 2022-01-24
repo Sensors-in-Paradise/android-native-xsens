@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.page2
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.SystemClock
 import android.widget.*
@@ -42,6 +43,7 @@ class LoggingManager(
     private val activitiesAdapter = ActivitiesAdapter(labels)
     private lateinit var xSenseMetadataStorage: XSensDotMetadataStorage
     private val tempSensorMacMap = mutableMapOf<String, String>()
+
     init {
         activitiesRV.adapter = activitiesAdapter
 
@@ -125,7 +127,9 @@ class LoggingManager(
             Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
             return false
         }
-        val deviceSetKey = xSenseMetadataStorage.tryGetDeviceSetKey(devices.getConnected()) ?: return false
+        val deviceSetKey =
+            xSenseMetadataStorage.tryGetDeviceSetKey(devices.getConnectedWithOfflineMetadata())
+                ?: return false
 
         for (tagPrefix in GlobalValues.sensorTagPrefixes) {
             val tag = GlobalValues.formatTag(tagPrefix, deviceSetKey)
@@ -174,6 +178,7 @@ class LoggingManager(
         labels.clear()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun stopLogging() {
         timer.stop()
         val recordingEndTime = System.currentTimeMillis()
@@ -233,8 +238,15 @@ class LoggingManager(
                 val destFile = getRecordingFile(destFileDir, deviceAddress)
                 Files.copy(tempFile.toPath(), FileOutputStream(destFile))
             }
-            val metadataStorage = RecordingMetadataStorage(destFileDir.resolve(GlobalValues.METADATA_JSON_FILENAME))
-            metadataStorage.setData(labels, recordingStartTime, recordingEndTime, person, tempSensorMacMap)
+            val metadataStorage =
+                RecordingMetadataStorage(destFileDir.resolve(GlobalValues.METADATA_JSON_FILENAME))
+            metadataStorage.setData(
+                labels,
+                recordingStartTime,
+                recordingEndTime,
+                person,
+                tempSensorMacMap
+            )
 
             onRecordingDone?.let { it(Recording(destFileDir, metadataStorage)) }
         }
@@ -244,6 +256,7 @@ class LoggingManager(
     fun setOnRecordingDone(onRecordingDone: (Recording) -> Unit) {
         this.onRecordingDone = onRecordingDone
     }
+
     fun setOnRecordingStarted(onRecordingStarted: () -> Unit) {
         this.onRecordingStarted = onRecordingStarted
     }

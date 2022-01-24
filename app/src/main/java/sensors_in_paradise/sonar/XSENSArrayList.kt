@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar
 
+import android.provider.Settings
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 
 class XSENSArrayList : ArrayList<XSensDotDeviceWithOfflineMetadata>() {
@@ -37,6 +38,15 @@ class XSENSArrayList : ArrayList<XSensDotDeviceWithOfflineMetadata>() {
         }
         return devices
     }
+    fun getConnectedWithOfflineMetadata(): XSENSArrayList {
+        val devices = XSENSArrayList()
+        for (device in this) {
+            if (device.connectionState == XsensDotDevice.CONN_STATE_CONNECTED) {
+                devices.add(device)
+            }
+        }
+        return devices
+    }
     fun areAllConnectedDevicesSynced(): Boolean {
         for (device in getConnected()) {
             if (!device.isSynced) {
@@ -44,5 +54,30 @@ class XSENSArrayList : ArrayList<XSensDotDeviceWithOfflineMetadata>() {
             }
         }
         return true
+    }
+    fun insertSortedBySet(device: XSensDotDeviceWithOfflineMetadata):Int{
+        val set = device.getSet()
+        for(i in 0 until size){
+            val currentSet = this[i].getSet()
+            if(set!=null) {
+                if (currentSet!=null) {
+                    //> 0 if currentSet < set
+                    if (set <= currentSet) {
+                        add(i, device)
+                        return i
+                    }
+                }
+                else{
+                    add(i, device)
+                    return i
+                }
+            }
+            else if(currentSet==null){
+                add(i, device)
+                return i
+            }
+        }
+        add( device)
+        return size-1
     }
 }
