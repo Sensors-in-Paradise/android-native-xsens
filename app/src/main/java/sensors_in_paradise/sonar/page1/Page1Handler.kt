@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.page1
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -7,6 +8,7 @@ import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.graphics.Color
 import android.os.Build
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.annotation.RequiresApi
@@ -19,14 +21,13 @@ import com.xsens.dot.android.sdk.models.FilterProfileInfo
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.models.XsensDotSyncManager
 import com.xsens.dot.android.sdk.utils.XsensDotScanner
-import sensors_in_paradise.sonar.PageInterface
-import sensors_in_paradise.sonar.R
-import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.util.PermissionsHelper
 import java.util.ArrayList
 import java.util.HashMap
+import android.view.animation.AccelerateDecelerateInterpolator
+import sensors_in_paradise.sonar.*
 
-class Page1Handler(val scannedDevices: XSENSArrayList) :
+class Page1Handler(private val scannedDevices: XSENSArrayList) :
     XsensDotScannerCallback, XsensDotDeviceCallback, PageInterface,
     UIDeviceConnectionInterface, SyncInterface {
     private lateinit var context: Context
@@ -40,9 +41,12 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
     private lateinit var syncLinearLayout: LinearLayout
     private lateinit var syncPb: ProgressBar
     private lateinit var syncBtn: Button
-    private var isSyncing = false
+    private lateinit var refreshLinearLayout: LinearLayout
+    private lateinit var refreshButton: Button
+    private lateinit var xsensDotMetadata: XSensDotMetadataStorage
     private val unsyncedColor = Color.parseColor("#FF5722")
     private val syncedColor = Color.parseColor("#00e676")
+    override var isSyncing = false
 
     override fun onXsensDotConnectionChanged(address: String, state: Int) {
         activity.runOnUiThread {
@@ -60,6 +64,11 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
     }
     override fun onXsensDotFirmwareVersionRead(s: String, s1: String) {}
     override fun onXsensDotTagChanged(address: String, tag: String) {
+        val device = scannedDevices.get(address)
+        if (device != null) {
+            Log.d("CONNECTION_SCREEN", "setting tag for device $address tag: $tag")
+            xsensDotMetadata.setTagForAddress(address, tag)
+        }
         activity.runOnUiThread {
             sensorAdapter.notifyItemChanged(address)
         }
@@ -92,14 +101,18 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
     override fun onSyncStatusUpdate(s: String, b: Boolean) {}
     override fun onXsensDotScanned(device: BluetoothDevice, i: Int) {
         if (!scannedDevices.contains(device.address)) {
-            scannedDevices.add(XsensDotDevice(context, device, this))
+            val tag = xsensDotMetadata.getTagForAddress(device.address)
+            Log.d("CONNECTION_SCREEN", "Offline tag for device ${device.address}: $tag")
+            scannedDevices.add(XSensDotDeviceWithOfflineMetadata(context, device, this, tag))
             sensorAdapter.notifyItemInserted(scannedDevices.size - 1)
         }
 
         activity.runOnUiThread {
             linearLayoutCenter.visibility = View.INVISIBLE
+            refreshLinearLayout.visibility = View.VISIBLE
         }
     }
+    @SuppressLint("NotifyDataSetChanged")
     @RequiresApi(Build.VERSION_CODES.S)
     override fun activityCreated(activity: Activity) {
         this.context = activity
@@ -113,11 +126,26 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
         linearLayoutCenter = activity.findViewById(R.id.linearLayout_center_activity_main)
         sensorAdapter = SensorAdapter(context, scannedDevices, this)
         rv.adapter = sensorAdapter
+        refreshLinearLayout = activity.findViewById(R.id.linearLayout_refresh_connection_fragment)
+        refreshButton = activity.findViewById(R.id.button_refresh_connection_fragment)
+        xsensDotMetadata = XSensDotMetadataStorage(context)
 
         syncBtn.setOnClickListener {
             isSyncing = true
             scannedDevices.getConnected()[0].isRootDevice = true
             XsensDotSyncManager.getInstance(SyncHandler(this)).startSyncing(scannedDevices.getConnected(), 0)
+        }
+
+        refreshButton.setOnClickListener {
+            val deg: Float = refreshButton.rotation + 1080f
+            refreshButton.animate().rotation(deg).interpolator = AccelerateDecelerateInterpolator()
+            refreshButton.animate().duration = 1500
+
+            mXsScanner!!.stopScan()
+            scannedDevices.forEach { it.disconnect() }
+            scannedDevices.clear()
+            sensorAdapter.notifyDataSetChanged()
+            mXsScanner!!.startScan()
         }
     }
     override fun activityResumed() {
@@ -157,6 +185,15 @@ class Page1Handler(val scannedDevices: XSENSArrayList) :
         } else {
             device.disconnect()
         }
+        activity.runOnUiThread {
+            sensorAdapter.notifyItemChanged(device.address)
+        }
+    }
+
+    override fun onConnectionCancelRequested(device: XsensDotDevice) {
+        // TODO Check if works
+        device.disconnect()
+
         activity.runOnUiThread {
             sensorAdapter.notifyItemChanged(device.address)
         }
