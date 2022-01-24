@@ -1,7 +1,7 @@
 
 buildscript {
     ext.kotlin_version = '1.6.10'
-
+    ext.moshiVersion = "1.13.0"
     repositories {
         google()
         mavenCentral()
@@ -69,6 +69,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
 }
 

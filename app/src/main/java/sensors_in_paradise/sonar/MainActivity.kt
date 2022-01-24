@@ -9,30 +9,38 @@ import android.view.MenuItem
 import android.widget.ViewAnimator
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
-import sensors_in_paradise.sonar.uploader.FileUploaderDialog
 import sensors_in_paradise.sonar.page1.Page1Handler
 import sensors_in_paradise.sonar.page2.Page2Handler
+import sensors_in_paradise.sonar.page2.RecordingDataManager
 import sensors_in_paradise.sonar.page3.Page3Handler
+import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
+import sensors_in_paradise.sonar.uploader.OwnCloudRecordingsUploader
 
 class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
 
     private lateinit var switcher: ViewAnimator
     private lateinit var tabLayout: TabLayout
+    private lateinit var ownCloudUploader: OwnCloudRecordingsUploader
+    private lateinit var recordingsManager: RecordingDataManager
 
     private val pageHandlers = ArrayList<PageInterface>()
 
     private val scannedDevices = XSENSArrayList()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         switcher = findViewById(R.id.switcher_activity_main)
         tabLayout = findViewById(R.id.tab_layout_activity_main)
+        recordingsManager = RecordingDataManager(
+            GlobalValues.getSensorRecordingsBaseDir(this)
+        )
 
         initClickListeners()
         val page1Handler = Page1Handler(scannedDevices)
         pageHandlers.add(page1Handler)
-        val page2Handler = Page2Handler(scannedDevices)
+        val page2Handler = Page2Handler(scannedDevices, recordingsManager)
         pageHandlers.add(page2Handler)
         val page3Handler = Page3Handler(scannedDevices)
         pageHandlers.add(page3Handler)
@@ -43,6 +51,8 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
             handler.activityCreated(this)
         }
         supportActionBar?.setBackgroundDrawable(ColorDrawable(getColor(R.color.colorPrimary)))
+
+        ownCloudUploader = OwnCloudRecordingsUploader(this, recordingsManager)
     }
 
     override fun onResume() {
@@ -75,7 +85,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
     }
 
     fun onFileUploadMenuItemClicked(ignored: MenuItem) {
-        FileUploaderDialog(this).show()
+        RecordingsUploaderDialog(this, ownCloudUploader).show()
     }
 
     fun onSettingsMenuItemClicked(ignored: MenuItem) {

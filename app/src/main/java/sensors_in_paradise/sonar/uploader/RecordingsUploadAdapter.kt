@@ -7,20 +7,19 @@ import android.widget.TextView
 import android.widget.ViewAnimator
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.R
-import java.io.File
 
-class FilesAdapter(
-    private val fileItems: FileUIItemArrayList,
+class RecordingsUploadAdapter(
+    private val recordingUiItems: RecordingUIItemArrayList,
 ) :
-    RecyclerView.Adapter<FilesAdapter.ViewHolder>() {
+    RecyclerView.Adapter<RecordingsUploadAdapter.ViewHolder>() {
 
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder).
      */
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val labelTV: TextView = view.findViewById(R.id.tv_label_uploadFile)
-        val statusTV: TextView = view.findViewById(R.id.tv_status_uploadFile)
+        val labelTV: TextView = view.findViewById(R.id.tv_label_recordingUpload)
+        val statusTV: TextView = view.findViewById(R.id.tv_status_recordingUpload)
         val animator: ViewAnimator = view.findViewById(R.id.switcher_uploadFile)
     }
 
@@ -28,7 +27,7 @@ class FilesAdapter(
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         // Create a new view, which defines the UI of the list item
         val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.upload_file, viewGroup, false)
+            .inflate(R.layout.recording_upload, viewGroup, false)
 
         return ViewHolder(view)
     }
@@ -38,20 +37,16 @@ class FilesAdapter(
 
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
-       val fileItem = fileItems[position]
-        viewHolder.labelTV.text = fileItem.label
-        viewHolder.statusTV.text = fileItem.statusLabel()
-        viewHolder.animator.displayedChild = fileItem.status.ordinal
+        val recording = recordingUiItems[position]
+        viewHolder.labelTV.text = recording.label
+
+        val status = recording.getStatusLabel()
+        viewHolder.statusTV.text = status
+        viewHolder.animator.displayedChild = recording.getSummarizedStatus().ordinal
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount(): Int {
-        return fileItems.size
-    }
-    fun notifyItemChanged(file: File) {
-        val index = fileItems.indexOf(file)
-        if (index != -1) {
-            notifyItemChanged(index)
-        }
+        return recordingUiItems.size
     }
 }
