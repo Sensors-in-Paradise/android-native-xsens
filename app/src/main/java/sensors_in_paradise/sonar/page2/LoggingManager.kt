@@ -8,6 +8,7 @@ import com.xsens.dot.android.sdk.models.XsensDotPayload
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.XSENSArrayList
+import sensors_in_paradise.sonar.XSensDotMetadataStorage
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Files
