@@ -110,7 +110,7 @@ class LoggingManager(
     }
 
     private fun getRecordingFileDir(time: LocalDateTime, person: String): File {
-        val timeStr = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(time)
+        val timeStr = DateTimeFormatter.ofPattern("yyyy-MM-yy-HH-mm-ss").format(time)
         return GlobalValues.getSensorRecordingsBaseDir(context).resolve(person).resolve(timeStr)
     }
 
