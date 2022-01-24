@@ -18,7 +18,8 @@ class OwnCloudClient(val activity: Activity, val callback: OwnCloudClientInterfa
     private val baseUrl = BuildConfig.OWNCLOUD_BASEURL
     private val credentialsAvailable = BuildConfig.OWNCLOUD_CREDENTIALS_AVAILABLE
     private val credentialsNotAvailableException =
-        Exception("Owncloud credentials are not available. Please add apikeys.properties file to project root. (Ask Tobi)")
+        Exception("Owncloud credentials are not available. " +
+                "Please add apikeys.properties file to project root. (Ask Tobi)")
 
     init {
         if (credentialsAvailable) {
@@ -82,7 +83,6 @@ class OwnCloudClient(val activity: Activity, val callback: OwnCloudClientInterfa
             callback.onFileUploadFailed(localFile, remoteFilePath, credentialsNotAvailableException)
         }
     }
-
 
     companion object {
         fun normalizePath(path: String): String {
