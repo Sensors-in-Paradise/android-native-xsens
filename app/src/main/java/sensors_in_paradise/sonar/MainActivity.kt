@@ -7,6 +7,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.ViewAnimator
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
 import sensors_in_paradise.sonar.page1.Page1Handler
@@ -24,7 +25,6 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
     private lateinit var recordingsManager: RecordingDataManager
 
     private val pageHandlers = ArrayList<PageInterface>()
-
     private val scannedDevices = XSENSArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,7 +46,10 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
         pageHandlers.add(page3Handler)
         page1Handler.addConnectionInterface(page2Handler)
         page1Handler.addConnectionInterface(page3Handler)
-        pageHandlers.add(PermissionsHandler())
+        val permissionLauncher = registerForActivityResult(
+                ActivityResultContracts.RequestMultiplePermissions()) {}
+        pageHandlers.add(PermissionsHandler(permissionLauncher))
+
         for (handler in pageHandlers) {
             handler.activityCreated(this)
         }
@@ -61,9 +64,11 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
             handler.activityResumed()
         }
     }
+
     private fun initClickListeners() {
         tabLayout.addOnTabSelectedListener(this)
     }
+
     override fun onTabSelected(tab: TabLayout.Tab?) {
         if (tab != null) {
             switcher.displayedChild = tab.position
