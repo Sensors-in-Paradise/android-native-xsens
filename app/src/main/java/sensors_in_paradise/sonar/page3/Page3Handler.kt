@@ -65,6 +65,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             lastPrediction = 0L
 
             for (device in devices.getConnected()) {
+                // This line does nothing right now
                 masterSensorAddress = device.address
                 device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
                 device.startMeasuring()
@@ -103,9 +104,12 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         for (i in output.indices) {
             val percentage = round(output[i] * 10000) / 100
-            val prediction = Prediction(outputLabelMap[i]!!, "$percentage%")
+            val prediction = Prediction(outputLabelMap[i]!!, percentage)
             predictions.add(prediction)
         }
+
+        predictions.sortWith(Prediction.PredictionsComparator)
+
         adapter.notifyDataSetChanged()
     }
 
@@ -195,6 +199,8 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         val freeAcc: FloatArray = xsensDotData.freeAcc
 
         rawSensorDataMap[deviceAddress]?.add(Pair(timeStamp, quat + freeAcc))
+
+        // Attempt to automatically display predicitions every x seconds
 //        if(deviceAddress == masterSensorAddress) {
 //            if(lastPrediction == 0L) {
 //                lastPrediction = timeStamp

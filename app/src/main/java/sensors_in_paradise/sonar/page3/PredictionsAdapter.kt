@@ -37,7 +37,7 @@ class PredictionsAdapter(
         // contents of the view with that element
        val prediction = predictions[position]
         viewHolder.titleTextView.text = prediction.title
-        viewHolder.detailsTextView.text = prediction.content
+        viewHolder.detailsTextView.text = prediction.percentageAsString()
     }
 
     // Return the size of your dataset (invoked by the layout manager)
