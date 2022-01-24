@@ -30,7 +30,7 @@ class Recording(val dir: File, val metadataStorage: RecordingMetadataStorage) {
     fun getDirectory(): File {
         return dir
     }
-    fun delete(){
+    fun delete() {
             val children = dir.listFiles()
             if (children != null) {
                 for (child in children) {
@@ -42,7 +42,6 @@ class Recording(val dir: File, val metadataStorage: RecordingMetadataStorage) {
     fun areFilesSynchronized(): Boolean {
         val headerSize = 9
         val margin = 10
-
 
             val childCSVs = dir.listFiles { _, name -> name.endsWith(".csv") } ?: return false
 
@@ -59,7 +58,6 @@ class Recording(val dir: File, val metadataStorage: RecordingMetadataStorage) {
                     return false
                 }
             }
-
 
         return true
     }

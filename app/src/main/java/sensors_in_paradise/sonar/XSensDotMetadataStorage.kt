@@ -2,7 +2,6 @@ package sensors_in_paradise.sonar
 
 import android.content.Context
 import android.widget.Toast
-import com.xsens.dot.android.sdk.models.XsensDotDevice
 import java.io.File
 
 class XSensDotMetadataStorage(context: Context) :
@@ -35,7 +34,7 @@ class XSensDotMetadataStorage(context: Context) :
 
     fun tryGetDeviceSetKey(connectedDevices: XSENSArrayList): String? {
         val deviceSetKeys =
-            connectedDevices.map { it.getSet()?:"0" }
+            connectedDevices.map { it.getSet() ?: "0" }
                 .toSet()
         return if (deviceSetKeys.size == 1) {
             deviceSetKeys.first().toString()

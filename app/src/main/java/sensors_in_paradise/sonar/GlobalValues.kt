@@ -3,7 +3,6 @@ package sensors_in_paradise.sonar
 import android.Manifest
 import android.content.Context
 import java.io.File
-import java.util.regex.Pattern
 
 class GlobalValues private constructor() {
     companion object {

@@ -2,7 +2,6 @@ package sensors_in_paradise.sonar.util
 
 import android.content.Context
 import android.widget.Toast
-import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.XSensDotDeviceWithOfflineMetadata
 import java.nio.ByteBuffer
 import java.nio.ByteOrder

@@ -1,10 +1,7 @@
 package sensors_in_paradise.sonar.page2
 
-import java.io.BufferedReader
 import sensors_in_paradise.sonar.GlobalValues
 import java.io.File
-import java.io.FileReader
-import kotlin.random.Random
 
 class RecordingDataManager(private val recordingsDir: File) {
     val recordingsList = ArrayList<Recording>()

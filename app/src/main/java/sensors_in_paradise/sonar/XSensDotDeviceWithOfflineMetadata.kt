@@ -20,7 +20,7 @@ class XSensDotDeviceWithOfflineMetadata(
             ((super.getTag() == "" || super.getTag() == defaultTag) && _tag != null)
         return if (shouldUseOfflineTag) _tag!! else super.getTag()
     }
-    fun getSet():String?{
+    fun getSet(): String? {
         return extractDeviceSetKeyFromTag(tag)
     }
     fun getSetColor(): Int {
@@ -40,16 +40,16 @@ class XSensDotDeviceWithOfflineMetadata(
             else -> false
         }
     }
-    companion object{
+    companion object {
         fun extractDeviceSetKeyFromTag(tag: String): String? {
-            return if(doesTagMatchPattern(tag)) tag.last().toString() else null
+            return if (doesTagMatchPattern(tag)) tag.last().toString() else null
         }
         private val regex = Pattern.compile("(LF|LW|ST|RW|RF)-\\d")
-        private fun doesTagMatchPattern(tag:String):Boolean{
+        private fun doesTagMatchPattern(tag: String): Boolean {
             return regex.matcher(tag).matches()
         }
         fun extractTagPrefixFromTag(tag: String): String? {
-            return if(doesTagMatchPattern(tag)) tag.substring(0, 2) else null
+            return if (doesTagMatchPattern(tag)) tag.substring(0, 2) else null
         }
     }
 }

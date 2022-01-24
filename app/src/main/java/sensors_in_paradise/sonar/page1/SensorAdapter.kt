@@ -1,7 +1,6 @@
 package sensors_in_paradise.sonar.page1
 
 import android.content.Context
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
@@ -90,7 +89,7 @@ class SensorAdapter(
         viewHolder.cancelButton.visibility = if (connectionCallbackUI.isSyncing) View.GONE else View.VISIBLE
 
         val hasSetColor = device.hasSetColor()
-        if(hasSetColor){
+        if (hasSetColor) {
             viewHolder.sensorSetView.setBackgroundColor(device.getSetColor())
             viewHolder.sensorSetView.visibility = View.VISIBLE
         }
