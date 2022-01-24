@@ -2,6 +2,7 @@ package sensors_in_paradise.sonar
 
 import android.Manifest
 import android.content.Context
+import android.os.Build
 import java.io.File
 
 class GlobalValues private constructor() {
@@ -25,16 +26,23 @@ class GlobalValues private constructor() {
             return File(context.dataDir, "people2.json")
         }
 
-        val requiredPermissions = arrayListOf(
-            Manifest.permission.BLUETOOTH,
-            Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.INTERNET,
-            Manifest.permission.ACCESS_NETWORK_STATE
-        )
+        fun getRequiredPermissions(): ArrayList<String> {
+            val result = arrayListOf(
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.INTERNET,
+                Manifest.permission.ACCESS_NETWORK_STATE
+            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                result.add(Manifest.permission.BLUETOOTH_SCAN)
+                result.add(Manifest.permission.BLUETOOTH_CONNECT)
+            }
+            return result
+        }
         val sensorTagMap = mapOf(
             "LF" to "D4:22:CD:00:06:7B",
             "LW" to "D4:22:CD:00:06:89",
