@@ -41,11 +41,15 @@ class GlobalValues private constructor() {
         fun formatTag(tagPrefix: String, deviceSetKey: String): String {
             return "$tagPrefix-$deviceSetKey"
         }
-        fun extractTagPrefixFromTag(tag: String): String {
+        fun extractTagPrefixFromTag(tag: String): String? {
+
             return tag.substring(0, 2)
         }
         fun extractDeviceSetKeyFromTag(tag: String): String {
             return tag.last().toString()
+        }
+        fun doesTagMatchPattern(tag:String):Boolean{
+            return tag.matches("/(LF|LW|ST|RW|RF)-\\d/g")
         }
         fun getDurationAsString(durationMS: Long): String {
 
