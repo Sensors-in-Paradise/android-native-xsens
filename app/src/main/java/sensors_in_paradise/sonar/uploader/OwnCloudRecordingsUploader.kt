@@ -149,11 +149,6 @@ class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
         }
     }
     private fun areAllRecordingsFinished(): Boolean {
-        for (recording in recordingUiItems) {
-           if (!recording.isUploaded() && !recording.isFailed()) {
-               return false
-           }
-        }
-        return true
+       return recordingUiItems.areAllUploadedOrFailed()
     }
 }

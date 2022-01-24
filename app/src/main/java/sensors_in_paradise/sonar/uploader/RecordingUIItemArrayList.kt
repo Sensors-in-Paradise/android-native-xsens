@@ -21,32 +21,9 @@ class RecordingUIItemArrayList : ArrayList<RecordingUIItem>() {
         }
         return null
     }
-    /*
-    fun contains(file: File): Boolean {
-        for (fileUIItem in this) {
-            if (fileUIItem.file == file) {
-                return true
-            }
-        }
-        return false
-    }
-    fun indexOf(file: File): Int {
-        for ((i, fileUIItem) in this.withIndex()) {
-            if (fileUIItem.file == file) {
-                return i
-            }
-        }
-        return -1
-    }
-    fun setStatusOfAllItems(status: UploadStatus) {
-        for (item in this) {
-            item.status = status
-        }
-    }
-    */
     fun areAllUploadedOrFailed(): Boolean {
-        for (item in this) {
-            if (item.isFailed() || item.isUploaded()) {
+        for (recording in this) {
+            if (!recording.isUploaded() && !recording.isFailed()) {
                 return false
             }
         }
@@ -54,7 +31,7 @@ class RecordingUIItemArrayList : ArrayList<RecordingUIItem>() {
     }
     fun areAllUploaded(): Boolean {
         for (item in this) {
-            if (item.isUploaded()) {
+            if (!item.isUploaded()) {
                 return false
             }
         }
