@@ -8,7 +8,6 @@ import com.xsens.dot.android.sdk.models.XsensDotPayload
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.XSENSArrayList
-import sensors_in_paradise.sonar.XSensDotMetadataStorage
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Files
@@ -42,6 +41,7 @@ class LoggingManager(
     private val activitiesAdapter = ActivitiesAdapter(labels)
     private lateinit var xSenseMetadataStorage: XSensDotMetadataStorage
     private val tempSensorMacMap = mutableMapOf<String, String>()
+
     init {
         activitiesRV.adapter = activitiesAdapter
 
@@ -60,7 +60,7 @@ class LoggingManager(
         endButton.isEnabled = false
 
         startButton.setOnClickListener {
-            if (tryPrepareLogging()) {
+            if (enoughDevicesConnected) {
                 onRecordingStarted?.let { it1 -> it1() }
                 startLogging()
                 if (!isLabelSelected()) {
@@ -70,13 +70,14 @@ class LoggingManager(
                         activitiesAdapter.notifyItemInserted(labels.size - 1)
                     })
                 }
+            } else {
+                Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
             }
         }
         startButton.isEnabled = true
         endButton.setOnClickListener {
             stopLogging()
         }
-        xSenseMetadataStorage = XSensDotMetadataStorage(context)
     }
 
     private fun showActivityDialog(
@@ -118,21 +119,6 @@ class LoggingManager(
 
     private fun getNewUnlabelledTempFile(fileDir: File, deviceAddress: String): File {
         return fileDir.resolve("${System.currentTimeMillis()}_$deviceAddress.csv")
-    }
-
-    private fun tryPrepareLogging(): Boolean {
-        if (!enoughDevicesConnected) {
-            Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
-            return false
-        }
-        val deviceSetKey = xSenseMetadataStorage.tryGetDeviceSetKey(devices.getConnected()) ?: return false
-
-        for (tagPrefix in GlobalValues.sensorTagPrefixes) {
-            val tag = GlobalValues.formatTag(tagPrefix, deviceSetKey)
-            val address = xSenseMetadataStorage.getAddressForTag(tag)
-            tempSensorMacMap[address] = tag
-        }
-        return true
     }
 
     private fun startLogging() {
@@ -233,8 +219,15 @@ class LoggingManager(
                 val destFile = getRecordingFile(destFileDir, deviceAddress)
                 Files.copy(tempFile.toPath(), FileOutputStream(destFile))
             }
-            val metadataStorage = RecordingMetadataStorage(destFileDir.resolve(GlobalValues.METADATA_JSON_FILENAME))
-            metadataStorage.setData(labels, recordingStartTime, recordingEndTime, person, tempSensorMacMap)
+            val metadataStorage =
+                RecordingMetadataStorage(destFileDir.resolve(GlobalValues.METADATA_JSON_FILENAME))
+            metadataStorage.setData(
+                labels,
+                recordingStartTime,
+                recordingEndTime,
+                person,
+                tempSensorMacMap
+            )
 
             onRecordingDone?.let { it(Recording(destFileDir, metadataStorage)) }
         }
