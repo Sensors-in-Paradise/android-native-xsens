@@ -3,8 +3,10 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 def apikeyPropertiesFile = rootProject.file("apikey.properties")
 def apikeyProperties = new Properties()
-apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
-
+def apiKeysAvailable = apikeyPropertiesFile.exists()
+if(apiKeysAvailable) {
+    apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
+}
 android {
     compileSdkVersion 31
     //buildToolsVersion "29.0.2"
@@ -17,9 +19,10 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "OWNCLOUD_USER", apikeyProperties['OWNCLOUD_USER'])
-        buildConfigField("String", "OWNCLOUD_TOKEN", apikeyProperties['OWNCLOUD_TOKEN'])
-        buildConfigField("String", "OWNCLOUD_BASEURL", apikeyProperties['OWNCLOUD_BASEURL'])
+        buildConfigField("boolean", "OWNCLOUD_CREDENTIALS_AVAILABLE", apiKeysAvailable.toString())
+        buildConfigField("String", "OWNCLOUD_USER", apiKeysAvailable?apikeyProperties['OWNCLOUD_USER']:'"unknown"')
+        buildConfigField("String", "OWNCLOUD_TOKEN", apiKeysAvailable?apikeyProperties['OWNCLOUD_TOKEN']:'"unknown"')
+        buildConfigField("String", "OWNCLOUD_BASEURL", apiKeysAvailable?apikeyProperties['OWNCLOUD_BASEURL']:'"unknown"')
     }
 
     buildTypes {

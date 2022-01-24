@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Log
 import com.google.common.net.MediaType
 import sensors_in_paradise.sonar.GlobalValues
+import sensors_in_paradise.sonar.MessageDialog
 import sensors_in_paradise.sonar.page2.RecordingDataManager
 import java.io.File
 
@@ -133,6 +134,11 @@ class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
         recording.setStatusOfFileOrDir(localFile, UploadStatus.FAILED)
         onRecordingStatusChanged(recording)
     }
+
+    override fun onCredentialsNotAvailable() {
+        MessageDialog(context, "Owncloud credentials are not available. Please add apikeys.properties file to project root. (Ask Tobi)")
+    }
+
     private fun onRecordingStatusChanged(recording: RecordingUIItem) {
         onItemChanged?.let { it(recording) }
         if (onAllItemsFinishedWork != null) {
