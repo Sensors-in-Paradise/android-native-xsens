@@ -42,6 +42,7 @@ class LoggingManager(
     private val activitiesAdapter = ActivitiesAdapter(labels)
     private lateinit var xSenseMetadataStorage: XSensDotMetadataStorage
     private val tempSensorMacMap = mutableMapOf<String, String>()
+
     init {
         activitiesRV.adapter = activitiesAdapter
 
@@ -136,6 +137,14 @@ class LoggingManager(
     }
 
     private fun startLogging() {
+        while (labels.size > 1) {
+            labels.removeAt(0)
+        }
+        recordingStartTime = System.currentTimeMillis()
+        if (labels.size == 1) {
+            val pair = labels[0]
+            labels[0] = Pair(recordingStartTime, pair.second)
+        }
         endButton.isEnabled = true
         startButton.isEnabled = false
         timer.base = SystemClock.elapsedRealtime()
@@ -145,7 +154,7 @@ class LoggingManager(
         fileDir.mkdirs()
         val recordingsKey = LocalDateTime.now()
         tempRecordingMap[recordingsKey] = arrayListOf()
-        recordingStartTime = System.currentTimeMillis()
+
         for (device in devices.getConnected()) {
             device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
             device.startMeasuring()
@@ -187,7 +196,6 @@ class LoggingManager(
         resolveMissingFields {
             moveTempFiles(personTV.text.toString(), recordingEndTime)
             labelTV.text = ""
-            personTV.text = ""
             endButton.isEnabled = false
             startButton.isEnabled = true
             xsLoggers.clear()
@@ -233,8 +241,15 @@ class LoggingManager(
                 val destFile = getRecordingFile(destFileDir, deviceAddress)
                 Files.copy(tempFile.toPath(), FileOutputStream(destFile))
             }
-            val metadataStorage = RecordingMetadataStorage(destFileDir.resolve(GlobalValues.METADATA_JSON_FILENAME))
-            metadataStorage.setData(labels, recordingStartTime, recordingEndTime, person, tempSensorMacMap)
+            val metadataStorage =
+                RecordingMetadataStorage(destFileDir.resolve(GlobalValues.METADATA_JSON_FILENAME))
+            metadataStorage.setData(
+                labels,
+                recordingStartTime,
+                recordingEndTime,
+                person,
+                tempSensorMacMap
+            )
 
             onRecordingDone?.let { it(Recording(destFileDir, metadataStorage)) }
         }
@@ -244,6 +259,7 @@ class LoggingManager(
     fun setOnRecordingDone(onRecordingDone: (Recording) -> Unit) {
         this.onRecordingDone = onRecordingDone
     }
+
     fun setOnRecordingStarted(onRecordingStarted: () -> Unit) {
         this.onRecordingStarted = onRecordingStarted
     }
