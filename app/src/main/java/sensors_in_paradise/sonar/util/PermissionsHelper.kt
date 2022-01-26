@@ -15,7 +15,7 @@ class PermissionsHelper private constructor() {
 
         fun getRequiredButUngrantedPermissions(context: Context): ArrayList<String> {
             val result = ArrayList<String>()
-            for (permission in GlobalValues.requiredPermissions) {
+            for (permission in GlobalValues.getRequiredPermissions()) {
                 if (!isPermissionGranted(context, permission)) {
                     result.add(permission)
                 }
@@ -23,7 +23,7 @@ class PermissionsHelper private constructor() {
             return result
         }
 
-        fun isPermissionGranted(context: Context, permission: String): Boolean {
+        private fun isPermissionGranted(context: Context, permission: String): Boolean {
             return (ContextCompat.checkSelfPermission(
                 context,
                 permission
