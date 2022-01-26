@@ -2,6 +2,8 @@ package sensors_in_paradise.sonar.page3
 
 import android.app.Activity
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.widget.Button
 import android.widget.Chronometer
@@ -38,7 +40,6 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private val rawSensorDataMap = mutableMapOf<String, MutableList<Pair<Long, FloatArray>>>()
     private var sensorDataByteBuffer: ByteBuffer? = null
 
-    private lateinit var masterSensorAddress: String
     private var lastPrediction: Long = 0
 
     private val numDevices = 5
@@ -46,6 +47,14 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private var isRunning = false
 
     private lateinit var predictionModel: Lstmmodel118
+    private lateinit var mainHandler: Handler
+
+    private val updatePredictionTask = object : Runnable {
+        override fun run() {
+            processAndPredict()
+            mainHandler.postDelayed(this, 4000)
+        }
+    }
 
     private fun toggleButtons() {
         startButton.isEnabled = !(startButton.isEnabled)
@@ -65,8 +74,6 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             lastPrediction = 0L
 
             for (device in devices.getConnected()) {
-                // This line does nothing right now
-                masterSensorAddress = device.address
                 device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
                 device.startMeasuring()
             }
@@ -166,10 +173,12 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         startButton.setOnClickListener {
             startDataCollection()
+            mainHandler.postDelayed(updatePredictionTask, 4000)
         }
 
         stopButton.setOnClickListener {
             stopDataCollection()
+            mainHandler.removeCallbacks(updatePredictionTask)
         }
 
         predictButton = activity.findViewById(R.id.button_predict_predict)
@@ -177,6 +186,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             processAndPredict()
         }
         predictionModel = Lstmmodel118.newInstance(context)
+        mainHandler = Handler(Looper.getMainLooper())
     }
 
     override fun activityResumed() {
@@ -199,17 +209,6 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         val freeAcc: FloatArray = xsensDotData.freeAcc
 
         rawSensorDataMap[deviceAddress]?.add(Pair(timeStamp, quat + freeAcc))
-
-        // Attempt to automatically display predicitions every x seconds
-//        if(deviceAddress == masterSensorAddress) {
-//            if(lastPrediction == 0L) {
-//                lastPrediction = timeStamp
-//            // TODO: This is not working with different output rates and models:
-//            } else if (timeStamp - lastPrediction >= 16667 * 180) {
-//                lastPrediction = timeStamp
-//                processAndPredict()
-//            }
-//        }
     }
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
