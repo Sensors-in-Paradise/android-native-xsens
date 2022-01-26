@@ -10,6 +10,7 @@ import android.widget.Chronometer
 import android.widget.Toast
 import sensors_in_paradise.sonar.util.UIHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import org.tensorflow.lite.DataType
@@ -30,9 +31,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var context: Context
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: PredictionsAdapter
-    private lateinit var predictButton: Button
-    private lateinit var startButton: Button
-    private lateinit var stopButton: Button
+    private lateinit var predictionButton: MaterialButton
     private lateinit var timer: Chronometer
 
     private lateinit var predictionHelper: PredictionHelper
@@ -56,9 +55,16 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         }
     }
 
-    private fun toggleButtons() {
-        startButton.isEnabled = !(startButton.isEnabled)
-        stopButton.isEnabled = !(stopButton.isEnabled)
+    private fun togglePrediction() {
+        if (isRunning) {
+            predictionButton.setIconResource(R.drawable.ic_baseline_play_arrow_24)
+            predictionButton.setText("Start")
+            stopDataCollection()
+        } else {
+            predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
+            predictionButton.setText("Stop")
+            startDataCollection()
+        }
     }
 
     private fun clearBuffers() {
@@ -80,8 +86,8 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             timer.base = SystemClock.elapsedRealtime()
             timer.start()
 
-            toggleButtons()
             isRunning = true
+            mainHandler.postDelayed(updatePredictionTask, 4000)
         } else {
             Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
         }
@@ -93,8 +99,8 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             device.stopMeasuring()
         }
 
-        toggleButtons()
         isRunning = false
+        mainHandler.removeCallbacks(updatePredictionTask)
     }
 
     private fun addPredictionViews(output: FloatArray) {
@@ -155,7 +161,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         predictionHelper = PredictionHelper(context, rawSensorDataMap)
 
-        // Inititalising prediction RV
+        // Initialising prediction RV
         recyclerView = activity.findViewById(R.id.rv_prediction)
         adapter = PredictionsAdapter(predictions)
         recyclerView.adapter = adapter
@@ -167,24 +173,12 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         // Buttons and Timer
         timer = activity.findViewById(R.id.timer_predict_predict)
-        startButton = activity.findViewById(R.id.button_start_predict)
-        stopButton = activity.findViewById(R.id.button_stop_predict)
-        stopButton.isEnabled = false
+        predictionButton = activity.findViewById(R.id.button_start_predict)
 
-        startButton.setOnClickListener {
-            startDataCollection()
-            mainHandler.postDelayed(updatePredictionTask, 4000)
+        predictionButton.setOnClickListener {
+            togglePrediction()
         }
 
-        stopButton.setOnClickListener {
-            stopDataCollection()
-            mainHandler.removeCallbacks(updatePredictionTask)
-        }
-
-        predictButton = activity.findViewById(R.id.button_predict_predict)
-        predictButton.setOnClickListener {
-            processAndPredict()
-        }
         predictionModel = Lstmmodel118.newInstance(context)
         mainHandler = Handler(Looper.getMainLooper())
     }
