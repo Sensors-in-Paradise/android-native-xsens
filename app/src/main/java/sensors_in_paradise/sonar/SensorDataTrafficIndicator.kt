@@ -6,18 +6,17 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import androidx.core.view.postDelayed
 
 class SensorDataTrafficIndicator(context: Context, attrs: AttributeSet) : View(context, attrs) {
-    private class TrafficIndicator(var  rect: Rect,var paint: Paint){
+    private class TrafficIndicator(var rect: Rect, var paint: Paint) {
         var lastDataReceived = 0L
     }
     private val defaultNumSensors = 1
     var numSensors = defaultNumSensors
         set(value) {
-            field = if(value!=0) value else 1
+            field = if (value != 0) value else 1
             initTrafficIndicators()
             invalidate()
         }
@@ -33,9 +32,12 @@ class SensorDataTrafficIndicator(context: Context, attrs: AttributeSet) : View(c
             field = value
             invalidate()
         }
-    private val backgroundPaint = Paint(0).apply {
-        color = Color.BLACK
-    }
+    private val defaultIdleColor = Color.GRAY
+    private var idleColor = defaultIdleColor
+        set(value) {
+            field = value
+            invalidate()
+        }
     private var trafficIndicators: Array<TrafficIndicator>? = null
     private var animationRunning = false
     private val defaultFadeOutDuration = 1000
@@ -56,6 +58,10 @@ class SensorDataTrafficIndicator(context: Context, attrs: AttributeSet) : View(c
                     R.styleable.SensorDataTrafficIndicator_indicatorColor,
                     defaultIndicatorColor
                 )
+               idleColor = getColor(
+                    R.styleable.SensorDataTrafficIndicator_idleColor,
+                    defaultIndicatorColor
+                )
                 pixelsBetween = getInt(
                     R.styleable.SensorDataTrafficIndicator_pixelsBetween,
                     defaultPixelsBetween
@@ -70,11 +76,10 @@ class SensorDataTrafficIndicator(context: Context, attrs: AttributeSet) : View(c
         }
     }
 
-private fun initTrafficIndicators(){
+private fun initTrafficIndicators() {
     val w = width
     val h = height
     val widthPerSensor = ((w - paddingLeft - paddingRight) / numSensors)
-
 
     trafficIndicators = Array(numSensors) { i ->
         TrafficIndicator(Rect(
@@ -84,7 +89,7 @@ private fun initTrafficIndicators(){
             h - paddingBottom
         ), Paint(0).apply {
             color = indicatorColor
-            alpha=0
+            alpha = 0
         })
     }
 }
@@ -99,7 +104,7 @@ private fun initTrafficIndicators(){
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.apply {
-            //drawRect(clipBounds, backgroundPaint)
+            // drawRect(clipBounds, backgroundPaint)
             trafficIndicators?.forEach {
                 drawRect(it.rect, it.paint)
             }
@@ -107,8 +112,8 @@ private fun initTrafficIndicators(){
     }
 
     fun setSensorDataReceived(sensorIndex: Int) {
-        if(trafficIndicators!=null){
-            if(sensorIndex< trafficIndicators!!.size){
+        if (trafficIndicators != null) {
+            if (sensorIndex < trafficIndicators!!.size) {
                 trafficIndicators!![sensorIndex].lastDataReceived = System.currentTimeMillis()
             }
         }
@@ -128,14 +133,13 @@ private fun initTrafficIndicators(){
 
                 val timeDiff = currTime - lastReceived
 
-
                 if (timeDiff <= fadeOutDuration) {
                     paint.alpha = 255 - ((timeDiff * 255) / fadeOutDuration).toInt()
                     paint.color = indicatorColor
                     result = true
                 } else {
                     paint.alpha = 255
-                    paint.color  = Color.GRAY
+                    paint.color = idleColor
                 }
             }
         }

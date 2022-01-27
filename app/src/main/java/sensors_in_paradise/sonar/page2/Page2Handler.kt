@@ -124,7 +124,6 @@ class Page2Handler(
         loggingManager.xsLoggers.find { logger -> logger.filename.contains(deviceAddress) }
             ?.update(xsensDotData)
 
-
         activity.runOnUiThread {
             sensorDataTrafficIndicator.setSensorDataReceived(
                 devices.getConnectedWithOfflineMetadata().indexOf(deviceAddress)
