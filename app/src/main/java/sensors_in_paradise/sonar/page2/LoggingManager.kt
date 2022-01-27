@@ -194,7 +194,6 @@ class LoggingManager(
         resolveMissingFields {
             moveTempFiles(personTV.text.toString(), recordingEndTime)
             labelTV.text = ""
-            personTV.text = ""
             endButton.isEnabled = false
             startButton.isEnabled = true
             xsLoggers.clear()
