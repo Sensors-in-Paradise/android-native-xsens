@@ -1,35 +1,33 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="@string/messages_header">
+    <!-- <PreferenceCategory app:title="@string/messages_header">
 
-        <EditTextPreference
-            app:key="signature"
-            app:title="@string/signature_title"
-            app:useSimpleSummaryProvider="true" />
+         <EditTextPreference
+             app:key="signature"
+             app:title="@string/signature_title"
+             app:useSimpleSummaryProvider="true" />
 
-        <ListPreference
-            app:defaultValue="reply"
-            app:entries="@array/reply_entries"
-            app:entryValues="@array/reply_values"
-            app:key="reply"
-            app:title="@string/reply_title"
-            app:useSimpleSummaryProvider="true" />
+         <ListPreference
+             app:defaultValue="reply"
+             app:entries="@array/reply_entries"
+             app:entryValues="@array/reply_values"
+             app:key="reply"
+             app:title="@string/reply_title"
+             app:useSimpleSummaryProvider="true" />
 
-    </PreferenceCategory>
+     </PreferenceCategory>-->
 
-    <PreferenceCategory app:title="@string/sync_header">
+    <PreferenceCategory app:title="Appearance">
+        <SwitchPreferenceCompat
+            app:key="unfollowSystemTheme"
+            app:summary="If this setting is enabled, the app will not follow the selected system theme, meaning you can choose light or dark mode for this app individually"
+            app:title="Do not use system theme"
+            app:defaultValue="false"/>
 
         <SwitchPreferenceCompat
-            app:key="sync"
-            app:title="@string/sync_title" />
-
-        <SwitchPreferenceCompat
-            app:dependency="sync"
-            app:key="attachment"
-            app:summaryOff="@string/attachment_summary_off"
-            app:summaryOn="@string/attachment_summary_on"
-            app:title="@string/attachment_title" />
-
+            app:dependency="unfollowSystemTheme"
+            app:key="darkMode"
+            app:title="Dark mode" />
     </PreferenceCategory>
 
 </PreferenceScreen>

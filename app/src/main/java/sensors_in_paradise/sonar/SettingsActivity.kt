@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar
 
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
@@ -16,6 +17,7 @@ class SettingsActivity : AppCompatActivity() {
                 .commit()
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setBackgroundDrawable(ColorDrawable(getColor(R.color.colorPrimary)))
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {
