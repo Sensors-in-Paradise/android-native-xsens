@@ -51,10 +51,11 @@ class GlobalValues private constructor() {
             "RF" to "D4:22:CD:00:06:72"
         )
 
-        fun sensorAddressToTag(address: String): String {
-            return sensorTagMap.filterValues { it == address }.keys.first()
-        }
+        val sensorTagPrefixes = listOf("LF", "LW", "ST", "RW", "RF")
 
+        fun formatTag(tagPrefix: String, deviceSetKey: String): String {
+            return "$tagPrefix-$deviceSetKey"
+        }
         fun getDurationAsString(durationMS: Long): String {
 
             val diffSecs = (durationMS) / 1000
