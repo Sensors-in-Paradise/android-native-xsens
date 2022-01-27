@@ -26,6 +26,7 @@ class Page2Handler(
     private lateinit var viewSwitcher: ViewSwitcher
     private lateinit var recordingsAdapter: RecordingsAdapter
     private lateinit var tabLayout: TabLayout
+    //TODO: Move to MainActivity above tabBar???!
     private lateinit var sensorDataTrafficIndicator: SensorDataTrafficIndicator
     private var activitiesTab: TabLayout.Tab? = null
     private var recordingsTab: TabLayout.Tab? = null
