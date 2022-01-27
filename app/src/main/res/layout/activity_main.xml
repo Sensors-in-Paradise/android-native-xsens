@@ -25,11 +25,11 @@
         android:id="@+id/tab_layout_activity_main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        app:tabIndicatorColor="@color/orange"
-        app:tabIconTint="@color/white_selector"
-        app:tabSelectedTextColor="@color/orange"
-        app:tabTextColor="@color/white"
+        android:background="@drawable/tablayout_background"
+        app:tabIndicatorColor="@color/colorPrimary"
+        app:tabIconTint="@color/primary_selector"
+        app:tabSelectedTextColor="@color/colorPrimary"
+        app:tabTextColor="@color/lightGrey"
         >
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
