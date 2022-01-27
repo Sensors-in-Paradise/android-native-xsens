@@ -39,6 +39,7 @@ class SensorAdapter(
         val batteryPB: ProgressBar = view.findViewById(R.id.pb_battery_sensorDevice)
         val cancelButton: Button = view.findViewById(R.id.button_cancel_connection_sensor_device)
         val statusIV: ImageView = view.findViewById(R.id.imageView_status_connection_fragment)
+        val sensorSetView: View = view.findViewById(R.id.view_sensorSetColor_sensorDevice)
     }
 
     // Create new views (invoked by the layout manager)
@@ -83,9 +84,15 @@ class SensorAdapter(
         }
         viewHolder.detailsTextView.text = detailsText
         viewHolder.batteryPB.progress = if (isConnected) device.batteryPercentage else 0
-        viewHolder.batteryPB.visibility = if (isConnected) View.VISIBLE else View.INVISIBLE
+        viewHolder.batteryPB.visibility = if (isConnected) View.VISIBLE else View.GONE
 
         viewHolder.cancelButton.visibility = if (connectionCallbackUI.isSyncing) View.GONE else View.VISIBLE
+
+        val hasSetColor = device.hasSetColor()
+        if (hasSetColor) {
+            viewHolder.sensorSetView.setBackgroundColor(device.getSetColor())
+            viewHolder.sensorSetView.visibility = View.VISIBLE
+        }
 
         var statusDrawable = disconnectedDrawable
         if (isConnected) {

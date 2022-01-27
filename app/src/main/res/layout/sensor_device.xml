@@ -5,123 +5,143 @@
     android:id="@+id/card_sensorDevice"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:padding="8dp"
+    app:cardCornerRadius="8dp"
     android:layout_marginHorizontal="8dp"
-    android:layout_marginTop="8dp"
-    app:cardCornerRadius="8dp">
+   >
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginVertical="8dp">
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
 
-
-        <LinearLayout
-
-            android:layout_width="0dp"
+        <View
+            android:id="@+id/view_sensorSetColor_sensorDevice"
+            android:layout_width="10dp"
+            android:visibility="invisible"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_marginLeft="16dp"
-            android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/flipper_sensorDevice"
-            app:layout_constraintHorizontal_bias="0.08"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:background="@color/colorAccent"
+           />
 
-
-            <ImageView
-                android:id="@+id/imageView_status_connection_fragment"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="clip_vertical"
-                app:srcCompat="@drawable/ic_baseline_link_off_24" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/tv_name_sensorDevice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-
-                    android:text="TextView"
-                    android:textStyle="bold"
-                    android:visibility="visible" />
-
-                <TextView
-                    android:id="@+id/tv_details_sensorDevice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-
-                    android:text="TextView"
-                    android:visibility="visible" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <ViewFlipper
-            android:id="@+id/flipper_sensorDevice"
-            android:layout_width="wrap_content"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginRight="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:layout_marginVertical="8dp">
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:id="@+id/linearLayout_center_sensorDevice"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginVertical="16dp"
+                android:orientation="horizontal"
 
-                <ProgressBar
-                    android:id="@+id/pb_battery_sensorDevice"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginHorizontal="4dp"
-                    android:fadingEdge="horizontal" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/flipper_sensorDevice"
+                app:layout_constraintHorizontal_bias="0.08"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <Button
-                    android:id="@+id/switch_connect_sensorDevice"
+
+                <ImageView
+                    android:id="@+id/imageView_status_connection_fragment"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
-                    android:text="Disconnect" />
 
+                    android:layout_marginHorizontal="24dp"
+                    app:srcCompat="@drawable/ic_baseline_link_off_24" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_name_sensorDevice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+
+                        android:text="TextView"
+                        android:textStyle="bold"
+                        android:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/tv_details_sensorDevice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+
+                        android:text="TextView"
+                        android:visibility="visible" />
+                </LinearLayout>
             </LinearLayout>
 
-            <LinearLayout
+            <ViewFlipper
+                android:id="@+id/flipper_sensorDevice"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_gravity="right"
-                android:orientation="horizontal">
+                android:layout_marginEnd="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <ProgressBar
-                    style="?android:attr/progressBarStyle"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <ProgressBar
+                        android:id="@+id/pb_battery_sensorDevice"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginHorizontal="4dp"
+                        android:fadingEdge="horizontal"
+                        android:visibility="gone" />
+
+                    <Button
+                        android:id="@+id/switch_connect_sensorDevice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:text="Disconnect" />
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:scaleX="0.5"
-                    android:scaleY="0.5" />
+                    android:layout_gravity="end"
+                    android:orientation="horizontal">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_cancel_connection_sensor_device"
-                    android:layout_width="50dp"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="right"
-                    android:background="@android:color/transparent"
-                    android:scaleX="1.15"
-                    android:scaleY="1.15"
-                    app:icon="@drawable/ic_baseline_close_24"
-                    app:iconGravity="end"
-                    app:iconTint="#FF5722" />
+                    <ProgressBar
+                        style="?android:attr/progressBarStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:scaleX="0.5"
+                        android:scaleY="0.5" />
 
-            </LinearLayout>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_cancel_connection_sensor_device"
+                        android:layout_width="50dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="end"
+                        android:background="@android:color/transparent"
+                        android:scaleX="1.15"
+                        android:scaleY="1.15"
+                        app:icon="@drawable/ic_baseline_close_24"
+                        app:iconGravity="end"
+                        app:iconTint="#FF5722" />
+
+                </LinearLayout>
 
 
-        </ViewFlipper>
+            </ViewFlipper>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

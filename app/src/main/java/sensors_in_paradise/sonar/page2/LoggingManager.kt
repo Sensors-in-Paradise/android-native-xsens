@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.page2
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.SystemClock
 import android.widget.*
@@ -8,11 +9,12 @@ import com.xsens.dot.android.sdk.models.XsensDotPayload
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.XSENSArrayList
+import sensors_in_paradise.sonar.XSensDotMetadataStorage
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Files
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.time.ZoneOffset
 import java.util.*
 
 @Suppress("LongParameterList")
@@ -39,6 +41,8 @@ class LoggingManager(
     private val labels = ArrayList<Pair<Long, String>>()
     private var recordingStartTime = 0L
     private val activitiesAdapter = ActivitiesAdapter(labels)
+    private lateinit var xSenseMetadataStorage: XSensDotMetadataStorage
+    private val tempSensorMacMap = mutableMapOf<String, String>()
 
     init {
         activitiesRV.adapter = activitiesAdapter
@@ -58,7 +62,7 @@ class LoggingManager(
         endButton.isEnabled = false
 
         startButton.setOnClickListener {
-            if (enoughDevicesConnected) {
+            if (tryPrepareLogging()) {
                 onRecordingStarted?.let { it1 -> it1() }
                 startLogging()
                 if (!isLabelSelected()) {
@@ -68,14 +72,13 @@ class LoggingManager(
                         activitiesAdapter.notifyItemInserted(labels.size - 1)
                     })
                 }
-            } else {
-                Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
             }
         }
         startButton.isEnabled = true
         endButton.setOnClickListener {
             stopLogging()
         }
+        xSenseMetadataStorage = XSensDotMetadataStorage(context)
     }
 
     private fun showActivityDialog(
@@ -106,9 +109,11 @@ class LoggingManager(
         )
     }
 
-    private fun getRecordingFileDir(time: LocalDateTime, person: String): File {
-        val timeStr = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(time)
-        return GlobalValues.getSensorRecordingsBaseDir(context).resolve(person).resolve(timeStr)
+    private fun getRecordingFileDir(time: LocalDateTime): File {
+        val timeStr = time.toInstant(ZoneOffset.UTC).toEpochMilli().toString()
+
+        return GlobalValues.getSensorRecordingsBaseDir(context).resolve("ML Prototype Recordings")
+            .resolve(timeStr)
     }
 
     private fun getRecordingFile(fileDir: File, deviceAddress: String): File {
@@ -119,15 +124,24 @@ class LoggingManager(
         return fileDir.resolve("${System.currentTimeMillis()}_$deviceAddress.csv")
     }
 
+    private fun tryPrepareLogging(): Boolean {
+        if (!enoughDevicesConnected) {
+            Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        val deviceSetKey =
+            xSenseMetadataStorage.tryGetDeviceSetKey(devices.getConnectedWithOfflineMetadata())
+                ?: return false
+
+        for (tagPrefix in GlobalValues.sensorTagPrefixes) {
+            val tag = GlobalValues.formatTag(tagPrefix, deviceSetKey)
+            val address = xSenseMetadataStorage.getAddressForTag(tag)
+            tempSensorMacMap[address] = tag
+        }
+        return true
+    }
+
     private fun startLogging() {
-        while (labels.size > 1) {
-            labels.removeAt(0)
-        }
-        recordingStartTime = System.currentTimeMillis()
-        if (labels.size == 1) {
-            val pair = labels[0]
-            labels[0] = Pair(recordingStartTime, pair.second)
-        }
         endButton.isEnabled = true
         startButton.isEnabled = false
         timer.base = SystemClock.elapsedRealtime()
@@ -137,7 +151,7 @@ class LoggingManager(
         fileDir.mkdirs()
         val recordingsKey = LocalDateTime.now()
         tempRecordingMap[recordingsKey] = arrayListOf()
-
+        recordingStartTime = System.currentTimeMillis()
         for (device in devices.getConnected()) {
             device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
             device.startMeasuring()
@@ -166,6 +180,7 @@ class LoggingManager(
         labels.clear()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun stopLogging() {
         timer.stop()
         val recordingEndTime = System.currentTimeMillis()
@@ -218,7 +233,7 @@ class LoggingManager(
         val keys = tempRecordingMap.keys.asIterable()
         for (timestamp in keys) {
             val recordingFiles = tempRecordingMap[timestamp]
-            val destFileDir = getRecordingFileDir(timestamp, person)
+            val destFileDir = getRecordingFileDir(timestamp)
             destFileDir.mkdirs()
             for ((deviceAddress, tempFile) in recordingFiles!!) {
                 val destFile = getRecordingFile(destFileDir, deviceAddress)
@@ -231,7 +246,7 @@ class LoggingManager(
                 recordingStartTime,
                 recordingEndTime,
                 person,
-                GlobalValues.sensorTagMap
+                tempSensorMacMap
             )
 
             onRecordingDone?.let { it(Recording(destFileDir, metadataStorage)) }

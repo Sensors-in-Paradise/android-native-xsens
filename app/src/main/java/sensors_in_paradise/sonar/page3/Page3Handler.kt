@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import android.widget.Button
 import android.widget.Chronometer
 import android.widget.Toast
 import sensors_in_paradise.sonar.util.UIHelper
@@ -15,8 +14,7 @@ import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
-import sensors_in_paradise.sonar.GlobalValues
-import sensors_in_paradise.sonar.PageInterface
+import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.util.PredictionHelper
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.page1.ConnectionInterface
@@ -34,6 +32,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var predictionButton: MaterialButton
     private lateinit var timer: Chronometer
 
+    private lateinit var metadataStorage: XSensDotMetadataStorage
     private lateinit var predictionHelper: PredictionHelper
     private val predictions = ArrayList<Prediction>()
     private val rawSensorDataMap = mutableMapOf<String, MutableList<Pair<Long, FloatArray>>>()
@@ -68,17 +67,14 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     private fun clearBuffers() {
-        for ((_, deviceDataList) in rawSensorDataMap) {
-            deviceDataList.clear()
-        }
+        rawSensorDataMap.clear()
         sensorDataByteBuffer = null
     }
 
     private fun startDataCollection() {
-        if (numConnectedDevices >= numDevices) {
-            clearBuffers()
-            lastPrediction = 0L
-
+        clearBuffers()
+        lastPrediction = 0L
+        if (tryInitializeSensorDataMap()) {
             for (device in devices.getConnected()) {
                 device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
                 device.startMeasuring()
@@ -88,9 +84,20 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
             isRunning = true
             mainHandler.postDelayed(updatePredictionTask, 4000)
-        } else {
-            Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun tryInitializeSensorDataMap(): Boolean {
+        if (numConnectedDevices < numDevices) {
+            Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        val deviceSetKey = metadataStorage.tryGetDeviceSetKey(devices.getConnectedWithOfflineMetadata()) ?: return false
+
+        for (tagPrefix in GlobalValues.sensorTagPrefixes) {
+            rawSensorDataMap[GlobalValues.formatTag(tagPrefix, deviceSetKey)] = mutableListOf<Pair<Long, FloatArray>>()
+        }
+        return true
     }
 
     private fun stopDataCollection() {
@@ -159,17 +166,13 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         this.activity = activity
         this.context = activity
 
+        metadataStorage = XSensDotMetadataStorage(context)
         predictionHelper = PredictionHelper(context, rawSensorDataMap)
 
-        // Initialising prediction RV
+        // Initializing prediction RV
         recyclerView = activity.findViewById(R.id.rv_prediction)
         adapter = PredictionsAdapter(predictions)
         recyclerView.adapter = adapter
-
-        // Initialising data array
-        for ((_, address) in GlobalValues.sensorTagMap) {
-            rawSensorDataMap[address] = mutableListOf<Pair<Long, FloatArray>>()
-        }
 
         // Buttons and Timer
         timer = activity.findViewById(R.id.timer_predict_predict)
@@ -202,7 +205,8 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         val quat: FloatArray = xsensDotData.quat
         val freeAcc: FloatArray = xsensDotData.freeAcc
 
-        rawSensorDataMap[deviceAddress]?.add(Pair(timeStamp, quat + freeAcc))
+        val deviceTag = metadataStorage.getTagForAddress(deviceAddress)
+        rawSensorDataMap[deviceTag]?.add(Pair(timeStamp, quat + freeAcc))
     }
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
