@@ -40,8 +40,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layoutManager="LinearLayoutManager"
-            android:paddingBottom="48dp">
-
+            android:paddingBottom="54dp"
+            android:clipToPadding="false"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
         </androidx.recyclerview.widget.RecyclerView>
 
         <LinearLayout
@@ -83,31 +84,18 @@
         </LinearLayout>
 
     </LinearLayout>
-
-
-    <LinearLayout
-        android:id="@+id/linearLayout_sync_connection_fragment"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_sync_connection_fragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
+        android:enabled="false"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="16dp"
-        android:orientation="vertical"
-        android:visibility="gone">
+        android:text="Sync sensors"
+        app:backgroundTint="@color/colorAccent"
+        android:visibility="gone"
+        android:layout_gravity="bottom"
+        app:icon="@drawable/ic_baseline_sync_24">
 
-        <ProgressBar
-            android:id="@+id/pb_syncProgress_connection_fragment"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+    </com.google.android.material.button.MaterialButton>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_sync_connection_fragment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:text="Sync sensors"
-            app:backgroundTint="#FF5722"
-            app:icon="@drawable/ic_baseline_sync_24"></com.google.android.material.button.MaterialButton>
-    </LinearLayout>
 </FrameLayout>

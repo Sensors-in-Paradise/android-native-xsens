@@ -26,6 +26,7 @@ import java.util.ArrayList
 import java.util.HashMap
 import android.view.animation.AccelerateDecelerateInterpolator
 import sensors_in_paradise.sonar.*
+import kotlin.properties.Delegates
 
 class Page1Handler(private val scannedDevices: XSENSArrayList) :
     XsensDotScannerCallback, XsensDotDeviceCallback, PageInterface,
@@ -38,13 +39,11 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
     private lateinit var rv: RecyclerView
     private lateinit var linearLayoutCenter: LinearLayout
     private lateinit var sensorAdapter: SensorAdapter
-    private lateinit var syncLinearLayout: LinearLayout
-    private lateinit var syncPb: ProgressBar
     private lateinit var syncBtn: Button
     private lateinit var refreshLinearLayout: LinearLayout
     private lateinit var refreshButton: Button
     private lateinit var xsensDotMetadata: XSensDotMetadataStorage
-    private val unsyncedColor = Color.parseColor("#FF5722")
+    private var unsyncedColor by Delegates.notNull<Int>()
     private val syncedColor = Color.parseColor("#00e676")
     override var isSyncing = false
 
@@ -121,8 +120,8 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
         rv = activity.findViewById(R.id.rv_bluetoothDevices_activity_main)
         pb = activity.findViewById(R.id.pb_activity_main)
         syncBtn = activity.findViewById(R.id.button_sync_connection_fragment)
-        syncLinearLayout = activity.findViewById(R.id.linearLayout_sync_connection_fragment)
-        syncPb = activity.findViewById(R.id.pb_syncProgress_connection_fragment)
+        unsyncedColor = activity.getColor(R.color.colorAccent)
+
         linearLayoutCenter = activity.findViewById(R.id.linearLayout_center_activity_main)
         sensorAdapter = SensorAdapter(context, scannedDevices, this)
         rv.adapter = sensorAdapter
@@ -220,7 +219,7 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
         activity.runOnUiThread {
             Toast.makeText(context, "Finished syncing, success: $isSuccess", Toast.LENGTH_LONG).show()
             updateSyncButtonState()
-            syncPb.progress = 100
+            setSyncProgress(100)
             if (syncingResultMap != null) {
                 for (key in syncingResultMap.keys) {
                     sensorAdapter.notifyItemChanged(key)
@@ -231,17 +230,21 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
 
     override fun onSyncProgress(progress: Int) {
         activity.runOnUiThread {
-            syncPb.progress = progress
+            setSyncProgress(progress)
         }
+    }
+    private fun setSyncProgress(progress: Int) {
+        syncBtn.text = "Syncing connected sensors: $progress%"
     }
 
     private fun updateSyncButtonState() {
         val areDevicesConnected = scannedDevices.getConnected().size > 0
         activity.runOnUiThread {
             syncBtn.isEnabled = areDevicesConnected and !isSyncing
-            syncLinearLayout.visibility = if (areDevicesConnected or isSyncing) View.VISIBLE else View.GONE
+            syncBtn.visibility = if (areDevicesConnected or isSyncing) View.VISIBLE else View.GONE
             val bgColor = if (scannedDevices.areAllConnectedDevicesSynced()) syncedColor else unsyncedColor
             syncBtn.setBackgroundColor(bgColor)
+            syncBtn.text = if (isSyncing) "Syncing connected sensors..." else "Sync connected sensors"
         }
     }
 

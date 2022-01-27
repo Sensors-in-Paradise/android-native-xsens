@@ -9,6 +9,7 @@ import android.view.MenuItem
 import android.widget.ViewAnimator
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate.*
 import com.google.android.material.tabs.TabLayout
 import sensors_in_paradise.sonar.page1.Page1Handler
 import sensors_in_paradise.sonar.page2.Page2Handler
@@ -16,6 +17,7 @@ import sensors_in_paradise.sonar.page2.RecordingDataManager
 import sensors_in_paradise.sonar.page3.Page3Handler
 import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.uploader.OwnCloudRecordingsUploader
+import sensors_in_paradise.sonar.util.PreferencesHelper
 
 class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
 
@@ -60,6 +62,11 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
 
     override fun onResume() {
         super.onResume()
+        var mode = MODE_NIGHT_FOLLOW_SYSTEM
+        if (!PreferencesHelper.shouldFollowSystemTheme(this)) {
+            mode = if (PreferencesHelper.shouldUseDarkMode(this)) MODE_NIGHT_YES else MODE_NIGHT_NO
+        }
+        setDefaultNightMode(mode)
         for (handler in pageHandlers) {
             handler.activityResumed()
         }
