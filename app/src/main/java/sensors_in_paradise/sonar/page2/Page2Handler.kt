@@ -53,8 +53,7 @@ class Page2Handler(
         loggingManager = LoggingManager(
             context,
             devices,
-            activity.findViewById(R.id.buttonStart),
-            activity.findViewById(R.id.buttonEnd),
+            activity.findViewById(R.id.buttonRecord),
             timer,
             activity.findViewById(R.id.tv_activity_captureFragment),
             activity.findViewById(R.id.tv_person_captureFragment),

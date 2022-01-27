@@ -5,9 +5,11 @@ import android.content.Context
 import android.os.SystemClock
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.GlobalValues
+import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.XSensDotMetadataStorage
 import java.io.File
@@ -21,8 +23,7 @@ import java.util.*
 class LoggingManager(
     val context: Context,
     private val devices: XSENSArrayList,
-    private val startButton: Button,
-    private val endButton: Button,
+    private val recordButton: MaterialButton,
     private val timer: Chronometer,
     private val labelTV: TextView,
     private val personTV: TextView,
@@ -41,8 +42,9 @@ class LoggingManager(
     private val labels = ArrayList<Pair<Long, String>>()
     private var recordingStartTime = 0L
     private val activitiesAdapter = ActivitiesAdapter(labels)
-    private lateinit var xSenseMetadataStorage: XSensDotMetadataStorage
+    private var xSenseMetadataStorage: XSensDotMetadataStorage
     private val tempSensorMacMap = mutableMapOf<String, String>()
+    private var isRecording = false
 
     init {
         activitiesRV.adapter = activitiesAdapter
@@ -59,9 +61,18 @@ class LoggingManager(
                 personTV.text = person
             })
         }
-        endButton.isEnabled = false
 
-        startButton.setOnClickListener {
+        recordButton.setOnClickListener {
+            toggleRecording()
+        }
+
+        xSenseMetadataStorage = XSensDotMetadataStorage(context)
+    }
+
+    private fun toggleRecording() {
+        if (isRecording) {
+            stopLogging()
+        } else {
             if (tryPrepareLogging()) {
                 onRecordingStarted?.let { it1 -> it1() }
                 startLogging()
@@ -74,11 +85,6 @@ class LoggingManager(
                 }
             }
         }
-        startButton.isEnabled = true
-        endButton.setOnClickListener {
-            stopLogging()
-        }
-        xSenseMetadataStorage = XSensDotMetadataStorage(context)
     }
 
     private fun showActivityDialog(
@@ -142,8 +148,9 @@ class LoggingManager(
     }
 
     private fun startLogging() {
-        endButton.isEnabled = true
-        startButton.isEnabled = false
+        recordButton.setIconResource(R.drawable.ic_baseline_stop_24)
+        isRecording = true
+
         timer.base = SystemClock.elapsedRealtime()
         timer.format = "%s" // set the format for a chronometer
         timer.start()
@@ -183,6 +190,8 @@ class LoggingManager(
     @SuppressLint("NotifyDataSetChanged")
     private fun stopLogging() {
         timer.stop()
+        isRecording = false
+
         val recordingEndTime = System.currentTimeMillis()
         for (logger in xsLoggers) {
             logger.stop()
@@ -194,8 +203,7 @@ class LoggingManager(
         resolveMissingFields {
             moveTempFiles(personTV.text.toString(), recordingEndTime)
             labelTV.text = ""
-            endButton.isEnabled = false
-            startButton.isEnabled = true
+            recordButton.setIconResource(R.drawable.ic_baseline_play_arrow_24)
             xsLoggers.clear()
             labels.clear()
             activitiesAdapter.notifyDataSetChanged()

@@ -56,12 +56,8 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
     private fun togglePrediction() {
         if (isRunning) {
-            predictionButton.setIconResource(R.drawable.ic_baseline_play_arrow_24)
-            predictionButton.setText("Start")
             stopDataCollection()
         } else {
-            predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
-            predictionButton.setText("Stop")
             startDataCollection()
         }
     }
@@ -84,6 +80,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
             isRunning = true
             mainHandler.postDelayed(updatePredictionTask, 4000)
+            predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
         }
     }
 
@@ -108,6 +105,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         isRunning = false
         mainHandler.removeCallbacks(updatePredictionTask)
+        predictionButton.setIconResource(R.drawable.ic_baseline_play_arrow_24)
     }
 
     private fun addPredictionViews(output: FloatArray) {
