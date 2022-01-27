@@ -24,7 +24,7 @@ abstract class JSONStorage @Throws(
             save()
         } else {
             val fileContentRaw = Files.readAllBytes(file.toPath())
-            val fileContent = String(fileContentRaw, StandardCharsets.US_ASCII)
+            val fileContent = String(fileContentRaw, StandardCharsets.UTF_8)
             json = JSONObject(fileContent)
         }
         onJSONInitialized()
