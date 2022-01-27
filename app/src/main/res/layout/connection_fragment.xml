@@ -30,29 +30,21 @@
             android:visibility="gone" />
     </LinearLayout>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_bluetoothDevices_activity_main"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layoutManager="LinearLayoutManager"
-            android:paddingBottom="48dp">
-
-        </androidx.recyclerview.widget.RecyclerView>
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:id="@+id/linearLayout_refresh_connection_fragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginVertical="16dp"
             android:gravity="start"
             android:orientation="horizontal"
             android:paddingHorizontal="18dp"
-            android:visibility="gone">
+            android:visibility="visible"
+            app:layout_constraintBottom_toTopOf="@+id/rv_bluetoothDevices_activity_main"
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                 android:id="@+id/textView"
@@ -82,32 +74,45 @@
 
         </LinearLayout>
 
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:id="@+id/linearLayout_sync_connection_fragment"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="16dp"
-        android:orientation="vertical"
-        android:visibility="gone">
-
-        <ProgressBar
-            android:id="@+id/pb_syncProgress_connection_fragment"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_sync_connection_fragment"
+        <LinearLayout
+            android:id="@+id/linearLayout_sync_connection_fragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:enabled="false"
-            android:text="Sync sensors"
-            app:backgroundTint="#FF5722"
-            app:icon="@drawable/ic_baseline_sync_24"></com.google.android.material.button.MaterialButton>
-    </LinearLayout>
+            android:layout_marginHorizontal="16dp"
+            android:orientation="vertical"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_sync_connection_fragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:text="Sync sensors"
+                app:backgroundTint="#FF5722"
+                app:icon="@drawable/ic_baseline_sync_24"></com.google.android.material.button.MaterialButton>
+
+            <ProgressBar
+                android:id="@+id/pb_syncProgress_connection_fragment"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_bluetoothDevices_activity_main"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toTopOf="@+id/linearLayout_sync_connection_fragment"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout_refresh_connection_fragment"
+            tools:layout_editor_absoluteX="0dp">
+
+        </androidx.recyclerview.widget.RecyclerView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </FrameLayout>

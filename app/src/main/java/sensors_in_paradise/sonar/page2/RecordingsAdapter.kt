@@ -50,7 +50,7 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager, pri
             metadata.getActivities().joinToString(", ") { (_, activity) -> activity }
         val personName = metadata.getPerson()
         val activityDuration = metadata.getDuration()
-        val filesSynchronized = recordingsManager.checkSynchronizedTimeStamps(recording.getDirectory())
+        val filesSynchronized = recording.areFilesSynchronized()
 
         val start = dateFormat.format(Date(metadata.getTimeStarted()))
 
