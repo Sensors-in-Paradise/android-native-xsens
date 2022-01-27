@@ -30,21 +30,19 @@
             android:visibility="gone" />
     </LinearLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
+        android:layout_height="match_parent"
+        android:orientation="vertical">
         <LinearLayout
             android:id="@+id/linearLayout_refresh_connection_fragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="16dp"
+            android:layout_marginVertical="10dp"
             android:gravity="start"
             android:orientation="horizontal"
             android:paddingHorizontal="18dp"
-            android:visibility="visible"
-            app:layout_constraintBottom_toTopOf="@+id/rv_bluetoothDevices_activity_main"
-            app:layout_constraintTop_toTopOf="parent">
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/textView"
@@ -73,46 +71,30 @@
                 tools:ignore="TouchTargetSizeCheck" />
 
         </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/linearLayout_sync_connection_fragment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:orientation="vertical"
-            android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_sync_connection_fragment"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:enabled="false"
-                android:text="Sync sensors"
-                app:backgroundTint="#FF5722"
-                app:icon="@drawable/ic_baseline_sync_24"></com.google.android.material.button.MaterialButton>
-
-            <ProgressBar
-                android:id="@+id/pb_syncProgress_connection_fragment"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
-
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_bluetoothDevices_activity_main"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            app:layout_constraintBottom_toTopOf="@+id/linearLayout_sync_connection_fragment"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout_refresh_connection_fragment"
-            tools:layout_editor_absoluteX="0dp">
-
+            android:layout_height="wrap_content"
+            app:layoutManager="LinearLayoutManager"
+            android:paddingBottom="54dp"
+            android:paddingTop="8dp"
+            android:clipToPadding="false"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
         </androidx.recyclerview.widget.RecyclerView>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_sync_connection_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:layout_marginHorizontal="16dp"
+        android:text="Sync sensors"
+        app:backgroundTint="@color/colorAccent"
+        android:visibility="gone"
+        android:layout_gravity="bottom"
+        app:icon="@drawable/ic_baseline_sync_24">
+
+    </com.google.android.material.button.MaterialButton>
 
 </FrameLayout>
