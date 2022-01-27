@@ -26,16 +26,17 @@ class Page2Handler(
     private lateinit var viewSwitcher: ViewSwitcher
     private lateinit var recordingsAdapter: RecordingsAdapter
     private lateinit var tabLayout: TabLayout
+    private lateinit var sensorDataTrafficIndicator: SensorDataTrafficIndicator
     private var activitiesTab: TabLayout.Tab? = null
     private var recordingsTab: TabLayout.Tab? = null
     private var numConnectedDevices = 0
     private var numDevices = 5
 
     private lateinit var loggingManager: LoggingManager
-
+    private lateinit var activity: Activity
     override fun activityCreated(activity: Activity) {
         this.context = activity
-
+        this.activity = activity
         timer = activity.findViewById(R.id.timer)
 
         activityCountTextView = activity.findViewById(R.id.tv_activity_counts)
@@ -47,6 +48,9 @@ class Page2Handler(
         recyclerViewRecordings.adapter = recordingsAdapter
         viewSwitcher = activity.findViewById(R.id.viewSwitcher_captureFragment)
         tabLayout = activity.findViewById(R.id.tabLayout_captureFragment)
+        sensorDataTrafficIndicator =
+            activity.findViewById(R.id.sensorDataTrafficIndicator_captureFragment)
+
         activitiesTab = tabLayout.getTabAt(1)
         activitiesTab?.view?.isEnabled = false
         recordingsTab = tabLayout.getTabAt(0)
@@ -113,11 +117,19 @@ class Page2Handler(
                 }
             }
         }
+        sensorDataTrafficIndicator.numSensors = numConnectedDevices
     }
 
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
         loggingManager.xsLoggers.find { logger -> logger.filename.contains(deviceAddress) }
             ?.update(xsensDotData)
+
+
+        activity.runOnUiThread {
+            sensorDataTrafficIndicator.setSensorDataReceived(
+                devices.getConnectedWithOfflineMetadata().indexOf(deviceAddress)
+            )
+        }
     }
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {}

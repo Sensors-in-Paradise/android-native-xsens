@@ -7,12 +7,15 @@
     android:orientation="vertical"
     android:paddingHorizontal="16dp"
     android:paddingVertical="16dp"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    xmlns:custom="http://schemas.android.com/apk/res-auto">
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:baselineAligned="false">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -129,6 +132,12 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
+    <sensors_in_paradise.sonar.SensorDataTrafficIndicator
+        android:id="@+id/sensorDataTrafficIndicator_captureFragment"
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        custom:indicatorColor="@color/colorPrimary"
+        custom:fadeOutDuration="100"/>
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout_captureFragment"
         android:layout_width="match_parent"
