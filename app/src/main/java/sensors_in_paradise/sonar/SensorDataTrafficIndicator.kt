@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import androidx.core.view.postDelayed
 
@@ -60,7 +61,7 @@ class SensorDataTrafficIndicator(context: Context, attrs: AttributeSet) : View(c
                 )
                idleColor = getColor(
                     R.styleable.SensorDataTrafficIndicator_idleColor,
-                    defaultIndicatorColor
+                    defaultIdleColor
                 )
                 pixelsBetween = getInt(
                     R.styleable.SensorDataTrafficIndicator_pixelsBetween,
@@ -70,6 +71,7 @@ class SensorDataTrafficIndicator(context: Context, attrs: AttributeSet) : View(c
                     R.styleable.SensorDataTrafficIndicator_fadeOutDuration,
                     defaultFadeOutDuration
                 )
+                Log.d("SENSOR_DATA_TRAFFIC_INDICATOR", "fadeOutDuration: $fadeOutDuration")
             } finally {
                 recycle()
             }
@@ -88,8 +90,8 @@ private fun initTrafficIndicators() {
             paddingLeft + (i + 1) * widthPerSensor - if (i != numSensors - 1) pixelsBetween / 2 else 0,
             h - paddingBottom
         ), Paint(0).apply {
-            color = indicatorColor
-            alpha = 0
+            color = idleColor
+            alpha = 255
         })
     }
 }
@@ -124,6 +126,7 @@ private fun initTrafficIndicators() {
 
     /** Returns true if there is one fading out animation still running, false otherwise*/
     private fun updatePaints(): Boolean {
+        // TODO: Debug why fade animation does not work
         val currTime = System.currentTimeMillis()
         var result = false
         if (trafficIndicators != null) {
