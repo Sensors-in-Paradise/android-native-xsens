@@ -48,8 +48,16 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
         pageHandlers.add(page3Handler)
         page1Handler.addConnectionInterface(page2Handler)
         page1Handler.addConnectionInterface(page3Handler)
+        page1Handler.addConnectionInterface(
+            SensorTrafficIndicatorHandler(
+                this,
+                scannedDevices,
+                findViewById(R.id.sensorDataTrafficIndicator_captureFragment)
+            )
+        )
         val permissionLauncher = registerForActivityResult(
-                ActivityResultContracts.RequestMultiplePermissions()) {}
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) {}
         pageHandlers.add(PermissionsHandler(permissionLauncher))
 
         for (handler in pageHandlers) {

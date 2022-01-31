@@ -8,7 +8,7 @@
     android:paddingHorizontal="16dp"
     android:paddingVertical="16dp"
     tools:context=".MainActivity"
-    xmlns:custom="http://schemas.android.com/apk/res-auto">
+   >
 
 
     <LinearLayout
@@ -132,13 +132,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
-    <sensors_in_paradise.sonar.SensorDataTrafficIndicator
-        android:id="@+id/sensorDataTrafficIndicator_captureFragment"
-        android:layout_width="match_parent"
-        android:layout_height="8dp"
-        custom:indicatorColor="@color/colorPrimary"
-        custom:idleColor="#263238"
-        custom:fadeOutDuration="10000"/>
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout_captureFragment"
         android:layout_width="match_parent"
