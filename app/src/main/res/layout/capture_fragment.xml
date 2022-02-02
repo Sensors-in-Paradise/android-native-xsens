@@ -68,65 +68,42 @@
         </LinearLayout>
 
     </LinearLayout>
-
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        app:cardBackgroundColor="#00202020">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="16dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/buttonRecord">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonRecord"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                android:padding="0dp"
+                app:icon="@drawable/ic_baseline_play_arrow_24"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="64dp"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle" />
 
             <Chronometer
                 android:id="@+id/timer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView"
-                android:textSize="60sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.493"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:layout_marginLeft="12dp"
+                android:textSize="48dp"
+                android:textColor="?android:textColorHint"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="16dp"
-                android:orientation="vertical"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/timer">
+        </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginVertical="8dp"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/buttonRecord"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        style="@style/Widget.MaterialComponents.Button.Icon"
-                        app:icon="@drawable/ic_baseline_play_arrow_24"
-                        app:iconSize="32dp"
-                        app:iconGravity="textStart"
-                        android:padding="0dp"
-                        app:iconPadding="0dp"
-                        android:insetLeft="0dp"
-                        android:insetTop="0dp"
-                        android:insetRight="0dp"
-                        android:insetBottom="0dp"
-                        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle"
-                        />
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout_captureFragment"
         android:layout_width="match_parent"
@@ -152,8 +129,6 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-
-
             <TextView
                 android:id="@+id/tv_activity_counts"
                 android:layout_width="wrap_content"
@@ -171,8 +146,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
-
-
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView_activities_captureFragment"
