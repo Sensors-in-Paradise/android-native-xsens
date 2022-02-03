@@ -3,8 +3,11 @@ package sensors_in_paradise.sonar.util
 import android.content.Context
 import android.widget.Toast
 import sensors_in_paradise.sonar.GlobalValues
+import java.io.File
+import java.io.FileWriter
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
 
@@ -161,5 +164,43 @@ class PredictionHelper(
         sensorDataByteBuffer.asFloatBuffer().put(floatArray, 0, numDataLines * dataLineFloatSize)
         sensorDataByteBuffer.rewind()
         return sensorDataByteBuffer
+    }
+
+    fun exportPreprocessedData(sensorDataByteBuffer: ByteBuffer?) {
+        if (sensorDataByteBuffer == null) {
+            Toast.makeText(context, "No data recording available!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val outputDir = context.cacheDir
+        File.createTempFile("record", "csv", outputDir)
+
+        val numUnits = GlobalValues.unitLabels.size
+        val lineSize = GlobalValues.NUM_DEVICES + numUnits
+        val sensorTags = GlobalValues.sensorTagMap.toList()
+
+        var csvHeader = ""
+        (0..lineSize).forEach {
+            val tagOffset = floor(it.toFloat()/numUnits).toInt()
+            val unitOffset = it%numUnits
+            val trailing = if (it == lineSize-1) "\n" else ", "
+            csvHeader += "${sensorTags[tagOffset]}-${GlobalValues.unitLabels[unitOffset]}$trailing"}
+
+        try {
+            val fileWriter = FileWriter("record.csv")
+            fileWriter.append(csvHeader)
+
+            val floatBuffer = sensorDataByteBuffer!!.asFloatBuffer()
+            for (it in 0 until floatBuffer.position()) {
+                fileWriter.append(floatBuffer[it].toString())
+
+                val trailing = if (it%lineSize == lineSize-1) "\n" else ", "
+                fileWriter.append(trailing)
+            }
+            fileWriter.close()
+        } catch (e: Exception) {
+            Toast.makeText(context, "Failed to export CSV file!", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        }
     }
 }

@@ -10,6 +10,7 @@ import android.widget.Chronometer
 import android.widget.Toast
 import sensors_in_paradise.sonar.util.UIHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import org.tensorflow.lite.DataType
@@ -36,6 +37,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var predictButton: Button
     private lateinit var startButton: Button
     private lateinit var stopButton: Button
+    private lateinit var exportButton: FloatingActionButton
     private lateinit var timer: Chronometer
 
     private lateinit var predictionHelper: PredictionHelper
@@ -69,6 +71,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         exportPreprocessedData()
 
         toggleButtons()
+        exportButton.isEnabled = true
         isRunning = false
     }
 
@@ -92,41 +95,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         adapter.notifyDataSetChanged()
     }
 
-    private fun exportPreprocessedData() {
-        val outputDir = context.cacheDir
-        File.createTempFile("record", "csv", outputDir)
-
-        val numUnits = GlobalValues.unitLabels.size
-        val lineSize = GlobalValues.NUM_DEVICES + numUnits
-        val sensorTags = GlobalValues.sensorTagMap.toList()
-
-        var csvHeader = ""
-        (0..lineSize).forEach {
-            val tagOffset = floor(it.toFloat()/numUnits).toInt()
-            val unitOffset = it%numUnits
-            val trailing = if (it == lineSize-1) "\n" else ", "
-            csvHeader += "${sensorTags[tagOffset]}-${GlobalValues.unitLabels[unitOffset]}$trailing"}
-
-        try {
-            val fileWriter = FileWriter("record.csv")
-            fileWriter.append(csvHeader)
-
-            val floatBuffer = sensorDataByteBuffer!!.asFloatBuffer()
-            for (it in 0 until floatBuffer.position()) {
-                fileWriter.append(floatBuffer[it].toString())
-
-                val trailing = if (it%lineSize == lineSize-1) "\n" else ", "
-                fileWriter.append(trailing)
-            }
-            fileWriter.close()
-        } catch (e: Exception) {
-                println("Writing CSV error!")
-                e.printStackTrace()
-        }
-    }
-
     override fun activityCreated(activity: Activity) {
-
         this.activity = activity
         this.context = activity
 
@@ -146,7 +115,10 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         timer = activity.findViewById(R.id.timer_predict_predict)
         startButton = activity.findViewById(R.id.button_start_predict)
         stopButton = activity.findViewById(R.id.button_stop_predict)
+        predictButton = activity.findViewById(R.id.button_predict_predict)
+        exportButton = activity.findViewById(R.id.button_export_recording_prediction)
         stopButton.isEnabled = false
+        exportButton.isEnabled = false
 
         startButton.setOnClickListener {
             if (numConnectedDevices >= GlobalValues.NUM_DEVICES) {
@@ -171,7 +143,6 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             stopDataCollection()
         }
 
-        predictButton = activity.findViewById(R.id.button_predict_predict)
         predictButton.setOnClickListener {
             if (sensorDataByteBuffer != null) {
                 // get data and model
@@ -193,6 +164,10 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
                 Toast.makeText(context, "Please measure an activity first!",
                     Toast.LENGTH_SHORT).show()
             }
+        }
+
+        exportButton.setOnClickListener {
+            predictionHelper.exportPreprocessedData(sensorDataByteBuffer)
         }
     }
 
