@@ -28,15 +28,16 @@
         <include android:id="@+id/second_activity_main"  layout="@layout/capture_fragment" />
         <include android:id="@+id/second_activity_main"  layout="@layout/prediction_fragment" />
     </android.widget.ViewAnimator>
+    <!--        android:background="@drawable/tablayout_background"-->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_layout_activity_main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/tablayout_background"
-        app:tabIndicatorColor="@color/colorPrimary"
+        android:backgroundTint="@color/slightBackgroundContrast"
+        app:tabIndicatorColor="@color/colorAccent"
         app:tabIconTint="@color/primary_selector"
         app:tabSelectedTextColor="@color/colorPrimary"
-        app:tabTextColor="@color/lightGrey"
+        app:tabTextColor="?android:textColorSecondary"
         >
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
@@ -54,16 +55,4 @@
             android:text="Prediction"
             android:icon="@drawable/ic_baseline_local_fire_department_24"/>
     </com.google.android.material.tabs.TabLayout>
-    <android.widget.ViewAnimator
-        android:id="@+id/switcher_activity_main"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
-
-        <include android:id="@+id/first_activity_main"  layout="@layout/connection_fragment" />
-        <include android:id="@+id/second_activity_main"  layout="@layout/capture_fragment" />
-        <include android:id="@+id/second_activity_main"  layout="@layout/prediction_fragment" />
-    </android.widget.ViewAnimator>
-
-
 </LinearLayout>

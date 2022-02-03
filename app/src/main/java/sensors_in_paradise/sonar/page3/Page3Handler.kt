@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.page3
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.os.Handler
@@ -7,6 +8,7 @@ import android.os.Looper
 import android.os.SystemClock
 import android.widget.Chronometer
 import android.widget.Toast
+import android.widget.ViewSwitcher
 import sensors_in_paradise.sonar.util.UIHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
@@ -30,6 +32,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: PredictionsAdapter
     private lateinit var predictionButton: MaterialButton
+    private lateinit var viewSwitcher: ViewSwitcher
     private lateinit var timer: Chronometer
 
     private lateinit var metadataStorage: XSensDotMetadataStorage
@@ -69,6 +72,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
     private fun startDataCollection() {
         clearBuffers()
+        viewSwitcher.displayedChild = 1
         lastPrediction = 0L
         if (tryInitializeSensorDataMap()) {
             for (device in devices.getConnected()) {
@@ -108,6 +112,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         predictionButton.setIconResource(R.drawable.ic_baseline_play_arrow_24)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun addPredictionViews(output: FloatArray) {
         predictions.clear()
 
@@ -127,8 +132,8 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         }
 
         predictions.sortWith(Prediction.PredictionsComparator)
-
         adapter.notifyDataSetChanged()
+        viewSwitcher.displayedChild = 0
     }
 
     private fun processAndPredict() {
@@ -153,8 +158,6 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         // Runs model inference and gets result
         val outputs = predictionModel.process(inputFeature0)
         val outputFeature0 = outputs.outputFeature0AsTensorBuffer
-        // TODO: Do this when handler gets destroyed
-        // predictionModel.close()
 
         addPredictionViews(outputFeature0.floatArray)
     }
@@ -169,9 +172,9 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
         // Initializing prediction RV
         recyclerView = activity.findViewById(R.id.rv_prediction)
-        adapter = PredictionsAdapter(predictions)
+        adapter = PredictionsAdapter(predictions, activity.getColor(R.color.colorPrimary))
         recyclerView.adapter = adapter
-
+        viewSwitcher = activity.findViewById(R.id.viewSwitcher_predictionFragment)
         // Buttons and Timer
         timer = activity.findViewById(R.id.timer_predict_predict)
         predictionButton = activity.findViewById(R.id.button_start_predict)

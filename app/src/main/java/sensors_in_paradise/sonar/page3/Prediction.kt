@@ -7,7 +7,7 @@ class Prediction(var title: String, var percentage: Float) {
 
     // Equivalent to Java's static keyword
     companion object {
-        val PredictionsComparator =  Comparator<Prediction> { left, right ->
+        val PredictionsComparator = Comparator<Prediction> { left, right ->
             // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
             when {
                 (left.percentage < right.percentage) -> 0

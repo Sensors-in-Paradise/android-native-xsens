@@ -20,6 +20,8 @@ class RecordingsUploaderDialog(activity: Activity, uploader: OwnCloudRecordingsU
     private var noFilesTV: TextView
     private var switcher: ViewSwitcher
     private var uploadButton: Button
+    private var activityCountTextView: TextView
+    private val recordingsManager = uploader.recordingsManager
     init {
 
         val inflater = activity.layoutInflater
@@ -31,6 +33,7 @@ class RecordingsUploaderDialog(activity: Activity, uploader: OwnCloudRecordingsU
         switcher = rootView.findViewById(R.id.switcher_connectionStatus_uploadDialog)
         hintTV = rootView.findViewById(R.id.tv_hint_uploadFilesDialog)
         noFilesTV = rootView.findViewById(R.id.tv_noFilesToUpload_uploadDialog)
+        activityCountTextView = rootView.findViewById(R.id.tv_activity_counts)
         recyclerView.adapter = adapter
         uploader.onItemChanged = this::onRecordingItemChanged
         uploader.onAllItemsFinishedWork = this::onRecordingsFinishedWorking
@@ -53,6 +56,7 @@ class RecordingsUploaderDialog(activity: Activity, uploader: OwnCloudRecordingsU
             uploader.synchronize()
         }
         adapter.notifyDataSetChanged()
+        updateActivityCounts()
     }
 
     private fun onRecordingItemChanged(recording: RecordingUIItem) {
@@ -61,5 +65,14 @@ class RecordingsUploaderDialog(activity: Activity, uploader: OwnCloudRecordingsU
     private fun onRecordingsFinishedWorking() {
         uploadButton.isEnabled = true
         uploadButton.text = "Upload"
+    }
+    private fun updateActivityCounts() {
+        val numberOfRecodings = recordingsManager.getNumberOfRecordingsPerActivity()
+        var text = " "
+        for ((activity, number) in numberOfRecodings) {
+            text += "$activity: $number | "
+        }
+        activityCountTextView.text = text.trimEnd('|', ' ')
+        activityCountTextView.visibility = if (numberOfRecodings.isEmpty()) View.GONE else View.VISIBLE
     }
 }
