@@ -8,8 +8,16 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity"
     android:orientation="vertical"
-    android:gravity="bottom">
-
+    android:gravity="bottom"
+    xmlns:custom="http://schemas.android.com/apk/res-auto">
+    <sensors_in_paradise.sonar.SensorDataTrafficIndicatorView
+        android:id="@+id/sensorDataTrafficIndicator_captureFragment"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        custom:indicatorColor="@color/colorPrimary"
+        custom:idleColor="@color/slightBackgroundContrast"
+        custom:textColor="?android:textColorPrimary"
+        custom:fadeOutDuration="200"/>
     <android.widget.ViewAnimator
         android:id="@+id/switcher_activity_main"
         android:layout_width="match_parent"
@@ -20,7 +28,6 @@
         <include android:id="@+id/second_activity_main"  layout="@layout/capture_fragment" />
         <include android:id="@+id/second_activity_main"  layout="@layout/prediction_fragment" />
     </android.widget.ViewAnimator>
-
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_layout_activity_main"
         android:layout_width="match_parent"
@@ -47,6 +54,16 @@
             android:text="Prediction"
             android:icon="@drawable/ic_baseline_local_fire_department_24"/>
     </com.google.android.material.tabs.TabLayout>
+    <android.widget.ViewAnimator
+        android:id="@+id/switcher_activity_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <include android:id="@+id/first_activity_main"  layout="@layout/connection_fragment" />
+        <include android:id="@+id/second_activity_main"  layout="@layout/capture_fragment" />
+        <include android:id="@+id/second_activity_main"  layout="@layout/prediction_fragment" />
+    </android.widget.ViewAnimator>
 
 
 </LinearLayout>

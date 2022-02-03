@@ -3,6 +3,7 @@
     <color name="colorPrimary">#ffab91</color>
     <color name="colorPrimaryDark">#c97b63</color>
     <color name="colorAccent">#90a4ae</color>
+    <color name="slightBackgroundContrast">#263238</color>
 
     <color name="orange">#FF5722</color>
     <color name="lightGrey">#e0e0e0</color>

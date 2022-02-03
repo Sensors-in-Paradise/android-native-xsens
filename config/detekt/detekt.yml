@@ -799,3 +799,4 @@ style:
       - 'com.android.volley.*'
       - 'sensors_in_paradise.sonar.*'
       - 'androidx.appcompat.app.AppCompatDelegate.*'
+      - 'android.graphics.*'
