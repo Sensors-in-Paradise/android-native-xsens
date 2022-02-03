@@ -72,7 +72,6 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
     private fun startDataCollection() {
         clearBuffers()
-        viewSwitcher.displayedChild = 1
         lastPrediction = 0L
         if (tryInitializeSensorDataMap()) {
             for (device in devices.getConnected()) {
@@ -85,6 +84,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             isRunning = true
             mainHandler.postDelayed(updatePredictionTask, 4000)
             predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
+            viewSwitcher.displayedChild = 1
         }
     }
 

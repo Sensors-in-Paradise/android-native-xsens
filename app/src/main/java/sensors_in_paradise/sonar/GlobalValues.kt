@@ -43,7 +43,7 @@ class GlobalValues private constructor() {
             }
             return result
         }
-        
+
         val sensorTagPrefixes = listOf("LF", "LW", "ST", "RW", "RF")
 
         fun formatTag(tagPrefix: String, deviceSetKey: String): String {
