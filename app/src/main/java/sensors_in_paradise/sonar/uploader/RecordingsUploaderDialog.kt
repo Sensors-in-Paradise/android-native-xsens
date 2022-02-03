@@ -2,6 +2,7 @@ package sensors_in_paradise.sonar.uploader
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
@@ -32,6 +33,9 @@ class RecordingsUploaderDialog(activity: Activity, uploader: OwnCloudRecordingsU
         hintTV = rootView.findViewById(R.id.tv_hint_uploadFilesDialog)
         noFilesTV = rootView.findViewById(R.id.tv_noFilesToUpload_uploadDialog)
         recyclerView.adapter = adapter
+        uploader.onItemChanged = this::onRecordingItemChanged
+        uploader.onAllItemsFinishedWork = this::onRecordingsFinishedWorking
+        uploader.reloadRecordings()
 
         if (recordings.size> 0) {
             noFilesTV.visibility = View.GONE
@@ -49,9 +53,6 @@ class RecordingsUploaderDialog(activity: Activity, uploader: OwnCloudRecordingsU
             uploadButton.text = "Uploading"
             uploader.synchronize()
         }
-        uploader.onItemChanged = this::onRecordingItemChanged
-        uploader.onAllItemsFinishedWork = this::onRecordingsFinishedWorking
-        uploader.reloadRecordings()
         adapter.notifyDataSetChanged()
     }
 

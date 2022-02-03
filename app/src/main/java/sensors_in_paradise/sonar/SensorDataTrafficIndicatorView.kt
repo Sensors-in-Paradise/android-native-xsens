@@ -34,22 +34,18 @@ class SensorDataTrafficIndicatorView(context: Context, attrs: AttributeSet) : Vi
             return@let PointF(centerX - textBounds.width() / 2, centerY + textBounds.height() / 2)
         }
     }
-
-    private val defaultNumSensors = 1
-    var numSensors = defaultNumSensors
+    var numSensors = 0
         set(value) {
-            field = if (value != 0) value else 1
+            field = value
             initTrafficIndicators()
             invalidate()
         }
-    private val defaultPixelsBetween = 12
-    var pixelsBetween = defaultPixelsBetween
+    var pixelsBetween = 12
         set(value) {
             field = value
             invalidate()
         }
-    private val defaultIndicatorColor = Color.RED
-    private var indicatorColor = defaultIndicatorColor
+    private var indicatorColor = Color.RED
         set(value) {
             field = value
             for (indicator in trafficIndicators) {
@@ -57,8 +53,7 @@ class SensorDataTrafficIndicatorView(context: Context, attrs: AttributeSet) : Vi
             }
             invalidate()
         }
-    private val defaultIdleColor = Color.GRAY
-    private var idleColor = defaultIdleColor
+    private var idleColor = Color.GRAY
         set(value) {
             field = value
             idlePaint.color = value
@@ -70,8 +65,7 @@ class SensorDataTrafficIndicatorView(context: Context, attrs: AttributeSet) : Vi
     }
     private val trafficIndicators: ArrayList<TrafficIndicator> = ArrayList()
     private var animationRunning = false
-    private val defaultFadeOutDuration = 1000
-    private var fadeOutDuration = defaultFadeOutDuration
+    private var fadeOutDuration = 1000
         set(value) {
             field = value
             animationFrameDelay = max(30, value / 255)
@@ -98,19 +92,19 @@ class SensorDataTrafficIndicatorView(context: Context, attrs: AttributeSet) : Vi
             try {
                 indicatorColor = getColor(
                     R.styleable.SensorDataTrafficIndicator_indicatorColor,
-                    defaultIndicatorColor
+                    indicatorColor
                 )
                 idleColor = getColor(
                     R.styleable.SensorDataTrafficIndicator_idleColor,
-                    defaultIdleColor
+                    idleColor
                 )
                 pixelsBetween = getInt(
                     R.styleable.SensorDataTrafficIndicator_pixelsBetween,
-                    defaultPixelsBetween
+                    pixelsBetween
                 )
                 fadeOutDuration = getInt(
                     R.styleable.SensorDataTrafficIndicator_fadeOutDuration,
-                    defaultFadeOutDuration
+                    fadeOutDuration
                 )
                 textColor = getColor(
                     R.styleable.SensorDataTrafficIndicator_textColor,
@@ -130,23 +124,24 @@ class SensorDataTrafficIndicatorView(context: Context, attrs: AttributeSet) : Vi
     private fun initTrafficIndicators() {
         val w = width
         val h = height
-        val widthPerSensor = ((w - paddingLeft - paddingRight) / numSensors)
-
         trafficIndicators.clear()
-        for (i in 0 until numSensors) {
-            val rect = Rect(
-                paddingLeft + i * widthPerSensor + if (i != 0) pixelsBetween / 2 else 0,
-                paddingTop,
-                paddingLeft + (i + 1) * widthPerSensor - if (i != numSensors - 1) pixelsBetween / 2 else 0,
-                h - paddingBottom
-            )
-            val paint = Paint(0).apply {
-                color = indicatorColor
-                alpha = 0
+        if(numSensors>0) {
+            val widthPerSensor = ((w - paddingLeft - paddingRight) / numSensors)
+            for (i in 0 until numSensors) {
+                val rect = Rect(
+                    paddingLeft + i * widthPerSensor + if (i != 0) pixelsBetween / 2 else 0,
+                    paddingTop,
+                    paddingLeft + (i + 1) * widthPerSensor - if (i != numSensors - 1) pixelsBetween / 2 else 0,
+                    h - paddingBottom
+                )
+                val paint = Paint(0).apply {
+                    color = indicatorColor
+                    alpha = 0
+                }
+                val text = sensorTags?.get(i)
+                val indicator = TrafficIndicator(rect, paint, text = text, textColor)
+                trafficIndicators.add(indicator)
             }
-            val text = sensorTags?.get(i)
-            val indicator = TrafficIndicator(rect, paint, text = text, textColor)
-            trafficIndicators.add(indicator)
         }
     }
 
