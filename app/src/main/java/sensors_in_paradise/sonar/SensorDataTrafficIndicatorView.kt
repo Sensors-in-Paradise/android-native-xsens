@@ -125,7 +125,7 @@ class SensorDataTrafficIndicatorView(context: Context, attrs: AttributeSet) : Vi
         val w = width
         val h = height
         trafficIndicators.clear()
-        if(numSensors>0) {
+        if (numSensors> 0) {
             val widthPerSensor = ((w - paddingLeft - paddingRight) / numSensors)
             for (i in 0 until numSensors) {
                 val rect = Rect(
