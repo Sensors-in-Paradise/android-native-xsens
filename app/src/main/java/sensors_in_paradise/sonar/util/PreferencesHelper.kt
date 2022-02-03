@@ -13,7 +13,7 @@ class PreferencesHelper private constructor() {
             return getSharedPreferences(context).getBoolean("darkMode", false)
         }
         fun shouldFollowSystemTheme(context: Context): Boolean {
-            return !getSharedPreferences(context).getBoolean("unfollowSystemTheme", true)
+            return !getSharedPreferences(context).getBoolean("unfollowSystemTheme", false)
         }
     }
 }
