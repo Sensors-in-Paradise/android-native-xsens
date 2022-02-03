@@ -6,7 +6,9 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.view.View
 import android.widget.Chronometer
+import android.widget.ProgressBar
 import android.widget.Toast
 import android.widget.ViewSwitcher
 import sensors_in_paradise.sonar.util.UIHelper
@@ -22,6 +24,7 @@ import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.ml.Lstmmodel118
+import sensors_in_paradise.sonar.util.PreferencesHelper
 import kotlin.collections.ArrayList
 import java.nio.ByteBuffer
 import kotlin.math.round
@@ -33,15 +36,16 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var adapter: PredictionsAdapter
     private lateinit var predictionButton: MaterialButton
     private lateinit var viewSwitcher: ViewSwitcher
+    private lateinit var progressBar: ProgressBar
     private lateinit var timer: Chronometer
 
     private lateinit var metadataStorage: XSensDotMetadataStorage
     private lateinit var predictionHelper: PredictionHelper
     private val predictions = ArrayList<Prediction>()
     private val rawSensorDataMap = mutableMapOf<String, MutableList<Pair<Long, FloatArray>>>()
-    private var sensorDataByteBuffer: ByteBuffer? = null
+    // private var sensorDataByteBuffer: ByteBuffer? = null
 
-    private var lastPrediction: Long = 0
+    private var lastPrediction = 0L
 
     private val numDevices = 5
     private var numConnectedDevices = 0
@@ -50,13 +54,24 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var predictionModel: Lstmmodel118
     private lateinit var mainHandler: Handler
 
+    private val predictionInterval = 4000L
     private val updatePredictionTask = object : Runnable {
         override fun run() {
             processAndPredict()
-            mainHandler.postDelayed(this, 4000)
+            mainHandler.postDelayed(this, predictionInterval)
         }
     }
+    private val updateProgressBarTask = object : Runnable {
+        override fun run() {
+            var progress = 0
 
+            if (isRunning) {
+                progress = ((100 * (System.currentTimeMillis() - lastPrediction)) / predictionInterval).toInt()
+                mainHandler.postDelayed(this, 40)
+            }
+            progressBar.progress = progress
+        }
+    }
     private fun togglePrediction() {
         if (isRunning) {
             stopDataCollection()
@@ -67,9 +82,12 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
     private fun clearBuffers() {
         rawSensorDataMap.clear()
-        sensorDataByteBuffer = null
     }
-
+    private fun resetSensorDataLists() {
+        for (key in rawSensorDataMap.keys) {
+            rawSensorDataMap[key]?.clear()
+        }
+    }
     private fun startDataCollection() {
         clearBuffers()
         lastPrediction = 0L
@@ -83,6 +101,8 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
             isRunning = true
             mainHandler.postDelayed(updatePredictionTask, 4000)
+            mainHandler.postDelayed(updateProgressBarTask, 100)
+            progressBar.visibility = View.VISIBLE
             predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
             viewSwitcher.displayedChild = 1
         }
@@ -96,7 +116,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         val deviceSetKey = metadataStorage.tryGetDeviceSetKey(devices.getConnectedWithOfflineMetadata()) ?: return false
 
         for (tagPrefix in GlobalValues.sensorTagPrefixes) {
-            rawSensorDataMap[GlobalValues.formatTag(tagPrefix, deviceSetKey)] = mutableListOf<Pair<Long, FloatArray>>()
+            rawSensorDataMap[GlobalValues.formatTag(tagPrefix, deviceSetKey)] = mutableListOf()
         }
         return true
     }
@@ -106,9 +126,11 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         for (device in devices.getConnected()) {
             device.stopMeasuring()
         }
-
+        viewSwitcher.displayedChild = 0
         isRunning = false
         mainHandler.removeCallbacks(updatePredictionTask)
+        mainHandler.removeCallbacks(updateProgressBarTask)
+        progressBar.visibility = View.INVISIBLE
         predictionButton.setIconResource(R.drawable.ic_baseline_play_arrow_24)
     }
 
@@ -137,23 +159,25 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     private fun processAndPredict() {
-        sensorDataByteBuffer = predictionHelper.processSensorData()
-        predict()
-    }
-
-    private fun predict() {
-        if (sensorDataByteBuffer == null) {
+        val buffer = predictionHelper.processSensorData(rawSensorDataMap)
+        if (buffer == null) {
             Toast.makeText(
                 context, "Please measure an activity first!",
                 Toast.LENGTH_SHORT
             ).show()
-            return
+        } else {
+            predict(buffer)
+            resetSensorDataLists()
         }
+    }
+
+    private fun predict(sensorDataByteBuffer: ByteBuffer) {
+        lastPrediction = System.currentTimeMillis()
         // Creates inputs for reference.
         val inputFeature0 = TensorBuffer.createFixedSize(
             intArrayOf(1, predictionHelper.dataVectorSize, predictionHelper.dataLineFloatSize),
             DataType.FLOAT32)
-        inputFeature0.loadBuffer(sensorDataByteBuffer!!)
+        inputFeature0.loadBuffer(sensorDataByteBuffer)
 
         // Runs model inference and gets result
         val outputs = predictionModel.process(inputFeature0)
@@ -168,7 +192,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         this.context = activity
 
         metadataStorage = XSensDotMetadataStorage(context)
-        predictionHelper = PredictionHelper(context, rawSensorDataMap)
+        predictionHelper = PredictionHelper(context, PreferencesHelper.shouldShowToastsVerbose(context))
 
         // Initializing prediction RV
         recyclerView = activity.findViewById(R.id.rv_prediction)
@@ -178,7 +202,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         // Buttons and Timer
         timer = activity.findViewById(R.id.timer_predict_predict)
         predictionButton = activity.findViewById(R.id.button_start_predict)
-
+        progressBar = activity.findViewById(R.id.progressBar_nextPrediction_predictionFragment)
         predictionButton.setOnClickListener {
             togglePrediction()
         }

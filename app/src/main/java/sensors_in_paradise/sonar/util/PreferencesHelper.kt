@@ -15,5 +15,8 @@ class PreferencesHelper private constructor() {
         fun shouldFollowSystemTheme(context: Context): Boolean {
             return !getSharedPreferences(context).getBoolean("unfollowSystemTheme", false)
         }
+        fun shouldShowToastsVerbose(context: Context): Boolean {
+            return getSharedPreferences(context).getBoolean("verboseToasts", false)
+        }
     }
 }

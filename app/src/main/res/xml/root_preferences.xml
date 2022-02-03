@@ -29,5 +29,11 @@
             app:key="darkMode"
             app:title="Dark mode" />
     </PreferenceCategory>
-
+    <PreferenceCategory app:title="Developer options">
+        <SwitchPreferenceCompat
+            app:key="verboseToasts"
+            app:title="Verbose Toast logging"
+            app:defaultValue="false"
+            app:summary="Show semi-important Toasts for debugging"/>
+    </PreferenceCategory>
 </PreferenceScreen>

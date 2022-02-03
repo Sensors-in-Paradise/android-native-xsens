@@ -10,7 +10,7 @@ import kotlin.math.min
 
 class PredictionHelper(
     private val context: Context,
-    private val rawSensorDataMap: MutableMap<String, MutableList<Pair<Long, FloatArray>>>
+    private val showToasts: Boolean
 ) {
 
     private val numDevices = 5
@@ -23,7 +23,7 @@ class PredictionHelper(
     val dataLineFloatSize = (numQuats + numFreeAccs) * numDevices
     val dataVectorSize = 180
 
-    private fun fillEmptyDataLines() {
+    private fun fillEmptyDataLines(rawSensorDataMap: MutableMap<String, MutableList<Pair<Long, FloatArray>>>) {
         val frequency = 60
         val epsilon = 10
 
@@ -32,8 +32,10 @@ class PredictionHelper(
         val finishingTimestamp = rawSensorDataMap.minOf { it.value.last().first }
 
         if (finishingTimestamp <= startingTimestamp) {
-            Toast.makeText(context, "Timestamps not in sync", Toast.LENGTH_LONG).show()
-            Toast.makeText(context, "Data may be inconsistent!", Toast.LENGTH_SHORT).show()
+            if (showToasts) {
+                Toast.makeText(context, "Timestamps not in sync", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Data may be inconsistent!", Toast.LENGTH_SHORT).show()
+            }
             return
         }
 
@@ -107,7 +109,7 @@ class PredictionHelper(
     }
 
     @Suppress("MaxLineLength", "TooGenericExceptionCaught", "SwallowedException", "ReturnCount")
-    fun processSensorData(): ByteBuffer? {
+    fun processSensorData(rawSensorDataMap: MutableMap<String, MutableList<Pair<Long, FloatArray>>>): ByteBuffer? {
         // check for sensors without data
         rawSensorDataMap.forEach {
             val tag = it.key
@@ -120,8 +122,9 @@ class PredictionHelper(
 
         // fill empty data lines
         try {
-            fillEmptyDataLines()
+            fillEmptyDataLines(rawSensorDataMap)
         } catch (e: Exception) {
+
             Toast.makeText(context, "Filling of empty data failed", Toast.LENGTH_LONG).show()
             Toast.makeText(context, "Data may be inconsistent!", Toast.LENGTH_SHORT).show()
         }
