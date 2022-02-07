@@ -1,21 +1,30 @@
 package sensors_in_paradise.sonar.page3
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
-import android.widget.Button
+import android.view.View
 import android.widget.Chronometer
+import android.widget.ProgressBar
 import android.widget.Toast
+import android.widget.ViewSwitcher
 import sensors_in_paradise.sonar.util.UIHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.util.PredictionHelper
-import sensors_in_paradise.sonar.ml.XsensTest02
+import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.page1.ConnectionInterface
+import sensors_in_paradise.sonar.XSENSArrayList
+import sensors_in_paradise.sonar.ml.Lstmmodel118
+import sensors_in_paradise.sonar.util.PreferencesHelper
 import kotlin.collections.ArrayList
 import java.nio.ByteBuffer
 import kotlin.math.round
@@ -25,29 +34,78 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private lateinit var context: Context
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: PredictionsAdapter
-    private lateinit var predictButton: Button
-    private lateinit var startButton: Button
-    private lateinit var stopButton: Button
+    private lateinit var predictionButton: MaterialButton
+    private lateinit var viewSwitcher: ViewSwitcher
+    private lateinit var progressBar: ProgressBar
     private lateinit var timer: Chronometer
 
     private lateinit var metadataStorage: XSensDotMetadataStorage
     private lateinit var predictionHelper: PredictionHelper
     private val predictions = ArrayList<Prediction>()
     private val rawSensorDataMap = mutableMapOf<String, MutableList<Pair<Long, FloatArray>>>()
-    private var sensorDataByteBuffer: ByteBuffer? = null
+    // private var sensorDataByteBuffer: ByteBuffer? = null
+
+    private var lastPrediction = 0L
 
     private val numDevices = 5
     private var numConnectedDevices = 0
     private var isRunning = false
 
-    private fun toggleButtons() {
-        startButton.isEnabled = !(startButton.isEnabled)
-        stopButton.isEnabled = !(stopButton.isEnabled)
+    private lateinit var predictionModel: Lstmmodel118
+    private lateinit var mainHandler: Handler
+
+    private val predictionInterval = 4000L
+    private val updatePredictionTask = object : Runnable {
+        override fun run() {
+            processAndPredict()
+            mainHandler.postDelayed(this, predictionInterval)
+        }
+    }
+    private val updateProgressBarTask = object : Runnable {
+        override fun run() {
+            var progress = 0
+
+            if (isRunning) {
+                progress = ((100 * (System.currentTimeMillis() - lastPrediction)) / predictionInterval).toInt()
+                mainHandler.postDelayed(this, 40)
+            }
+            progressBar.progress = progress
+        }
+    }
+    private fun togglePrediction() {
+        if (isRunning) {
+            stopDataCollection()
+        } else {
+            startDataCollection()
+        }
     }
 
     private fun clearBuffers() {
         rawSensorDataMap.clear()
-        sensorDataByteBuffer = null
+    }
+    private fun resetSensorDataLists() {
+        for (key in rawSensorDataMap.keys) {
+            rawSensorDataMap[key]?.clear()
+        }
+    }
+    private fun startDataCollection() {
+        clearBuffers()
+        lastPrediction = 0L
+        if (tryInitializeSensorDataMap()) {
+            for (device in devices.getConnected()) {
+                device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
+                device.startMeasuring()
+            }
+            timer.base = SystemClock.elapsedRealtime()
+            timer.start()
+
+            isRunning = true
+            mainHandler.postDelayed(updatePredictionTask, 4000)
+            mainHandler.postDelayed(updateProgressBarTask, 100)
+            progressBar.visibility = View.VISIBLE
+            predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
+            viewSwitcher.displayedChild = 1
+        }
     }
 
     private fun tryInitializeSensorDataMap(): Boolean {
@@ -58,7 +116,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         val deviceSetKey = metadataStorage.tryGetDeviceSetKey(devices.getConnectedWithOfflineMetadata()) ?: return false
 
         for (tagPrefix in GlobalValues.sensorTagPrefixes) {
-            rawSensorDataMap[GlobalValues.formatTag(tagPrefix, deviceSetKey)] = mutableListOf<Pair<Long, FloatArray>>()
+            rawSensorDataMap[GlobalValues.formatTag(tagPrefix, deviceSetKey)] = mutableListOf()
         }
         return true
     }
@@ -68,31 +126,64 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         for (device in devices.getConnected()) {
             device.stopMeasuring()
         }
-
-        sensorDataByteBuffer = predictionHelper.processSensorData()
-
-        toggleButtons()
+        viewSwitcher.displayedChild = 0
         isRunning = false
+        mainHandler.removeCallbacks(updatePredictionTask)
+        mainHandler.removeCallbacks(updateProgressBarTask)
+        progressBar.visibility = View.INVISIBLE
+        predictionButton.setIconResource(R.drawable.ic_baseline_play_arrow_24)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun addPredictionViews(output: FloatArray) {
         predictions.clear()
 
         val outputLabelMap = mapOf(
-            0 to "Walking",
+            0 to "Running",
             1 to "Squats",
-            2 to "Running",
-            3 to "Stairs Down",
-            4 to "Stairs up",
-            5 to "Standing"
+            2 to "Stairs Down",
+            3 to "Stairs Up",
+            4 to "Standing",
+            5 to "Walking"
         ).withDefault { "" }
 
-        for (i in 0..output.size - 1) {
-            val procentage = round(output[i] * 10000) / 100
-            val prediction = Prediction(outputLabelMap[i]!!, procentage.toString() + "%")
+        for (i in output.indices) {
+            val percentage = round(output[i] * 10000) / 100
+            val prediction = Prediction(outputLabelMap[i]!!, percentage)
             predictions.add(prediction)
         }
+
+        predictions.sortWith(Prediction.PredictionsComparator)
         adapter.notifyDataSetChanged()
+        viewSwitcher.displayedChild = 0
+    }
+
+    private fun processAndPredict() {
+        val buffer = predictionHelper.processSensorData(rawSensorDataMap)
+        if (buffer == null) {
+            Toast.makeText(
+                context, "Please measure an activity first!",
+                Toast.LENGTH_SHORT
+            ).show()
+        } else {
+            predict(buffer)
+            resetSensorDataLists()
+        }
+    }
+
+    private fun predict(sensorDataByteBuffer: ByteBuffer) {
+        lastPrediction = System.currentTimeMillis()
+        // Creates inputs for reference.
+        val inputFeature0 = TensorBuffer.createFixedSize(
+            intArrayOf(1, predictionHelper.dataVectorSize, predictionHelper.dataLineFloatSize),
+            DataType.FLOAT32)
+        inputFeature0.loadBuffer(sensorDataByteBuffer)
+
+        // Runs model inference and gets result
+        val outputs = predictionModel.process(inputFeature0)
+        val outputFeature0 = outputs.outputFeature0AsTensorBuffer
+
+        addPredictionViews(outputFeature0.floatArray)
     }
 
     override fun activityCreated(activity: Activity) {
@@ -101,61 +192,23 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         this.context = activity
 
         metadataStorage = XSensDotMetadataStorage(context)
-        predictionHelper = PredictionHelper(context, rawSensorDataMap)
+        predictionHelper = PredictionHelper(context, PreferencesHelper.shouldShowToastsVerbose(context))
 
         // Initializing prediction RV
         recyclerView = activity.findViewById(R.id.rv_prediction)
-        adapter = PredictionsAdapter(predictions)
+        adapter = PredictionsAdapter(predictions, activity.getColor(R.color.colorPrimary))
         recyclerView.adapter = adapter
-
+        viewSwitcher = activity.findViewById(R.id.viewSwitcher_predictionFragment)
         // Buttons and Timer
         timer = activity.findViewById(R.id.timer_predict_predict)
-        startButton = activity.findViewById(R.id.button_start_predict)
-        stopButton = activity.findViewById(R.id.button_stop_predict)
-        stopButton.isEnabled = false
-
-        startButton.setOnClickListener {
-            clearBuffers()
-            if (tryInitializeSensorDataMap()) {
-                for (device in devices.getConnected()) {
-                    device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
-                    device.startMeasuring()
-                }
-                timer.base = SystemClock.elapsedRealtime()
-                timer.start()
-
-                toggleButtons()
-                isRunning = true
-            }
+        predictionButton = activity.findViewById(R.id.button_start_predict)
+        progressBar = activity.findViewById(R.id.progressBar_nextPrediction_predictionFragment)
+        predictionButton.setOnClickListener {
+            togglePrediction()
         }
 
-        stopButton.setOnClickListener {
-            stopDataCollection()
-        }
-
-        predictButton = activity.findViewById(R.id.button_predict_predict)
-        predictButton.setOnClickListener {
-            if (sensorDataByteBuffer != null) {
-                // get data and model
-                val model = XsensTest02.newInstance(context)
-
-                // Creates inputs for reference.
-                val inputFeature0 = TensorBuffer.createFixedSize(
-                    intArrayOf(1, predictionHelper.dataVectorSize, predictionHelper.dataLineFloatSize),
-                    DataType.FLOAT32)
-                inputFeature0.loadBuffer(sensorDataByteBuffer!!)
-
-                // Runs model inference and gets result
-                val outputs = model.process(inputFeature0)
-                val outputFeature0 = outputs.outputFeature0AsTensorBuffer
-                model.close()
-
-                addPredictionViews(outputFeature0.floatArray)
-            } else {
-                Toast.makeText(context, "Please measure an activity first!",
-                    Toast.LENGTH_SHORT).show()
-            }
-        }
+        predictionModel = Lstmmodel118.newInstance(context)
+        mainHandler = Handler(Looper.getMainLooper())
     }
 
     override fun activityResumed() {
@@ -173,9 +226,9 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
 
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
 
-        val timeStamp: Long = xsensDotData.getSampleTimeFine()
-        val quat: FloatArray = xsensDotData.getQuat()
-        val freeAcc: FloatArray = xsensDotData.getFreeAcc()
+        val timeStamp: Long = xsensDotData.sampleTimeFine
+        val quat: FloatArray = xsensDotData.quat
+        val freeAcc: FloatArray = xsensDotData.freeAcc
 
         val deviceTag = metadataStorage.getTagForAddress(deviceAddress)
         rawSensorDataMap[deviceTag]?.add(Pair(timeStamp, quat + freeAcc))

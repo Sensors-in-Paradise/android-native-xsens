@@ -22,7 +22,6 @@ class Page2Handler(
     private lateinit var timer: Chronometer
 
     private lateinit var recyclerViewRecordings: RecyclerView
-    private lateinit var activityCountTextView: TextView
     private lateinit var viewSwitcher: ViewSwitcher
     private lateinit var recordingsAdapter: RecordingsAdapter
     private lateinit var tabLayout: TabLayout
@@ -38,8 +37,6 @@ class Page2Handler(
         this.activity = activity
         timer = activity.findViewById(R.id.timer)
 
-        activityCountTextView = activity.findViewById(R.id.tv_activity_counts)
-
         recyclerViewRecordings = activity.findViewById(R.id.recyclerView_recordings_captureFragment)
         val linearLayoutManager = LinearLayoutManager(context)
         recyclerViewRecordings.layoutManager = linearLayoutManager
@@ -54,8 +51,7 @@ class Page2Handler(
         loggingManager = LoggingManager(
             context,
             devices,
-            activity.findViewById(R.id.buttonStart),
-            activity.findViewById(R.id.buttonEnd),
+            activity.findViewById(R.id.buttonRecord),
             timer,
             activity.findViewById(R.id.tv_activity_captureFragment),
             activity.findViewById(R.id.tv_person_captureFragment),
@@ -74,22 +70,11 @@ class Page2Handler(
         }
 
         tabLayout.addOnTabSelectedListener(this)
-        updateActivityCounts()
     }
 
     private fun addRecordingToUI(recording: Recording) {
         recordingsManager.recordingsList.add(0, recording)
         recordingsAdapter.notifyItemInserted(0)
-        updateActivityCounts()
-    }
-
-    private fun updateActivityCounts() {
-        val numberOfRecodings = recordingsManager.getNumberOfRecordingsPerActivity()
-        var text = " "
-        for ((activity, number) in numberOfRecodings) {
-            text += "$activity: $number | "
-        }
-        activityCountTextView.text = text.trimEnd('|', ' ')
     }
 
     override fun activityResumed() {

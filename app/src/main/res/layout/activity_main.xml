@@ -6,9 +6,9 @@
 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:textAlignment="center"
     tools:context=".MainActivity"
     android:orientation="vertical"
+    android:gravity="bottom"
     xmlns:custom="http://schemas.android.com/apk/res-auto">
     <sensors_in_paradise.sonar.SensorDataTrafficIndicatorView
         android:id="@+id/sensorDataTrafficIndicator_captureFragment"
@@ -18,34 +18,41 @@
         custom:idleColor="@color/slightBackgroundContrast"
         custom:textColor="?android:textColorPrimary"
         custom:fadeOutDuration="200"/>
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tab_layout_activity_main"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        >
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Connection"/>
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Recording"/>
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Prediction"/>
-    </com.google.android.material.tabs.TabLayout>
     <android.widget.ViewAnimator
         android:id="@+id/switcher_activity_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         >
-
         <include android:id="@+id/first_activity_main"  layout="@layout/connection_fragment" />
         <include android:id="@+id/second_activity_main"  layout="@layout/capture_fragment" />
         <include android:id="@+id/second_activity_main"  layout="@layout/prediction_fragment" />
     </android.widget.ViewAnimator>
-
-
+    <!--        android:background="@drawable/tablayout_background"-->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout_activity_main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/slightBackgroundContrast"
+        app:tabIndicatorColor="@color/colorAccent"
+        app:tabIconTint="@color/primary_selector"
+        app:tabSelectedTextColor="@color/colorPrimary"
+        app:tabTextColor="?android:textColorSecondary"
+        >
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Connection"
+            android:icon="@drawable/ic_baseline_bluetooth_connected_24"/>
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Recording"
+            android:icon="@drawable/ic_baseline_label_24"/>
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Prediction"
+            android:icon="@drawable/ic_baseline_local_fire_department_24"/>
+    </com.google.android.material.tabs.TabLayout>
 </LinearLayout>

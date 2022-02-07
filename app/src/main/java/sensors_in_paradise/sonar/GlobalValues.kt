@@ -43,13 +43,6 @@ class GlobalValues private constructor() {
             }
             return result
         }
-        val sensorTagMap = mapOf(
-            "LF" to "D4:22:CD:00:06:7B",
-            "LW" to "D4:22:CD:00:06:89",
-            "ST" to "D4:22:CD:00:06:7F",
-            "RW" to "D4:22:CD:00:06:7D",
-            "RF" to "D4:22:CD:00:06:72"
-        )
 
         val sensorTagPrefixes = listOf("LF", "LW", "ST", "RW", "RF")
 

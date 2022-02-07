@@ -49,7 +49,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
-
+                    app:tint="?android:textColorPrimary"
                     android:layout_marginHorizontal="24dp"
                     app:srcCompat="@drawable/ic_baseline_link_off_24" />
 

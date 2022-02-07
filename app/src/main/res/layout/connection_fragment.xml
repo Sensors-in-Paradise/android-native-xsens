@@ -67,6 +67,7 @@
                 app:backgroundTint="@color/slightBackgroundContrast"
                 app:cornerRadius="21dp"
                 app:icon="@drawable/ic_baseline_refresh_24"
+                app:iconTint="?android:textColorSecondary"
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
                 android:padding="3dp"
