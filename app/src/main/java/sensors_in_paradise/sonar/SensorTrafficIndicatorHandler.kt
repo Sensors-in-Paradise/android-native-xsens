@@ -3,6 +3,7 @@ package sensors_in_paradise.sonar
 import android.app.Activity
 import android.util.Log
 import com.xsens.dot.android.sdk.events.XsensDotData
+import sensors_in_paradise.sonar.custom_views.SensorDataTrafficIndicatorView
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 
 class SensorTrafficIndicatorHandler(

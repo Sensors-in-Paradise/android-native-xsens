@@ -10,7 +10,7 @@
     android:orientation="vertical"
     android:gravity="bottom"
     xmlns:custom="http://schemas.android.com/apk/res-auto">
-    <sensors_in_paradise.sonar.SensorDataTrafficIndicatorView
+    <sensors_in_paradise.sonar.custom_views.SensorDataTrafficIndicatorView
         android:id="@+id/sensorDataTrafficIndicator_captureFragment"
         android:layout_width="match_parent"
         android:layout_height="8dp"

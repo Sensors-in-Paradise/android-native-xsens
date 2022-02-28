@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate.*
 import com.google.android.material.tabs.TabLayout
+import sensors_in_paradise.sonar.custom_views.stickman.StickmanDialog
 import sensors_in_paradise.sonar.page1.Page1Handler
 import sensors_in_paradise.sonar.page2.Page2Handler
 import sensors_in_paradise.sonar.page2.RecordingDataManager
@@ -111,5 +112,8 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
     fun onSettingsMenuItemClicked(ignored: MenuItem) {
         val intent = Intent(this, SettingsActivity::class.java)
         startActivity(intent)
+    }
+    fun onStickmanMenuItemClicked(ignored: MenuItem) {
+        StickmanDialog(this)
     }
 }
