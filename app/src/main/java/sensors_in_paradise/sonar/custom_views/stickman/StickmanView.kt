@@ -11,6 +11,11 @@ import android.view.View
 // camera transformation: file:///C:/Users/tfied/OneDrive/Dokumente/Studium/Archiv/Semester%203/CGS/Script/alle_folien.pdf page 327
 class StickmanView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val stickman  = Stickman()
+
+
+
+
+
     private var centerX = 1f
     private var centerY= 1f
     private val paint = Paint(0).apply {
