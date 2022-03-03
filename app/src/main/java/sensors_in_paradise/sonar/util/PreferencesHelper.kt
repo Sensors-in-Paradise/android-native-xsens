@@ -10,17 +10,24 @@ class PreferencesHelper private constructor() {
         fun getSharedPreferences(context: Context): SharedPreferences {
             return PreferenceManager.getDefaultSharedPreferences(context)
         }
+
         fun shouldUseDarkMode(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("darkMode", false)
         }
+
         fun shouldFollowSystemTheme(context: Context): Boolean {
             return !getSharedPreferences(context).getBoolean("unfollowSystemTheme", false)
         }
+
         fun shouldShowToastsVerbose(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("verboseToasts", false)
         }
+
         fun getRecordingsSubDir(context: Context): String {
-            return getSharedPreferences(context).getString("recordingsSubDir", context.getString(R.string.default_recordings_subdir))!!
+            return getSharedPreferences(context).getString(
+                "recordingsSubDir",
+                context.getString(R.string.default_recordings_subdir)
+            )!!
         }
     }
 }

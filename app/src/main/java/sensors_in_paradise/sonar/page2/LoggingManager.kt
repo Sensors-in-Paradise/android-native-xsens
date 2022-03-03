@@ -6,7 +6,6 @@ import android.os.SystemClock
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
-import com.xsens.dot.android.sdk.models.XsensDotPayload
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
@@ -28,7 +27,7 @@ class LoggingManager(
     private val timer: Chronometer,
     private val labelTV: TextView,
     private val personTV: TextView,
-    private val activitiesRV: RecyclerView
+    activitiesRV: RecyclerView
 ) {
 
     val xsLoggers: ArrayList<XsensDotLogger> = ArrayList()
