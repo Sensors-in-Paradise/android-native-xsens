@@ -1,4 +1,5 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!-- <PreferenceCategory app:title="@string/messages_header">
 
@@ -35,5 +36,15 @@
             app:title="Verbose Toast logging"
             app:defaultValue="false"
             app:summary="Show semi-important Toasts for debugging"/>
+    </PreferenceCategory>
+    <PreferenceCategory app:title="Data recording options">
+
+        <EditTextPreference
+            android:defaultValue="@string/default_recordings_subdir"
+            android:key="recordingsSubDir"
+            android:selectAllOnFocus="false"
+            android:singleLine="true"
+            android:title="Recordings subdirectory"
+            android:summary="Choose the name of the subdirectory in which recordings should be stored. This directory will then also be mirrored in the cloud on upload."/>
     </PreferenceCategory>
 </PreferenceScreen>
