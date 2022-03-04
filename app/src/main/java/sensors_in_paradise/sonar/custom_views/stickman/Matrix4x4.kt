@@ -1,17 +1,46 @@
 package sensors_in_paradise.sonar.custom_views.stickman
 
-class Matrix4x4(val row1: Array<Float>, val row2: Array<Float>, val row3: Array<Float>, val row4: Array<Float>) {
-    constructor() : this(arrayOf(1f,0f,0f,0f),arrayOf(0f,1f,0f,0f),arrayOf(0f,0f,1f,0f),arrayOf(0f,0f,0f,1f))
+import java.lang.IndexOutOfBoundsException
 
-    fun transform(p: Point3D): Point3D{
-        return Point3D(applyRowOnVector(row1, p), applyRowOnVector(row1, p),applyRowOnVector(row1, p),applyRowOnVector(row1, p))
+class Matrix4x4(private val row1: Array<Float>, private val row2: Array<Float>, private val row3: Array<Float>, private val row4: Array<Float>) {
+    constructor() : this(arrayOf(1f,0f,0f,0f),arrayOf(0f,1f,0f,0f),arrayOf(0f,0f,1f,0f),arrayOf(0f,0f,0f,1f))
+    operator fun get(row: Int): Array<Float>{
+        return when(row){
+            0->row1
+            1->row2
+            2->row3
+            3->row4
+            else -> throw IndexOutOfBoundsException("Row-Index must be 0 <= index <= 3")
+        }
+    }
+    operator fun get(row: Int, col: Int): Float{
+        return this[row][col]
+    }
+
+    operator fun set(row: Int, col: Int, value: Float){
+        this[row][col] = value
+    }
+
+    operator fun times(p: Point3D): Point3D{
+        val res = Point3D()
+        for(row in 0..3){
+            var sum = 0f
+            for(col in 0..3){
+                sum += this[row][col] * p[col]
+            }
+            res[row] = sum
+        }
+        return res
     }
     private fun applyRowOnVector(row: Array<Float>, vector: Point3D): Float{
         assert(row.size == 4)
+
         var sum = 0f
         for((i, f) in row.withIndex()){
             sum += f * vector[i]
         }
         return sum
     }
+
+
 }
