@@ -5,7 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import sensors_in_paradise.sonar.custom_views.stickman.Matrix4x4
-import sensors_in_paradise.sonar.custom_views.stickman.Point3D
+import sensors_in_paradise.sonar.custom_views.stickman.Vec4
 
 class Matrix4x4Test {
     @Before
@@ -36,7 +36,7 @@ class Matrix4x4Test {
     }
     @Test
     fun transformVectorTest() {
-        val p1 = Point3D(2f, 06f, 1f,1f)
+        val p1 = Vec4(2f, 06f, 1f,1f)
         val m = Matrix4x4(arrayOf(1f,2f,1f,1f),arrayOf(0f,1f,0f,1f),arrayOf(2f,3f,4f,1f),arrayOf(1f,1f,1f,1f))
         val res = m *p1
         assertEquals(16f,res.x)
@@ -47,7 +47,7 @@ class Matrix4x4Test {
     @Test
     fun transformVectorWithUnitMatrixTest() {
         val m = Matrix4x4()
-        val p = Point3D(1f, 0.5f, 2f)
+        val p = Vec4(1f, 0.5f, 2f)
         val res = m * p
         assertEquals(1f,res.x)
         assertEquals(0.5f,res.y)

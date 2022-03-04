@@ -21,8 +21,8 @@ class Matrix4x4(private val row1: Array<Float>, private val row2: Array<Float>, 
         this[row][col] = value
     }
 
-    operator fun times(p: Point3D): Point3D{
-        val res = Point3D()
+    operator fun times(p: Vec4): Vec4{
+        val res = Vec4()
         for(row in 0..3){
             var sum = 0f
             for(col in 0..3){
@@ -32,7 +32,7 @@ class Matrix4x4(private val row1: Array<Float>, private val row2: Array<Float>, 
         }
         return res
     }
-    private fun applyRowOnVector(row: Array<Float>, vector: Point3D): Float{
+    private fun applyRowOnVector(row: Array<Float>, vector: Vec4): Float{
         assert(row.size == 4)
 
         var sum = 0f

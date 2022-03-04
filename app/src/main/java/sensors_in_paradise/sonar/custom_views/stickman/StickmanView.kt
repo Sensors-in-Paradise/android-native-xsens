@@ -34,8 +34,8 @@ class StickmanView(context: Context, attrs: AttributeSet) : View(context, attrs)
             }
         }
     }
-    private fun project3DPoint(point3D: Point3D): PointF {
-        val p = (point3D+ 1f) * 0.5f
+    private fun project3DPoint(vec4: Vec4): PointF {
+        val p = (vec4+ 1f) * 0.5f
 
         return PointF(p.x*width.toFloat(), p.y * height.toFloat())
     }
