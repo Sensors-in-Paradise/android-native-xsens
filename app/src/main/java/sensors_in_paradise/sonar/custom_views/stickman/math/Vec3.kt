@@ -1,10 +1,10 @@
-package sensors_in_paradise.sonar.custom_views.stickman
+package sensors_in_paradise.sonar.custom_views.stickman.math
 
-import java.lang.IndexOutOfBoundsException
-
-class Vec3(x: Float, y: Float, z: Float): VecX<Vec3>(arrayOf(x,y,z)) {
+open class Vec3(values: FloatArray): VecX<Vec3>(values,3) {
     constructor(vec3: Vec3) : this(vec3.x, vec3.y, vec3.z)
     constructor() : this(0f, 0f, 0f)
+    constructor(x: Float, y: Float, z: Float) : this(floatArrayOf(x, y, z))
+
     var x: Float
         get() = this[0]
         set(value) {

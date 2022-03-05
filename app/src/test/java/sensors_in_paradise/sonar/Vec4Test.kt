@@ -5,12 +5,14 @@ import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import sensors_in_paradise.sonar.custom_views.stickman.Vec4
+import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 
 class Vec4Test {
     @Before
     fun init() {
+
     }
+
     @Test
     fun equalityTest() {
         val p1 = Vec4(1f, 0.5f, 0f)
@@ -28,17 +30,17 @@ class Vec4Test {
         assertEquals(3f, p1.x)
         assertEquals(2.5f, p1.y)
         assertEquals(2f, p1.z)
-        assertEquals(1f, p1.w)
+        assertEquals(3f, p1.w)
     }
     @Test
-    fun point3DPlusAssignTest() {
+    fun vec3PlusAssignTest() {
         val p1 = Vec4(1f, 0.5f, 0f)
         val p2 = Vec4(0f, 2.5f, 1f)
         p1 += p2
         assertEquals(1f, p1.x)
         assertEquals(3f, p1.y)
         assertEquals(1f, p1.z)
-        assertEquals(1f, p1.w)
+        assertEquals(2f, p1.w)
     }
     @Test
     fun scalarMinusAssignTest() {
@@ -47,17 +49,17 @@ class Vec4Test {
         assertEquals(-1f, p1.x)
         assertEquals(-1.5f, p1.y)
         assertEquals(-2f, p1.z)
-        assertEquals(1f, p1.w)
+        assertEquals(-1f, p1.w)
     }
     @Test
-    fun point3DMinusAssignTest() {
+    fun vec3MinusAssignTest() {
         val p1 = Vec4(1f, 0.5f, 0f)
         val p2 = Vec4(0f, 2.5f, 1f)
         p1 -= p2
         assertEquals(1f, p1.x)
         assertEquals(-2f, p1.y)
         assertEquals(-1f, p1.z)
-        assertEquals(1f, p1.w)
+        assertEquals(0f, p1.w)
     }
     @Test
     fun scalarTimesAssignTest() {
@@ -66,10 +68,10 @@ class Vec4Test {
         assertEquals(2f, p1.x)
         assertEquals(1f, p1.y)
         assertEquals(0f, p1.z)
-        assertEquals(1f, p1.w)
+        assertEquals(2f, p1.w)
     }
     @Test
-    fun point3DTimesAssignTest() {
+    fun vec3TimesAssignTest() {
         val p1 = Vec4(1f, 0.5f, 0f)
         val p2 = Vec4(0f, 2.5f, 1f)
         p1 *= p2
@@ -85,10 +87,10 @@ class Vec4Test {
         assertEquals(0.5f, p1.x)
         assertEquals(6f, p1.y)
         assertEquals(0f, p1.z)
-        assertEquals(1f, p1.w)
+        assertEquals(0.5f, p1.w)
     }
     @Test
-    fun point3DDivAssignTest() {
+    fun vec3DivAssignTest() {
         val p1 = Vec4(1f, 24f, 6f)
         val p2 = Vec4(1f, 2f, 3f)
         p1/=p2
@@ -105,17 +107,17 @@ class Vec4Test {
         assertEquals(3f, p2.x)
         assertEquals(2.5f, p2.y)
         assertEquals(2f, p2.z)
-        assertEquals(1f, p2.w)
+        assertEquals(3f, p2.w)
     }
     @Test
-    fun point3DPlusTest() {
+    fun vec3PlusTest() {
         val p1 = Vec4(1f, 0.5f, 0f)
         val p2 = Vec4(0f, 2.5f, 1f)
         val p3 = p1 + p2
         assertEquals(1f, p3.x)
         assertEquals(3f, p3.y)
         assertEquals(1f, p3.z)
-        assertEquals(1f, p3.w)
+        assertEquals(2f, p3.w)
     }
     @Test
     fun scalarMinusTest() {
@@ -124,17 +126,17 @@ class Vec4Test {
         assertEquals(-1f, p2.x)
         assertEquals(-1.5f, p2.y)
         assertEquals(-2f, p2.z)
-        assertEquals(1f, p2.w)
+        assertEquals(-1f, p2.w)
     }
     @Test
-    fun point3DMinusTest() {
+    fun vec3MinusTest() {
         val p1 = Vec4(1f, 0.5f, 0f)
         val p2 = Vec4(0f, 2.5f, 1f)
         val p3 = p1 - p2
         assertEquals(1f, p3.x)
         assertEquals(-2f, p3.y)
         assertEquals(-1f, p3.z)
-        assertEquals(1f, p3.w)
+        assertEquals(0f, p3.w)
     }
     @Test
     fun scalarTimesTest() {
@@ -143,10 +145,10 @@ class Vec4Test {
         assertEquals(2f, p2.x)
         assertEquals(1f, p2.y)
         assertEquals(0f, p2.z)
-        assertEquals(1f, p2.w)
+        assertEquals(2f, p2.w)
     }
     @Test
-    fun point3DTimesTest() {
+    fun vec3TimesTest() {
         val p1 = Vec4(1f, 0.5f, 0f)
         val p2 = Vec4(0f, 2.5f, 1f)
         val p3 = p1 * p2
@@ -162,10 +164,10 @@ class Vec4Test {
         assertEquals(0.5f, p2.x)
         assertEquals(6f, p2.y)
         assertEquals(0f, p2.z)
-        assertEquals(1f, p2.w)
+        assertEquals(0.5f, p2.w)
     }
     @Test
-    fun point3DDivTest() {
+    fun vec3DivTest() {
         val p1 = Vec4(1f, 24f, 6f)
         val p2 = Vec4(1f, 2f, 3f)
         val p3 = p1/p2
@@ -200,15 +202,17 @@ class Vec4Test {
     }
     @Test
     fun divideByZeroScalarTest() {
-        val p1 = Vec4(1f, 0.5f, 0f, 23f)
+        val p1 = Vec4(1f, 0.5f, 2f, 23f)
 
-        assertEquals(p1.x, p1[0])
-        assertEquals(p1.y, p1[1])
-        assertEquals(p1.z, p1[2])
-        assertEquals(p1.w, p1[3])
+        p1 /= 0f
+
+        assertEquals(Float.POSITIVE_INFINITY, p1.x)
+        assertEquals(Float.POSITIVE_INFINITY, p1.y)
+        assertEquals(Float.POSITIVE_INFINITY, p1.z)
+        assertEquals(Float.POSITIVE_INFINITY, p1.w)
     }
     @Test
-    fun divideByZeroPoint3DTest() {
+    fun divideByZeroVec3Test() {
         val p1 = Vec4(1f, 0.5f, 2f, 23f)
         val p2 = Vec4(0f, 0f, 0f)
 
@@ -217,6 +221,18 @@ class Vec4Test {
         assertEquals(Float.POSITIVE_INFINITY,p1.y)
         assertEquals(Float.POSITIVE_INFINITY,p1.z)
         assertEquals( p1[3],p1.w)
+    }
+
+    @Test
+    fun xyzIsReferenceTest() {
+        val p1 = Vec4(1f, 0.5f, 2f, 23f)
+        val p2 = p1.xyz
+        p2 += 1.0f
+
+        assertEquals(2f,p1.x)
+        assertEquals(1.5f,p1.y)
+        assertEquals(3f,p1.z)
+        assertEquals( 23f,p1.w)
     }
     @After
     fun cleanUp() {

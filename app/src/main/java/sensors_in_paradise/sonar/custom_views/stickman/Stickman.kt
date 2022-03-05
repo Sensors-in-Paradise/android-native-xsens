@@ -1,6 +1,8 @@
 package sensors_in_paradise.sonar.custom_views.stickman
 
-class Stickman: Object3D() {
+import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
+
+class Stickman: LineObject3D() {
     val leftFoot = Vec4(-0.5f, -0.5f, 0f)
     val rightFoot = Vec4(0.5f, -0.5f, 0f)
     val center = Vec4(0f, 0f, 0f)

@@ -1,6 +1,8 @@
 package sensors_in_paradise.sonar.custom_views.stickman
 
-abstract class Object3D {
+import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
+
+abstract class LineObject3D {
     private val frustumOpeningAngleW = Math.PI/2f
     private val frustumOpeningAngleH = Math.PI/2f
     //private val s_xy = Matrix4x4(arrayOf(Math.))

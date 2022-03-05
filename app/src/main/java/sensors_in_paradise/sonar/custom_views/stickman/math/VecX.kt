@@ -1,6 +1,6 @@
-package sensors_in_paradise.sonar.custom_views.stickman
+package sensors_in_paradise.sonar.custom_views.stickman.math
 
-abstract class VecX<T: VecAbstractBase>(values: Array<Float>): VecAbstractBase(values) {
+abstract class VecX<T: VecAbstractBase>(values: FloatArray, size: Int=values.size): VecAbstractBase(values, size) {
     abstract fun clone(): T
 
 
@@ -16,7 +16,7 @@ abstract class VecX<T: VecAbstractBase>(values: Array<Float>): VecAbstractBase(v
     }
     operator fun unaryMinus(): T {
         val res = clone()
-        for(i in 0 until res.size()){
+        for(i in 0 until res.size){
             res[i] = -res[i]
         }
         return res

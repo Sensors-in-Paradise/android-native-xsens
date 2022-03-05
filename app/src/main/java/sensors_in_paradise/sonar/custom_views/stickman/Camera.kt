@@ -1,5 +1,9 @@
 package sensors_in_paradise.sonar.custom_views.stickman
 
-class Camera(val center: Vec4, val eye: Vec4, val up: Vec4) {
+import sensors_in_paradise.sonar.custom_views.stickman.math.Matrix4x4
+import sensors_in_paradise.sonar.custom_views.stickman.math.Vec3
+
+class Camera(center: Vec3, eye: Vec3, up: Vec3) {
+    val lookAtMatrix = Matrix4x4.lookAt(eye, center, up)
 
 }
