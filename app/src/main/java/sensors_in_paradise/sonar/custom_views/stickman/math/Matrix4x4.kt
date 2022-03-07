@@ -64,6 +64,12 @@ class Matrix4x4(private val data: FloatArray) {
             data.clone()
         )
     }
+    fun lookAt(eye: Vec3,
+               center: Vec3,
+               up: Vec3){
+        lookAt(eye.x,eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z,this)
+    }
+
     companion object{
         fun fromRows(row1: Array<Float>, row2: Array<Float>,row3: Array<Float>,row4: Array<Float>): Matrix4x4{
             val data = FloatArray(16)
@@ -77,15 +83,26 @@ class Matrix4x4(private val data: FloatArray) {
         }
         fun lookAt(eyeX: Float, eyeY: Float, eyeZ: Float,
                    centerX: Float, centerY: Float, centerZ: Float,
-                   upX: Float, upY: Float, upZ: Float): Matrix4x4{
-            val data = FloatArray(16)
+                   upX: Float, upY: Float, upZ: Float,  m: Matrix4x4?=null): Matrix4x4{
+
+            val data = m?.data ?: FloatArray(16)
             Matrix.setLookAtM(data, 0, eyeX, eyeY, eyeZ, centerX,centerY,centerZ,upX, upY, upZ)
-            return Matrix4x4(data)
+            return m ?: Matrix4x4(data)
         }
         fun lookAt(eye: Vec3,
                    center: Vec3,
-                   up: Vec3): Matrix4x4{
-           return lookAt(eye.x,eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z)
+                   up: Vec3, m: Matrix4x4?=null): Matrix4x4{
+           return lookAt(eye.x,eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z,m)
+        }
+        fun project(fovy: Float, aspect: Float, zNear: Float, zFar: Float): Matrix4x4{
+            val data = FloatArray(16)
+            Matrix.perspectiveM(data, 0,fovy, aspect, zNear, zFar )
+            return Matrix4x4(data)
+        }
+        fun rotateY(angle: Float): Matrix4x4{
+            val data = FloatArray(16)
+            Matrix.rotateM(data, 0,angle, 0f, 1f, 0f )
+            return Matrix4x4(data)
         }
     }
 }

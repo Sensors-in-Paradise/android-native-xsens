@@ -7,6 +7,7 @@ import android.graphics.Paint
 import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.View
+import sensors_in_paradise.sonar.custom_views.stickman.math.Matrix4x4
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec3
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 
@@ -14,8 +15,8 @@ import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 class StickmanView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val stickman  = Stickman()
     private val cube = Cube()
-    private val camera = Camera(Vec3(0f,0.5f, 0f),Vec3(0f,1f, -3f), Vec3(0f,1f, 0f))
-
+    private val camera = Camera(Vec3(0f,0.5f, 0f),Vec3(0f,1f, -5f), Vec3(0f,1f, 0f))
+    private var projection = Matrix4x4.project(90f, 1f, -3f, 3f)
 
 
     private var centerX = 1f
@@ -41,8 +42,8 @@ class StickmanView(context: Context, attrs: AttributeSet) : View(context, attrs)
         }
     }
     private fun project3DPoint(vec4: Vec4): PointF {
-        val projected = camera.lookAtMatrix * vec4
-        val p = (projected+ 1f) * 0.5f
+        val projected = projection * camera.lookAtMatrix * vec4
+        val p = (projected.xy / projected.w + 1f) * 0.5f
 
         return PointF(p.x*width.toFloat(), p.y * height.toFloat())
     }
@@ -51,6 +52,6 @@ class StickmanView(context: Context, attrs: AttributeSet) : View(context, attrs)
         super.onSizeChanged(w, h, oldw, oldh)
         centerX = (w/2).toFloat()
         centerY = (h/2).toFloat()
-
+        projection = Matrix4x4.project(45f, w.toFloat()/h.toFloat(), -3f, 6f)
     }
 }
