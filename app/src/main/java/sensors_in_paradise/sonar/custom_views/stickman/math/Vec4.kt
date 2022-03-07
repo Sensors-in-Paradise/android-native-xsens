@@ -2,6 +2,7 @@ package sensors_in_paradise.sonar.custom_views.stickman.math
 
 class Vec4(values: FloatArray): VecX<Vec4>(values,4){
     constructor(vec4: Vec4) : this(vec4.x, vec4.y, vec4.z, vec4.w)
+    constructor(vec3: Vec3) : this(vec3.x, vec3.y, vec3.z, 1f)
     constructor(x: Float, y: Float, z: Float) : this(x, y, z, 1f)
     constructor() : this(floatArrayOf(0f, 0f, 0f, 1f))
     constructor(x: Float, y: Float, z: Float,  w: Float) : this(floatArrayOf(x, y, z, w))
