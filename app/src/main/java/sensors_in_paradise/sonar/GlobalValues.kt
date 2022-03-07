@@ -3,6 +3,7 @@ package sensors_in_paradise.sonar
 import android.Manifest
 import android.content.Context
 import android.os.Build
+import com.xsens.dot.android.sdk.models.XsensDotPayload
 import java.io.File
 
 class GlobalValues private constructor() {
@@ -10,6 +11,7 @@ class GlobalValues private constructor() {
         const val NULL_ACTIVITY = "null - activity"
         const val UNKNOWN_PERSON = "unknown"
         const val METADATA_JSON_FILENAME = "metadata.json"
+        const val MEASUREMENT_MODE = XsensDotPayload.PAYLOAD_TYPE_CUSTOM_MODE_4
         fun getSensorRecordingsBaseDir(context: Context): File {
             return context.getExternalFilesDir(null) ?: context.dataDir
         }

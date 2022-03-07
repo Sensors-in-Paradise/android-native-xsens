@@ -6,12 +6,12 @@ import android.os.SystemClock
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
-import com.xsens.dot.android.sdk.models.XsensDotPayload
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.XSensDotMetadataStorage
+import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Files
@@ -27,7 +27,7 @@ class LoggingManager(
     private val timer: Chronometer,
     private val labelTV: TextView,
     private val personTV: TextView,
-    private val activitiesRV: RecyclerView
+    activitiesRV: RecyclerView
 ) {
 
     val xsLoggers: ArrayList<XsensDotLogger> = ArrayList()
@@ -118,7 +118,7 @@ class LoggingManager(
     private fun getRecordingFileDir(time: LocalDateTime): File {
         val timeStr = time.toInstant(ZoneOffset.UTC).toEpochMilli().toString()
 
-        return GlobalValues.getSensorRecordingsBaseDir(context).resolve("ML Prototype Recordings")
+        return GlobalValues.getSensorRecordingsBaseDir(context).resolve(PreferencesHelper.getRecordingsSubDir(context))
             .resolve(timeStr)
     }
 
@@ -160,7 +160,7 @@ class LoggingManager(
         tempRecordingMap[recordingsKey] = arrayListOf()
         recordingStartTime = System.currentTimeMillis()
         for (device in devices.getConnected()) {
-            device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
+            device.measurementMode = GlobalValues.MEASUREMENT_MODE
             device.startMeasuring()
             val file = getNewUnlabelledTempFile(fileDir, device.address)
 
@@ -169,7 +169,7 @@ class LoggingManager(
                 XsensDotLogger(
                     this.context,
                     XsensDotLogger.TYPE_CSV,
-                    XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION,
+                    GlobalValues.MEASUREMENT_MODE,
                     file.absolutePath,
                     device.address,
                     "1",
