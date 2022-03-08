@@ -33,7 +33,7 @@ class StickmanView(context: Context, attrs: AttributeSet) : View(context, attrs)
                 isAnimationThreadInSlowMode = true
             }
             try {
-                Thread.sleep(if (isAnimationThreadInSlowMode) 5000L else 50L)
+                Thread.sleep(if (isAnimationThreadInSlowMode) 5000L else 30L)
             } catch (e: InterruptedException) {
                 Log.d("StickmanView", "Animation thread interrupted.")
             }
@@ -82,10 +82,7 @@ class StickmanView(context: Context, attrs: AttributeSet) : View(context, attrs)
                 lastEventX = x
                 camera.rotateY(diff / 5f)
                 onSceneChanged()
-                if (isAnimationThreadInSlowMode) {
-                    isAnimationThreadInSlowMode = false
-                    animationThread.interrupt()
-                }
+
             }
             if (event.action == MotionEvent.ACTION_DOWN) {
                 lastEventX = event.getAxisValue(MotionEvent.AXIS_X)
@@ -96,5 +93,9 @@ class StickmanView(context: Context, attrs: AttributeSet) : View(context, attrs)
 
     private fun onSceneChanged() {
         lastTimeSceneChanged = System.currentTimeMillis()
+        if (isAnimationThreadInSlowMode) {
+            isAnimationThreadInSlowMode = false
+            animationThread.interrupt()
+        }
     }
 }
