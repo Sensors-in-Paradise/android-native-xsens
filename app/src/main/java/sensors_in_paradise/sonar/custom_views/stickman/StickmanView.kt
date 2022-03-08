@@ -82,7 +82,6 @@ class StickmanView(context: Context, attrs: AttributeSet) : View(context, attrs)
                 lastEventX = x
                 camera.rotateY(diff / 5f)
                 onSceneChanged()
-
             }
             if (event.action == MotionEvent.ACTION_DOWN) {
                 lastEventX = event.getAxisValue(MotionEvent.AXIS_X)
