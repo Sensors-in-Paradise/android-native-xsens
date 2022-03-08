@@ -10,6 +10,8 @@ import android.view.View
 import sensors_in_paradise.sonar.custom_views.stickman.math.Matrix4x4
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec3
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
+import sensors_in_paradise.sonar.custom_views.stickman.object3D.Cube
+import sensors_in_paradise.sonar.custom_views.stickman.object3D.Stickman
 
 // camera transformation: file:///C:/Users/tfied/OneDrive/Dokumente/Studium/Archiv/Semester%203/CGS/Script/alle_folien.pdf page 327
 class StickmanView(context: Context, attrs: AttributeSet) : View(context, attrs) {

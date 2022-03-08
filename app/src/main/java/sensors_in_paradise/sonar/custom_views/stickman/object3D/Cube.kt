@@ -1,6 +1,7 @@
-package sensors_in_paradise.sonar.custom_views.stickman
+package sensors_in_paradise.sonar.custom_views.stickman.object3D
 
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
+import sensors_in_paradise.sonar.custom_views.stickman.object3D.LineObject3D
 
 class Cube: LineObject3D() {
     // lbb for left-bottom-back

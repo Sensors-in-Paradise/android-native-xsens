@@ -1,6 +1,7 @@
-package sensors_in_paradise.sonar.custom_views.stickman
+package sensors_in_paradise.sonar.custom_views.stickman.object3D
 
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
+import sensors_in_paradise.sonar.custom_views.stickman.object3D.LineObject3D
 
 class Stickman: LineObject3D() {
     val leftFoot = Vec4(-0.5f, -0.5f, 0f)
