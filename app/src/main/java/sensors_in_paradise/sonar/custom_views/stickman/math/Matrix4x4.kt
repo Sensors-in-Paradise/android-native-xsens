@@ -1,6 +1,7 @@
 package sensors_in_paradise.sonar.custom_views.stickman.math
 
 import android.opengl.Matrix
+import android.util.Log
 import java.lang.Exception
 import java.lang.IndexOutOfBoundsException
 
@@ -69,6 +70,16 @@ class Matrix4x4(private val data: FloatArray) {
                up: Vec3){
         lookAt(eye.x,eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z,this)
     }
+    fun asString():String{
+        var s = ""
+        for(row in 0..3){
+            for(col in 0..3){
+                s += " "+this[row,col]
+            }
+            s+="\n"
+        }
+        return s
+    }
 
     companion object{
         fun fromRows(row1: Array<Float>, row2: Array<Float>,row3: Array<Float>,row4: Array<Float>): Matrix4x4{
@@ -99,10 +110,18 @@ class Matrix4x4(private val data: FloatArray) {
             Matrix.perspectiveM(data, 0,fovy, aspect, zNear, zFar )
             return Matrix4x4(data)
         }
-        fun rotateY(angle: Float): Matrix4x4{
-            val data = FloatArray(16)
-            Matrix.rotateM(data, 0,angle, 0f, 1f, 0f )
-            return Matrix4x4(data)
+        fun rotationY(angle: Float): Matrix4x4{
+            val m = Matrix4x4()
+            Matrix.rotateM(m.data, 0,angle, 0f, 1f, 0f )
+            return m
+        }
+        fun rotationX(degrees:Float):Matrix4x4{
+            return rotationX(degrees, Vec3(1f,0f,0f))
+        }
+        fun rotationX(degrees:Float, centerOfRotation: Vec3):Matrix4x4{
+            val m = Matrix4x4()
+            Matrix.rotateM(m.data, 0, degrees, centerOfRotation.x, centerOfRotation.y, centerOfRotation.z)
+            return m
         }
     }
 }
