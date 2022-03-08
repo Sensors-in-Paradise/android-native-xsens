@@ -10,7 +10,6 @@ import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 class Vec4Test {
     @Before
     fun init() {
-
     }
 
     @Test
@@ -19,9 +18,9 @@ class Vec4Test {
         val p2 = Vec4(1f, 0.5f, 0f)
         val p3 = Vec4(2f, 0.5f, 0f)
 
-        assert(p1==p2)
-        assert(p2!= p3)
-        assert(p1!= p3)
+        assert(p1 == p2)
+        assert(p2 != p3)
+        assert(p1 != p3)
     }
     @Test
     fun scalarPlusAssignTest() {
@@ -93,7 +92,7 @@ class Vec4Test {
     fun vec3DivAssignTest() {
         val p1 = Vec4(1f, 24f, 6f)
         val p2 = Vec4(1f, 2f, 3f)
-        p1/=p2
+        p1 /= p2
         assertEquals(1f, p1.x)
         assertEquals(12f, p1.y)
         assertEquals(2f, p1.z)
@@ -170,7 +169,7 @@ class Vec4Test {
     fun vec3DivTest() {
         val p1 = Vec4(1f, 24f, 6f)
         val p2 = Vec4(1f, 2f, 3f)
-        val p3 = p1/p2
+        val p3 = p1 / p2
         assertEquals(1f, p3.x)
         assertEquals(12f, p3.y)
         assertEquals(2f, p3.z)
@@ -186,7 +185,7 @@ class Vec4Test {
         assertEquals(p1.z, p2.z)
         assertEquals(p1.w, p2.w)
 
-        p2 +=0.5f
+        p2 += 0.5f
         Assert.assertNotEquals(p1.x, p2.x)
         Assert.assertNotEquals(p1.y, p2.y)
         Assert.assertNotEquals(p1.z, p2.z)
@@ -217,10 +216,10 @@ class Vec4Test {
         val p2 = Vec4(0f, 0f, 0f)
 
         p1 /= p2
-        assertEquals(Float.POSITIVE_INFINITY,p1.x)
-        assertEquals(Float.POSITIVE_INFINITY,p1.y)
-        assertEquals(Float.POSITIVE_INFINITY,p1.z)
-        assertEquals( p1[3],p1.w)
+        assertEquals(Float.POSITIVE_INFINITY, p1.x)
+        assertEquals(Float.POSITIVE_INFINITY, p1.y)
+        assertEquals(Float.POSITIVE_INFINITY, p1.z)
+        assertEquals(p1[3], p1.w)
     }
 
     @Test
@@ -229,13 +228,12 @@ class Vec4Test {
         val p2 = p1.xyz
         p2 += 1.0f
 
-        assertEquals(2f,p1.x)
-        assertEquals(1.5f,p1.y)
-        assertEquals(3f,p1.z)
-        assertEquals( 23f,p1.w)
+        assertEquals(2f, p1.x)
+        assertEquals(1.5f, p1.y)
+        assertEquals(3f, p1.z)
+        assertEquals(23f, p1.w)
     }
     @After
     fun cleanUp() {
-
     }
 }

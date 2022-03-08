@@ -472,7 +472,7 @@ naming:
   PackageNaming:
     active: true
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
-    packagePattern: '[a-z\_]+(\.[a-z][A-Za-z0-9]*)*'
+    packagePattern: '[a-z0-9\_]+(\.[a-z][A-Za-z0-9\_]*)*'
   TopLevelPropertyNaming:
     active: true
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']

@@ -1,16 +1,12 @@
 package sensors_in_paradise.sonar.custom_views.stickman
 
 import android.app.AlertDialog
-import android.app.Dialog
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
-import android.widget.EditText
-import android.widget.TextView
 import sensors_in_paradise.sonar.R
 
-class StickmanDialog(context: Context){
-    var dialog: AlertDialog
+class StickmanDialog(context: Context) {
+    private var dialog: AlertDialog
 
     init {
 
@@ -18,8 +14,7 @@ class StickmanDialog(context: Context){
         builder.setTitle("Stickman")
 
         val root = LayoutInflater.from(context).inflate(R.layout.stickman_dialog, null)
-        val stickmanView = root.findViewById<StickmanView>(R.id.editText_promptDialog)
-
+        // val stickmanView = root.findViewById<StickmanView>(R.id.editText_promptDialog)
 
         builder.setView(root)
 
@@ -29,6 +24,5 @@ class StickmanDialog(context: Context){
 
         dialog = builder.create()
         dialog.show()
-
     }
 }
