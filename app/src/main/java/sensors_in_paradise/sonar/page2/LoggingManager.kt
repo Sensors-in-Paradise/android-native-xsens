@@ -3,6 +3,7 @@ package sensors_in_paradise.sonar.page2
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.SystemClock
+import android.util.Log
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
@@ -148,6 +149,16 @@ class LoggingManager(
     }
 
     private fun startLogging() {
+        while (labels.size > 1){
+            labels.removeAt(0)
+        }
+
+        recordingStartTime = System.currentTimeMillis()
+        if (labels.size == 1) {
+            val activity = labels[0].second
+            labels[0]= Pair(recordingStartTime, activity)
+        }
+
         recordButton.setIconResource(R.drawable.ic_baseline_stop_24)
         isRecording = true
 
@@ -158,7 +169,7 @@ class LoggingManager(
         fileDir.mkdirs()
         val recordingsKey = LocalDateTime.now()
         tempRecordingMap[recordingsKey] = arrayListOf()
-        recordingStartTime = System.currentTimeMillis()
+        
         for (device in devices.getConnected()) {
             device.measurementMode = GlobalValues.MEASUREMENT_MODE
             device.startMeasuring()
