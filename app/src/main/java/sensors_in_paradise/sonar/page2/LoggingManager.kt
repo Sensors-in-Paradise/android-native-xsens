@@ -147,18 +147,33 @@ class LoggingManager(
         return true
     }
 
+    private fun initializeLabels(startTime: Long) {
+        // clear labels because it is being filled when selecting activities, even when not recording
+        while (labels.size > 1) {
+            labels.removeAt(0)
+        }
+
+        if (labels.size == 1) {
+            val activity = labels[0].second
+            labels[0] = Pair(startTime, activity)
+        }
+    }
+
     private fun startLogging() {
+        recordingStartTime = System.currentTimeMillis()
+        initializeLabels(recordingStartTime)
+
         recordButton.setIconResource(R.drawable.ic_baseline_stop_24)
         isRecording = true
 
         timer.base = SystemClock.elapsedRealtime()
-        timer.format = "%s" // set the format for a chronometer
+        timer.format = "%s"
         timer.start()
         val fileDir = GlobalValues.getSensorRecordingsTempDir(context)
         fileDir.mkdirs()
         val recordingsKey = LocalDateTime.now()
         tempRecordingMap[recordingsKey] = arrayListOf()
-        recordingStartTime = System.currentTimeMillis()
+
         for (device in devices.getConnected()) {
             device.measurementMode = GlobalValues.MEASUREMENT_MODE
             device.startMeasuring()
