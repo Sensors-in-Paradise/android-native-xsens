@@ -47,30 +47,27 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
         dir.delete()
     }
     fun areFilesSynchronized(): Boolean {
-        val headerSize = 9
-        val margin = 10
+        val childCSVs = dir.listFiles { _, name -> name.endsWith(".csv") } ?: return false
 
-            val childCSVs = dir.listFiles { _, name -> name.endsWith(".csv") } ?: return false
+        val firstFile = childCSVs[0]
 
-            val firstFile = childCSVs[0]
+        val lineNumber = getAbsoluteLineNumber(firstFile)
+        val timesteps = lineNumber - XSENS_HEADER_SIZE
 
-            val lineNumber = getAbsoluteLineNumber(firstFile)
-            val timesteps = lineNumber - XSENS_HEADER_SIZE
+        val margin = floor(timesteps * 0.2).toInt()
+        val lineFrom = XSENS_HEADER_SIZE + margin
+        val lineTo = lineNumber - margin
+        // End is exclusive, so +1 on last line
+        val randomLine = Random.nextInt(lineFrom, lineTo + 1)
+        val timestamp = getTimeStampAtLine(firstFile, randomLine)
 
-            val margin = floor(timesteps * 0.2).toInt()
-            val lineFrom = XSENS_HEADER_SIZE + margin
-            val lineTo = lineNumber - margin
-            // End is exclusive, so +1 on last line
-            val randomLine = Random.nextInt(lineFrom, lineTo + 1)
-            val timestamp = getTimeStampAtLine(firstFile, randomLine)
+        assert(timestamp != "") { "No initial timestamp could be found." }
 
-            assert(timestamp != "") { "No initial timestamp could be found." }
-
-            for (child in childCSVs) {
-                if (!findTimeStamp(child, timestamp)) {
-                    return false
-                }
+        for (child in childCSVs) {
+            if (!findTimeStamp(child, timestamp)) {
+                return false
             }
+        }
 
         return true
     }
