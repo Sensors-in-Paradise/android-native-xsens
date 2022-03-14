@@ -4,7 +4,11 @@ import sensors_in_paradise.sonar.GlobalValues
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
+import kotlin.math.floor
 import kotlin.random.Random
+
+const val XSENS_HEADER_SIZE = 9
+const val XSENS_EMPTY_FILE_SIZE = 430
 
 open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorage) {
     constructor(dir: File) : this(
@@ -51,7 +55,13 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
             val firstFile = childCSVs[0]
 
             val lineNumber = getAbsoluteLineNumber(firstFile)
-            val randomLine = Random.nextInt(headerSize + margin, lineNumber - margin)
+            val timesteps = lineNumber - XSENS_HEADER_SIZE
+
+            val margin = floor(timesteps * 0.2).toInt()
+            val lineFrom = XSENS_HEADER_SIZE + margin
+            val lineTo = lineNumber - margin
+            // End is exclusive, so +1 on last line
+            val randomLine = Random.nextInt(lineFrom, lineTo + 1)
             val timestamp = getTimeStampAtLine(firstFile, randomLine)
 
             assert(timestamp != "") { "No initial timestamp could be found." }
