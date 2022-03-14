@@ -39,7 +39,6 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager, pri
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val recording = dataSet[position]
         val metadata = recording.metadataStorage
-        val isValid = recording.areFilesValid
         viewHolder.deleteButton.setOnClickListener {
             val index = dataSet.indexOf(recording)
             recordingsManager.deleteRecording(recording)
@@ -50,7 +49,6 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager, pri
             metadata.getActivities().joinToString(", ") { (_, activity) -> activity }
         val personName = metadata.getPerson()
         val activityDuration = metadata.getDuration()
-        val filesSynchronized = recording.areFilesSynchronized()
 
         val start = dateFormat.format(Date(metadata.getTimeStarted()))
 
@@ -58,16 +56,29 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager, pri
         viewHolder.durationTextView.text = "Duration: " + GlobalValues.getDurationAsString(activityDuration)
         viewHolder.startTimeTextView.text = "Start: $start"
         viewHolder.personTextView.text = "Person: " + personName
-        if (!isValid) {
-            viewHolder.checkFilesTextView.setTextColor(ContextCompat.getColor(context, R.color.red))
-            viewHolder.checkFilesTextView.text = "Some files are empty"
-        } else if (!filesSynchronized) {
-            viewHolder.checkFilesTextView.setTextColor(ContextCompat.getColor(context, R.color.yellow))
-            viewHolder.checkFilesTextView.text = "Files are not synchronized"
-        } else {
-            viewHolder.checkFilesTextView.setTextColor(ContextCompat.getColor(context, R.color.green))
-            viewHolder.checkFilesTextView.text = "Files checked and synchronized"
+
+        // Set check file text & color conditionally
+        viewHolder.checkFilesTextView.setTextColor(getCheckFileColor(recording))
+        viewHolder.checkFilesTextView.text = getCheckFileText(recording)
+    }
+
+    private fun getCheckFileText(recording: Recording): String {
+        return when (recording.state) {
+            RecordingFileState.Empty -> "Some files are empty"
+            RecordingFileState.Unsynchronized -> "Files are not synchronized"
+            RecordingFileState.Valid -> "Files checked and synchronized"
         }
+    }
+
+    private fun getCheckFileColor(recording: Recording): Int {
+        return ContextCompat.getColor(
+            context,
+            when (recording.state) {
+                RecordingFileState.Empty -> R.color.red
+                RecordingFileState.Unsynchronized -> R.color.yellow
+                RecordingFileState.Valid -> R.color.green
+            }
+        )
     }
 
     override fun getItemCount() = dataSet.size

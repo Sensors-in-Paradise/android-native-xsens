@@ -10,6 +10,15 @@ import kotlin.random.Random
 const val XSENS_HEADER_SIZE = 9
 const val XSENS_EMPTY_FILE_SIZE = 430
 
+/**
+ * Enum that describes the condition / state a recording can be in
+ */
+enum class RecordingFileState {
+    Empty,
+    Unsynchronized,
+    Valid
+}
+
 open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorage) {
     constructor(dir: File) : this(
         dir,
@@ -19,14 +28,15 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
         recording.dir,
         recording.metadataStorage
     )
-    val areFilesValid = !areFilesEmpty(dir)
+    val state = getRecordingState()
+    val isValid
+        get() = state != RecordingFileState.Empty
 
     private fun areFilesEmpty(dir: File): Boolean {
-        val emptyFileSize = 430
         val childCSVs = dir.listFiles { _, name -> name.endsWith(".csv") }
         if (childCSVs != null) {
             for (child in childCSVs) {
-                if (child.length() < emptyFileSize) {
+                if (child.length() < XSENS_EMPTY_FILE_SIZE) {
                     return true
                 }
             }
@@ -46,6 +56,24 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
             }
         dir.delete()
     }
+
+    private fun getRecordingState(): RecordingFileState {
+        return if (areFilesEmpty(dir)) {
+            RecordingFileState.Empty
+        } else if (!areFilesSynchronized()) {
+            RecordingFileState.Unsynchronized
+        } else {
+            RecordingFileState.Valid
+        }
+    }
+
+    /**
+     * Checks if the files of the recording are synchronized -> contain exactly the same timestamps.
+     * **This only works if the files are not empty.**
+     *
+     * This is checked on one sample line, as the timestamps are usually consistently spaced for one
+     * sensor.
+     */
     fun areFilesSynchronized(): Boolean {
         val childCSVs = dir.listFiles { _, name -> name.endsWith(".csv") } ?: return false
 
@@ -114,6 +142,10 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
         reader.close()
         return false
     }
+
+    /**
+     * Counts all lines in the given recording file **including** the header
+     */
     private fun getAbsoluteLineNumber(file: File): Int {
         var lineNumber = 0
 

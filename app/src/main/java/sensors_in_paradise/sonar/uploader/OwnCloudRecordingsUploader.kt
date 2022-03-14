@@ -47,7 +47,7 @@ class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
 
     fun synchronize() {
         for (recordingUiItem in recordingUiItems) {
-            if (recordingUiItem.areFilesValid) {
+            if (recordingUiItem.isValid) {
                 uploadRecording(recordingUiItem)
             }
         }
