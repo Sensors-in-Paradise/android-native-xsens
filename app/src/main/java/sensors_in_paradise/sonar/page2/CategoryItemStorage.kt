@@ -5,7 +5,7 @@ import org.json.JSONObject
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
 
-// TODO: Others as default category
+// TODO: Others as default category (in PersistenceStringArrayDialog --> CategoryDialog)
 
 
 /*
@@ -35,20 +35,15 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
         items = json.getJSONArray("items")
     }
 
-    fun addItemIfNotAdded(item: String, deletable: Boolean = true): Boolean {
-        var alreadyAdded = false
-        for (i in 0 until items.length()) {
-            if (items[i] == item) {
-                alreadyAdded = true
-                break
-            }
-        }
+    fun addEntryIfNotAdded(entry: String, category: String = "Others", deletable: Boolean = true): Boolean {
+        var alreadyAdded = isEntryAdded(entry)
+
         if (!alreadyAdded) {
-            addEntry(item)
+            addEntry(entry, category)
             save()
         }
         if (!deletable) {
-            nonDeletableItems.add(item)
+            nonDeletableItems.add(entry)
         }
         return !alreadyAdded
     }
@@ -59,6 +54,7 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
         save()
     }
 
+    // Removes all entries in the category as well
     fun removeCategory(category: String) {
         for (i in 0 until items.length()) {
             if (items.getJSONObject(i).getString("category") == category) {
@@ -69,42 +65,88 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
         save()
     }
 
-    fun getCategoriesAsArray(): Array<String> {
+    fun getItems(): MutableList<CategoryItem> {
+        var itemList = mutableListOf<CategoryItem>()
 
+        val categories = getCategoriesAsArray()
+        for (category in categories) {
+            val entries = getEntriesAsArrayList(category)
+            val item = CategoryItem(category, entries)
+            itemList.add(item)
+        }
+
+        return itemList
+    }
+
+    fun getCategoriesAsArray(): Array<String> {
+        return Array(items.length()) { i -> items.getJSONObject(i).getString("category")  }
     }
 
     fun getCategoriesAsArrayList(): ArrayList<String> {
-
+        return getCategoriesAsArray().toCollection(ArrayList())
     }
 
     // TODO: Handle if no matching category found
     fun addEntry(entry: String, category: String = "Others") {
-        for (i in 0 until items.length()) {
-            var jsonObj = items.getJSONObject(i)
-            if (jsonObj.getString("category") == category) {
-                jsonObj.getJSONArray("entries").put(entry)
-                break
-            }
-        }
+        val jsonObj = findJSONObjectByCategory(category)
+        jsonObj?.getJSONArray("entries")?.put(entry)
         save()
     }
 
     fun removeEntry(entry: String, category: String = "Others") {
-        for (i in 0 until items.length()) {
-            var jsonObj = items.getJSONObject(i)
-            if (jsonObj.getString("category") == category) {
-                jsonObj.getJSONArray("entries").remove(entry)
-                break
+        val jsonObj = findJSONObjectByCategory(category)
+        if (jsonObj != null) {
+            val categoryEntries: JSONArray = jsonObj.getJSONArray("entries")
+            for (i in 0 until categoryEntries.length()) {
+                if (categoryEntries[i] == entry) {
+                    categoryEntries.remove(i)
+                    break
+                }
             }
         }
+
         save()
     }
 
-    fun getEntriesAsArray(): Array<String> {
-        return Array(this.items.length()) { i -> this.items[i].toString() }
+    fun getEntriesAsArray(category: String): Array<String> {
+        val jsonObj = findJSONObjectByCategory(category)
+        if (jsonObj != null) {
+            val categoryEntries: JSONArray = jsonObj.getJSONArray("entries")
+            return Array(categoryEntries.length()) { i ->
+                categoryEntries[i].toString()
+            }
+        }
+
+        return emptyArray()
     }
 
-    fun getEntriesAsArrayList(): ArrayList<String> {
-        return getEntriesAsArray().toCollection(ArrayList())
+    fun getEntriesAsArrayList(category: String): ArrayList<String> {
+        return getEntriesAsArray(category).toCollection(ArrayList())
+    }
+
+    private fun isEntryAdded(entry: String): Boolean {
+        for (i in 0 until items.length()) {
+            val jsonObject = items.getJSONObject(i)
+            val categoryEntries: JSONArray = jsonObject.getJSONArray("entries")
+
+            for (i in 0 until categoryEntries.length()) {
+                if (categoryEntries[i] == entry) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    // TODO: maybe throw exception here to avoid null checks
+    private fun findJSONObjectByCategory(category: String): JSONObject? {
+        for (i in 0 until items.length()) {
+            val jsonObj = items.getJSONObject(i)
+            if (jsonObj.getString("category") == category) {
+                return jsonObj
+            }
+        }
+
+        return null
     }
 }
