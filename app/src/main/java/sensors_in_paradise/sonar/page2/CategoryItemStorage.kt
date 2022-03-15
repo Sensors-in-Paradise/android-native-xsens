@@ -1,12 +1,13 @@
 package sensors_in_paradise.sonar.page2
 
+import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
 
 // TODO: Others as default category (in PersistenceStringArrayDialog --> CategoryDialog)
-
+// TODO: Nondeletable items müsste Others enthalten, aktuell wird "null-activity" gesetzt
 
 /*
 Example Structure:
@@ -27,6 +28,8 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
     lateinit var items: JSONArray
     val nonDeletableItems = ArrayList<String>()
 
+    private val defaultCategory = "Others"
+
     override fun onFileNewlyCreated() {
         json.put("items", JSONArray())
     }
@@ -35,12 +38,13 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
         items = json.getJSONArray("items")
     }
 
-    fun addEntryIfNotAdded(entry: String, category: String = "Others", deletable: Boolean = true): Boolean {
+    fun addEntryIfNotAdded(entry: String, category: String = defaultCategory, deletable: Boolean = true): Boolean {
         var alreadyAdded = isEntryAdded(entry)
 
+        addCategory(defaultCategory)
+        
         if (!alreadyAdded) {
             addEntry(entry, category)
-            save()
         }
         if (!deletable) {
             nonDeletableItems.add(entry)
@@ -49,7 +53,9 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
     }
 
     fun addCategory(category: String) {
+        Log.d("TEST", "Aaa")
         val obj = JSONObject("""{"category":"$category", "entries":[]}""")
+
         items.put(obj)
         save()
     }
@@ -87,13 +93,13 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
     }
 
     // TODO: Handle if no matching category found
-    fun addEntry(entry: String, category: String = "Others") {
+    fun addEntry(entry: String, category: String = defaultCategory) {
         val jsonObj = findJSONObjectByCategory(category)
         jsonObj?.getJSONArray("entries")?.put(entry)
         save()
     }
 
-    fun removeEntry(entry: String, category: String = "Others") {
+    fun removeEntry(entry: String, category: String = defaultCategory) {
         val jsonObj = findJSONObjectByCategory(category)
         if (jsonObj != null) {
             val categoryEntries: JSONArray = jsonObj.getJSONArray("entries")

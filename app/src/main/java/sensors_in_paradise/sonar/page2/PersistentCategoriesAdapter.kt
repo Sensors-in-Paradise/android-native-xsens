@@ -1,12 +1,10 @@
 package sensors_in_paradise.sonar.page2
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.R
 
@@ -30,7 +28,7 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.category_item, parent, false)
 
-        return PersistentCategoriesAdapter.ViewHolder(view)
+        return ViewHolder(view)
     }
 
     override fun onBindViewHolder(viewHolder: PersistentCategoriesAdapter.ViewHolder, position: Int) {

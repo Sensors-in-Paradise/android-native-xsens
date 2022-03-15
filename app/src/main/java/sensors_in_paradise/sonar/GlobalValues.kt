@@ -21,8 +21,8 @@ class GlobalValues private constructor() {
         }
 
         fun getActivityLabelsJSONFile(context: Context): File {
-            return File(context.dataDir, "labels.json")
-//            return File(context.getExternalFilesDir(null) ?: context.dataDir, "labels.json")
+//            return File(context.dataDir, "labels.json")
+            return File(context.getExternalFilesDir(null) ?: context.dataDir, "labels.json")
         }
 
         fun getPeopleJSONFile(context: Context): File {
