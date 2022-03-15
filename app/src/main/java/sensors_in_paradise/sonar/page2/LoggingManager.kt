@@ -123,7 +123,11 @@ class LoggingManager(
     }
 
     private fun getRecordingFile(fileDir: File, deviceAddress: String): File {
-        return fileDir.resolve("$deviceAddress.csv")
+        return fileDir.resolve("${escapeFilename(deviceAddress)}.csv")
+    }
+
+    private fun escapeFilename(name: String): String {
+        return name.replace("\\W+".toRegex(), "-")
     }
 
     private fun getNewUnlabelledTempFile(fileDir: File, deviceAddress: String): File {
