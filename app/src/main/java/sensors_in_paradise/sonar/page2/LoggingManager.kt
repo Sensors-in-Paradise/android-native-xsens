@@ -127,7 +127,7 @@ class LoggingManager(
     }
 
     private fun escapeFilename(name: String): String {
-        return name.replace("\\W+".toRegex(), "_")
+        return name.replace("\\W+".toRegex(), "-")
     }
 
     private fun getNewUnlabelledTempFile(fileDir: File, deviceAddress: String): File {
