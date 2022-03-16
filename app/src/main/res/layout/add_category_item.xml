@@ -4,7 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:minHeight="70dp"
+    android:minHeight="50dp"
+    android:backgroundTint="@color/colorPrimary"
+    android:layout_margin="8dp"
     android:id="@+id/wrapper">
 
     <LinearLayout
@@ -20,13 +22,13 @@
             <TextView
                 android:id="@+id/itemTv"
                 android:layout_width="wrap_content"
-                android:layout_height="70dp"
+                android:layout_height="50dp"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:text="Category"
-                android:textColor="@color/colorPrimary"
-                android:textSize="18sp"
+                android:text="+"
                 android:textStyle="bold"
+                android:textColor="@color/white"
+                android:textSize="32sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -41,7 +43,8 @@
                 android:layout_marginEnd="16dp"
                 android:src="@drawable/ic_baseline_keyboard_arrow_down_24"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:visibility="gone"/>
 
             <ImageView
                 android:id="@+id/btn_delete_stringsDialogItem"
@@ -52,14 +55,16 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_baseline_close_24_red"
-                tools:ignore="SpeakableTextPresentCheck" />
+                tools:ignore="SpeakableTextPresentCheck"
+                android:visibility="gone"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/expandable_layout">
+            android:id="@+id/expandable_layout"
+            android:visibility="gone">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/child_rv"

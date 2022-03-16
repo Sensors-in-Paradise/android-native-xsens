@@ -36,7 +36,7 @@ class NestedAdapter(private val entries: List<String>) :
         }
 
         viewHolder.entry.setOnLongClickListener {
-            val builder = AlertDialog.Builder(viewHolder.entry.getContext())
+            val builder = AlertDialog.Builder(viewHolder.entry.context)
             builder.setMessage("Are you sure you want to delete?")
                 .setCancelable(false)
                 .setPositiveButton("Yes") { dialog, id ->

@@ -1,10 +1,11 @@
 package sensors_in_paradise.sonar.page2
 
-import android.util.Log
+import android.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.R
@@ -25,21 +26,49 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
         val mArrowImage: ImageView = view.findViewById(R.id.arrow_imageview)
         val nestedRecyclerView: RecyclerView = view.findViewById(R.id.child_rv)
         val deleteButton: ImageView = view.findViewById(R.id.btn_delete_stringsDialogItem)
+        val wrapper: CardView = view.findViewById(R.id.wrapper)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PersistentCategoriesAdapter.ViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.category_item, parent, false)
+        val view = if (viewType == R.layout.category_item){
+            LayoutInflater.from(parent.context).inflate(R.layout.category_item, parent, false);
+        } else {
+            LayoutInflater.from(parent.context).inflate(R.layout.add_category_item, parent, false);
+        }
 
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(viewHolder: PersistentCategoriesAdapter.ViewHolder, position: Int) {
+        if (position == dataSet.size) {
+            viewHolder.wrapper.setOnClickListener {
+                val builder = AlertDialog.Builder(viewHolder.wrapper.context)
+                val editText: EditText = EditText(viewHolder.wrapper.context);
+
+                builder.setView(editText)
+                builder.setMessage("Add new category")
+                    .setCancelable(true)
+                    .setPositiveButton("Submit") { dialog, id ->
+                        val newCategory = editText.text.toString()
+                        itemsStorage.addCategoryIfNotAdded(newCategory)
+                        dataSet = itemsStorage.getItems()
+                        notifyItemInserted(dataSet.size - 1)
+                    }
+                    .setNegativeButton("Cancel") { dialog, id ->
+                        dialog.dismiss()
+                    }
+                val alert = builder.create()
+                alert.show()
+            }
+            return
+        }
+
         val model: CategoryItem = dataSet[position]
 
         viewHolder.deleteButton.setOnClickListener {
             itemsStorage.removeCategory(model.itemText)
             if (position != -1) {
+                dataSet = itemsStorage.getItems()
                 notifyItemRemoved(position)
             }
         }
@@ -79,7 +108,11 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
         }
     }
 
-    override fun getItemCount() = dataSet.size
+    override fun getItemCount() = dataSet.size + 1
+
+    override fun getItemViewType(position: Int): Int {
+        return if (position == dataSet.size) R.layout.add_category_item else R.layout.category_item
+    }
 
     fun setOnItemClickedListener(onItemClicked: (value: String) -> Unit) {
         this.onItemClicked = onItemClicked
