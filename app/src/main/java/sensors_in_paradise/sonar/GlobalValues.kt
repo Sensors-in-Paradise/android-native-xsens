@@ -9,6 +9,14 @@ import java.io.File
 class GlobalValues private constructor() {
     companion object {
         const val NULL_ACTIVITY = "null - activity"
+        const val OTHERS_CATEGORY = "Others"
+        val DEFINED_ACTIVITIES = linkedMapOf<String, String>(
+            "Essen bringen" to "Mittag",
+            "Geschirr wegräumen" to "Mittag",
+            "Wagen schieben" to "Mittag",
+            NULL_ACTIVITY to OTHERS_CATEGORY,
+            "Computerarbeit" to OTHERS_CATEGORY
+        )
         const val UNKNOWN_PERSON = "unknown"
         const val METADATA_JSON_FILENAME = "metadata.json"
         const val MEASUREMENT_MODE = XsensDotPayload.PAYLOAD_TYPE_CUSTOM_MODE_4

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 class NestedAdapter(private val entries: List<String>) :
     RecyclerView.Adapter<NestedAdapter.NestedViewHolder>() {
+    private var onItemClicked: ((value: String) -> Unit)? = null
 
     inner class NestedViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val entry: TextView = view.findViewById(sensors_in_paradise.sonar.R.id.nestedItemTv)
@@ -24,10 +25,18 @@ class NestedAdapter(private val entries: List<String>) :
     }
 
     override fun onBindViewHolder(viewHolder: NestedViewHolder, position: Int) {
-        viewHolder.entry.text = entries[position]
+        val entryText = entries[position]
+        viewHolder.entry.text = entryText
+        viewHolder.entry.setOnClickListener{
+            onItemClicked?.let { it1 -> it1(entryText) }
+        }
     }
 
     override fun getItemCount(): Int {
         return entries.size
+    }
+
+    fun setOnItemClickedListener(onItemClicked: (value: String) -> Unit) {
+        this.onItemClicked = onItemClicked
     }
 }

@@ -92,11 +92,19 @@ class LoggingManager(
         cancellable: Boolean? = true
     ) {
         val openedTimestamp = System.currentTimeMillis()
-        PersistentStringArrayDialog(
+//        PersistentStringArrayDialog(
+//            context,
+//            "Select an activity label",
+//            GlobalValues.getActivityLabelsJSONFile(context),
+//            defaultItem = GlobalValues.NULL_ACTIVITY,
+//            callback = { value -> onSelected(value, openedTimestamp) },
+//            cancellable = cancellable ?: true
+//        )
+        PersistentCategoriesDialog(
             context,
-            "Select an activity Label",
+            "Select an activity label",
             GlobalValues.getActivityLabelsJSONFile(context),
-            defaultItem = GlobalValues.NULL_ACTIVITY,
+            defaultItems = GlobalValues.DEFINED_ACTIVITIES,
             callback = { value -> onSelected(value, openedTimestamp) },
             cancellable = cancellable ?: true
         )

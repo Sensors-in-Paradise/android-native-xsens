@@ -8,8 +8,10 @@ import java.io.File
 
 // TODO: Others as default category (in PersistenceStringArrayDialog --> CategoryDialog)
 // TODO: Nondeletable items müsste Others enthalten, aktuell wird "null-activity" gesetzt
+// TODO: nonDeletableCategories und Items zusammenführen in einer Struktur
+// TODO: unused Imports entfernen
 
-/*
+/**
 Example Structure:
 
 {"items": [
@@ -27,6 +29,7 @@ Example Structure:
 class CategoryItemStorage(file: File) : JSONStorage(file) {
     lateinit var items: JSONArray
     val nonDeletableItems = ArrayList<String>()
+    val nonDeletableCategories = ArrayList<String>()
 
     private val defaultCategory = "Others"
 
@@ -41,19 +44,24 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
     fun addEntryIfNotAdded(entry: String, category: String = defaultCategory, deletable: Boolean = true): Boolean {
         var alreadyAdded = isEntryAdded(entry)
 
-        addCategory(defaultCategory)
-        
         if (!alreadyAdded) {
             addEntry(entry, category)
+            addCategoryIfNotAdded(category)
         }
         if (!deletable) {
             nonDeletableItems.add(entry)
+            nonDeletableCategories.add(category)
         }
         return !alreadyAdded
     }
 
+    fun addCategoryIfNotAdded(category: String) {
+        if (!getCategoriesAsArrayList().contains(category)) {
+            addCategory(category)
+        }
+    }
+
     fun addCategory(category: String) {
-        Log.d("TEST", "Aaa")
         val obj = JSONObject("""{"category":"$category", "entries":[]}""")
 
         items.put(obj)
@@ -94,6 +102,7 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
 
     // TODO: Handle if no matching category found
     fun addEntry(entry: String, category: String = defaultCategory) {
+//        Log.d("TEST", entry)
         val jsonObj = findJSONObjectByCategory(category)
         jsonObj?.getJSONArray("entries")?.put(entry)
         save()
