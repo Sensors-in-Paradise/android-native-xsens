@@ -12,6 +12,7 @@ import java.io.File
 import java.util.*
 import kotlin.collections.LinkedHashMap
 import androidx.core.widget.addTextChangedListener
+import sensors_in_paradise.sonar.GlobalValues
 
 class PersistentCategoriesDialog(
     val context: Context,
@@ -28,7 +29,7 @@ class PersistentCategoriesDialog(
     init {
         // Add default categories and entries
         for ((entry, category) in defaultItems) {
-            storage.addEntryIfNotAdded(entry, category, deletable = false)
+            storage.addEntryIfNotAdded(entry.lowercase(Locale.getDefault()), category, deletable = false)
         }
 
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
@@ -56,23 +57,20 @@ class PersistentCategoriesDialog(
             button.isEnabled = false
             button.setOnClickListener {
                 storage.addEntry(searchEditText.text.toString().lowercase(Locale.getDefault()))
-//                adapter.notifyItemInserted(storage.items.length() - 1)
-                adapter.notifyDataSetChanged()
+                adapter.updateByCategory(GlobalValues.OTHERS_CATEGORY)
                 searchEditText.setText("")
             }
             searchEditText.addTextChangedListener { text ->
-                button.isEnabled = (text.toString() != "")
-//                button.isEnabled = (!isItemAlreadyAdded(text.toString()) && text.toString() != "")
+                button.isEnabled = (!isItemAlreadyAdded(text.toString()) && text.toString() != "")
 //                adapter.filter(text.toString())
             }
         }
 
         dialog.show()
     }
-//    private fun isItemAlreadyAdded(item: String): Boolean {
-//        val currentLabels = storage.getItemsAsArray()
-//        return currentLabels.contains(item)
-//    }
+    private fun isItemAlreadyAdded(entry: String): Boolean {
+        return storage.isEntryAdded(entry)
+    }
 //
 //    fun setCancelListener(listener: DialogInterface.OnCancelListener) {
 //        dialog.setOnCancelListener(listener)

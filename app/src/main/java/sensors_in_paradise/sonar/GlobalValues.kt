@@ -11,11 +11,11 @@ class GlobalValues private constructor() {
         const val NULL_ACTIVITY = "null - activity"
         const val OTHERS_CATEGORY = "Others"
         val DEFINED_ACTIVITIES = linkedMapOf<String, String>(
+            NULL_ACTIVITY to OTHERS_CATEGORY,
+            "Computerarbeit" to OTHERS_CATEGORY,
             "Essen bringen" to "Mittag",
             "Geschirr wegräumen" to "Mittag",
             "Wagen schieben" to "Mittag",
-            NULL_ACTIVITY to OTHERS_CATEGORY,
-            "Computerarbeit" to OTHERS_CATEGORY
         )
         const val UNKNOWN_PERSON = "unknown"
         const val METADATA_JSON_FILENAME = "metadata.json"

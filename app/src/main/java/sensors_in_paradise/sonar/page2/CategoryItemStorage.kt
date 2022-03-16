@@ -6,9 +6,7 @@ import org.json.JSONObject
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
 
-// TODO: Others as default category (in PersistenceStringArrayDialog --> CategoryDialog)
-// TODO: Nondeletable items müsste Others enthalten, aktuell wird "null-activity" gesetzt
-// TODO: nonDeletableCategories und Items zusammenführen in einer Struktur
+
 // TODO: unused Imports entfernen
 
 /**
@@ -42,7 +40,7 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
     }
 
     fun addEntryIfNotAdded(entry: String, category: String = defaultCategory, deletable: Boolean = true): Boolean {
-        var alreadyAdded = isEntryAdded(entry)
+        val alreadyAdded = isEntryAdded(entry)
 
         if (!alreadyAdded) {
             addEntry(entry, category)
@@ -80,7 +78,7 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
     }
 
     fun getItems(): MutableList<CategoryItem> {
-        var itemList = mutableListOf<CategoryItem>()
+        val itemList = mutableListOf<CategoryItem>()
 
         val categories = getCategoriesAsArray()
         for (category in categories) {
@@ -102,7 +100,6 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
 
     // TODO: Handle if no matching category found
     fun addEntry(entry: String, category: String = defaultCategory) {
-//        Log.d("TEST", entry)
         val jsonObj = findJSONObjectByCategory(category)
         jsonObj?.getJSONArray("entries")?.put(entry)
         save()
@@ -139,7 +136,7 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
         return getEntriesAsArray(category).toCollection(ArrayList())
     }
 
-    private fun isEntryAdded(entry: String): Boolean {
+    fun isEntryAdded(entry: String): Boolean {
         for (i in 0 until items.length()) {
             val jsonObject = items.getJSONObject(i)
             val categoryEntries: JSONArray = jsonObject.getJSONArray("entries")
