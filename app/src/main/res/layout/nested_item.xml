@@ -17,6 +17,8 @@
             android:text="Activity 1"
             android:textColor="#8c8c8c"
             android:textSize="18sp"
-            android:layout_gravity="center" />
+            android:layout_margin="8dp"
+            android:gravity="center_horizontal"
+            android:layout_gravity="center"/>
 
 </com.google.android.material.card.MaterialCardView>

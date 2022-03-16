@@ -2,7 +2,6 @@ package sensors_in_paradise.sonar.page2
 
 import android.app.AlertDialog
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.EditText
@@ -71,9 +70,5 @@ class PersistentCategoriesDialog(
     private fun isItemAlreadyAdded(entry: String): Boolean {
         return storage.isEntryAdded(entry)
     }
-//
-//    fun setCancelListener(listener: DialogInterface.OnCancelListener) {
-//        dialog.setOnCancelListener(listener)
-//    }
 }
 

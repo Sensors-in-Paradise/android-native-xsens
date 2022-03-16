@@ -12,10 +12,56 @@ class GlobalValues private constructor() {
         const val OTHERS_CATEGORY = "Others"
         val DEFINED_ACTIVITIES = linkedMapOf<String, String>(
             NULL_ACTIVITY to OTHERS_CATEGORY,
-            "Computerarbeit" to OTHERS_CATEGORY,
-            "Essen bringen" to "Mittag",
-            "Geschirr wegräumen" to "Mittag",
-            "Wagen schieben" to "Mittag",
+            "aufräumen" to OTHERS_CATEGORY,
+            "aufwischen" to OTHERS_CATEGORY,
+            "Blumen gießen" to OTHERS_CATEGORY,
+            "Desinfizierende Reinigung" to OTHERS_CATEGORY,
+            "Kaffee kochen" to OTHERS_CATEGORY,
+            "Schrank aufräumen" to OTHERS_CATEGORY,
+            "Staub wischen" to OTHERS_CATEGORY,
+            "Wagen schieben" to OTHERS_CATEGORY,
+            "Wäsche umräumen" to OTHERS_CATEGORY,
+            "Wäsche zusammenlegen" to OTHERS_CATEGORY,
+            "Accessoires (Parfüm) anlegen" to "Morgenpflege",
+            "Bad vorbereiten" to "Morgenpflege",
+            "Bett machen" to "Morgenpflege",
+            "Eincremen" to "Morgenpflege",
+            "Haare kämmen" to "Morgenpflege",
+            "Hautpflege" to "Morgenpflege",
+            "IKP-Versorgung" to "Morgenpflege",
+            "Medikamente geben" to "Morgenpflege",
+            "Mundpflege" to "Morgenpflege",
+            "Nägel schneiden" to "Morgenpflege",
+            "Umkleiden" to "Morgenpflege",
+            "Verband anlegen" to "Morgenpflege",
+            "duschen" to "Waschen",
+            "föhnen" to "Waschen",
+            "Gesamtwäsche im Bett" to "Waschen",
+            "Haare waschen" to "Waschen",
+            "Rücken waschen" to "Waschen",
+            "waschen am Waschbecken" to "Waschen",
+            "Wasser holen" to "Waschen",
+            "Essen austeilen" to "Mahlzeiten",
+            "Essen austragen" to "Mahlzeiten",
+            "Essen reichen" to "Mahlzeiten",
+            "Geschirr einsammeln" to "Mahlzeiten",
+            "Getränke ausschenken" to "Mahlzeiten",
+            "Getränk geben" to "Mahlzeiten",
+            "Küche aufräumen" to "Mahlzeiten",
+            "Küchenvorbereitungen" to "Mahlzeiten",
+            "Tablett tragen" to "Mahlzeiten",
+            "Arm halten" to "Assistieren",
+            "Assistieren - aufstehen" to "Assistieren",
+            "Assistieren - hinsetzen" to "Assistieren",
+            "Insulingabe" to "Assistieren",
+            "Toilettengang" to "Assistieren",
+            "Patient umlagern (Lagerung)" to "Assistieren",
+            "Rollstuhl schieben" to "Assistieren",
+            "Rollstuhl-Transfer" to "Assistieren",
+            "Arbeiten am computer" to "Organisation",
+            "Dokumentation" to "Organisation",
+            "Medikamente stellen " to "Organisation",
+            "Telefonieren" to "Organisation",
         )
         const val UNKNOWN_PERSON = "unknown"
         const val METADATA_JSON_FILENAME = "metadata.json"
@@ -29,6 +75,7 @@ class GlobalValues private constructor() {
         }
 
         fun getActivityLabelsJSONFile(context: Context): File {
+            // TODO: Change back once application was tested
 //            return File(context.dataDir, "labels.json")
             return File(context.getExternalFilesDir(null) ?: context.dataDir, "labels.json")
         }

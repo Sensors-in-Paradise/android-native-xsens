@@ -1,13 +1,10 @@
 package sensors_in_paradise.sonar.page2
 
-import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
 
-
-// TODO: unused Imports entfernen
 
 /**
 Example Structure:

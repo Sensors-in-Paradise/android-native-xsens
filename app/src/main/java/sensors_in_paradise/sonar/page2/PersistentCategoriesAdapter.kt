@@ -87,7 +87,7 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
             viewHolder.mArrowImage.setImageResource(R.drawable.ic_baseline_keyboard_arrow_down_24);
         }
 
-        val nestedAdapter = NestedAdapter(nestedItems)
+        val nestedAdapter = NestedAdapter(nestedItems, itemsStorage.nonDeletableItems)
         viewHolder.nestedRecyclerView.layoutManager = GridLayoutManager(viewHolder.itemView.getContext(), 2)
         viewHolder.nestedRecyclerView.setHasFixedSize(true)
         viewHolder.nestedRecyclerView.adapter = nestedAdapter
