@@ -1,3 +1,4 @@
+@file:Suppress("SwallowedException")
 package sensors_in_paradise.sonar.page2
 
 import org.json.JSONArray
@@ -59,6 +60,7 @@ class RecordingMetadataStorage(file: File) : JSONStorage(file) {
 
     fun setRecordingState(state: String) {
         json.put("recordingState", state)
+        save()
     }
 
     fun getRecordingState(): String? {

@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.page2
 
+import android.util.Log
 import sensors_in_paradise.sonar.GlobalValues
 import java.io.BufferedReader
 import java.io.File
