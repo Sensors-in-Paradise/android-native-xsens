@@ -81,7 +81,7 @@ class PersistentCategoriesDialog(
             }
             searchEditText.addTextChangedListener { text ->
                 button.isEnabled = (!isItemAlreadyAdded(text.toString()) && text.toString() != "")
-//                adapter.filter(text.toString())
+                adapter.filter(text.toString())
             }
         }
 

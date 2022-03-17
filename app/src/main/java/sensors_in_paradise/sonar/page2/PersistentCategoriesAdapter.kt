@@ -1,6 +1,7 @@
 package sensors_in_paradise.sonar.page2
 
 import android.app.AlertDialog
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +16,7 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
     RecyclerView.Adapter<PersistentCategoriesAdapter.ViewHolder>() {
     private var dataSet: List<CategoryItem> = itemsStorage.getItems()
     private var nestedItems: List<String> = ArrayList()
+    private var filterText: String = ""
 
     // This is handed over to the nested recyclerviews
     private var onItemClicked: ((value: String) -> Unit)? = null
@@ -40,6 +42,7 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
     }
 
     override fun onBindViewHolder(viewHolder: PersistentCategoriesAdapter.ViewHolder, position: Int) {
+        // Add new category button
         if (position == dataSet.size) {
             viewHolder.wrapper.setOnClickListener {
                 val builder = AlertDialog.Builder(viewHolder.wrapper.context)
@@ -63,7 +66,7 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
             return
         }
 
-        val model: CategoryItem = dataSet[position]
+        val model: CategoryItem = getFilteredModelAt(position)
 
         viewHolder.deleteButton.setOnClickListener {
             itemsStorage.removeCategory(model.itemText)
@@ -87,6 +90,7 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
             viewHolder.mArrowImage.setImageResource(R.drawable.ic_baseline_keyboard_arrow_down_24);
         }
 
+        nestedItems = model.nestedList
         val nestedAdapter = NestedAdapter(nestedItems, itemsStorage.nonDeletableItems)
         viewHolder.nestedRecyclerView.layoutManager = GridLayoutManager(viewHolder.itemView.getContext(), 2)
         viewHolder.nestedRecyclerView.setHasFixedSize(true)
@@ -103,12 +107,11 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
 
         viewHolder.mArrowImage.setOnClickListener {
             model.isExpanded = !model.isExpanded
-            nestedItems = model.nestedList
             notifyItemChanged(viewHolder.adapterPosition)
         }
     }
 
-    override fun getItemCount() = dataSet.size + 1
+    override fun getItemCount() = getFilteredItemCount()
 
     override fun getItemViewType(position: Int): Int {
         return if (position == dataSet.size) R.layout.add_category_item else R.layout.category_item
@@ -137,5 +140,44 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
         dataSet[position].isExpanded = true
         nestedItems = dataSet[position].nestedList
         notifyItemChanged(position)
+    }
+
+    /**
+     * Search functionality
+     */
+    fun filter(text: String) {
+        filterText = text
+        notifyDataSetChanged()
+    }
+
+    private fun getFilteredItemCount(): Int {
+        return if (filterText != "") {
+            1
+        } else {
+            dataSet.size + 1
+        }
+    }
+
+    private fun isItemMatchedByFilter(item: String): Boolean {
+        return item.contains(filterText)
+    }
+
+    private fun getFilteredModelAt(index: Int): CategoryItem {
+        if (filterText == "") return dataSet[index]
+
+        val itemText = "Search results"
+        var nestedList = mutableListOf<String>()
+
+        val categories = itemsStorage.getCategoriesAsArray()
+        for (category in categories) {
+            val entries = itemsStorage.getEntriesAsArray(category)
+            for (entry in entries) {
+                if (isItemMatchedByFilter(entry)) {
+                    nestedList.add(entry)
+                }
+            }
+        }
+
+        return CategoryItem(itemText, nestedList, true)
     }
 }

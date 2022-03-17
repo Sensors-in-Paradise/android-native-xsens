@@ -1,6 +1,7 @@
 package sensors_in_paradise.sonar.page2
 
 import android.app.AlertDialog
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
