@@ -1,6 +1,7 @@
 package sensors_in_paradise.sonar.page2
 
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
@@ -55,6 +56,19 @@ class RecordingMetadataStorage(file: File) : JSONStorage(file) {
     fun getPerson(): String {
         return json.getString("person")
     }
+
+    fun setRecordingState(state: String) {
+        json.put("recordingState", state)
+    }
+
+    fun getRecordingState(): String? {
+        return try {
+            json.getString("recordingState")
+        } catch (exception: JSONException) {
+            null
+        }
+    }
+
     private fun addActivity(activity: Pair<Long, String>) {
         val obj = JSONObject()
         obj.put("timeStarted", activity.first)
