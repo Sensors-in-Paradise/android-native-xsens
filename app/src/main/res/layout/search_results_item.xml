@@ -15,7 +15,8 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:id="@+id/category_wrapper">
 
             <TextView
                 android:id="@+id/itemTv"
@@ -23,7 +24,7 @@
                 android:layout_height="70dp"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:text="Category"
+                android:text="Search results"
                 android:textColor="@color/colorPrimary"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -39,21 +40,18 @@
                 android:layout_height="30dp"
                 android:layout_marginTop="20dp"
                 android:layout_marginEnd="16dp"
-                android:src="@drawable/ic_baseline_keyboard_arrow_down_24"
+                android:src="@drawable/ic_baseline_keyboard_arrow_up_24"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:visibility="gone"/>
+                app:layout_constraintTop_toTopOf="parent"/>
 
             <ImageView
                 android:id="@+id/btn_delete_stringsDialogItem"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_baseline_close_24_red"
-                tools:ignore="SpeakableTextPresentCheck"
                 android:visibility="gone"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,12 +1,12 @@
 package sensors_in_paradise.sonar.page2
 
 import android.app.AlertDialog
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.R
@@ -29,13 +29,20 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
         val nestedRecyclerView: RecyclerView = view.findViewById(R.id.child_rv)
         val deleteButton: ImageView = view.findViewById(R.id.btn_delete_stringsDialogItem)
         val wrapper: CardView = view.findViewById(R.id.wrapper)
+        val categoryWrapper: ConstraintLayout = view.findViewById(R.id.category_wrapper)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PersistentCategoriesAdapter.ViewHolder {
-        val view = if (viewType == R.layout.category_item){
-            LayoutInflater.from(parent.context).inflate(R.layout.category_item, parent, false);
-        } else {
-            LayoutInflater.from(parent.context).inflate(R.layout.add_category_item, parent, false);
+        val view = when (viewType) {
+            R.layout.category_item -> {
+                LayoutInflater.from(parent.context).inflate(R.layout.category_item, parent, false)
+            }
+            R.layout.search_results_item -> {
+                LayoutInflater.from(parent.context).inflate(R.layout.search_results_item, parent, false)
+            }
+            else -> {
+                LayoutInflater.from(parent.context).inflate(R.layout.add_category_item, parent, false)
+            }
         }
 
         return ViewHolder(view)
@@ -46,18 +53,18 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
         if (position == dataSet.size) {
             viewHolder.wrapper.setOnClickListener {
                 val builder = AlertDialog.Builder(viewHolder.wrapper.context)
-                val editText: EditText = EditText(viewHolder.wrapper.context);
+                val editText = EditText(viewHolder.wrapper.context)
 
                 builder.setView(editText)
                 builder.setMessage("Add new category")
                     .setCancelable(true)
-                    .setPositiveButton("Submit") { dialog, id ->
+                    .setPositiveButton("Submit") { _, _ ->
                         val newCategory = editText.text.toString()
                         itemsStorage.addCategoryIfNotAdded(newCategory)
                         dataSet = itemsStorage.getItems()
                         notifyItemInserted(dataSet.size - 1)
                     }
-                    .setNegativeButton("Cancel") { dialog, id ->
+                    .setNegativeButton("Cancel") { dialog, _ ->
                         dialog.dismiss()
                     }
                 val alert = builder.create()
@@ -85,14 +92,14 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
         viewHolder.expandableLayout.visibility = if (isExpanded) View.VISIBLE else View.GONE
 
         if (isExpanded) {
-            viewHolder.mArrowImage.setImageResource(R.drawable.ic_baseline_keyboard_arrow_up_24);
+            viewHolder.mArrowImage.setImageResource(R.drawable.ic_baseline_keyboard_arrow_up_24)
         } else {
-            viewHolder.mArrowImage.setImageResource(R.drawable.ic_baseline_keyboard_arrow_down_24);
+            viewHolder.mArrowImage.setImageResource(R.drawable.ic_baseline_keyboard_arrow_down_24)
         }
 
         nestedItems = model.nestedList
         val nestedAdapter = NestedAdapter(nestedItems, itemsStorage.nonDeletableItems)
-        viewHolder.nestedRecyclerView.layoutManager = GridLayoutManager(viewHolder.itemView.getContext(), 2)
+        viewHolder.nestedRecyclerView.layoutManager = GridLayoutManager(viewHolder.itemView.context, 2)
         viewHolder.nestedRecyclerView.setHasFixedSize(true)
         viewHolder.nestedRecyclerView.adapter = nestedAdapter
 
@@ -105,7 +112,7 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
             }
         }
 
-        viewHolder.mArrowImage.setOnClickListener {
+        viewHolder.categoryWrapper.setOnClickListener {
             model.isExpanded = !model.isExpanded
             notifyItemChanged(viewHolder.adapterPosition)
         }
@@ -114,7 +121,17 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
     override fun getItemCount() = getFilteredItemCount()
 
     override fun getItemViewType(position: Int): Int {
-        return if (position == dataSet.size) R.layout.add_category_item else R.layout.category_item
+        return when {
+            position == dataSet.size -> {
+                R.layout.add_category_item
+            }
+            filterText != "" -> {
+                R.layout.search_results_item
+            }
+            else -> {
+                R.layout.category_item
+            }
+        }
     }
 
     fun setOnItemClickedListener(onItemClicked: (value: String) -> Unit) {
@@ -166,7 +183,7 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
         if (filterText == "") return dataSet[index]
 
         val itemText = "Search results"
-        var nestedList = mutableListOf<String>()
+        val nestedList = mutableListOf<String>()
 
         val categories = itemsStorage.getCategoriesAsArray()
         for (category in categories) {

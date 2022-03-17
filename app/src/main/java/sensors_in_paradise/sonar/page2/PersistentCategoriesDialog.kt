@@ -13,7 +13,6 @@ import java.io.File
 import java.util.*
 import kotlin.collections.LinkedHashMap
 import androidx.core.widget.addTextChangedListener
-import sensors_in_paradise.sonar.GlobalValues
 
 class PersistentCategoriesDialog(
     val context: Context,
@@ -54,12 +53,12 @@ class PersistentCategoriesDialog(
         dialog.setOnShowListener {
             dialog.setCancelable(cancellable)
             val button: Button =
-                (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE)
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             button.isEnabled = false
             button.setOnClickListener {
 
                 val builder = AlertDialog.Builder(context)
-                val spinner: Spinner = Spinner(context)
+                val spinner = Spinner(context)
                 val spinnerAdapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line,
                     storage.getCategoriesAsArray())
                 spinner.adapter = spinnerAdapter
@@ -67,13 +66,13 @@ class PersistentCategoriesDialog(
                 builder.setView(spinner)
                 builder.setMessage("Choose category")
                     .setCancelable(true)
-                    .setPositiveButton("Submit") { dialog, id ->
+                    .setPositiveButton("Submit") { _, _ ->
                         val category = spinner.selectedItem.toString()
                         storage.addEntry(searchEditText.text.toString().lowercase(Locale.getDefault()), category)
                         adapter.updateByCategory(category)
                         searchEditText.setText("")
                     }
-                    .setNegativeButton("Cancel") { dialog, id ->
+                    .setNegativeButton("Cancel") { dialog, _ ->
                         dialog.dismiss()
                     }
                 val alert = builder.create()

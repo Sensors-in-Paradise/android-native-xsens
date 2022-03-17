@@ -1,7 +1,6 @@
 package sensors_in_paradise.sonar.page2
 
 import android.app.AlertDialog
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,10 +40,10 @@ class NestedAdapter(private val entries: List<String>, private val nonDeletableE
                 val builder = AlertDialog.Builder(viewHolder.wrapper.context)
                 builder.setMessage("Are you sure you want to delete?")
                     .setCancelable(false)
-                    .setPositiveButton("Yes") { dialog, id ->
+                    .setPositiveButton("Yes") { _, _ ->
                         onItemLongClicked?.let {it1 -> it1(entryText, position)}
                     }
-                    .setNegativeButton("No") { dialog, id ->
+                    .setNegativeButton("No") { dialog, _ ->
                         dialog.dismiss()
                     }
                 val alert = builder.create()
