@@ -6,14 +6,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:minHeight="50dp"
     android:backgroundTint="@color/colorPrimary"
-    android:layout_margin="8dp"
-    android:id="@+id/wrapper">
+    android:layout_margin="8dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:id="@+id/linear_layout">
+        android:orientation="vertical">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -36,6 +34,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <!-- Do not delete ImageViews! -->
             <ImageView
                 android:id="@+id/arrow_imageview"
                 android:layout_width="30dp"

@@ -55,29 +55,7 @@ class PersistentCategoriesDialog(
             val button: Button =
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             button.isEnabled = false
-            button.setOnClickListener {
-
-                val builder = AlertDialog.Builder(context)
-                val spinner = Spinner(context)
-                val spinnerAdapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line,
-                    storage.getCategoriesAsArray())
-                spinner.adapter = spinnerAdapter
-
-                builder.setView(spinner)
-                builder.setMessage("Choose category")
-                    .setCancelable(true)
-                    .setPositiveButton("Submit") { _, _ ->
-                        val category = spinner.selectedItem.toString()
-                        storage.addEntry(searchEditText.text.toString().lowercase(Locale.getDefault()), category)
-                        adapter.updateByCategory(category)
-                        searchEditText.setText("")
-                    }
-                    .setNegativeButton("Cancel") { dialog, _ ->
-                        dialog.dismiss()
-                    }
-                val alert = builder.create()
-                alert.show()
-            }
+            button.setOnClickListener { showCategorySelectionDialog(searchEditText) }
             searchEditText.addTextChangedListener { text ->
                 button.isEnabled = (!isItemAlreadyAdded(text.toString()) && text.toString() != "")
                 adapter.filter(text.toString())
@@ -86,8 +64,32 @@ class PersistentCategoriesDialog(
 
         dialog.show()
     }
+
     private fun isItemAlreadyAdded(entry: String): Boolean {
         return storage.isEntryAdded(entry)
+    }
+
+    private fun showCategorySelectionDialog(searchEditText: EditText) {
+        val builder = AlertDialog.Builder(context)
+        val spinner = Spinner(context)
+        val spinnerAdapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line,
+            storage.getCategoriesAsArray())
+        spinner.adapter = spinnerAdapter
+
+        builder.setView(spinner)
+        builder.setMessage("Choose category")
+            .setCancelable(true)
+            .setPositiveButton("Submit") { _, _ ->
+                val category = spinner.selectedItem.toString()
+                storage.addEntry(searchEditText.text.toString().lowercase(Locale.getDefault()), category)
+                adapter.updateByCategory(category)
+                searchEditText.setText("")
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+        val alert = builder.create()
+        alert.show()
     }
 }
 

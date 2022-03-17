@@ -22,13 +22,11 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
     private var onItemClicked: ((value: String) -> Unit)? = null
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val linearLayout: LinearLayout = view.findViewById(R.id.linear_layout)
         val expandableLayout: RelativeLayout = view.findViewById(R.id.expandable_layout)
         val mTextView: TextView = view.findViewById(R.id.itemTv)
         val mArrowImage: ImageView = view.findViewById(R.id.arrow_imageview)
         val nestedRecyclerView: RecyclerView = view.findViewById(R.id.child_rv)
         val deleteButton: ImageView = view.findViewById(R.id.btn_delete_stringsDialogItem)
-        val wrapper: CardView = view.findViewById(R.id.wrapper)
         val categoryWrapper: ConstraintLayout = view.findViewById(R.id.category_wrapper)
     }
 
@@ -49,27 +47,9 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
     }
 
     override fun onBindViewHolder(viewHolder: PersistentCategoriesAdapter.ViewHolder, position: Int) {
-        // Add new category button
+        // Add-new-category button
         if (position == dataSet.size) {
-            viewHolder.wrapper.setOnClickListener {
-                val builder = AlertDialog.Builder(viewHolder.wrapper.context)
-                val editText = EditText(viewHolder.wrapper.context)
-
-                builder.setView(editText)
-                builder.setMessage("Add new category")
-                    .setCancelable(true)
-                    .setPositiveButton("Submit") { _, _ ->
-                        val newCategory = editText.text.toString()
-                        itemsStorage.addCategoryIfNotAdded(newCategory)
-                        dataSet = itemsStorage.getItems()
-                        notifyItemInserted(dataSet.size - 1)
-                    }
-                    .setNegativeButton("Cancel") { dialog, _ ->
-                        dialog.dismiss()
-                    }
-                val alert = builder.create()
-                alert.show()
-            }
+            viewHolder.categoryWrapper.setOnClickListener { showAddCategoryDialog(viewHolder) }
             return
         }
 
@@ -123,13 +103,13 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
     override fun getItemViewType(position: Int): Int {
         return when {
             position == dataSet.size -> {
-                R.layout.add_category_item
+                R.layout.add_category_item // add-new-category button at bottom
             }
             filterText != "" -> {
-                R.layout.search_results_item
+                R.layout.search_results_item // search-results category
             }
             else -> {
-                R.layout.category_item
+                R.layout.category_item // default category item
             }
         }
     }
@@ -159,6 +139,26 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
         notifyItemChanged(position)
     }
 
+    private fun showAddCategoryDialog(viewHolder: ViewHolder) {
+        val builder = AlertDialog.Builder(viewHolder.categoryWrapper.context)
+        val editText = EditText(viewHolder.categoryWrapper.context)
+
+        builder.setView(editText)
+        builder.setMessage("Add new category")
+            .setCancelable(true)
+            .setPositiveButton("Submit") { _, _ ->
+                val newCategory = editText.text.toString()
+                itemsStorage.addCategoryIfNotAdded(newCategory)
+                dataSet = itemsStorage.getItems()
+                notifyItemInserted(dataSet.size - 1)
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+        val alert = builder.create()
+        alert.show()
+    }
+
     /**
      * Search functionality
      */
@@ -169,7 +169,7 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
 
     private fun getFilteredItemCount(): Int {
         return if (filterText != "") {
-            1
+            1 // Only need to show one category - search results
         } else {
             dataSet.size + 1
         }
