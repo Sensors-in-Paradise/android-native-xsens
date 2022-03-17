@@ -95,7 +95,7 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
         nestedAdapter.setOnItemClickedListener { value -> this.onItemClicked?.let { it(value) } }
 
         nestedAdapter.setOnItemLongClickedListener { value:String, index:Int ->
-            itemsStorage.removeEntry(value)
+            itemsStorage.removeEntry(value, dataSet[position].itemText)
             if (index != -1) {
                 update(position)
             }

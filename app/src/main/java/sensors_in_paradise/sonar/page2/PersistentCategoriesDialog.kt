@@ -3,8 +3,10 @@ package sensors_in_paradise.sonar.page2
 import android.app.AlertDialog
 import android.content.Context
 import android.view.LayoutInflater
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Spinner
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.R
 import java.io.File
@@ -55,9 +57,27 @@ class PersistentCategoriesDialog(
                 (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE)
             button.isEnabled = false
             button.setOnClickListener {
-                storage.addEntry(searchEditText.text.toString().lowercase(Locale.getDefault()))
-                adapter.updateByCategory(GlobalValues.OTHERS_CATEGORY)
-                searchEditText.setText("")
+
+                val builder = AlertDialog.Builder(context)
+                val spinner: Spinner = Spinner(context)
+                val spinnerAdapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line,
+                    storage.getCategoriesAsArray())
+                spinner.adapter = spinnerAdapter
+
+                builder.setView(spinner)
+                builder.setMessage("Choose category")
+                    .setCancelable(true)
+                    .setPositiveButton("Submit") { dialog, id ->
+                        val category = spinner.selectedItem.toString()
+                        storage.addEntry(searchEditText.text.toString().lowercase(Locale.getDefault()), category)
+                        adapter.updateByCategory(category)
+                        searchEditText.setText("")
+                    }
+                    .setNegativeButton("Cancel") { dialog, id ->
+                        dialog.dismiss()
+                    }
+                val alert = builder.create()
+                alert.show()
             }
             searchEditText.addTextChangedListener { text ->
                 button.isEnabled = (!isItemAlreadyAdded(text.toString()) && text.toString() != "")
