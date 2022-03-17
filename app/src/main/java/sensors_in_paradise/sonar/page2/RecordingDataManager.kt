@@ -19,6 +19,7 @@ class RecordingDataManager(private val recordingsDir: File, val recordingsList: 
             }
         }
     }
+
     private fun isRecordingDir(file: File): Boolean {
         val childDirs = file.listFiles { dir, filename -> dir.resolve(filename).isDirectory }
         if (childDirs == null || childDirs.isEmpty()) {
@@ -27,6 +28,7 @@ class RecordingDataManager(private val recordingsDir: File, val recordingsList: 
         }
         return false
     }
+
     fun getNumberOfRecordingsPerActivity(): Map<String, Int> {
         val activities = ArrayList<String>()
         for (rec in recordingsList) {

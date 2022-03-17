@@ -28,7 +28,7 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
         recording.dir,
         recording.metadataStorage
     )
-    val state = getRecordingState()
+    val state = computeRecordingState()
     val isValid
         get() = state != RecordingFileState.Empty
 
@@ -47,6 +47,7 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
     fun getDirectory(): File {
         return dir
     }
+
     fun delete() {
             val children = dir.listFiles()
             if (children != null) {
@@ -57,14 +58,20 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
         dir.delete()
     }
 
-    private fun getRecordingState(): RecordingFileState {
-        return if (areFilesEmpty(dir)) {
+    private fun computeRecordingState(): RecordingFileState {
+        var state = checkCache()
+        if (state != null) return state
+
+        state = if (areFilesEmpty(dir)) {
             RecordingFileState.Empty
         } else if (!areFilesSynchronized()) {
             RecordingFileState.Unsynchronized
         } else {
             RecordingFileState.Valid
         }
+
+        saveCache(state)
+        return state
     }
 
     /**
@@ -74,7 +81,7 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
      * This is checked on one sample line, as the timestamps are usually consistently spaced for one
      * sensor.
      */
-    fun areFilesSynchronized(): Boolean {
+    private fun areFilesSynchronized(): Boolean {
         val childCSVs = dir.listFiles { _, name -> name.endsWith(".csv") } ?: return false
 
         val firstFile = childCSVs[0]
@@ -99,6 +106,7 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
 
         return true
     }
+
     private fun getTimeStampAtLine(file: File, lineNumber: Int): String {
         var counter = 0
 
@@ -155,7 +163,41 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
 
         return lineNumber
     }
+
     fun getRecordingFiles(): Array<File> {
         return dir.listFiles { file -> file.isFile && file.name.endsWith(".csv") } ?: emptyArray()
+    }
+
+    private fun checkCache(): RecordingFileState? {
+        val state = metadataStorage.getRecordingState()
+        if (state == null) return state
+
+        return when (state) {
+            "Valid" -> {
+                RecordingFileState.Valid
+            }
+            "Empty" -> {
+                RecordingFileState.Empty
+            }
+            else -> {
+                RecordingFileState.Unsynchronized
+            }
+        }
+    }
+
+    private fun saveCache(state: RecordingFileState) {
+        val recordingState = when (state) {
+            RecordingFileState.Valid -> {
+                "Valid"
+            }
+            RecordingFileState.Empty -> {
+                "Empty"
+            }
+            else -> {
+                "Unsynchronized"
+            }
+        }
+
+        metadataStorage.setRecordingState(recordingState)
     }
 }
