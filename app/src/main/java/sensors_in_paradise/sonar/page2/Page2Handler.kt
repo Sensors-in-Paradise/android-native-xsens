@@ -7,11 +7,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
 import com.xsens.dot.android.sdk.events.XsensDotData
-import com.xsens.dot.android.sdk.models.XsensDotDevice
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
-import sensors_in_paradise.sonar.util.UIHelper
 
 class Page2Handler(
     private val devices: XSENSArrayList,
@@ -28,7 +26,6 @@ class Page2Handler(
     private var activitiesTab: TabLayout.Tab? = null
     private var recordingsTab: TabLayout.Tab? = null
     private var numConnectedDevices = 0
-    private var numDevices = 5
 
     private lateinit var loggingManager: LoggingManager
     private lateinit var activity: Activity
@@ -48,6 +45,7 @@ class Page2Handler(
         activitiesTab = tabLayout.getTabAt(1)
         activitiesTab?.view?.isEnabled = false
         recordingsTab = tabLayout.getTabAt(0)
+
         loggingManager = LoggingManager(
             context,
             devices,
@@ -82,31 +80,15 @@ class Page2Handler(
 
     override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
         numConnectedDevices = devices.getConnected().size
-        loggingManager.enoughDevicesConnected = numConnectedDevices >= numDevices
-        val deviceLogger =
-            loggingManager.xsLoggers.find { logger -> logger.filename.contains(deviceAddress) }
-        if (!connected && deviceLogger != null) {
-            devices.get(deviceAddress)?.let {
-                if (it.connectionState == XsensDotDevice.CONN_STATE_DISCONNECTED) {
-                    loggingManager.cancelLogging()
-                    UIHelper.showAlert(
-                        context,
-                        "The Device ${it.name} was disconnected!"
-                    )
-                    deviceLogger.stop()
-                    it.stopMeasuring()
-                    timer.stop()
-                }
-            }
-        }
+        loggingManager.handleConnectionStateChange(deviceAddress, connected)
     }
 
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
-        loggingManager.xsLoggers.find { logger -> logger.filename.contains(deviceAddress) }
-            ?.update(xsensDotData)
+        loggingManager.handleSensorDataUpdate(deviceAddress, xsensDotData)
     }
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {}
+
     override fun onTabSelected(tab: TabLayout.Tab?) {
         if (tab != null) {
             viewSwitcher.displayedChild = tab.position
