@@ -27,10 +27,7 @@ class PersistentCategoriesDialog(
     var adapter: PersistentCategoriesAdapter
 
     init {
-        // Add default categories and entries
-        for ((entry, category) in defaultItems) {
-            storage.addEntryIfNotAdded(entry.lowercase(Locale.getDefault()), category, deletable = false)
-        }
+        addDefaultEntries(defaultItems)
 
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         builder.setTitle(title)
@@ -61,12 +58,20 @@ class PersistentCategoriesDialog(
                 adapter.filter(text.toString())
             }
         }
+    }
 
+    fun show() {
         dialog.show()
     }
 
     private fun isItemAlreadyAdded(entry: String): Boolean {
         return storage.isEntryAdded(entry)
+    }
+
+    private fun addDefaultEntries(defaultItems: LinkedHashMap<String, String>) {
+        for ((entry, category) in defaultItems) {
+            storage.addEntryIfNotAdded(entry.lowercase(Locale.getDefault()), category, deletable = false)
+        }
     }
 
     private fun showCategorySelectionDialog(searchEditText: EditText) {

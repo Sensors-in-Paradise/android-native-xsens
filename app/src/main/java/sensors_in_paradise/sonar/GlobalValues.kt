@@ -57,7 +57,7 @@ class GlobalValues private constructor() {
             "Toilettengang" to "Assistieren",
             "Patient umlagern (Lagerung)" to "Assistieren",
             "Rollstuhl schieben" to "Assistieren",
-            "Rollstuhl-Transfer" to "Assistieren",
+            "Rollstuhl Transfer" to "Assistieren",
             "Arbeiten am computer" to "Organisation",
             "Dokumentation" to "Organisation",
             "Medikamente stellen " to "Organisation",

@@ -46,6 +46,8 @@ class LoggingManager(
     private val tempSensorMacMap = mutableMapOf<String, String>()
     private var isRecording = false
 
+    private var categoriesDialog: PersistentCategoriesDialog? = null
+
     init {
         activitiesRV.adapter = activitiesAdapter
 
@@ -92,22 +94,18 @@ class LoggingManager(
         cancellable: Boolean? = true
     ) {
         val openedTimestamp = System.currentTimeMillis()
-//        PersistentStringArrayDialog(
-//            context,
-//            "Select an activity label",
-//            GlobalValues.getActivityLabelsJSONFile(context),
-//            defaultItem = GlobalValues.NULL_ACTIVITY,
-//            callback = { value -> onSelected(value, openedTimestamp) },
-//            cancellable = cancellable ?: true
-//        )
-        PersistentCategoriesDialog(
-            context,
-            "Select an activity label",
-            GlobalValues.getActivityLabelsJSONFile(context),
-            defaultItems = GlobalValues.DEFINED_ACTIVITIES,
-            callback = { value -> onSelected(value, openedTimestamp) },
-            cancellable = cancellable ?: true
-        )
+
+        if (categoriesDialog == null) {
+            categoriesDialog = PersistentCategoriesDialog(
+                context,
+                "Select an activity label",
+                GlobalValues.getActivityLabelsJSONFile(context),
+                defaultItems = GlobalValues.DEFINED_ACTIVITIES,
+                callback = { value -> onSelected(value, openedTimestamp) },
+                cancellable = cancellable ?: true
+            )
+        }
+        categoriesDialog?.show()
     }
 
     private fun showPersonDialog(
