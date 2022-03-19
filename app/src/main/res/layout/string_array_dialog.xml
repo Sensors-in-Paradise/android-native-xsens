@@ -9,14 +9,24 @@
     android:padding="16dp"
     tools:context=".MainActivity">
 
-    <EditText
-        android:id="@+id/editText_search_stringArrayDialog"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textField"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
+        app:startIconContentDescription="Search or add new "
         android:hint="Search or add new "
-        android:inputType="textPersonName"
-        android:visibility="visible" />
+        app:endIconMode="clear_text"
+        android:ems="10"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editText_search_stringArrayDialog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView_items_stringArrayDialog"

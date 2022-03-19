@@ -47,7 +47,6 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
     }
 
     override fun onBindViewHolder(viewHolder: PersistentCategoriesAdapter.ViewHolder, position: Int) {
-        // Add-new-category button
         if (position == dataSet.size) {
             viewHolder.categoryWrapper.setOnClickListener { showAddCategoryDialog(viewHolder) }
             return
