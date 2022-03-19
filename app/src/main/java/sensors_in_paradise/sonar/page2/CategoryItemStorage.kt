@@ -5,7 +5,6 @@ import org.json.JSONObject
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
 
-
 /**
 Example Structure:
 
@@ -88,16 +87,17 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
     }
 
     fun getCategoriesAsArray(): Array<String> {
-        return Array(items.length()) { i -> items.getJSONObject(i).getString("category")  }
+        return Array(items.length()) { i -> items.getJSONObject(i).getString("category") }
     }
 
     fun getCategoriesAsArrayList(): ArrayList<String> {
         return getCategoriesAsArray().toCollection(ArrayList())
     }
 
-    // TODO: Handle if no matching category found
     fun addEntry(entry: String, category: String = defaultCategory) {
         val jsonObj = findJSONObjectByCategory(category)
+        assert(jsonObj != null) { "ERROR: '$category' does not exist as category." }
+
         jsonObj?.getJSONArray("entries")?.put(entry)
         save()
     }
@@ -147,7 +147,6 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
         return false
     }
 
-    // TODO: maybe throw exception here to avoid null checks
     private fun findJSONObjectByCategory(category: String): JSONObject? {
         for (i in 0 until items.length()) {
             val jsonObj = items.getJSONObject(i)

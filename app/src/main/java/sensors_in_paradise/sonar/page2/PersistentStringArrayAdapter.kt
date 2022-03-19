@@ -9,7 +9,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.R
 
-
 class PersistentStringArrayAdapter(private val itemsStorage: StringItemStorage) :
     RecyclerView.Adapter<PersistentStringArrayAdapter.ViewHolder>() {
     private var dataSet = itemsStorage.items

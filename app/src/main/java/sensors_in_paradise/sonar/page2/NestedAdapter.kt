@@ -5,9 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
-
 
 class NestedAdapter(private val entries: List<String>, private val nonDeletableEntries: ArrayList<String>) :
     RecyclerView.Adapter<NestedAdapter.NestedViewHolder>() {
@@ -29,19 +29,19 @@ class NestedAdapter(private val entries: List<String>, private val nonDeletableE
     override fun onBindViewHolder(viewHolder: NestedViewHolder, position: Int) {
         val entryText = entries[position]
         viewHolder.entry.text = entryText
-        viewHolder.wrapper.setOnClickListener{
+        viewHolder.wrapper.setOnClickListener {
             onItemClicked?.let { it1 -> it1(entryText) }
         }
 
         if (!nonDeletableEntries.contains(entryText)) {
-            viewHolder.wrapper.strokeColor = viewHolder.wrapper.context.resources.getColor(
+            viewHolder.wrapper.strokeColor = ContextCompat.getColor(viewHolder.wrapper.context,
                 sensors_in_paradise.sonar.R.color.colorAccent)
             viewHolder.wrapper.setOnLongClickListener {
                 val builder = AlertDialog.Builder(viewHolder.wrapper.context)
                 builder.setMessage("Are you sure you want to delete?")
                     .setCancelable(false)
                     .setPositiveButton("Yes") { _, _ ->
-                        onItemLongClicked?.let {it1 -> it1(entryText, position)}
+                        onItemLongClicked?.let { it1 -> it1(entryText, position) }
                     }
                     .setNegativeButton("No") { dialog, _ ->
                         dialog.dismiss()

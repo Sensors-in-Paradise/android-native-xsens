@@ -75,13 +75,11 @@ class GlobalValues private constructor() {
         }
 
         fun getActivityLabelsJSONFile(context: Context): File {
-            // TODO: Change back once application was tested
-//            return File(context.dataDir, "labels.json")
             return File(context.getExternalFilesDir(null) ?: context.dataDir, "labels.json")
         }
 
         fun getPeopleJSONFile(context: Context): File {
-            return File(context.dataDir, "people2.json")
+            return File(context.getExternalFilesDir(null) ?: context.dataDir, "people.json")
         }
 
         fun getRequiredPermissions(): ArrayList<String> {

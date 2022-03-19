@@ -5,12 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.R
-
 
 class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage) :
     RecyclerView.Adapter<PersistentCategoriesAdapter.ViewHolder>() {
@@ -84,7 +82,7 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
 
         nestedAdapter.setOnItemClickedListener { value -> this.onItemClicked?.let { it(value) } }
 
-        nestedAdapter.setOnItemLongClickedListener { value:String, index:Int ->
+        nestedAdapter.setOnItemLongClickedListener { value: String, index: Int ->
             itemsStorage.removeEntry(value, dataSet[position].itemText)
             if (index != -1) {
                 update(position)

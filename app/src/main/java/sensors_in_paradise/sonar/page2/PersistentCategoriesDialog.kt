@@ -97,4 +97,3 @@ class PersistentCategoriesDialog(
         alert.show()
     }
 }
-
