@@ -286,7 +286,7 @@ class LoggingManager(
 class ActiveRecording(val context: Context, private val devices: XSENSArrayList) {
     private val xsLoggers: ArrayList<XsensDotLogger> = ArrayList()
     val labels = ArrayList<Pair<Long, String>>()
-    private val sensorTagToMacMap = mutableMapOf<String, String>()
+    private val sensorMacToTagMap = mutableMapOf<String, String>()
     private val tempSensorFiles = arrayListOf<Pair<String, File>>()
 
     private lateinit var recordingStartTime: LocalDateTime
@@ -343,7 +343,7 @@ class ActiveRecording(val context: Context, private val devices: XSENSArrayList)
         val fileDir = LogIOHelper.getTempRecordingDir(context)
         for (device in devices.getConnected()) {
             // Store the Tag and MAC address for saving the mapping to JSON
-            sensorTagToMacMap[device.tag] = device.address
+            sensorMacToTagMap[device.address] = device.tag
             startXSensLogger(device, fileDir)
         }
     }
@@ -403,7 +403,7 @@ class ActiveRecording(val context: Context, private val devices: XSENSArrayList)
             recordingStartTime.toSonarLong(),
             recordingEndTime,
             person,
-            sensorTagToMacMap
+            sensorMacToTagMap
         )
 
         recording = Recording(destFileDir, metadataStorage)
