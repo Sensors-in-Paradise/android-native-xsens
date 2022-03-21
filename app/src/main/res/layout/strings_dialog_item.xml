@@ -19,7 +19,7 @@
         android:id="@+id/btn_delete_stringsDialogItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="0.25"
+        android:layout_weight="0"
         app:srcCompat="@drawable/ic_baseline_delete_forever_24"
         tools:ignore="SpeakableTextPresentCheck" />
 

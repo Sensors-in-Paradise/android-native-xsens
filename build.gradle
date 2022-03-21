@@ -1,3 +1,4 @@
+import io.gitlab.arturbosch.detekt.Detekt
 
 buildscript {
     ext.kotlin_version = '1.6.10'
@@ -9,6 +10,11 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:7.1.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10"
+        classpath 'com.google.gms:google-services:4.3.10'
+
+        // Add the Crashlytics Gradle plugin
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.8.1'
+
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -31,7 +37,7 @@ def buildFiles = "**/build/**"
 def configFile = files("$rootDir/config/detekt/detekt.yml")
 def projectSource = file(projectDir)
 
-tasks.register("detektBasic", io.gitlab.arturbosch.detekt.Detekt) {
+tasks.register("detektBasic", Detekt) {
     description = "Custom DETEKT build for all modules"
     parallel = true
     ignoreFailures = false
@@ -48,7 +54,7 @@ tasks.register("detektBasic", io.gitlab.arturbosch.detekt.Detekt) {
     }
 }
 
-tasks.register("detektClear", io.gitlab.arturbosch.detekt.Detekt) {
+tasks.register("detektClear", Detekt) {
     description = "Custom DETEKT build for all modules"
     parallel = true
     ignoreFailures = false
