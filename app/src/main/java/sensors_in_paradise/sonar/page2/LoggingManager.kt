@@ -219,7 +219,7 @@ class LoggingManager(
         onSelected: (value: String, openedTimestamp: Long) -> Unit,
         cancellable: Boolean? = true
     ) {
-        val openedTimestamp = System.currentTimeMillis()
+        val openedTimestamp = LocalDateTime.now().toSonarLong()
         PersistentStringArrayDialog(
             context,
             "Select an activity Label",
