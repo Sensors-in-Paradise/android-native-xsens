@@ -47,6 +47,7 @@ class LoggingManager(
     private var isRecording = false
 
     private var categoriesDialog: PersistentCategoriesDialog? = null
+    private var openedTimestamp: Long = 0
 
     init {
         activitiesRV.adapter = activitiesAdapter
@@ -89,11 +90,15 @@ class LoggingManager(
         }
     }
 
+    private fun getCurrentOpenedTimestamp(): Long {
+        return openedTimestamp
+    }
+
     private fun showActivityDialog(
         onSelected: (value: String, openedTimestamp: Long) -> Unit,
         cancellable: Boolean? = true
     ) {
-        val openedTimestamp = System.currentTimeMillis()
+        openedTimestamp = System.currentTimeMillis()
 
         if (categoriesDialog == null) {
             categoriesDialog = PersistentCategoriesDialog(
@@ -101,7 +106,7 @@ class LoggingManager(
                 "Select an activity label",
                 GlobalValues.getActivityLabelsJSONFile(context),
                 defaultItems = GlobalValues.DEFINED_ACTIVITIES,
-                callback = { value -> onSelected(value, openedTimestamp) },
+                callback = { value -> onSelected(value, getCurrentOpenedTimestamp()) },
                 cancellable = cancellable ?: true
             )
         }
