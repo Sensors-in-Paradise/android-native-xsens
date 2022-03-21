@@ -39,8 +39,8 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
         val alreadyAdded = isEntryAdded(entry)
 
         if (!alreadyAdded) {
-            addEntry(entry, category)
             addCategoryIfNotAdded(category)
+            addEntry(entry, category)
         }
         if (!deletable) {
             nonDeletableItems.add(entry)
