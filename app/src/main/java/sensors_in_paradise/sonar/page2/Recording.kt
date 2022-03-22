@@ -34,14 +34,15 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
 
     private fun areFilesEmpty(dir: File): Boolean {
         val childCSVs = dir.listFiles { _, name -> name.endsWith(".csv") }
-        if (childCSVs != null) {
+        if (childCSVs != null && childCSVs.isNotEmpty()) {
             for (child in childCSVs) {
                 if (child.length() < XSENS_EMPTY_FILE_SIZE) {
                     return true
                 }
             }
+            return false
         }
-        return false
+        return true
     }
 
     fun getDirectory(): File {
