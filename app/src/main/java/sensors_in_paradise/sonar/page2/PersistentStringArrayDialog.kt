@@ -32,6 +32,7 @@ class PersistentStringArrayDialog(
         val root = LayoutInflater.from(context).inflate(R.layout.string_array_dialog, null)
         val searchEditText = root.findViewById<EditText>(R.id.editText_search_stringArrayDialog)
         val rv = root.findViewById<RecyclerView>(R.id.recyclerView_items_stringArrayDialog)
+
         adapter = PersistentStringArrayAdapter(storage)
         rv.adapter = adapter
         builder.setView(root)
@@ -61,6 +62,7 @@ class PersistentStringArrayDialog(
 
         dialog.show()
     }
+
     private fun isItemAlreadyAdded(item: String): Boolean {
         val currentLabels = storage.getItemsAsArray()
         return currentLabels.contains(item)

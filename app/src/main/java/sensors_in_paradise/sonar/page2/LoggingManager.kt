@@ -39,6 +39,9 @@ class LoggingManager(
 
     private var activeRecording: ActiveRecording? = null
 
+    private var categoriesDialog: PersistentCategoriesDialog? = null
+    private var openedTimestamp: Long = 0
+
     init {
         activitiesRV.adapter = activitiesAdapter
 
@@ -212,22 +215,31 @@ class LoggingManager(
         }
     }
 
+    private fun getCurrentOpenedTimestamp(): Long {
+        return openedTimestamp
+    }
+
     // /////////////////////////////
     // ///////// DIALOGS ///////////
     // /////////////////////////////
+
     private fun showActivityDialog(
         onSelected: (value: String, openedTimestamp: Long) -> Unit,
         cancellable: Boolean? = true
     ) {
-        val openedTimestamp = LocalDateTime.now().toSonarLong()
-        PersistentStringArrayDialog(
-            context,
-            "Select an activity Label",
-            GlobalValues.getActivityLabelsJSONFile(context),
-            defaultItem = GlobalValues.NULL_ACTIVITY,
-            callback = { value -> onSelected(value, openedTimestamp) },
-            cancellable = cancellable ?: true
-        )
+        openedTimestamp = LocalDateTime.now().toSonarLong()
+
+        if (categoriesDialog == null) {
+            categoriesDialog = PersistentCategoriesDialog(
+                context,
+                "Select an activity label",
+                GlobalValues.getActivityLabelsJSONFile(context),
+                defaultItems = GlobalValues.DEFINED_ACTIVITIES,
+                callback = { value -> onSelected(value, getCurrentOpenedTimestamp()) },
+                cancellable = cancellable ?: true
+            )
+        }
+        categoriesDialog?.show()
     }
 
     private fun showPersonDialog(
@@ -274,7 +286,7 @@ class LoggingManager(
 class ActiveRecording(val context: Context, private val devices: XSENSArrayList) {
     private val xsLoggers: ArrayList<XsensDotLogger> = ArrayList()
     val labels = ArrayList<Pair<Long, String>>()
-    private val sensorTagToMacMap = mutableMapOf<String, String>()
+    private val sensorMacToTagMap = mutableMapOf<String, String>()
     private val tempSensorFiles = arrayListOf<Pair<String, File>>()
 
     private lateinit var recordingStartTime: LocalDateTime
@@ -331,7 +343,7 @@ class ActiveRecording(val context: Context, private val devices: XSENSArrayList)
         val fileDir = LogIOHelper.getTempRecordingDir(context)
         for (device in devices.getConnected()) {
             // Store the Tag and MAC address for saving the mapping to JSON
-            sensorTagToMacMap[device.tag] = device.address
+            sensorMacToTagMap[device.address] = device.tag
             startXSensLogger(device, fileDir)
         }
     }
@@ -391,7 +403,7 @@ class ActiveRecording(val context: Context, private val devices: XSENSArrayList)
             recordingStartTime.toSonarLong(),
             recordingEndTime,
             person,
-            sensorTagToMacMap
+            sensorMacToTagMap
         )
 
         recording = Recording(destFileDir, metadataStorage)
