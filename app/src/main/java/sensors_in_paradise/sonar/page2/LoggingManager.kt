@@ -444,5 +444,5 @@ object LogIOHelper {
     }
 }
 
-fun LocalDateTime.toSonarLong() = this.toInstant(ZoneOffset.UTC).toEpochMilli()
+fun LocalDateTime.toSonarLong() = this.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli()
 fun LocalDateTime.toSonarString() = this.toSonarLong().toString()
