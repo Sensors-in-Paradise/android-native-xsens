@@ -107,6 +107,9 @@ class Matrix4x4(private val data: FloatArray) {
     fun scale(x: Float, y: Float, z: Float) {
         Matrix.scaleM(this.data, 0, x, y, z)
     }
+    fun translate(x: Float, y: Float, z: Float) {
+        Matrix.translateM(this.data, 0, x, y, z)
+    }
 
     companion object {
         fun fromRows(

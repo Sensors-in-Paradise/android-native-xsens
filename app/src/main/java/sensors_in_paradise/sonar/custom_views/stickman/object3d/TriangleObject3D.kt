@@ -5,7 +5,7 @@ import android.graphics.Paint
 import android.graphics.PointF
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 
-abstract class TriangleObject3D(val fillColor: Int) : DrawableObject3DInterface {
+abstract class TriangleObject3D(vertices: Array<Vec4>, val fillColor: Int) : Object3D(vertices) {
     abstract fun get3DTrianglesToDraw(): Array<Triple<Vec4, Vec4, Vec4>>
     abstract fun hasChanged(): Boolean
     abstract fun onDrawn()

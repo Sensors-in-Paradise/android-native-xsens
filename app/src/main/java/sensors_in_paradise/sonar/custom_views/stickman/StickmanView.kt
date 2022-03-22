@@ -13,11 +13,12 @@ import sensors_in_paradise.sonar.custom_views.stickman.math.Vec3
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 import sensors_in_paradise.sonar.custom_views.stickman.object3d.Cube
 import sensors_in_paradise.sonar.custom_views.stickman.object3d.Plane
+import sensors_in_paradise.sonar.custom_views.stickman.object3d.Stickman
 
 class StickmanView(context: Context, attrs: AttributeSet) : View(context, attrs) {
-    private val objects3DToDraw = arrayOf(Plane(), Cube())
+    private val objects3DToDraw = arrayOf(Plane().apply{scale(1f, 0f, 1f)}/*, Cube()*/, Stickman())
 
-    private val camera = Camera(Vec3(0f, 0.5f, 0f), Vec3(0f, 1.5f, -3f), Vec3(0f, 1f, 0f))
+    private val camera = Camera(Vec3(0f, 0.5f, 0f), Vec3(0f, 1f, -2f), Vec3(0f, 1f, 0f))
     private var projection = Matrix4x4.project(90f, 1f, 0.1f, 4f)
     private val fpsTextPaint = Paint(0).apply {
         color = Color.WHITE

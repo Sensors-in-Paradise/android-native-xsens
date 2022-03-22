@@ -44,4 +44,12 @@ class Vec4(values: FloatArray) : VecX<Vec4>(values, 4) {
     override fun clone(): Vec4 {
         return Vec4(this)
     }
+
+    operator fun timesAssign(matrix4x4: Matrix4x4) {
+       val result = matrix4x4 * this
+        x = result.x
+        y = result.y
+        z = result.z
+        w = result.w
+    }
 }

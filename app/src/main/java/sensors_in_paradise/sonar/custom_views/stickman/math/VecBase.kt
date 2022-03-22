@@ -71,6 +71,7 @@ open class VecBase(protected val values: FloatArray, size: Int) {
         }
     }
 
+
     operator fun divAssign(a: Float) {
         for (i in 0 until size) {
             values[i] /= a

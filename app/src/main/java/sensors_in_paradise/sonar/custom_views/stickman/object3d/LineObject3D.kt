@@ -5,7 +5,7 @@ import android.graphics.Paint
 import android.graphics.PointF
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 
-abstract class LineObject3D : DrawableObject3DInterface {
+abstract class LineObject3D(vertices:Array<Vec4>) : Object3D(vertices) {
     abstract fun getVectorPaint(): Paint
     abstract fun get3DLinesToDraw(): Array<Pair<Vec4, Vec4>>
     abstract fun getLinePaint(): Paint
