@@ -8,7 +8,7 @@ import kotlin.math.floor
 import kotlin.random.Random
 
 const val XSENS_HEADER_SIZE = 9
-const val XSENS_EMPTY_FILE_SIZE = 430
+const val XSENS_EMPTY_FILE_SIZE = 435
 
 /**
  * Enum that describes the condition / state a recording can be in
