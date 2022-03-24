@@ -17,6 +17,6 @@
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="default_recordings_subdir">ML Prototype Recordings</string>
-    <string name="default_webdav_cloud_url">https://magentacloud.de/remote.php/webdav</string>
+    <string name="default_webdav_cloud_url">https://magentacloud.de/remote.php/webdav/</string>
     <string name="default_webdav_username">120049010000000332523454</string>
 </resources>
