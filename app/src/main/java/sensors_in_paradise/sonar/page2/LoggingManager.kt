@@ -238,7 +238,7 @@ class LoggingManager(
                 callback = { value -> onSelected(value, getCurrentOpenedTimestamp()) },
             )
         }
-        categoriesDialog?.show(cancelable?: true)
+        categoriesDialog?.show(cancelable ?: true)
     }
 
     private fun showPersonDialog(
