@@ -29,4 +29,8 @@ class PermissionsHandler(private val requestPermissionLauncher: ActivityResultLa
             )
         }
     }
+
+    override fun activityDestroyed() {
+        // Nothing to do
+    }
 }

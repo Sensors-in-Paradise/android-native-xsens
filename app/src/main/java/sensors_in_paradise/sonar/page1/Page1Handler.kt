@@ -165,6 +165,11 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
             }
         }
     }
+
+    override fun activityDestroyed() {
+        // Nothing to do
+    }
+
     private var mXsScanner: XsensDotScanner? = null
     private fun initXsScanner() {
         mXsScanner = XsensDotScanner(context, this)
