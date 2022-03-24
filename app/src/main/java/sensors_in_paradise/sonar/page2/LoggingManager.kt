@@ -250,7 +250,7 @@ class LoggingManager(
             "Select a Person",
             GlobalValues.getPeopleJSONFile(context),
             defaultItem = GlobalValues.UNKNOWN_PERSON,
-            callback = onSelected, cancellable = cancelable ?: true
+            callback = onSelected, cancelable = cancelable ?: true
         )
     }
 
