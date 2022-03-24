@@ -85,7 +85,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
     }
 
     override fun onDestroy() {
-        pageHandlers.forEach { handler -> handler.activityDestroyed() }
+        pageHandlers.forEach { handler -> handler.activityWillDestroy() }
 
         super.onDestroy()
     }

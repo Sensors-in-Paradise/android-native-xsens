@@ -78,7 +78,7 @@ class Page2Handler(
     override fun activityResumed() {
     }
 
-    override fun activityDestroyed() {
+    override fun activityWillDestroy() {
         loggingManager.stopLoggingImmediately()
     }
 

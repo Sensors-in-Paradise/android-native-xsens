@@ -166,7 +166,7 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
         }
     }
 
-    override fun activityDestroyed() {
+    override fun activityWillDestroy() {
         // Nothing to do
     }
 

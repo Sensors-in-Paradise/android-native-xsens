@@ -214,7 +214,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     override fun activityResumed() {
     }
 
-    override fun activityDestroyed() {
+    override fun activityWillDestroy() {
         // Nothing to do
     }
 
