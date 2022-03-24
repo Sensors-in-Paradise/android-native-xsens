@@ -5,7 +5,7 @@ import android.graphics.PointF
 import sensors_in_paradise.sonar.custom_views.stickman.math.Matrix4x4
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 
-abstract class Object3D(val vertices:Array<Vec4>) {
+abstract class Object3D(val vertices:Array<Vec4>, var onObjectChanged: OnObjectChangedInterface?=null) {
 
     fun scale(x: Float, y: Float, z: Float){
         val m = Matrix4x4().apply { scale(x,y,z)}
@@ -19,6 +19,11 @@ abstract class Object3D(val vertices:Array<Vec4>) {
         for (v in vertices){
             v *= m
         }
+        notifyVerticesChanged()
     }
     abstract fun draw(canvas: Canvas, projectPoint: (p: Vec4) -> PointF)
+
+    fun notifyVerticesChanged(){
+        onObjectChanged?.onObjectChanged()
+    }
 }

@@ -11,14 +11,15 @@ import android.view.View
 import sensors_in_paradise.sonar.custom_views.stickman.math.Matrix4x4
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec3
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
-import sensors_in_paradise.sonar.custom_views.stickman.object3d.Cube
+import sensors_in_paradise.sonar.custom_views.stickman.object3d.Object3D
+import sensors_in_paradise.sonar.custom_views.stickman.object3d.OnObjectChangedInterface
 import sensors_in_paradise.sonar.custom_views.stickman.object3d.Plane
 import sensors_in_paradise.sonar.custom_views.stickman.object3d.Stickman
 
-class StickmanView(context: Context, attrs: AttributeSet) : View(context, attrs) {
-    private val objects3DToDraw = arrayOf(Plane().apply{scale(1f, 0f, 1f)}/*, Cube()*/, Stickman())
+class Render3DView(context: Context, attrs: AttributeSet) : View(context, attrs), OnObjectChangedInterface {
+    private val objects3DToDraw = ArrayList<Object3D>()//arrayListOf(/*Plane().apply{scale(1f, 0f, 1f)}, Cube(), Stickman()*/)
 
-    private val camera = Camera(Vec3(0f, 0.5f, 0f), Vec3(0f, 1f, -2f), Vec3(0f, 1f, 0f))
+    val camera = Camera(Vec3(0f, 0.5f, 0f), Vec3(0f, 1f, -2f), Vec3(0f, 1f, 0f))
     private var projection = Matrix4x4.project(90f, 1f, 0.1f, 4f)
     private val fpsTextPaint = Paint(0).apply {
         color = Color.WHITE
@@ -54,7 +55,7 @@ class StickmanView(context: Context, attrs: AttributeSet) : View(context, attrs)
             drawText(fpsText, 10f, textBounds.height().toFloat(), fpsTextPaint)
 
             for (obj in objects3DToDraw) {
-                obj.draw(canvas, this@StickmanView::project3DPoint)
+                obj.draw(canvas, this@Render3DView::project3DPoint)
             }
         }
         lastTimeDrawn = System.currentTimeMillis()
@@ -97,5 +98,13 @@ class StickmanView(context: Context, attrs: AttributeSet) : View(context, attrs)
             isAnimationThreadInSlowMode = false
             animationThread.interrupt()
         }
+    }
+    fun addObject3D(obj: Object3D){
+        objects3DToDraw.add(obj)
+        onSceneChanged()
+    }
+
+    override fun onObjectChanged() {
+        onSceneChanged()
     }
 }

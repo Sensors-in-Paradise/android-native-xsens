@@ -5,7 +5,7 @@ import android.graphics.Paint
 import android.graphics.PointF
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 
-abstract class LineObject3D(vertices:Array<Vec4>) : Object3D(vertices) {
+abstract class LineObject3D(vertices:Array<Vec4>, onObjectChanged: OnObjectChangedInterface?=null) : Object3D(vertices, onObjectChanged) {
     abstract fun getVectorPaint(): Paint
     abstract fun get3DLinesToDraw(): Array<Pair<Vec4, Vec4>>
     abstract fun getLinePaint(): Paint
@@ -14,6 +14,7 @@ abstract class LineObject3D(vertices:Array<Vec4>) : Object3D(vertices) {
         val linePaint = getLinePaint()
         val vectorPaint = getVectorPaint()
         canvas.apply {
+            // TODO: allow for per Line Paint
             get3DLinesToDraw().forEach {
                 val p1 = projectPoint(it.first)
                 val p2 = projectPoint(it.second)

@@ -42,4 +42,5 @@ class Cube : LineObject3D(arrayOf(lbb, lbf, ltb, ltf, rbb, rbf, rtb, rtf)) {
         private val rtb = Vec4(0.5f, 1f, 0.5f)
         private val rtf = Vec4(0.5f, 1f, -0.5f)
     }
+
 }
