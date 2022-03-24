@@ -136,7 +136,7 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
     }
 
     override fun onCredentialsNotAvailable(e: java.lang.Exception) {
-        MessageDialog(context, e.message?:"Credentials are not available")
+        MessageDialog(context, e.message ?: "Credentials are not available")
     }
 
     private fun onRecordingStatusChanged(recording: RecordingUIItem) {
