@@ -51,10 +51,11 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
         page1Handler.addConnectionInterface(page2Handler)
         page1Handler.addConnectionInterface(page3Handler)
         page1Handler.addConnectionInterface(
-            SensorTrafficIndicatorHandler(
+            SensorTrafficVisualizationHandler(
                 this,
                 scannedDevices,
-                findViewById(R.id.sensorDataTrafficIndicator_captureFragment)
+                findViewById(R.id.sensorDataTrafficIndicator_captureFragment),
+                findViewById(R.id.linearLayout_sensorOrientation_activityMain)
             )
         )
         val permissionLauncher = registerForActivityResult(

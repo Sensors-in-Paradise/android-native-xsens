@@ -13,14 +13,15 @@ import sensors_in_paradise.sonar.custom_views.stickman.math.Vec3
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 import sensors_in_paradise.sonar.custom_views.stickman.object3d.Object3D
 import sensors_in_paradise.sonar.custom_views.stickman.object3d.OnObjectChangedInterface
-import sensors_in_paradise.sonar.custom_views.stickman.object3d.Plane
-import sensors_in_paradise.sonar.custom_views.stickman.object3d.Stickman
 
-class Render3DView(context: Context, attrs: AttributeSet) : View(context, attrs), OnObjectChangedInterface {
-    private val objects3DToDraw = ArrayList<Object3D>()//arrayListOf(/*Plane().apply{scale(1f, 0f, 1f)}, Cube(), Stickman()*/)
+class Render3DView(context: Context, attrs: AttributeSet?) : View(context, attrs), OnObjectChangedInterface {
+    constructor(context: Context) : this(context, null)
 
-    val camera = Camera(Vec3(0f, 0.5f, 0f), Vec3(0f, 1f, -2f), Vec3(0f, 1f, 0f))
-    private var projection = Matrix4x4.project(90f, 1f, 0.1f, 4f)
+    val objects3DToDraw = ArrayList<Object3D>()//arrayListOf(/*Plane().apply{scale(1f, 0f, 1f)}, Cube(), Stickman()*/)
+    var enableYRotation = false
+    var showFPS = false
+    val camera = Camera(Vec3(0f, 0.5f, 0f), Vec3(0f, 0.5f, -2f), Vec3(0f, 1f, 0f), this::onSceneChanged)
+    private val projection = Matrix4x4.project(90f, 1f, 0.1f, 4f)
     private val fpsTextPaint = Paint(0).apply {
         color = Color.WHITE
         textSize = 50F
@@ -47,13 +48,15 @@ class Render3DView(context: Context, attrs: AttributeSet) : View(context, attrs)
     private val textBounds = Rect()
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val fps = 1000 / (System.currentTimeMillis() - lastTimeDrawn)
-        val fpsText = "FPS: $fps"
-
-        fpsTextPaint.getTextBounds(fpsText, 0, fpsText.length, textBounds)
+        if(showFPS) {
+            val fps = 1000 / (System.currentTimeMillis() - lastTimeDrawn)
+            val fpsText = "FPS: $fps"
+            fpsTextPaint.getTextBounds(fpsText, 0, fpsText.length, textBounds)
+            canvas.apply {
+                drawText(fpsText, 10f, textBounds.height().toFloat(), fpsTextPaint)
+            }
+        }
         canvas.apply {
-            drawText(fpsText, 10f, textBounds.height().toFloat(), fpsTextPaint)
-
             for (obj in objects3DToDraw) {
                 obj.draw(canvas, this@Render3DView::project3DPoint)
             }
@@ -77,19 +80,21 @@ class Render3DView(context: Context, attrs: AttributeSet) : View(context, attrs)
     private var lastEventX = 0f
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if (event != null) {
-            if (event.action == MotionEvent.ACTION_MOVE) {
-                val x = event.getAxisValue(MotionEvent.AXIS_X)
-                val diff = lastEventX - x
-                lastEventX = x
-                camera.rotateY(diff / 5f)
-                onSceneChanged()
-            }
-            if (event.action == MotionEvent.ACTION_DOWN) {
-                lastEventX = event.getAxisValue(MotionEvent.AXIS_X)
+        if(enableYRotation) {
+            if (event != null) {
+                if (event.action == MotionEvent.ACTION_MOVE) {
+                    val x = event.getAxisValue(MotionEvent.AXIS_X)
+                    val diff = lastEventX - x
+                    lastEventX = x
+                    camera.rotateY(diff / 5f)
+                    onSceneChanged()
+                }
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    lastEventX = event.getAxisValue(MotionEvent.AXIS_X)
+                }
             }
         }
-        return true
+        return enableYRotation
     }
 
     private fun onSceneChanged() {
@@ -101,10 +106,14 @@ class Render3DView(context: Context, attrs: AttributeSet) : View(context, attrs)
     }
     fun addObject3D(obj: Object3D){
         objects3DToDraw.add(obj)
+        obj.onObjectChanged = this
         onSceneChanged()
     }
 
+
     override fun onObjectChanged() {
         onSceneChanged()
+        //TODO: Remove Log
+        Log.d("3D_BUMMS - Render3DView", "scene changed")
     }
 }

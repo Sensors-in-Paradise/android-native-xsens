@@ -9,15 +9,15 @@ import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 class CoordinateSystem3D  : LineObject3D(
     arrayOf(
        origin, xAxis, yAxis, zAxis
-    )
+    ) + sensorBoundingBox.vertices
 ) {
 
     private val linesToDraw = arrayOf(
-        Pair(origin, xAxis),
-        Pair(origin, yAxis),
-        Pair(origin, zAxis),
+        Pair(vertices[0], vertices[1]),
+        Pair(vertices[0], vertices[2]),
+        Pair(vertices[0], vertices[3]),
     )
-    private val head = Cube()
+
 
     private val linePaint = Paint(0).apply {
         color = Color.WHITE
@@ -41,8 +41,10 @@ class CoordinateSystem3D  : LineObject3D(
     }
 
     override fun draw(canvas: Canvas, projectPoint: (p: Vec4) -> PointF) {
+        sensorBoundingBox.draw(canvas, projectPoint)
         super.draw(canvas, projectPoint)
-        head.draw(canvas, projectPoint)
+
+
     }
 
     companion object {
@@ -50,6 +52,9 @@ class CoordinateSystem3D  : LineObject3D(
         private val xAxis = Vec4(1f, 0f, 0f)
         private val yAxis = Vec4(0f, 1f, 0f)
         private val zAxis = Vec4(0f, 0f, 1f)
-
+        private val sensorBoundingBox= Cube().apply{
+            //translate(0.5f, 0f, 0.5f)
+            scale(0.5f, 1f, 0.5f)
+        }
     }
 }
