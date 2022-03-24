@@ -128,11 +128,7 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
         refreshButton = activity.findViewById(R.id.button_refresh_connection_fragment)
         xsensDotMetadata = XSensDotMetadataStorage(context)
 
-        syncBtn.setOnClickListener {
-            isSyncing = true
-            scannedDevices.getConnected()[0].isRootDevice = true
-            XsensDotSyncManager.getInstance(SyncHandler(this)).startSyncing(scannedDevices.getConnected(), 0)
-        }
+        syncBtn.setOnClickListener { startSyncing() }
 
         refreshButton.setOnClickListener {
             val deg: Float = refreshButton.rotation + 1080f
@@ -206,15 +202,30 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
         }
     }
 
+    private fun startSyncing() {
+        isSyncing = true
+
+        // Set the correct sensor settings
+        for (device in scannedDevices.getConnected()) {
+            device.setOutputRate(60)
+        }
+
+        // Try to find the ST sensor to use as root sensor
+        val stSensor = scannedDevices.getConnected().find {
+                sensor -> sensor.tag.startsWith("ST")
+        }
+        val selectedRootSensor = stSensor ?: scannedDevices.getConnected()[0]
+        selectedRootSensor.isRootDevice = true
+
+        XsensDotSyncManager.getInstance(SyncHandler(this)).startSyncing(scannedDevices.getConnected(), 0)
+    }
+
     override fun onFinishedSyncing(
         syncingResultMap: HashMap<String, Boolean>?,
         isSuccess: Boolean,
         requestCode: Int
     ) {
         isSyncing = false
-        for (device in scannedDevices.getConnected()) {
-                device.setOutputRate(60)
-        }
         activity.runOnUiThread {
             Toast.makeText(context, "Finished syncing, success: $isSuccess", Toast.LENGTH_LONG).show()
             updateSyncButtonState()

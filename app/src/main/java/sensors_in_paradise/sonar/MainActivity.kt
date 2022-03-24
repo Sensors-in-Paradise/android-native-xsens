@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate.*
 import com.google.android.material.tabs.TabLayout
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import sensors_in_paradise.sonar.custom_views.stickman.StickmanDialog
 import sensors_in_paradise.sonar.page1.Page1Handler
 import sensors_in_paradise.sonar.page2.Page2Handler
@@ -67,6 +68,9 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
         supportActionBar?.setBackgroundDrawable(ColorDrawable(getColor(R.color.colorPrimary)))
 
         ownCloudUploader = OwnCloudRecordingsUploader(this, recordingsManager)
+
+        // Force crashlytics to be enabled (we might want to disable it in debug mode / ...)
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
     }
 
     override fun onResume() {

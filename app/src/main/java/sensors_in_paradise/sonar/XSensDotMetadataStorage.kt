@@ -4,9 +4,8 @@ import android.content.Context
 import android.widget.Toast
 import java.io.File
 
-class XSensDotMetadataStorage(context: Context) :
+class XSensDotMetadataStorage(private val context: Context) :
     JSONStorage(File(context.dataDir, "xsensDotMetadata.json")) {
-    private val context = context
 
     override fun onFileNewlyCreated() {
     }

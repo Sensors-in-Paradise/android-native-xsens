@@ -1,23 +1,26 @@
 package sensors_in_paradise.sonar.page2
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.SystemClock
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
-import com.xsens.dot.android.sdk.models.XsensDotPayload
+import com.xsens.dot.android.sdk.events.XsensDotData
+import com.xsens.dot.android.sdk.models.XsensDotDevice
 import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.XSENSArrayList
-import sensors_in_paradise.sonar.XSensDotMetadataStorage
+import sensors_in_paradise.sonar.util.PreferencesHelper
+import sensors_in_paradise.sonar.util.UIHelper
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Files
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
+
+const val VALID_SENSOR_NUM = 5
 
 @Suppress("LongParameterList")
 class LoggingManager(
@@ -27,79 +30,216 @@ class LoggingManager(
     private val timer: Chronometer,
     private val labelTV: TextView,
     private val personTV: TextView,
-    private val activitiesRV: RecyclerView
+    activitiesRV: RecyclerView
 ) {
-
-    val xsLoggers: ArrayList<XsensDotLogger> = ArrayList()
-    var enoughDevicesConnected = false
-
-    /** Map of timestamp of recording as key and ArrayList of Pairs of sensor
-     * deviceAddress and associated recording file*/
-    private val tempRecordingMap: MutableMap<LocalDateTime, ArrayList<Pair<String, File>>> =
-        mutableMapOf()
     private var onRecordingDone: ((Recording) -> Unit)? = null
     private var onRecordingStarted: (() -> Unit)? = null
-    private val labels = ArrayList<Pair<Long, String>>()
-    private var recordingStartTime = 0L
-    private val activitiesAdapter = ActivitiesAdapter(labels)
-    private var xSenseMetadataStorage: XSensDotMetadataStorage
-    private val tempSensorMacMap = mutableMapOf<String, String>()
-    private var isRecording = false
+
+    private val activitiesAdapter = ActivitiesAdapter(arrayListOf())
+
+    private var activeRecording: ActiveRecording? = null
+
+    private var categoriesDialog: PersistentCategoriesDialog? = null
+    private var openedTimestamp: Long = 0
 
     init {
         activitiesRV.adapter = activitiesAdapter
 
         labelTV.setOnClickListener {
             showActivityDialog({ label, openedTimestamp ->
-                labelTV.text = label
-                labels.add(Pair(openedTimestamp, label))
-                activitiesAdapter.notifyItemInserted(labels.size - 1)
+                updateSelectedLabel(label, openedTimestamp)
             })
         }
         personTV.setOnClickListener {
-            showPersonDialog({ person ->
-                personTV.text = person
-            })
+            showPersonDialog(this::updateSelectedPerson)
         }
 
         recordButton.setOnClickListener {
             toggleRecording()
         }
-
-        xSenseMetadataStorage = XSensDotMetadataStorage(context)
     }
 
-    private fun toggleRecording() {
-        if (isRecording) {
-            stopLogging()
+    // /////////////////////////////
+    // /////// UI UPDATES //////////
+    // /////////////////////////////
+    // Everything that deals with changing the UI to show the current recording state
+
+    private fun updateSelectedPerson(name: String) {
+        personTV.text = name
+    }
+
+    private fun updateSelectedLabel(label: String, openedTimestamp: Long) {
+        labelTV.text = label
+        val position = activeRecording?.addLabel(openedTimestamp, label) ?: 0
+        activitiesAdapter.notifyItemInserted(position)
+    }
+
+    private fun updateRecordButton() {
+        if (isRecording()) {
+            recordButton.setIconResource(R.drawable.ic_baseline_stop_24)
         } else {
-            if (tryPrepareLogging()) {
-                onRecordingStarted?.let { it1 -> it1() }
-                startLogging()
-                if (!isLabelSelected()) {
-                    showActivityDialog(cancellable = false, onSelected = { label, openedTimestamp ->
-                        labelTV.text = label
-                        labels.add(Pair(openedTimestamp, label))
-                        activitiesAdapter.notifyItemInserted(labels.size - 1)
-                    })
-                }
-            }
+            recordButton.setIconResource(R.drawable.ic_baseline_play_arrow_24)
         }
     }
+
+    private fun startUITimer() {
+        timer.base = SystemClock.elapsedRealtime()
+        timer.format = "%s"
+        timer.start()
+    }
+
+    // /////////////////////////////
+    // ////// STATE UPDATES ////////
+    // /////////////////////////////
+
+    /**
+     * Checks if the changed sensor is still connected and if not stops the recording
+     */
+    fun handleConnectionStateChange(address: String, connected: Boolean) {
+        if (activeRecording?.hasLoggerForAddress(address) == true && !connected) {
+           devices.get(address)?.let {
+               if (it.connectionState == XsensDotDevice.CONN_STATE_DISCONNECTED) {
+                   UIHelper.showAlert(
+                       context,
+                       "The Device ${it.name} was disconnected!"
+                   )
+
+                   stopLogging()
+               }
+           }
+        }
+    }
+
+    /**
+     * Updates an existing logger with the new data, if it exists
+     */
+    fun handleSensorDataUpdate(address: String, xsensDotData: XsensDotData) {
+        activeRecording?.getLoggerForAddress(address)?.update(xsensDotData)
+    }
+
+    // /////////////////////////////
+    // //////// RECORDING //////////
+    // /////////////////////////////
+
+    /**
+     * Stops the recording, if it is currently running or tries to start a new one if none is running
+     *
+     */
+    private fun toggleRecording() {
+        if (isRecording()) {
+            stopLogging()
+        } else if (isReadyToRecord()) {
+            onRecordingStarted?.let { it1 -> it1() }
+            startLogging()
+        }
+    }
+
+    private fun isReadyToRecord(): Boolean {
+        val numConnected = devices.getConnected().size
+        if (numConnected != VALID_SENSOR_NUM) {
+            Toast.makeText(
+                context,
+                "Only $numConnected out of $VALID_SENSOR_NUM devices are connected!",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        return true
+    }
+
+    private fun isRecording(): Boolean {
+        return activeRecording?.isRunning() ?: false
+    }
+
+    /**
+     * Updates the UI to represent a running recording, creates a new ActiveRecording and starts it.
+     *
+     * If no label is selected, the activity dialog is opened
+     */
+    private fun startLogging() {
+        startUITimer()
+
+        activeRecording = ActiveRecording(context, devices)
+        activitiesAdapter.setActivities(activeRecording!!.labels)
+        if (isLabelSelected()) {
+            activeRecording!!.start(labelTV.text.toString())
+        } else {
+            activeRecording!!.start()
+            showActivityDialog(
+                cancellable = false,
+                onSelected = this::updateSelectedLabel
+            )
+        }
+
+        updateRecordButton()
+    }
+
+    /**
+     * Stops and deletes the current ActiveRecording WITHOUT saving it.
+     */
+    fun cancelLogging() {
+        activeRecording?.stop()
+        activitiesAdapter.unlinkActivitiesList()
+        activeRecording = null
+    }
+
+    private fun stopLogging() {
+        assert(activeRecording != null)
+        val activeRecording = activeRecording!!
+        activeRecording.stop()
+
+        timer.stop()
+        updateRecordButton()
+
+        resolveMissingFields {
+            activeRecording.save(personTV.text.toString())
+            activeRecording.recording?.let { onRecordingDone?.invoke(it) }
+            activitiesAdapter.unlinkActivitiesList()
+            this.activeRecording = null
+            labelTV.text = ""
+        }
+    }
+
+    private fun resolveMissingFields(onAllResolved: () -> Unit) {
+        if (!isLabelSelected()) {
+            showActivityDialog(cancellable = false, onSelected = { label, _ ->
+                updateSelectedLabel(label, 0)
+                resolveMissingFields(onAllResolved)
+            })
+        } else if (!isPersonSelected()) {
+            showPersonDialog(cancellable = false, onSelected = { person ->
+                updateSelectedPerson(person)
+                resolveMissingFields(onAllResolved)
+            })
+        } else {
+            onAllResolved()
+        }
+    }
+
+    private fun getCurrentOpenedTimestamp(): Long {
+        return openedTimestamp
+    }
+
+    // /////////////////////////////
+    // ///////// DIALOGS ///////////
+    // /////////////////////////////
 
     private fun showActivityDialog(
         onSelected: (value: String, openedTimestamp: Long) -> Unit,
         cancellable: Boolean? = true
     ) {
-        val openedTimestamp = System.currentTimeMillis()
-        PersistentStringArrayDialog(
-            context,
-            "Select an activity Label",
-            GlobalValues.getActivityLabelsJSONFile(context),
-            defaultItem = GlobalValues.NULL_ACTIVITY,
-            callback = { value -> onSelected(value, openedTimestamp) },
-            cancellable = cancellable ?: true
-        )
+        openedTimestamp = LocalDateTime.now().toSonarLong()
+
+        if (categoriesDialog == null) {
+            categoriesDialog = PersistentCategoriesDialog(
+                context,
+                "Select an activity label",
+                GlobalValues.getActivityLabelsJSONFile(context),
+                defaultItems = GlobalValues.DEFINED_ACTIVITIES,
+                callback = { value -> onSelected(value, getCurrentOpenedTimestamp()) },
+                cancellable = cancellable ?: true
+            )
+        }
+        categoriesDialog?.show()
     }
 
     private fun showPersonDialog(
@@ -115,151 +255,17 @@ class LoggingManager(
         )
     }
 
-    private fun getRecordingFileDir(time: LocalDateTime): File {
-        val timeStr = time.toInstant(ZoneOffset.UTC).toEpochMilli().toString()
-
-        return GlobalValues.getSensorRecordingsBaseDir(context).resolve("ML Prototype Recordings")
-            .resolve(timeStr)
-    }
-
-    private fun getRecordingFile(fileDir: File, deviceAddress: String): File {
-        return fileDir.resolve("$deviceAddress.csv")
-    }
-
-    private fun getNewUnlabelledTempFile(fileDir: File, deviceAddress: String): File {
-        return fileDir.resolve("${System.currentTimeMillis()}_$deviceAddress.csv")
-    }
-
-    private fun tryPrepareLogging(): Boolean {
-        if (!enoughDevicesConnected) {
-            Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
-            return false
-        }
-        val deviceSetKey =
-            xSenseMetadataStorage.tryGetDeviceSetKey(devices.getConnectedWithOfflineMetadata())
-                ?: return false
-
-        for (tagPrefix in GlobalValues.sensorTagPrefixes) {
-            val tag = GlobalValues.formatTag(tagPrefix, deviceSetKey)
-            val address = xSenseMetadataStorage.getAddressForTag(tag)
-            tempSensorMacMap[address] = tag
-        }
-        return true
-    }
-
-    private fun startLogging() {
-        recordButton.setIconResource(R.drawable.ic_baseline_stop_24)
-        isRecording = true
-
-        timer.base = SystemClock.elapsedRealtime()
-        timer.format = "%s" // set the format for a chronometer
-        timer.start()
-        val fileDir = GlobalValues.getSensorRecordingsTempDir(context)
-        fileDir.mkdirs()
-        val recordingsKey = LocalDateTime.now()
-        tempRecordingMap[recordingsKey] = arrayListOf()
-        recordingStartTime = System.currentTimeMillis()
-        for (device in devices.getConnected()) {
-            device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
-            device.startMeasuring()
-            val file = getNewUnlabelledTempFile(fileDir, device.address)
-
-            tempRecordingMap[recordingsKey]!!.add(Pair(device.address, file))
-            xsLoggers.add(
-                XsensDotLogger(
-                    this.context,
-                    XsensDotLogger.TYPE_CSV,
-                    XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION,
-                    file.absolutePath,
-                    device.address,
-                    "1",
-                    false,
-                    1,
-                    null as String?,
-                    "appVersion",
-                    0
-                )
-            )
-        }
-    }
-
-    fun cancelLogging() {
-        labels.clear()
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private fun stopLogging() {
-        timer.stop()
-        isRecording = false
-
-        val recordingEndTime = System.currentTimeMillis()
-        for (logger in xsLoggers) {
-            logger.stop()
-        }
-        for (device in devices.getConnected()) {
-            device.stopMeasuring()
-        }
-
-        resolveMissingFields {
-            moveTempFiles(personTV.text.toString(), recordingEndTime)
-            labelTV.text = ""
-            recordButton.setIconResource(R.drawable.ic_baseline_play_arrow_24)
-            xsLoggers.clear()
-            labels.clear()
-            activitiesAdapter.notifyDataSetChanged()
-        }
-    }
-
+    // /////////////////////////////
+    // ///////// HELPERS ///////////
+    // /////////////////////////////
     private fun isLabelSelected(): Boolean {
         val labelText = labelTV.text.toString()
         return labelText != ""
     }
 
-    private fun resolveMissingFields(onAllResolved: () -> Unit) {
+    private fun isPersonSelected(): Boolean {
         val personText = personTV.text.toString()
-        val isLabelSelected =
-            isLabelSelected()
-        val isPersonSelected =
-            personText != ""
-        if (!isLabelSelected) {
-            showActivityDialog(cancellable = false, onSelected = { label, _ ->
-                labelTV.text = label
-                resolveMissingFields(onAllResolved)
-                labels.add(Pair(recordingStartTime, label))
-            })
-        } else if (!isPersonSelected) {
-            showPersonDialog(cancellable = false, onSelected = { person ->
-                personTV.text = person
-                resolveMissingFields(onAllResolved)
-            })
-        } else {
-            onAllResolved()
-        }
-    }
-
-    private fun moveTempFiles(person: String, recordingEndTime: Long) {
-        val keys = tempRecordingMap.keys.asIterable()
-        for (timestamp in keys) {
-            val recordingFiles = tempRecordingMap[timestamp]
-            val destFileDir = getRecordingFileDir(timestamp)
-            destFileDir.mkdirs()
-            for ((deviceAddress, tempFile) in recordingFiles!!) {
-                val destFile = getRecordingFile(destFileDir, deviceAddress)
-                Files.copy(tempFile.toPath(), FileOutputStream(destFile))
-            }
-            val metadataStorage =
-                RecordingMetadataStorage(destFileDir.resolve(GlobalValues.METADATA_JSON_FILENAME))
-            metadataStorage.setData(
-                labels,
-                recordingStartTime,
-                recordingEndTime,
-                person,
-                tempSensorMacMap
-            )
-
-            onRecordingDone?.let { it(Recording(destFileDir, metadataStorage)) }
-        }
-        tempRecordingMap.clear()
+        return personText != ""
     }
 
     fun setOnRecordingDone(onRecordingDone: (Recording) -> Unit) {
@@ -270,3 +276,185 @@ class LoggingManager(
         this.onRecordingStarted = onRecordingStarted
     }
 }
+
+/**
+ * Represents a currently running recording, consisting of loggers for multiple sensors which write
+ * to multiple temporary files.
+ *
+ * The recording can be started, stopped and saved and labels can be added during the recording
+ */
+class ActiveRecording(val context: Context, private val devices: XSENSArrayList) {
+    private val xsLoggers: ArrayList<XsensDotLogger> = ArrayList()
+    val labels = ArrayList<Pair<Long, String>>()
+    private val sensorMacToTagMap = mutableMapOf<String, String>()
+    private val tempSensorFiles = arrayListOf<Pair<String, File>>()
+
+    private lateinit var recordingStartTime: LocalDateTime
+    private var recordingEndTime: LocalDateTime? = null
+
+    var recording: Recording? = null
+        private set
+
+    fun start() {
+        recordingStartTime = LocalDateTime.now()
+        startXSensLoggers()
+    }
+
+    fun start(initialLabel: String) {
+        start()
+        addLabel(0, initialLabel)
+    }
+
+    fun stop() {
+        recordingEndTime = LocalDateTime.now()
+        stopXSensLoggers()
+    }
+
+    fun save(person: String) {
+        assert(recordingEndTime != null)
+
+        moveTempFiles(person, recordingEndTime!!.toSonarLong())
+    }
+
+    fun getLoggerForAddress(address: String): XsensDotLogger? {
+        return xsLoggers.find { logger -> logger.filename.contains(address) }
+    }
+
+    fun hasLoggerForAddress(address: String): Boolean {
+        return getLoggerForAddress(address) != null
+    }
+
+    fun isRunning(): Boolean {
+        return recordingEndTime == null
+    }
+
+    /**
+     * Adds the label to the list of labels and returns the position
+     */
+    fun addLabel(timestamp: Long, label: String): Int {
+        // If its the first label, it has to start at recordingStartTime
+        val actualTimestamp = if (labels.isEmpty()) recordingStartTime.toSonarLong() else timestamp
+        labels.add(Pair(actualTimestamp, label))
+        return labels.size - 1
+    }
+
+    private fun startXSensLoggers() {
+        // Start measuring for all connected sensors
+        val fileDir = LogIOHelper.getTempRecordingDir(context)
+        for (device in devices.getConnected()) {
+            // Store the Tag and MAC address for saving the mapping to JSON
+            sensorMacToTagMap[device.address] = device.tag
+            startXSensLogger(device, fileDir)
+        }
+    }
+
+    private fun startXSensLogger(device: XsensDotDevice, fileDir: File) {
+        device.measurementMode = GlobalValues.MEASUREMENT_MODE
+        device.startMeasuring()
+
+        val file = LogIOHelper.getUniqueFile(fileDir, device.address)
+        tempSensorFiles.add(Pair(device.address, file))
+        xsLoggers.add(
+            createXSensLogger(file, device)
+        )
+    }
+
+    /**
+     * Returns a correctly configured XsensDotLogger
+     */
+    private fun createXSensLogger(file: File, device: XsensDotDevice): XsensDotLogger {
+        return XsensDotLogger(
+            this.context,
+            XsensDotLogger.TYPE_CSV,
+            GlobalValues.MEASUREMENT_MODE,
+            file.absolutePath,
+            device.address,
+            device.firmwareVersion,
+            device.isSynced,
+            device.currentOutputRate,
+            null as String?,
+            "appVersion",
+            0
+        )
+    }
+
+    private fun stopXSensLoggers() {
+        for (logger in xsLoggers) {
+            logger.stop()
+        }
+        for (device in devices.getConnected()) {
+            device.stopMeasuring()
+        }
+    }
+
+    /**
+     * Stores all temporary recording files and writes the metadata file.
+     */
+    private fun moveTempFiles(person: String, recordingEndTime: Long) {
+        val recordingFiles = tempSensorFiles
+
+        val destFileDir = LogIOHelper.createRecordingFileDir(context, recordingStartTime)
+        LogIOHelper.moveTempFilesToFinalDirectory(destFileDir, recordingFiles)
+
+        val metadataStorage =
+            RecordingMetadataStorage(destFileDir.resolve(GlobalValues.METADATA_JSON_FILENAME))
+        metadataStorage.setData(
+            labels,
+            recordingStartTime.toSonarLong(),
+            recordingEndTime,
+            person,
+            sensorMacToTagMap
+        )
+
+        recording = Recording(destFileDir, metadataStorage)
+    }
+}
+
+/**
+ * Helper object for IO access to the recording files
+ */
+object LogIOHelper {
+    fun moveTempFilesToFinalDirectory(
+        destFileDir: File,
+        recordings: ArrayList<Pair<String, File>>,
+    ) {
+        for ((deviceAddress, tempFile) in recordings) {
+            val destFile = getRecordingFile(destFileDir, deviceAddress)
+            Files.copy(tempFile.toPath(), FileOutputStream(destFile))
+        }
+    }
+
+    fun createRecordingFileDir(context: Context, time: LocalDateTime): File {
+        val timeStr = time.toSonarString()
+
+        val dir = GlobalValues.getSensorRecordingsBaseDir(context)
+            .resolve(PreferencesHelper.getRecordingsSubDir(context))
+            .resolve(timeStr)
+
+        // assume this completes successful or the app crashes (but recording is lost anyway)
+        dir.mkdirs()
+
+        return dir
+    }
+
+    private fun getRecordingFile(fileDir: File, deviceAddress: String): File {
+        return fileDir.resolve("${escapeFilename(deviceAddress)}.csv")
+    }
+
+    private fun escapeFilename(name: String): String {
+        return name.replace("\\W+".toRegex(), "-")
+    }
+
+    fun getUniqueFile(fileDir: File, deviceAddress: String): File {
+        return fileDir.resolve("${System.currentTimeMillis()}_$deviceAddress.csv")
+    }
+
+    fun getTempRecordingDir(context: Context): File {
+        val fileDir = GlobalValues.getSensorRecordingsTempDir(context)
+        fileDir.mkdirs()
+        return fileDir
+    }
+}
+
+fun LocalDateTime.toSonarLong() = this.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli()
+fun LocalDateTime.toSonarString() = this.toSonarLong().toString()
