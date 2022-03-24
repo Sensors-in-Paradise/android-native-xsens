@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.R
 
 @SuppressLint("NotifyDataSetChanged")
-class RecordingsUploaderDialog(activity: Activity, uploader: OwnCloudRecordingsUploader) : AlertDialog(activity) {
+class RecordingsUploaderDialog(activity: Activity, uploader: DavCloudRecordingsUploader) : AlertDialog(activity) {
     val context = activity
 
     private val recordings = uploader.recordingUiItems

@@ -3,7 +3,7 @@ package sensors_in_paradise.sonar.uploader
 import androidx.annotation.UiThread
 import java.io.File
 
-interface OwnCloudClientInterface {
+interface DavCloudClientInterface {
     @UiThread
     fun onDirCreated(dirPath: String, localReferenceDir: File?)
     @UiThread

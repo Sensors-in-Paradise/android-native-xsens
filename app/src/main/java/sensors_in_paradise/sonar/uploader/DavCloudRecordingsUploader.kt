@@ -9,14 +9,14 @@ import sensors_in_paradise.sonar.MessageDialog
 import sensors_in_paradise.sonar.page2.RecordingDataManager
 import java.io.File
 
-class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: RecordingDataManager) :
-    OwnCloudClientInterface {
+class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: RecordingDataManager) :
+    DavCloudClientInterface {
     val context: Context = activity
     var onItemChanged: ((recording: RecordingUIItem) -> Unit)? = null
     var onAllItemsFinishedWork: (() -> Unit)? = null
-    private val ownCloudMetadata =
-        LocalOwnCloudMetadataStorage(activity, GlobalValues.getSensorRecordingsBaseDir(context))
-    private val ownCloud = OwnCloudClient(activity, this)
+    private val davCloudMetadata =
+        LocalDavCloudMetadataStorage(activity, GlobalValues.getSensorRecordingsBaseDir(context))
+    private val davCloud = DavCloudClient(activity, this)
     val recordingUiItems = RecordingUIItemArrayList()
     private val dirCreationRequests = mutableSetOf<File>()
     init {
@@ -25,11 +25,11 @@ class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
     fun reloadRecordings() {
         recordingUiItems.clear()
         for (recording in recordingsManager.recordingsList) {
-            val recording = RecordingUIItem(recording, ownCloudMetadata.localUploadedFilesBaseDir)
+            val recording = RecordingUIItem(recording, davCloudMetadata.localUploadedFilesBaseDir)
 
             for (file in recording.filesAndDirsToBeUploaded) {
                 val isUploaded =
-                    if (file.isFile) ownCloudMetadata.isFileUploaded(file) else ownCloudMetadata.isDirCreated(
+                    if (file.isFile) davCloudMetadata.isFileUploaded(file) else davCloudMetadata.isDirCreated(
                         file
                     )
                 recording.setStatusOfFileOrDir(
@@ -59,16 +59,16 @@ class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
     }
 
     private fun uploadRecording(recording: RecordingUIItem) {
-        if (ownCloudMetadata.isDirCreated(recording.dir)) {
+        if (davCloudMetadata.isDirCreated(recording.dir)) {
             uploadFilesOfRecording(recording)
         } else {
             for (dir in recording.dirsToBeCreated) {
-                val isCreated = ownCloudMetadata.isDirCreated(dir)
+                val isCreated = davCloudMetadata.isDirCreated(dir)
                 val isCreationAlreadyRequested = dirCreationRequests.contains(dir)
                 if (!isCreated && !isCreationAlreadyRequested) {
                     dirCreationRequests.add(dir)
                     recording.setStatusOfFileOrDir(dir, UploadStatus.UPLOADING)
-                    ownCloud.createDir(ownCloudMetadata.getRelativePath(dir), dir)
+                    davCloud.createDir(davCloudMetadata.getRelativePath(dir), dir)
                     break
                 }
             }
@@ -78,16 +78,16 @@ class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
 
     private fun uploadFilesOfRecording(recording: RecordingUIItem) {
         for (file in recording.filesToBeUploaded) {
-            if (!ownCloudMetadata.isFileUploaded(file)) {
-                Log.d("OWNCLOUD", "Uploading file: ${file.name}")
+            if (!davCloudMetadata.isFileUploaded(file)) {
+                Log.d("DAVCLOUD", "Uploading file: ${file.name}")
                 recording.setStatusOfFileOrDir(file, UploadStatus.UPLOADING)
-                ownCloud.uploadFile(
+                davCloud.uploadFile(
                     file,
-                    ownCloudMetadata.getRelativePath(file),
+                    davCloudMetadata.getRelativePath(file),
                     MediaType.CSV_UTF_8
                 )
             } else {
-                // Log.d("OWNCLOUD", "File already uploaded: ${file.name}")
+                // Log.d("DAVCLOUD", "File already uploaded: ${file.name}")
                 recording.setStatusOfFileOrDir(file, UploadStatus.UPLOADED)
             }
             onItemChanged?.let { it(recording) }
@@ -95,8 +95,8 @@ class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
     }
 
     override fun onDirCreated(dirPath: String, localReferenceDir: File?) {
-        Log.d("OWNCLOUD", "Dir created: $dirPath")
-        ownCloudMetadata.setDirCreated(localReferenceDir!!)
+        Log.d("DAVCLOUD", "Dir created: $dirPath")
+        davCloudMetadata.setDirCreated(localReferenceDir!!)
         val recordings = recordingUiItems.getRecordingsInDir(localReferenceDir)
         for (recording in recordings) {
             recording.setStatusOfFileOrDir(localReferenceDir, UploadStatus.UPLOADED)
@@ -107,7 +107,7 @@ class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
     }
 
     override fun onDirCreationFailed(dirPath: String, localReferenceDir: File?, e: Exception) {
-        Log.e("OWNCLOUD", "Dir creation failed: ${e.message}")
+        Log.e("DAVCLOUD", "Dir creation failed: ${e.message}")
         val recordings = recordingUiItems.getRecordingsInDir(localReferenceDir!!)
         for (recording in recordings) {
             if (recording.getStatusOfFileOrDir(localReferenceDir) != UploadStatus.UPLOADED) {
@@ -119,15 +119,15 @@ class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
     }
 
     override fun onFileUploaded(localFile: File, remoteFilePath: String) {
-        Log.d("OWNCLOUD", "File Uploaded: $remoteFilePath")
-        ownCloudMetadata.setFileUploaded(localFile)
+        Log.d("DAVCLOUD", "File Uploaded: $remoteFilePath")
+        davCloudMetadata.setFileUploaded(localFile)
         val recording = recordingUiItems.getByRecordingDir(localFile.parentFile!!)!!
         recording.setStatusOfFileOrDir(localFile, UploadStatus.UPLOADED)
         onRecordingStatusChanged(recording)
     }
 
     override fun onFileUploadFailed(localFile: File, filePath: String, e: Exception) {
-        Log.e("OWNCLOUD", "Dir creation failed: ${e.message}")
+        Log.e("DAVCLOUD", "Dir creation failed: ${e.message}")
 
         val recording = recordingUiItems.getByRecordingDir(localFile.parentFile!!)!!
         recording.error = e
