@@ -15,7 +15,7 @@ class StickmanDialog(context: Context) {
 
         val root = LayoutInflater.from(context).inflate(R.layout.stickman_dialog, null)
         val stickmanView = root.findViewById<Render3DView>(R.id.stickmanView)
-        
+
 
 
         builder.setView(root)
