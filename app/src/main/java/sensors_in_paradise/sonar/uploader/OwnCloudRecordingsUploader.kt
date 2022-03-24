@@ -135,9 +135,8 @@ class OwnCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
         onRecordingStatusChanged(recording)
     }
 
-    override fun onCredentialsNotAvailable() {
-        MessageDialog(context, "Owncloud credentials are not available. " +
-                "Please add apikeys.properties file to project root. (Ask Tobi)")
+    override fun onCredentialsNotAvailable(e: java.lang.Exception) {
+        MessageDialog(context, e.message?:"Credentials are not available")
     }
 
     private fun onRecordingStatusChanged(recording: RecordingUIItem) {

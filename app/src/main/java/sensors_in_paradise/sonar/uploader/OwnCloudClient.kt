@@ -6,6 +6,7 @@ import com.google.common.net.MediaType
 import com.thegrizzlylabs.sardineandroid.Sardine
 import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine
 import sensors_in_paradise.sonar.BuildConfig
+import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.ExecutorService
@@ -15,17 +16,19 @@ class OwnCloudClient(val activity: Activity, val callback: OwnCloudClientInterfa
     val context: Context = activity
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
     private val sardine: Sardine = OkHttpSardine()
-    private val baseUrl = BuildConfig.OWNCLOUD_BASEURL
-    private val credentialsAvailable = BuildConfig.OWNCLOUD_CREDENTIALS_AVAILABLE
+    private val baseUrl = PreferencesHelper.getWebDAVUrl(context)
+    private val user = PreferencesHelper.getWebDAVUser(context)
+    private val token = PreferencesHelper.getWebDAVToken(context)
+    private val credentialsAvailable =token.isNotEmpty() && baseUrl.isNotEmpty() && user.isNotEmpty()
     private val credentialsNotAvailableException =
-        Exception("Owncloud credentials are not available. " +
-                "Please add apikeys.properties file to project root. (Ask Tobi)")
+        Exception("WebDAV cloud credentials (token, url or username) are not available. " +
+                "Please visit the app settings and make sure these are not empty (especially the token must be filled in once).")
 
     init {
         if (credentialsAvailable) {
-            sardine.setCredentials(BuildConfig.OWNCLOUD_USER, BuildConfig.OWNCLOUD_TOKEN)
+            sardine.setCredentials(user, token)
         } else {
-            callback.onCredentialsNotAvailable()
+            callback.onCredentialsNotAvailable(credentialsNotAvailableException)
         }
     }
 

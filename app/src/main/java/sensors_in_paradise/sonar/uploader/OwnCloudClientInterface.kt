@@ -13,5 +13,5 @@ interface OwnCloudClientInterface {
     @UiThread
     fun onFileUploadFailed(localFile: File, filePath: String, e: Exception)
     @UiThread
-    fun onCredentialsNotAvailable()
+    fun onCredentialsNotAvailable(e: Exception)
 }

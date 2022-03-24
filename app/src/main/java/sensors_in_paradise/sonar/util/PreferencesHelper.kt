@@ -29,5 +29,23 @@ class PreferencesHelper private constructor() {
                 context.getString(R.string.default_recordings_subdir)
             )!!
         }
+        fun getWebDAVUrl(context: Context): String {
+            return getSharedPreferences(context).getString(
+                "cloudBaseURL",
+                context.getString(R.string.default_webdav_cloud_url)
+            )!!
+        }
+        fun getWebDAVUser(context: Context): String {
+            return getSharedPreferences(context).getString(
+                "cloudWebDAVUserName",
+                context.getString(R.string.default_webdav_username)
+            )!!
+        }
+        fun getWebDAVToken(context: Context): String {
+            return getSharedPreferences(context).getString(
+                "cloudWebDavToken",
+                ""
+            )!!
+        }
     }
 }

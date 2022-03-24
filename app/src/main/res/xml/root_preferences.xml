@@ -47,4 +47,28 @@
             android:title="Recordings subdirectory"
             android:summary="Choose the name of the subdirectory in which recordings should be stored. This directory will then also be mirrored in the cloud on upload."/>
     </PreferenceCategory>
+    <PreferenceCategory app:title="Cloud">
+        <EditTextPreference
+            android:defaultValue="@string/default_webdav_cloud_url"
+            android:key="cloudBaseURL"
+            android:selectAllOnFocus="false"
+            android:singleLine="true"
+            android:title="WebDAV URL"
+            android:summary="The base url for the WebDAV cloud you want to upload your files to"/>
+        <EditTextPreference
+            android:defaultValue="@string/default_webdav_username"
+            android:key="cloudWebDAVUserName"
+            android:selectAllOnFocus="false"
+            android:singleLine="true"
+            android:title="WebDAV user name"
+            android:summary="The user name for logging into your WebDAV cloud account"/>
+        <EditTextPreference
+            android:defaultValue=""
+            android:key="cloudWebDavToken"
+            android:selectAllOnFocus="false"
+            android:singleLine="true"
+            android:title="WebDAV token"
+            android:summary="The token for logging into your WebDAV cloud account"/>
+    </PreferenceCategory>
+
 </PreferenceScreen>

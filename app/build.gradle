@@ -6,12 +6,6 @@ apply plugin: 'kotlin-android-extensions'
 // Apply the Crashlytics Gradle plugin
 apply plugin: 'com.google.firebase.crashlytics'
 
-def apikeyPropertiesFile = rootProject.file("apikey.properties")
-def apikeyProperties = new Properties()
-def apiKeysAvailable = apikeyPropertiesFile.exists()
-if(apiKeysAvailable) {
-    apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
-}
 android {
     compileSdkVersion 31
     //buildToolsVersion "29.0.2"
@@ -24,10 +18,6 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("boolean", "OWNCLOUD_CREDENTIALS_AVAILABLE", apiKeysAvailable.toString())
-        buildConfigField("String", "OWNCLOUD_USER", apiKeysAvailable?apikeyProperties['OWNCLOUD_USER']:'"unknown"')
-        buildConfigField("String", "OWNCLOUD_TOKEN", apiKeysAvailable?apikeyProperties['OWNCLOUD_TOKEN']:'"unknown"')
-        buildConfigField("String", "OWNCLOUD_BASEURL", apiKeysAvailable?apikeyProperties['OWNCLOUD_BASEURL']:'"unknown"')
     }
 
     buildTypes {
