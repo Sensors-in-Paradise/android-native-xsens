@@ -18,7 +18,6 @@ class PersistentCategoriesDialog(
     val context: Context,
     title: String,
     storageFile: File,
-    cancellable: Boolean = true,
     defaultItems: LinkedHashMap<String, String>,
     callback: (value: String) -> Unit = {},
 ) {
@@ -48,7 +47,6 @@ class PersistentCategoriesDialog(
         }
 
         dialog.setOnShowListener {
-            dialog.setCancelable(cancellable)
             val button: Button =
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             button.isEnabled = false
@@ -60,7 +58,8 @@ class PersistentCategoriesDialog(
         }
     }
 
-    fun show() {
+    fun show(cancelable: Boolean = true) {
+        dialog.setCancelable(cancelable)
         dialog.show()
     }
 

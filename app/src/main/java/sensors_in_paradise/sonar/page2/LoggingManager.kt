@@ -165,7 +165,7 @@ class LoggingManager(
         } else {
             activeRecording!!.start()
             showActivityDialog(
-                cancellable = false,
+                cancelable = false,
                 onSelected = this::updateSelectedLabel
             )
         }
@@ -201,12 +201,12 @@ class LoggingManager(
 
     private fun resolveMissingFields(onAllResolved: () -> Unit) {
         if (!isLabelSelected()) {
-            showActivityDialog(cancellable = false, onSelected = { label, _ ->
+            showActivityDialog(cancelable = false, onSelected = { label, _ ->
                 updateSelectedLabel(label, 0)
                 resolveMissingFields(onAllResolved)
             })
         } else if (!isPersonSelected()) {
-            showPersonDialog(cancellable = false, onSelected = { person ->
+            showPersonDialog(cancelable = false, onSelected = { person ->
                 updateSelectedPerson(person)
                 resolveMissingFields(onAllResolved)
             })
@@ -225,7 +225,7 @@ class LoggingManager(
 
     private fun showActivityDialog(
         onSelected: (value: String, openedTimestamp: Long) -> Unit,
-        cancellable: Boolean? = true
+        cancelable: Boolean? = true
     ) {
         openedTimestamp = LocalDateTime.now().toSonarLong()
 
@@ -236,22 +236,21 @@ class LoggingManager(
                 GlobalValues.getActivityLabelsJSONFile(context),
                 defaultItems = GlobalValues.DEFINED_ACTIVITIES,
                 callback = { value -> onSelected(value, getCurrentOpenedTimestamp()) },
-                cancellable = cancellable ?: true
             )
         }
-        categoriesDialog?.show()
+        categoriesDialog?.show(cancelable?: true)
     }
 
     private fun showPersonDialog(
         onSelected: (value: String) -> Unit,
-        cancellable: Boolean? = true
+        cancelable: Boolean? = true
     ) {
         PersistentStringArrayDialog(
             context,
             "Select a Person",
             GlobalValues.getPeopleJSONFile(context),
             defaultItem = GlobalValues.UNKNOWN_PERSON,
-            callback = onSelected, cancellable = cancellable ?: true
+            callback = onSelected, cancellable = cancelable ?: true
         )
     }
 
