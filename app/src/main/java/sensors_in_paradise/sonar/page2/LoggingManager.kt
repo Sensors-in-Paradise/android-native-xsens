@@ -140,7 +140,7 @@ class LoggingManager(
             Toast.makeText(
                 context,
                 "Only $numConnected out of $VALID_SENSOR_NUM devices are connected!",
-                Toast.LENGTH_SHORT
+                Toast.LENGTH_LONG
             ).show()
         }
         return true
