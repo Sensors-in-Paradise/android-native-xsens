@@ -140,7 +140,7 @@ class LoggingManager(
             Toast.makeText(
                 context,
                 "Only $numConnected out of $VALID_SENSOR_NUM devices are connected!",
-                Toast.LENGTH_SHORT
+                Toast.LENGTH_LONG
             ).show()
         }
         return true
@@ -183,7 +183,8 @@ class LoggingManager(
     }
 
     private fun stopLogging() {
-        assert(activeRecording != null)
+        if (activeRecording == null) return
+
         val activeRecording = activeRecording!!
         activeRecording.stop()
 
@@ -197,6 +198,20 @@ class LoggingManager(
             this.activeRecording = null
             labelTV.text = ""
         }
+    }
+
+    /**
+     * Stops and saves the current recording immediately. Different to `stopLogging` the user is not
+     * asked for input if values are missing.
+     */
+    fun stopLoggingImmediately() {
+        if (!isLabelSelected()) {
+            updateSelectedLabel(GlobalValues.NULL_ACTIVITY, 0)
+        }
+        if (!isPersonSelected()) {
+            updateSelectedPerson(GlobalValues.UNKNOWN_PERSON)
+        }
+        stopLogging()
     }
 
     private fun resolveMissingFields(onAllResolved: () -> Unit) {

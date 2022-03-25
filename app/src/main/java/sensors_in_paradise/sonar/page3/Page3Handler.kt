@@ -214,6 +214,10 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     override fun activityResumed() {
     }
 
+    override fun activityWillDestroy() {
+        // Nothing to do
+    }
+
     override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
 
         numConnectedDevices = devices.getConnected().size
@@ -235,6 +239,6 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
-        // TODO("Not yet implemented")
+        // Nothing to do (?)
     }
 }

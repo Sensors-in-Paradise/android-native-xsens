@@ -8,4 +8,6 @@ interface PageInterface {
     fun activityCreated(activity: Activity)
     @UiThread
     fun activityResumed()
+    @UiThread
+    fun activityWillDestroy()
 }

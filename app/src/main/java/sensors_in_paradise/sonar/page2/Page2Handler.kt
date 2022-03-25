@@ -78,6 +78,10 @@ class Page2Handler(
     override fun activityResumed() {
     }
 
+    override fun activityWillDestroy() {
+        loggingManager.stopLoggingImmediately()
+    }
+
     override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
         numConnectedDevices = devices.getConnected().size
         loggingManager.handleConnectionStateChange(deviceAddress, connected)
