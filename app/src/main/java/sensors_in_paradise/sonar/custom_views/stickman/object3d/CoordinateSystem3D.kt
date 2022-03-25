@@ -39,12 +39,18 @@ class CoordinateSystem3D  : LineObject3D(
     override fun getVectorPaint(): Paint {
         return vectorPaint
     }
-
+    private val textPaint = Paint(0).apply{
+        color=Color.WHITE
+        
+    }
     override fun draw(canvas: Canvas, projectPoint: (p: Vec4) -> PointF) {
         sensorBoundingBox.draw(canvas, projectPoint)
         super.draw(canvas, projectPoint)
 
-
+        canvas.apply{
+            drawText("x: ${vertices[2].x} y: ${vertices[2].y} z: ${vertices[2].z}",width-300f,10f, textPaint)
+            drawText("x: ${linesToDraw[1].second.x} y: ${linesToDraw[1].second.y} z: ${linesToDraw[1].second.z}",width-300f,40f, textPaint)
+        }
     }
 
     companion object {

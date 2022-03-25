@@ -61,6 +61,8 @@ class Render3DView(context: Context, attrs: AttributeSet?) : View(context, attrs
                 obj.draw(canvas, this@Render3DView::project3DPoint)
             }
         }
+        //TODO: Remove Log
+        Log.d("3D_BUMMS - Render3DView", "onDraw")
         lastTimeDrawn = System.currentTimeMillis()
     }
 

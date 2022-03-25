@@ -15,7 +15,7 @@ class Cube : LineObject3D(arrayOf(lbb, lbf, ltb, ltf, rbb, rbf, rtb, rtf)) {
         strokeWidth = 5f
     }
     private val scaleMatrix = Matrix4x4().apply { scale(3f, 3f, 3f) }
-    // lbb for left-bottom-back
+
 
 
     override fun get3DLinesToDraw(): Array<Pair<Vec4, Vec4>> {
@@ -33,6 +33,7 @@ class Cube : LineObject3D(arrayOf(lbb, lbf, ltb, ltf, rbb, rbf, rtb, rtf)) {
         return vectorPaint
     }
     companion object{
+        // lbb for left-bottom-back
         private val lbb = Vec4(-0.5f, 0f, 0.5f)
         private val lbf = Vec4(-0.5f, 0f, -0.5f)
         private val ltb = Vec4(-0.5f, 1f, 0.5f)
@@ -42,5 +43,4 @@ class Cube : LineObject3D(arrayOf(lbb, lbf, ltb, ltf, rbb, rbf, rtb, rtf)) {
         private val rtb = Vec4(0.5f, 1f, 0.5f)
         private val rtf = Vec4(0.5f, 1f, -0.5f)
     }
-
 }
