@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.page2
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
@@ -159,6 +160,7 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
     /**
      * Search functionality
      */
+    @SuppressLint("NotifyDataSetChanged")
     fun filter(text: String) {
         filterText = text
         notifyDataSetChanged()

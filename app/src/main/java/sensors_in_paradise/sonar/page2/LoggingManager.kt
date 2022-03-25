@@ -2,7 +2,10 @@ package sensors_in_paradise.sonar.page2
 
 import android.content.Context
 import android.os.SystemClock
-import android.widget.*
+import android.util.Log
+import android.widget.Chronometer
+import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
@@ -18,7 +21,6 @@ import java.io.FileOutputStream
 import java.nio.file.Files
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.*
 
 const val VALID_SENSOR_NUM = 5
 
@@ -35,7 +37,7 @@ class LoggingManager(
     private var onRecordingDone: ((Recording) -> Unit)? = null
     private var onRecordingStarted: (() -> Unit)? = null
 
-    private val activitiesAdapter = ActivitiesAdapter(arrayListOf())
+    private val activitiesAdapter = ActivitiesAdapter(arrayListOf(), this)
 
     private var activeRecording: ActiveRecording? = null
 
@@ -288,6 +290,21 @@ class LoggingManager(
 
     fun setOnRecordingStarted(onRecordingStarted: () -> Unit) {
         this.onRecordingStarted = onRecordingStarted
+    }
+
+    fun editActivityLabel(position: Int, activities: java.util.ArrayList<Pair<Long, String>>) {
+        showActivityDialog(
+            cancelable = true,
+            onSelected = { value: String, _ ->
+                val timestamp = activities[position].first
+                activities[position] = Pair(timestamp, value)
+                activitiesAdapter.setActivities(activities)
+            }
+        )
+        Log.d(
+            "LoggingManager",
+            "changed activity label to: " + activities[position] + " at index " + position.toString()
+        )
     }
 }
 
