@@ -4,18 +4,19 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.TextView
-import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 
-class ActivitiesAdapter(private var activities: java.util.ArrayList<Pair<Long, String>>) :
+class ActivitiesAdapter(
+    private var activities: java.util.ArrayList<Pair<Long, String>>,
+    private var loggingManager: LoggingManager
+) :
     RecyclerView.Adapter<ActivitiesAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val activityEditText: EditText = view.findViewById(R.id.edit_activity_recordingActivityItem)
+        val activityTV: TextView = view.findViewById(R.id.tv_activity_recordingActivityItem)
         val startTimeTV: TextView = view.findViewById(R.id.tv_startTime_recordingActivityItem)
     }
 
@@ -38,12 +39,10 @@ class ActivitiesAdapter(private var activities: java.util.ArrayList<Pair<Long, S
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val activity = activities[position]
-        viewHolder.activityEditText.setText(activity.second)
+        viewHolder.activityTV.text = activity.second
         viewHolder.startTimeTV.text = getStartTimeAsString(activity)
-
-        viewHolder.activityEditText.addTextChangedListener { text ->
-            activities[position] = Pair(activity.first, text.toString())
-            notifyItemChanged(position)
+        viewHolder.activityTV.setOnClickListener {
+            loggingManager.editActivityLabel(position, activities)
         }
     }
 
