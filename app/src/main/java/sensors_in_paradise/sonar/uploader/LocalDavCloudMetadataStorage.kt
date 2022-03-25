@@ -6,8 +6,8 @@ import org.json.JSONObject
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
 
-class LocalOwnCloudMetadataStorage(context: Context, val localUploadedFilesBaseDir: File) :
-    JSONStorage(File(context.dataDir, "ownCloudMetadata.json")) {
+class LocalDavCloudMetadataStorage(context: Context, val localUploadedFilesBaseDir: File) :
+    JSONStorage(File(context.dataDir, "davCloudMetadata.json")) {
     private lateinit var uploadedFilesAndDirsObj: JSONObject
     override fun onFileNewlyCreated() {
         uploadedFilesAndDirsObj = JSONObject()
@@ -33,7 +33,7 @@ class LocalOwnCloudMetadataStorage(context: Context, val localUploadedFilesBaseD
         return dirOrFile.absolutePath.removePrefix(localUploadedFilesBaseDir.absolutePath)
     }
     private fun setDirCreated(dirPath: String) {
-        val path = OwnCloudClient.normalizePath(dirPath).removeSuffix("/")
+        val path = DavCloudClient.normalizePath(dirPath).removeSuffix("/")
         val dirs = path.split("/")
         var dirObj = uploadedFilesAndDirsObj
         for (dir in dirs) {
@@ -48,7 +48,7 @@ class LocalOwnCloudMetadataStorage(context: Context, val localUploadedFilesBaseD
     }
 
     private fun setFileUploaded(dirPath: String, fileName: String) {
-        val path = OwnCloudClient.normalizePath(dirPath).removeSuffix("/")
+        val path = DavCloudClient.normalizePath(dirPath).removeSuffix("/")
         val dirs = path.split("/")
         var dirObj = uploadedFilesAndDirsObj
         for (dir in dirs) {
@@ -73,7 +73,7 @@ class LocalOwnCloudMetadataStorage(context: Context, val localUploadedFilesBaseD
     }
 
     private fun isFileUploaded(dirPath: String, fileName: String): Boolean {
-        val path = OwnCloudClient.normalizePath(dirPath).removeSuffix("/")
+        val path = DavCloudClient.normalizePath(dirPath).removeSuffix("/")
         val dirs = path.split("/")
         var dirObj = uploadedFilesAndDirsObj
 
@@ -91,7 +91,7 @@ class LocalOwnCloudMetadataStorage(context: Context, val localUploadedFilesBaseD
         return doesJSONArrayContain(array, fileName)
     }
     private fun isDirUploaded(dirPath: String): Boolean {
-        val path = OwnCloudClient.normalizePath(dirPath).removeSuffix("/")
+        val path = DavCloudClient.normalizePath(dirPath).removeSuffix("/")
         val dirs = path.split("/")
         var dirObj = uploadedFilesAndDirsObj
 

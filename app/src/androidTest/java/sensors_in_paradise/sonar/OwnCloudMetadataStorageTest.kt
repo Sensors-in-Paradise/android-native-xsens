@@ -4,7 +4,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import junit.framework.TestCase.*
 import org.junit.Before
 import org.junit.Test
-import sensors_in_paradise.sonar.uploader.LocalOwnCloudMetadataStorage
+import sensors_in_paradise.sonar.uploader.LocalDavCloudMetadataStorage
 import java.io.File
 
 class OwnCloudMetadataStorageTest {
@@ -17,7 +17,7 @@ class OwnCloudMetadataStorageTest {
 
     @Test
     fun simpleFileSettersTest() {
-        val storage = LocalOwnCloudMetadataStorage(appContext, baseDir)
+        val storage = LocalDavCloudMetadataStorage(appContext, baseDir)
         val testFile = File(baseDir, "test.txt")
         assertFalse(storage.isFileUploaded(testFile))
         storage.setFileUploaded(testFile)
@@ -26,7 +26,7 @@ class OwnCloudMetadataStorageTest {
     }
     @Test
     fun deepFileSettersTest() {
-        val storage = LocalOwnCloudMetadataStorage(appContext, baseDir)
+        val storage = LocalDavCloudMetadataStorage(appContext, baseDir)
         val testFile = File(baseDir.resolve("fancyDir").resolve("deeperDir"), "test.txt")
         assertFalse(storage.isFileUploaded(testFile))
         storage.setFileUploaded(testFile)
@@ -35,7 +35,7 @@ class OwnCloudMetadataStorageTest {
     }
     @Test
     fun simpleDirSettersTest() {
-        val storage = LocalOwnCloudMetadataStorage(appContext, baseDir)
+        val storage = LocalDavCloudMetadataStorage(appContext, baseDir)
         val testDir = File(baseDir, "test")
 
         assertFalse(storage.isDirCreated(testDir))
@@ -45,7 +45,7 @@ class OwnCloudMetadataStorageTest {
     }
     @Test
     fun deepDirSettersTest() {
-        val storage = LocalOwnCloudMetadataStorage(appContext, baseDir)
+        val storage = LocalDavCloudMetadataStorage(appContext, baseDir)
         val testDir = File(baseDir.resolve("childA").resolve("deepChild"), "deepestChild")
 
         assertFalse(storage.isDirCreated(testDir))
@@ -55,7 +55,7 @@ class OwnCloudMetadataStorageTest {
     }
     @Test
     fun storageTest() {
-        val storageA = LocalOwnCloudMetadataStorage(appContext, baseDir)
+        val storageA = LocalDavCloudMetadataStorage(appContext, baseDir)
         val testDir = File(baseDir.resolve("childA").resolve("deepChild"), "deepestChild")
 
         assertFalse(storageA.isDirCreated(testDir))
@@ -65,7 +65,7 @@ class OwnCloudMetadataStorageTest {
         assertFalse(storageA.isFileUploaded(testFile))
         storageA.setFileUploaded(testFile)
 
-        val storageB = LocalOwnCloudMetadataStorage(appContext, baseDir)
+        val storageB = LocalDavCloudMetadataStorage(appContext, baseDir)
         assertTrue(storageB.isDirCreated(testDir))
         assertTrue(storageB.isFileUploaded(testFile))
 

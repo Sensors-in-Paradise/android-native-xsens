@@ -17,14 +17,14 @@ import sensors_in_paradise.sonar.page2.Page2Handler
 import sensors_in_paradise.sonar.page2.RecordingDataManager
 import sensors_in_paradise.sonar.page3.Page3Handler
 import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
-import sensors_in_paradise.sonar.uploader.OwnCloudRecordingsUploader
+import sensors_in_paradise.sonar.uploader.DavCloudRecordingsUploader
 import sensors_in_paradise.sonar.util.PreferencesHelper
 
 class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
 
     private lateinit var switcher: ViewAnimator
     private lateinit var tabLayout: TabLayout
-    private lateinit var ownCloudUploader: OwnCloudRecordingsUploader
+    private lateinit var davCloudUploader: DavCloudRecordingsUploader
     private lateinit var recordingsManager: RecordingDataManager
 
     private val pageHandlers = ArrayList<PageInterface>()
@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
         }
         supportActionBar?.setBackgroundDrawable(ColorDrawable(getColor(R.color.colorPrimary)))
 
-        ownCloudUploader = OwnCloudRecordingsUploader(this, recordingsManager)
+        davCloudUploader = DavCloudRecordingsUploader(this, recordingsManager)
 
         // Force crashlytics to be enabled (we might want to disable it in debug mode / ...)
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
     }
 
     fun onFileUploadMenuItemClicked(ignored: MenuItem) {
-        RecordingsUploaderDialog(this, ownCloudUploader).show()
+        RecordingsUploaderDialog(this, davCloudUploader).show()
     }
 
     fun onSettingsMenuItemClicked(ignored: MenuItem) {
