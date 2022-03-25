@@ -44,7 +44,11 @@ abstract class Object3D(val vertices:Array<Vec4>, var onObjectChanged: OnObjectC
 
     fun resetToDefaultState(){
         for (i in vertices.indices){
-            vertices[i] = defaultVertices[i].clone()
+            // TODO: put these operations as an assign function into VecX for more generic and write tests!
+            vertices[i].x = defaultVertices[i].x
+            vertices[i].y = defaultVertices[i].y
+            vertices[i].z = defaultVertices[i].z
+            vertices[i].w = defaultVertices[i].w
         }
         notifyVerticesChanged()
     }

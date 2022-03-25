@@ -18,7 +18,6 @@ class CoordinateSystem3D  : LineObject3D(
         Pair(vertices[0], vertices[3]),
     )
 
-
     private val linePaint = Paint(0).apply {
         color = Color.WHITE
         strokeWidth = 6f
@@ -48,8 +47,10 @@ class CoordinateSystem3D  : LineObject3D(
         super.draw(canvas, projectPoint)
 
         canvas.apply{
+            // TODO: remove
             drawText("x: ${vertices[2].x} y: ${vertices[2].y} z: ${vertices[2].z}",width-300f,10f, textPaint)
             drawText("x: ${linesToDraw[1].second.x} y: ${linesToDraw[1].second.y} z: ${linesToDraw[1].second.z}",width-300f,40f, textPaint)
+            drawText("vertices[0] === linesToDraw[0].first: ${vertices[0] === linesToDraw[0].first}",width-300f,80f, textPaint)
         }
     }
 

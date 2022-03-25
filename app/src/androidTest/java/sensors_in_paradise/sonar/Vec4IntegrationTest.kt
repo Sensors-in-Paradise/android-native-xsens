@@ -15,7 +15,7 @@ class Vec4IntegrationTest {
         Assert.assertEquals(0.5f, v[0])
         Assert.assertEquals(21f, v[1])
         Assert.assertEquals(10f, v[2])
-        Assert.assertEquals(0f, v[3])
+        Assert.assertEquals(1f, v[3])
     }
     @Test
     fun timesAssignMatrixTest() {
@@ -26,6 +26,16 @@ class Vec4IntegrationTest {
         Assert.assertEquals(1f, v[0])
         Assert.assertEquals(21f, v[1])
         Assert.assertEquals(10f, v[2])
-        Assert.assertEquals(0f, v[3])
+        Assert.assertEquals(1f, v[3])
     }
+    @Test
+    fun timesAssignMatrixReferenceTest() {
+        val m = Matrix4x4().apply { scale(2f, 1f, 1f) }
+        val v = Vec4(0.5f, 21f, 10f)
+        val b = v
+        v *= m
+
+        assert(b===v)
+    }
+
 }
