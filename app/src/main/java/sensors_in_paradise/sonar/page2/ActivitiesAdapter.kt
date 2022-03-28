@@ -9,7 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 
-class ActivitiesAdapter(private var activities: java.util.ArrayList<Pair<Long, String>>) :
+class ActivitiesAdapter(
+    var activities: java.util.ArrayList<Pair<Long, String>>,
+    private var loggingManager: LoggingManager
+) :
     RecyclerView.Adapter<ActivitiesAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -18,13 +21,13 @@ class ActivitiesAdapter(private var activities: java.util.ArrayList<Pair<Long, S
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setActivities(newList: ArrayList<Pair<Long, String>>) {
+    fun setAllActivities(newList: ArrayList<Pair<Long, String>>) {
         activities = newList
         notifyDataSetChanged()
     }
 
     fun unlinkActivitiesList() {
-        setActivities(arrayListOf())
+        setAllActivities(arrayListOf())
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
@@ -38,6 +41,10 @@ class ActivitiesAdapter(private var activities: java.util.ArrayList<Pair<Long, S
         val activity = activities[position]
         viewHolder.activityTV.text = activity.second
         viewHolder.startTimeTV.text = getStartTimeAsString(activity)
+
+        viewHolder.activityTV.setOnClickListener {
+            loggingManager.editActivityLabel(position)
+        }
     }
 
     override fun getItemCount() = activities.size

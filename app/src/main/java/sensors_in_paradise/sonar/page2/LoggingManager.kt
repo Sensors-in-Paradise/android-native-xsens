@@ -2,7 +2,9 @@ package sensors_in_paradise.sonar.page2
 
 import android.content.Context
 import android.os.SystemClock
-import android.widget.*
+import android.widget.Chronometer
+import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
@@ -18,7 +20,6 @@ import java.io.FileOutputStream
 import java.nio.file.Files
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.*
 
 const val VALID_SENSOR_NUM = 5
 
@@ -32,15 +33,18 @@ class LoggingManager(
     private val personTV: TextView,
     activitiesRV: RecyclerView
 ) {
+
     private var onRecordingDone: ((Recording) -> Unit)? = null
     private var onRecordingStarted: (() -> Unit)? = null
 
-    private val activitiesAdapter = ActivitiesAdapter(arrayListOf())
+    private val activitiesAdapter = ActivitiesAdapter(arrayListOf(), this)
 
     private var activeRecording: ActiveRecording? = null
 
     private var categoriesDialog: PersistentCategoriesDialog? = null
+    private var changeCategoriesDialog: PersistentCategoriesDialog? = null
     private var openedTimestamp: Long = 0
+    private var positionToChange: Int = 0
 
     init {
         activitiesRV.adapter = activitiesAdapter
@@ -103,7 +107,6 @@ class LoggingManager(
                        context,
                        "The Device ${it.name} was disconnected!"
                    )
-
                    stopLogging()
                }
            }
@@ -159,7 +162,7 @@ class LoggingManager(
         startUITimer()
 
         activeRecording = ActiveRecording(context, devices)
-        activitiesAdapter.setActivities(activeRecording!!.labels)
+        activitiesAdapter.setAllActivities(activeRecording!!.labels)
         if (isLabelSelected()) {
             activeRecording!!.start(labelTV.text.toString())
         } else {
@@ -234,6 +237,10 @@ class LoggingManager(
         return openedTimestamp
     }
 
+    private fun getPositionToChange(): Int {
+        return positionToChange
+    }
+
     // /////////////////////////////
     // ///////// DIALOGS ///////////
     // /////////////////////////////
@@ -254,6 +261,22 @@ class LoggingManager(
             )
         }
         categoriesDialog?.show(cancelable ?: true)
+    }
+
+    private fun showChangeActivityDialog(
+        onSelected: (value: String, openedTimestamp: Long) -> Unit,
+        cancelable: Boolean? = true
+    ) {
+        if (changeCategoriesDialog == null) {
+            changeCategoriesDialog = PersistentCategoriesDialog(
+                context,
+                "Select an activity label",
+                GlobalValues.getActivityLabelsJSONFile(context),
+                defaultItems = GlobalValues.DEFINED_ACTIVITIES,
+                callback = { value -> onSelected(value, getCurrentOpenedTimestamp()) },
+            )
+        }
+        changeCategoriesDialog?.show(cancelable ?: true)
     }
 
     private fun showPersonDialog(
@@ -289,6 +312,17 @@ class LoggingManager(
     fun setOnRecordingStarted(onRecordingStarted: () -> Unit) {
         this.onRecordingStarted = onRecordingStarted
     }
+
+    fun editActivityLabel(position: Int) {
+        positionToChange = position
+        showChangeActivityDialog(
+            cancelable = true,
+            onSelected = { value: String, _ ->
+                this.activeRecording?.changeLabel(getPositionToChange(), value)
+                this.activitiesAdapter.notifyItemChanged(getPositionToChange())
+            }
+        )
+    }
 }
 
 /**
@@ -299,7 +333,7 @@ class LoggingManager(
  */
 class ActiveRecording(val context: Context, private val devices: XSENSArrayList) {
     private val xsLoggers: ArrayList<XsensDotLogger> = ArrayList()
-    val labels = ArrayList<Pair<Long, String>>()
+    var labels = ArrayList<Pair<Long, String>>()
     private val sensorMacToTagMap = mutableMapOf<String, String>()
     private val tempSensorFiles = arrayListOf<Pair<String, File>>()
 
@@ -421,6 +455,10 @@ class ActiveRecording(val context: Context, private val devices: XSENSArrayList)
         )
 
         recording = Recording(destFileDir, metadataStorage)
+    }
+
+    fun changeLabel(position: Int, value: String) {
+        labels[position] = labels[position].copy(second = value)
     }
 }
 
