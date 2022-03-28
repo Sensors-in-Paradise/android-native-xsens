@@ -10,7 +10,7 @@ import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 
 class ActivitiesAdapter(
-    private var activities: java.util.ArrayList<Pair<Long, String>>,
+    var activities: java.util.ArrayList<Pair<Long, String>>,
     private var loggingManager: LoggingManager
 ) :
     RecyclerView.Adapter<ActivitiesAdapter.ViewHolder>() {
@@ -21,13 +21,13 @@ class ActivitiesAdapter(
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setActivities(newList: ArrayList<Pair<Long, String>>) {
+    fun setAllActivities(newList: ArrayList<Pair<Long, String>>) {
         activities = newList
         notifyDataSetChanged()
     }
 
     fun unlinkActivitiesList() {
-        setActivities(arrayListOf())
+        setAllActivities(arrayListOf())
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
@@ -43,7 +43,7 @@ class ActivitiesAdapter(
         viewHolder.startTimeTV.text = getStartTimeAsString(activity)
 
         viewHolder.activityTV.setOnClickListener {
-            loggingManager.editActivityLabel(position, activities)
+            loggingManager.editActivityLabel(position)
         }
     }
 

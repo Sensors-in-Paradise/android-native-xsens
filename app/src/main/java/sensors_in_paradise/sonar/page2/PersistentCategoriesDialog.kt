@@ -7,12 +7,11 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
+import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.R
 import java.io.File
 import java.util.*
-import kotlin.collections.LinkedHashMap
-import androidx.core.widget.addTextChangedListener
 
 class PersistentCategoriesDialog(
     val context: Context,
