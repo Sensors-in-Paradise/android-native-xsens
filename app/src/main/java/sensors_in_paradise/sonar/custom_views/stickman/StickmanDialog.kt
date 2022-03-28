@@ -18,24 +18,24 @@ class StickmanDialog(context: Context) {
         val root = LayoutInflater.from(context).inflate(R.layout.stickman_dialog, null)
         val stickmanView = root.findViewById<Render3DView>(R.id.stickmanView)
         stickmanView.apply {
-            addObject3D(Plane().apply{scale(1f, 0f, 1f)})
-            addObject3D( Stickman())
+            addObject3D(Plane().apply { scale(1f, 0f, 1f) })
+            addObject3D(Stickman())
         }
 
         stickmanView.camera.center.apply {
-            x=0f
-            y=0.5f
-            z=0f
+            x = 0f
+            y = 0.5f
+            z = 0f
         }
         stickmanView.camera.eye.apply {
-            x=0f
-            y=1f
-            z=-2f
+            x = 0f
+            y = 1f
+            z = -2f
         }
         stickmanView.camera.up.apply {
-            x=0f
-            y=1f
-            z=0f
+            x = 0f
+            y = 1f
+            z = 0f
         }
         stickmanView.camera.notifyCameraChanged()
         stickmanView.onObjectChanged()

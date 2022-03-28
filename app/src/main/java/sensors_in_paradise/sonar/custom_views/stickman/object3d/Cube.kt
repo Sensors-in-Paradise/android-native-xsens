@@ -2,7 +2,6 @@ package sensors_in_paradise.sonar.custom_views.stickman.object3d
 
 import android.graphics.Color
 import android.graphics.Paint
-import sensors_in_paradise.sonar.custom_views.stickman.math.Matrix4x4
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 
 class Cube : LineObject3D(arrayOf(lbb, lbf, ltb, ltf, rbb, rbf, rtb, rtf)) {
@@ -14,10 +13,6 @@ class Cube : LineObject3D(arrayOf(lbb, lbf, ltb, ltf, rbb, rbf, rtb, rtf)) {
         color = Color.WHITE
         strokeWidth = 5f
     }
-    private val scaleMatrix = Matrix4x4().apply { scale(3f, 3f, 3f) }
-
-
-
     override fun get3DLinesToDraw(): Array<Pair<Vec4, Vec4>> {
         return arrayOf(
             Pair(lbb, lbf), Pair(lbf, rbf), Pair(rbf, rbb), Pair(rbb, lbb),
@@ -25,14 +20,14 @@ class Cube : LineObject3D(arrayOf(lbb, lbf, ltb, ltf, rbb, rbf, rtb, rtf)) {
             Pair(lbb, ltb), Pair(lbf, ltf), Pair(rbf, rtf), Pair(rbb, rtb))
     }
 
-    override fun getLinePaint(): Paint {
+    override fun getLinePaint(lineIndex: Int?): Paint {
         return linePaint
     }
 
     override fun getVectorPaint(): Paint {
         return vectorPaint
     }
-    companion object{
+    companion object {
         // lbb for left-bottom-back
         private val lbb = Vec4(-0.5f, 0f, 0.5f)
         private val lbf = Vec4(-0.5f, 0f, -0.5f)

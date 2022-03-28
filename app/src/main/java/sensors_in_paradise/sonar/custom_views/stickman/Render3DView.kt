@@ -17,7 +17,7 @@ import sensors_in_paradise.sonar.custom_views.stickman.object3d.OnObjectChangedI
 class Render3DView(context: Context, attrs: AttributeSet?) : View(context, attrs), OnObjectChangedInterface {
     constructor(context: Context) : this(context, null)
 
-    val objects3DToDraw = ArrayList<Object3D>()//arrayListOf(/*Plane().apply{scale(1f, 0f, 1f)}, Cube(), Stickman()*/)
+    val objects3DToDraw = ArrayList<Object3D>() // arrayListOf(/*Plane().apply{scale(1f, 0f, 1f)}, Cube(), Stickman()*/)
     var enableYRotation = false
     var showFPS = false
     val camera = Camera(Vec3(0f, 0.5f, 0f), Vec3(0f, 0.5f, -2f), Vec3(0f, 1f, 0f), this::onSceneChanged)
@@ -48,7 +48,7 @@ class Render3DView(context: Context, attrs: AttributeSet?) : View(context, attrs
     private val textBounds = Rect()
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if(showFPS) {
+        if (showFPS) {
             val fps = 1000 / (System.currentTimeMillis() - lastTimeDrawn)
             val fpsText = "FPS: $fps"
             fpsTextPaint.getTextBounds(fpsText, 0, fpsText.length, textBounds)
@@ -61,8 +61,6 @@ class Render3DView(context: Context, attrs: AttributeSet?) : View(context, attrs
                 obj.draw(canvas, this@Render3DView::project3DPoint)
             }
         }
-        //TODO: Remove Log
-        Log.d("3D_BUMMS - Render3DView", "onDraw")
         lastTimeDrawn = System.currentTimeMillis()
     }
 
@@ -82,7 +80,7 @@ class Render3DView(context: Context, attrs: AttributeSet?) : View(context, attrs
     private var lastEventX = 0f
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if(enableYRotation) {
+        if (enableYRotation) {
             if (event != null) {
                 if (event.action == MotionEvent.ACTION_MOVE) {
                     val x = event.getAxisValue(MotionEvent.AXIS_X)
@@ -106,16 +104,13 @@ class Render3DView(context: Context, attrs: AttributeSet?) : View(context, attrs
             animationThread.interrupt()
         }
     }
-    fun addObject3D(obj: Object3D){
+    fun addObject3D(obj: Object3D) {
         objects3DToDraw.add(obj)
         obj.onObjectChanged = this
         onSceneChanged()
     }
 
-
     override fun onObjectChanged() {
         onSceneChanged()
-        //TODO: Remove Log
-        Log.d("3D_BUMMS - Render3DView", "scene changed")
     }
 }

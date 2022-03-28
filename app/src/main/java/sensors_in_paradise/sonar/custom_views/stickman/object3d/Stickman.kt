@@ -49,7 +49,7 @@ class Stickman : LineObject3D(
         return linesToDraw
     }
 
-    override fun getLinePaint(): Paint {
+    override fun getLinePaint(lineIndex: Int?): Paint {
         return linePaint
     }
 
@@ -74,7 +74,7 @@ class Stickman : LineObject3D(
         private val leftWrist = Vec4(-0.5f, +0.5f, 0f)
         private val rightWrist = Vec4(0.5f, +0.5f, 0f)
         private val throatTop = Vec4(0f, +1.1f, 0f)
-        private val head = Cube().apply{
+        private val head = Cube().apply {
             scale(0.15f, 0.2f, 0.15f)
             translate(0f, 1.1f, 0f)
         }

@@ -1,7 +1,6 @@
 package sensors_in_paradise.sonar.custom_views.stickman.object3d
 
 import android.graphics.Color
-import sensors_in_paradise.sonar.custom_views.stickman.math.Matrix4x4
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 
 class Plane : TriangleObject3D(arrayOf(lbb, lbf, rbb, rbf), Color.LTGRAY) {

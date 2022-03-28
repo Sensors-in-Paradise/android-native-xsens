@@ -103,7 +103,7 @@ class Matrix4x4(private val data: FloatArray) {
     fun rotate(degrees: Float, axisFactors: Vec3) {
         Matrix.rotateM(data, 0, degrees, axisFactors.x, axisFactors.y, axisFactors.z)
     }
-    fun rotateEuler( x: Float, y: Float, z: Float) {
+    fun rotateEuler(x: Float, y: Float, z: Float) {
         Matrix.setRotateEulerM(data, 0, x, y, z)
     }
 

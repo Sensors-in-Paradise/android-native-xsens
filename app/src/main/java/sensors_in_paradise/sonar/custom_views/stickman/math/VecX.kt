@@ -51,4 +51,9 @@ abstract class VecX<T : VecBase>(values: FloatArray, size: Int = values.size) : 
         res /= a
         return res
     }
+    fun assign(a: VecBase) {
+        for (i in 0 until a.size.coerceAtMost(size)) {
+             this[i] = a[i]
+        }
+    }
 }

@@ -1,14 +1,11 @@
 package sensors_in_paradise.sonar.custom_views.stickman.object3d
 
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.PointF
+import android.graphics.*
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 
-class CoordinateSystem3D  : LineObject3D(
+class CoordinateSystem3D : LineObject3D(
     arrayOf(
-       origin, xAxis, yAxis, zAxis
+        origin, xAxis, yAxis, zAxis
     ) + sensorBoundingBox.vertices
 ) {
 
@@ -17,11 +14,24 @@ class CoordinateSystem3D  : LineObject3D(
         Pair(vertices[0], vertices[2]),
         Pair(vertices[0], vertices[3]),
     )
-
-    private val linePaint = Paint(0).apply {
-        color = Color.WHITE
+    private val boldTypeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+    private val linePaints = arrayOf(Paint(0).apply {
+        color = Color.RED
         strokeWidth = 6f
-    }
+        textSize = 40f
+        typeface = boldTypeface
+    }, Paint(0).apply {
+        color = Color.GREEN
+        strokeWidth = 6f
+        textSize = 40f
+        typeface = boldTypeface
+    },
+        Paint(0).apply {
+            color = Color.BLUE
+            strokeWidth = 6f
+            textSize = 40f
+            typeface = boldTypeface
+        })
     private val vectorPaint = Paint(0).apply {
         color = Color.GREEN
         strokeWidth = 9f
@@ -31,26 +41,37 @@ class CoordinateSystem3D  : LineObject3D(
         return linesToDraw
     }
 
-    override fun getLinePaint(): Paint {
-        return linePaint
+    override fun getLinePaint(lineIndex: Int?): Paint {
+        return linePaints[lineIndex!!]
     }
 
     override fun getVectorPaint(): Paint {
         return vectorPaint
     }
-    private val textPaint = Paint(0).apply{
-        color=Color.WHITE
-        
-    }
+
     override fun draw(canvas: Canvas, projectPoint: (p: Vec4) -> PointF) {
         sensorBoundingBox.draw(canvas, projectPoint)
         super.draw(canvas, projectPoint)
 
-        canvas.apply{
-            // TODO: remove
-            drawText("x: ${vertices[2].x} y: ${vertices[2].y} z: ${vertices[2].z}",width-300f,10f, textPaint)
-            drawText("x: ${linesToDraw[1].second.x} y: ${linesToDraw[1].second.y} z: ${linesToDraw[1].second.z}",width-300f,40f, textPaint)
-            drawText("vertices[0] === linesToDraw[0].first: ${vertices[0] === linesToDraw[0].first}",width-300f,80f, textPaint)
+        canvas.apply {
+            drawText(
+                "x",
+                width - 60f,
+                40f,
+                linePaints[0]
+            )
+            drawText(
+                "y",
+                width - 40f,
+                40f,
+                linePaints[1]
+            )
+            drawText(
+                "z",
+                width - 20f,
+                40f,
+                linePaints[2]
+            )
         }
     }
 
@@ -59,8 +80,8 @@ class CoordinateSystem3D  : LineObject3D(
         private val xAxis = Vec4(1f, 0f, 0f)
         private val yAxis = Vec4(0f, 1f, 0f)
         private val zAxis = Vec4(0f, 0f, 1f)
-        private val sensorBoundingBox= Cube().apply{
-            //translate(0.5f, 0f, 0.5f)
+        private val sensorBoundingBox = Cube().apply {
+            // translate(0.5f, 0f, 0.5f)
             scale(0.5f, 1f, 0.5f)
         }
     }

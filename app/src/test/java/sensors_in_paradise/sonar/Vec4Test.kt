@@ -237,7 +237,7 @@ class Vec4Test {
     fun vecIsReferenceInPairTest() {
         val p1 = Vec4(1f, 0.5f, 2f, 23f)
         val p2 = Vec4(1f, 0.5f, 2f, 23f)
-        val arr = arrayOf(Pair(p1,p2))
+        val arr = arrayOf(Pair(p1, p2))
 
         arr[0].second.x += 1f
         assertEquals(2f, p2.x)

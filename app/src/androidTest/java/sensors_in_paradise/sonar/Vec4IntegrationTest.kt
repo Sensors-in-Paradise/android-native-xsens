@@ -35,7 +35,6 @@ class Vec4IntegrationTest {
         val b = v
         v *= m
 
-        assert(b===v)
+        assert(b === v)
     }
-
 }

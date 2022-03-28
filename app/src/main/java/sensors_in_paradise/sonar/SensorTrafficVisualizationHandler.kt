@@ -2,14 +2,11 @@ package sensors_in_paradise.sonar
 
 import android.app.Activity
 import android.content.Context
-import android.text.Layout
 import android.util.Log
-import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.LinearLayout
 import androidx.annotation.UiThread
-import androidx.core.graphics.rotationMatrix
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.utils.XsensDotParser
 import sensors_in_paradise.sonar.custom_views.SensorDataTrafficIndicatorView
@@ -23,7 +20,7 @@ class SensorTrafficVisualizationHandler(
     private val indicator: SensorDataTrafficIndicatorView,
     private val orientationRenderViewsLL: LinearLayout
 ) : ConnectionInterface {
-    private val context: Context =  activity
+    private val context: Context = activity
     private var connectedSensorAddressIndexMap = mutableMapOf<String, Int>()
     private val orientationRenderViews = ArrayList<Render3DView>()
     override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
@@ -50,9 +47,7 @@ class SensorTrafficVisualizationHandler(
             activity.runOnUiThread { indicator.setSensorDataReceived(index)
                 orientationRenderViews[index].objects3DToDraw[0].apply {
                     resetToDefaultState()
-                    rotate(eulerAngles[0].toFloat(), eulerAngles[1].toFloat(), eulerAngles[2].toFloat())
-                    // TODO: remove log
-                    Log.d("3D_BUMMS - x", this.vertices[1].x.toString())
+                    rotate(eulerAngles[1].toFloat(), eulerAngles[2].toFloat(), eulerAngles[0].toFloat())
                 }
             }
         } else {
@@ -66,11 +61,11 @@ class SensorTrafficVisualizationHandler(
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {}
 
     @UiThread
-    fun initializeOrientationRenderViews(connectedDevices: XSENSArrayList){
+    fun initializeOrientationRenderViews(connectedDevices: XSENSArrayList) {
         orientationRenderViewsLL.removeAllViews()
         orientationRenderViews.clear()
 
-        for(i in 0 until connectedDevices.size){
+        for (i in 0 until connectedDevices.size) {
             val renderView = Render3DView(context)
             renderView.enableYRotation = true
             renderView.showFPS = true
