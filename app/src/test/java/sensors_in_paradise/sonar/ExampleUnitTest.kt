@@ -13,8 +13,4 @@ class ExampleUnitTest {
     fun addition_isCorrect() {
         Assert.assertEquals(4, (2 + 2).toLong())
     }
-    @Test
-    fun failingTest() {
-        Assert.assertEquals(4, (2 + 1).toLong())
-    }
 }
