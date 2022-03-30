@@ -20,12 +20,19 @@
         custom:indicatorColor="@color/colorPrimary"
         custom:textColor="?android:textColorPrimary" />
 
+    <Button
+        android:id="@+id/btn_expandOrientationVisualization_activityMain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:text="v" />
+
     <LinearLayout
         android:id="@+id/linearLayout_sensorOrientation_activityMain"
         android:layout_width="match_parent"
         android:layout_height="400dp"
-        android:orientation="horizontal">
-    </LinearLayout>
+        android:orientation="horizontal"
+        android:visibility="gone"></LinearLayout>
 
     <android.widget.ViewAnimator
         android:id="@+id/switcher_activity_main"

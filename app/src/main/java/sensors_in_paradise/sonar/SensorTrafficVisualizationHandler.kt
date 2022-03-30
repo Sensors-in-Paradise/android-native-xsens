@@ -3,8 +3,10 @@ package sensors_in_paradise.sonar
 import android.app.Activity
 import android.content.Context
 import android.util.Log
+import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.widget.Button
 import android.widget.LinearLayout
 import androidx.annotation.UiThread
 import com.xsens.dot.android.sdk.events.XsensDotData
@@ -18,11 +20,30 @@ class SensorTrafficVisualizationHandler(
     val activity: Activity,
     private val scannedDevices: XSENSArrayList,
     private val indicator: SensorDataTrafficIndicatorView,
-    private val orientationRenderViewsLL: LinearLayout
+    private val orientationRenderViewsLL: LinearLayout,
+    private val expandOrientationRenderViewsBtn: Button
 ) : ConnectionInterface {
+    private var orientationLLExpanded = false
     private val context: Context = activity
     private var connectedSensorAddressIndexMap = mutableMapOf<String, Int>()
     private val orientationRenderViews = ArrayList<Render3DView>()
+
+    init{
+        expandOrientationRenderViewsBtn.setOnClickListener {
+            orientationLLExpanded = !orientationLLExpanded
+            if (orientationLLExpanded){
+
+                orientationRenderViewsLL.visibility = View.VISIBLE
+                expandOrientationRenderViewsBtn.text = "^"
+            }
+            else{
+                orientationRenderViewsLL.visibility = View.GONE
+                expandOrientationRenderViewsBtn.text = "v"
+            }
+        }
+        //TODO: remove
+        expandOrientationRenderViewsBtn.isEnabled = true
+    }
     override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
         connectedSensorAddressIndexMap.clear()
         val connectedDevices = scannedDevices.getConnectedWithOfflineMetadata()
@@ -37,17 +58,29 @@ class SensorTrafficVisualizationHandler(
         activity.runOnUiThread {
             initializeOrientationRenderViews(connectedDevices)
         }
+        if(connectedDevices.isEmpty()){
+            orientationRenderViewsLL.visibility = View.GONE
+            expandOrientationRenderViewsBtn.isEnabled = false
+        }
+        expandOrientationRenderViewsBtn.isEnabled = !connectedDevices.isEmpty()
     }
 
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
         val index = connectedSensorAddressIndexMap[deviceAddress]
         if (index != null) {
-            val eulerAngles = XsensDotParser.quaternion2Euler(xsensDotData.quat)
+            if (orientationLLExpanded) {
+                val eulerAngles = XsensDotParser.quaternion2Euler(xsensDotData.quat)
 
-            activity.runOnUiThread { indicator.setSensorDataReceived(index)
-                orientationRenderViews[index].objects3DToDraw[0].apply {
-                    resetToDefaultState()
-                    rotate(eulerAngles[1].toFloat(), eulerAngles[2].toFloat(), eulerAngles[0].toFloat())
+                activity.runOnUiThread {
+                    indicator.setSensorDataReceived(index)
+                    orientationRenderViews[index].objects3DToDraw[0].apply {
+                        resetToDefaultState()
+                        rotateEuler(
+                            eulerAngles[1].toFloat(),
+                            eulerAngles[2].toFloat(),
+                            eulerAngles[0].toFloat()
+                        )
+                    }
                 }
             }
         } else {
@@ -69,6 +102,9 @@ class SensorTrafficVisualizationHandler(
             val renderView = Render3DView(context)
             renderView.enableYRotation = true
             renderView.showFPS = true
+            renderView.camera.eye.apply {
+
+            }
             renderView.layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, MATCH_PARENT, 1.0f)
             renderView.addObject3D(CoordinateSystem3D())
             orientationRenderViewsLL.addView(renderView)

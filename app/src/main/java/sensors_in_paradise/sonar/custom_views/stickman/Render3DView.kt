@@ -20,7 +20,7 @@ class Render3DView(context: Context, attrs: AttributeSet?) : View(context, attrs
     val objects3DToDraw = ArrayList<Object3D>() // arrayListOf(/*Plane().apply{scale(1f, 0f, 1f)}, Cube(), Stickman()*/)
     var enableYRotation = false
     var showFPS = false
-    val camera = Camera(Vec3(0f, 0.5f, 0f), Vec3(0f, 0.5f, -2f), Vec3(0f, 1f, 0f), this::onSceneChanged)
+    val camera = Camera(Vec3(0f, 0f, 0f), Vec3(0f, 0f, 2f), Vec3(0f, 1f, 0f), this::onSceneChanged)
     private val projection = Matrix4x4.project(90f, 1f, 0.1f, 4f)
     private val fpsTextPaint = Paint(0).apply {
         color = Color.WHITE
@@ -86,7 +86,9 @@ class Render3DView(context: Context, attrs: AttributeSet?) : View(context, attrs
                     val x = event.getAxisValue(MotionEvent.AXIS_X)
                     val diff = lastEventX - x
                     lastEventX = x
-                    camera.rotateY(diff / 5f)
+                    //camera.rotateY(diff / 5f)
+                    //TODO : remove
+                    (objects3DToDraw[0] ).rotate(0f, diff/5f, 0f)
                     onSceneChanged()
                 }
                 if (event.action == MotionEvent.ACTION_DOWN) {

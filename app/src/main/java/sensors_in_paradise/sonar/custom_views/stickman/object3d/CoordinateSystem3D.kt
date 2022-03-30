@@ -6,7 +6,7 @@ import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 class CoordinateSystem3D : LineObject3D(
     arrayOf(
         origin, xAxis, yAxis, zAxis
-    ) + sensorBoundingBox.vertices
+    ), arrayListOf(sensorBoundingBox)
 ) {
 
     private val linesToDraw = arrayOf(
@@ -49,8 +49,7 @@ class CoordinateSystem3D : LineObject3D(
         return vectorPaint
     }
 
-    override fun draw(canvas: Canvas, projectPoint: (p: Vec4) -> PointF) {
-        sensorBoundingBox.draw(canvas, projectPoint)
+    override fun drawSelf(canvas: Canvas, projectPoint: (p: Vec4) -> PointF) {
         super.draw(canvas, projectPoint)
 
         canvas.apply {
@@ -82,7 +81,8 @@ class CoordinateSystem3D : LineObject3D(
         private val zAxis = Vec4(0f, 0f, 1f)
         private val sensorBoundingBox = Cube().apply {
             // translate(0.5f, 0f, 0.5f)
-            scale(0.5f, 1f, 0.5f)
+            scale(1f, 1f, 1f)
+            translate(0f,-0.5f,0f)
         }
     }
 }

@@ -19,7 +19,7 @@ class Stickman : LineObject3D(
         rightElbow,
         leftWrist,
         rightWrist
-    ) + head.vertices
+    ), arrayListOf(head)
 ) {
 
     private val linesToDraw = arrayOf(
@@ -34,7 +34,6 @@ class Stickman : LineObject3D(
         Pair(rightWrist, rightElbow),
         Pair(backTop, throatTop),
     )
-    private val head = Cube()
 
     private val linePaint = Paint(0).apply {
         color = Color.BLUE
@@ -55,11 +54,6 @@ class Stickman : LineObject3D(
 
     override fun getVectorPaint(): Paint {
         return vectorPaint
-    }
-
-    override fun draw(canvas: Canvas, projectPoint: (p: Vec4) -> PointF) {
-        super.draw(canvas, projectPoint)
-        head.draw(canvas, projectPoint)
     }
 
     companion object {

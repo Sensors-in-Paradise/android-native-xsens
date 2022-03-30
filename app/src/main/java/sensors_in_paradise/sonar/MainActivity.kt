@@ -55,7 +55,8 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
                 this,
                 scannedDevices,
                 findViewById(R.id.sensorDataTrafficIndicator_captureFragment),
-                findViewById(R.id.linearLayout_sensorOrientation_activityMain)
+                findViewById(R.id.linearLayout_sensorOrientation_activityMain),
+                findViewById(R.id.btn_expandOrientationVisualization_activityMain)
             )
         )
         val permissionLauncher = registerForActivityResult(

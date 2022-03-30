@@ -93,15 +93,15 @@ class Matrix4x4(private val data: FloatArray) {
     }
 
     fun rotateY(degrees: Float) {
-        rotate(degrees, Vec3(0f, 1f, 0f))
+        rotate(0f,degrees, 0f)
     }
 
     fun rotateX(degrees: Float) {
-        rotate(degrees, Vec3(1f, 0f, 0f))
+        rotate(degrees, 0f, 0f)
     }
 
-    fun rotate(degrees: Float, axisFactors: Vec3) {
-        Matrix.rotateM(data, 0, degrees, axisFactors.x, axisFactors.y, axisFactors.z)
+    fun rotate(xDegrees: Float, yDegrees: Float,zDegrees: Float) {
+        Matrix.rotateM(data, 0, xDegrees, 1.0f, yDegrees/xDegrees, zDegrees/xDegrees)
     }
     fun rotateEuler(x: Float, y: Float, z: Float) {
         Matrix.setRotateEulerM(data, 0, x, y, z)

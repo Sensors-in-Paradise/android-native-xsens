@@ -31,7 +31,7 @@ abstract class TriangleObject3D(vertices: Array<Vec4>, val fillColor: Int) : Obj
         return result
     }
 
-    override fun draw(canvas: Canvas, projectPoint: (p: Vec4) -> PointF) {
+    override fun drawSelf(canvas: Canvas, projectPoint: (p: Vec4) -> PointF) {
 
         val triangleVertexArray = getTriangleVertexArray(projectPoint)
 

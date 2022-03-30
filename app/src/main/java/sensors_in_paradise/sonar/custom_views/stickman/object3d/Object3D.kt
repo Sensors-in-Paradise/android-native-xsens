@@ -5,7 +5,7 @@ import android.graphics.PointF
 import sensors_in_paradise.sonar.custom_views.stickman.math.Matrix4x4
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 
-abstract class Object3D(val vertices: Array<Vec4>, var onObjectChanged: OnObjectChangedInterface? = null) {
+abstract class Object3D(protected val vertices: Array<Vec4>, private val children: ArrayList<Object3D> = ArrayList(), var onObjectChanged: OnObjectChangedInterface? = null) {
     private val defaultVertices = vertices.map { it.clone() }
 
     fun scale(x: Float, y: Float, z: Float) {
@@ -16,27 +16,42 @@ abstract class Object3D(val vertices: Array<Vec4>, var onObjectChanged: OnObject
         val m = Matrix4x4().apply { translate(x, y, z) }
         applyOnAllVertices(m)
     }
-
-    fun rotate(x: Float, y: Float, z: Float) {
-        val m = Matrix4x4().apply { this.rotateEuler(x, y, z) }
+    fun rotate(xDegrees: Float, yDegrees: Float, zDegrees: Float) {
+        val m = Matrix4x4().apply { this.rotate(xDegrees, yDegrees, zDegrees) }
         applyOnAllVertices(m)
     }
-    fun rotateRadians(x: Float, y: Float, z: Float) {
+    fun rotateEuler(xDegrees: Float, yDegrees: Float, zDegrees: Float) {
+        val m = Matrix4x4().apply { this.rotateEuler(xDegrees, yDegrees, zDegrees) }
+        applyOnAllVertices(m)
+    }
+    fun rotateEulerRadians(x: Float, y: Float, z: Float) {
         val m = Matrix4x4().apply { this.rotateEuler(radiansToDegrees(x), radiansToDegrees(y), radiansToDegrees(z)) }
         applyOnAllVertices(m)
     }
 
-    private val radiansToDegreesFactor = Math.PI.toFloat() / 180f
     private fun radiansToDegrees(radians: Float): Float {
         return (radiansToDegreesFactor * radians)
     }
-    private fun applyOnAllVertices(m: Matrix4x4) {
+    private fun applyOnAllVertices(m: Matrix4x4, applyOnChildren: Boolean=true,shouldNotifyThatVerticesChanged:Boolean = true) {
         for (v in vertices) {
             v *= m
         }
-        notifyVerticesChanged()
+        if(applyOnChildren) {
+            for (child in children) {
+                child.applyOnAllVertices(m, false)
+            }
+        }
+        if(shouldNotifyThatVerticesChanged) {
+            notifyVerticesChanged()
+        }
     }
-    abstract fun draw(canvas: Canvas, projectPoint: (p: Vec4) -> PointF)
+    fun draw(canvas: Canvas, projectPoint: (p: Vec4) -> PointF){
+        drawSelf(canvas, projectPoint)
+        for(child in children){
+            child.draw(canvas, projectPoint)
+        }
+    }
+    protected abstract fun drawSelf(canvas: Canvas, projectPoint: (p: Vec4) -> PointF)
 
     fun notifyVerticesChanged() {
         onObjectChanged?.onObjectChanged()
@@ -47,5 +62,8 @@ abstract class Object3D(val vertices: Array<Vec4>, var onObjectChanged: OnObject
             vertices[i].assign(defaultVertices[i])
         }
         notifyVerticesChanged()
+    }
+    companion object{
+        private const val radiansToDegreesFactor = Math.PI.toFloat() / 180f
     }
 }
