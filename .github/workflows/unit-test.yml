@@ -1,4 +1,4 @@
-name: test
+name: unit-test
 
 # Controls when the workflow will run
 on: [push]

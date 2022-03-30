@@ -1,0 +1,25 @@
+name: instrumented-test
+
+# Controls when the workflow will run
+on: [push]
+
+# Controls what will run
+jobs:
+  #workflow called build checks if project successfully builds
+  build:
+    runs-on: [mac-latest]
+    needs: [unit-test]
+    steps:
+            # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+            - name: Checkout the code
+              uses: actions/checkout@v2
+            - name: Run espresso tests
+              uses: reactivecircus/android-emulator-runner@v2
+              with:
+                api-level: 31
+                script: ./gradlew connectedCheck
+            - name: Upload test report
+              uses: actions/upload-artifact@v2
+              with:
+                name: instrumentation_test_report
+                path: app/build/reports/androidTests/connected/
