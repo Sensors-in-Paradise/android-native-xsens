@@ -7,7 +7,7 @@ on: [push]
 jobs:
   #workflow called build checks if project successfully builds
   build:
-    runs-on: [mac-latest]
+    runs-on: [macos-latest]
     steps:
             # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
             - name: Checkout the code
