@@ -50,7 +50,7 @@ class CoordinateSystem3D : LineObject3D(
     }
 
     override fun drawSelf(canvas: Canvas, projectPoint: (p: Vec4) -> PointF) {
-        super.draw(canvas, projectPoint)
+        super.drawSelf(canvas, projectPoint)
 
         canvas.apply {
             drawText(

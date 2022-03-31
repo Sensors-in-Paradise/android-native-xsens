@@ -88,7 +88,8 @@ class Render3DView(context: Context, attrs: AttributeSet?) : View(context, attrs
                     lastEventX = x
                     //camera.rotateY(diff / 5f)
                     //TODO : remove
-                    (objects3DToDraw[0] ).rotate(0f, diff/5f, 0f)
+                    objects3DToDraw[0].resetToDefaultState(shouldNotifyThatVerticesChanged = false)
+                    (objects3DToDraw[0] ).rotateEuler(0f, x,0f )
                     onSceneChanged()
                 }
                 if (event.action == MotionEvent.ACTION_DOWN) {

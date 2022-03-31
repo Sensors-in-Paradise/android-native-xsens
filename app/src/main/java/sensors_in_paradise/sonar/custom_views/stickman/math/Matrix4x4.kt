@@ -5,10 +5,7 @@ import java.lang.IndexOutOfBoundsException
 
 class Matrix4x4(private val data: FloatArray) {
     constructor() : this(
-        floatArrayOf(1f, 0f, 0f, 0f),
-        floatArrayOf(0f, 1f, 0f, 0f),
-        floatArrayOf(0f, 0f, 1f, 0f),
-        floatArrayOf(0f, 0f, 0f, 1f)
+       FloatArray(16).apply { Matrix.setIdentityM(this, 0) }
     )
 
     constructor(
@@ -38,7 +35,17 @@ class Matrix4x4(private val data: FloatArray) {
             else -> throw IndexOutOfBoundsException("Col-Index must be 0 <= index <= 3")
         }
     }
-
+    override operator fun equals(other: Any?): Boolean {
+        if(other is Matrix4x4){
+            for(i in data.indices){
+                if(other.data[i]!=data[i]){
+                    return false
+                }
+            }
+            return true
+        }
+        return false
+    }
     operator fun get(row: Int, col: Int): Float {
         return data[col * 4 + row]
     }
@@ -93,18 +100,15 @@ class Matrix4x4(private val data: FloatArray) {
     }
 
     fun rotateY(degrees: Float) {
-        rotate(0f,degrees, 0f)
+        rotate(degrees,0f,1f, 0f)
     }
 
     fun rotateX(degrees: Float) {
-        rotate(degrees, 0f, 0f)
+        rotate(degrees,1f, 0f, 0f)
     }
 
-    fun rotate(xDegrees: Float, yDegrees: Float,zDegrees: Float) {
-        Matrix.rotateM(data, 0, xDegrees, 1.0f, yDegrees/xDegrees, zDegrees/xDegrees)
-    }
-    fun rotateEuler(x: Float, y: Float, z: Float) {
-        Matrix.setRotateEulerM(data, 0, x, y, z)
+    fun rotate(degrees: Float, xFactor: Float,yFactor: Float, zFactor:Float) {
+        Matrix.rotateM(data, 0, degrees, xFactor, yFactor, zFactor)
     }
 
     fun scale(x: Float, y: Float, z: Float) {
@@ -157,6 +161,11 @@ class Matrix4x4(private val data: FloatArray) {
         fun project(fovy: Float, aspect: Float, zNear: Float, zFar: Float): Matrix4x4 {
             val data = FloatArray(16)
             Matrix.perspectiveM(data, 0, fovy, aspect, zNear, zFar)
+            return Matrix4x4(data)
+        }
+        fun rotateEuler(xDegrees: Float, yDegrees: Float, zDegrees: Float): Matrix4x4 {
+            val data = FloatArray(16)
+            Matrix.setRotateEulerM(data, 0, xDegrees, yDegrees, zDegrees)
             return Matrix4x4(data)
         }
     }

@@ -1,69 +1,142 @@
 package sensors_in_paradise.sonar.custom_views.stickman.object3d
 
-import android.graphics.Canvas
-import android.graphics.PointF
+import android.graphics.*
 import sensors_in_paradise.sonar.custom_views.stickman.math.Matrix4x4
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
+import kotlin.math.min
 
-abstract class Object3D(protected val vertices: Array<Vec4>, private val children: ArrayList<Object3D> = ArrayList(), var onObjectChanged: OnObjectChangedInterface? = null) {
+abstract class Object3D(
+    protected val vertices: Array<Vec4>,
+    private val children: ArrayList<Object3D> = ArrayList(),
+    var onObjectChanged: OnObjectChangedInterface? = null
+) {
     private val defaultVertices = vertices.map { it.clone() }
+    var drawVertexPositionsForDebugging = false
+    private val vertexPositionsDebuggingHeader = "i_|_x__|_y__|_z__"
+    private val debugTextBounds = Rect().apply {
+        debugTextPaint.getTextBounds(
+            vertexPositionsDebuggingHeader,
+            0,
+            vertexPositionsDebuggingHeader.length,
+            this
+        )
+    }
 
     fun scale(x: Float, y: Float, z: Float) {
         val m = Matrix4x4().apply { scale(x, y, z) }
         applyOnAllVertices(m)
     }
+
     fun translate(x: Float, y: Float, z: Float) {
         val m = Matrix4x4().apply { translate(x, y, z) }
         applyOnAllVertices(m)
     }
-    fun rotate(xDegrees: Float, yDegrees: Float, zDegrees: Float) {
-        val m = Matrix4x4().apply { this.rotate(xDegrees, yDegrees, zDegrees) }
+
+    fun rotate(degrees: Float, xFactor: Float,yFactor: Float, zFactor:Float) {
+        val m = Matrix4x4().apply { this.rotate(degrees,xFactor, yFactor, zFactor) }
         applyOnAllVertices(m)
     }
+
     fun rotateEuler(xDegrees: Float, yDegrees: Float, zDegrees: Float) {
-        val m = Matrix4x4().apply { this.rotateEuler(xDegrees, yDegrees, zDegrees) }
+        val m = Matrix4x4.rotateEuler(xDegrees, yDegrees, zDegrees)
         applyOnAllVertices(m)
     }
+
     fun rotateEulerRadians(x: Float, y: Float, z: Float) {
-        val m = Matrix4x4().apply { this.rotateEuler(radiansToDegrees(x), radiansToDegrees(y), radiansToDegrees(z)) }
-        applyOnAllVertices(m)
+        rotateEuler(
+            radiansToDegrees(x),
+            radiansToDegrees(y),
+            radiansToDegrees(z)
+        )
     }
 
     private fun radiansToDegrees(radians: Float): Float {
         return (radiansToDegreesFactor * radians)
     }
-    private fun applyOnAllVertices(m: Matrix4x4, applyOnChildren: Boolean=true,shouldNotifyThatVerticesChanged:Boolean = true) {
+
+    private fun applyOnAllVertices(
+        m: Matrix4x4,
+        applyOnChildren: Boolean = true,
+        shouldNotifyThatVerticesChanged: Boolean = true
+    ) {
         for (v in vertices) {
             v *= m
         }
-        if(applyOnChildren) {
+        if (applyOnChildren) {
             for (child in children) {
                 child.applyOnAllVertices(m, false)
             }
         }
-        if(shouldNotifyThatVerticesChanged) {
+        if (shouldNotifyThatVerticesChanged) {
             notifyVerticesChanged()
         }
     }
-    fun draw(canvas: Canvas, projectPoint: (p: Vec4) -> PointF){
+
+    private fun drawVertexPositionsForDebugging(canvas: Canvas) {
+        var y = 70f
+        canvas.drawText(
+            vertexPositionsDebuggingHeader,
+            canvas.width - 10f - debugTextBounds.width(),
+            y,
+            debugTextPaint
+        )
+        val f = { x: Float -> String.format("%.2f", x) }
+        val i = { i: Int -> i.toString().padStart(2, ' ') }
+
+        for (index in 0 until min(vertices.size, 99)) {
+            val v = vertices[index]
+            y += debugTextBounds.height()
+            canvas.drawText(
+                "${i(index)}|${f(v.x)}|${f(v.y)}|${f(v.z)}",
+                canvas.width - 10f - debugTextBounds.width(),
+                y,
+                debugTextPaint
+            )
+        }
+    }
+
+    fun draw(canvas: Canvas, projectPoint: (p: Vec4) -> PointF) {
+        if (drawVertexPositionsForDebugging) {
+            drawVertexPositionsForDebugging(canvas)
+        }
         drawSelf(canvas, projectPoint)
-        for(child in children){
+
+        for (child in children) {
             child.draw(canvas, projectPoint)
         }
     }
+
     protected abstract fun drawSelf(canvas: Canvas, projectPoint: (p: Vec4) -> PointF)
 
     fun notifyVerticesChanged() {
         onObjectChanged?.onObjectChanged()
     }
 
-    fun resetToDefaultState() {
+    fun resetToDefaultState(
+        applyOnChildren: Boolean = true,
+        shouldNotifyThatVerticesChanged: Boolean = true
+    ) {
         for (i in vertices.indices) {
             vertices[i].assign(defaultVertices[i])
         }
-        notifyVerticesChanged()
+        if (applyOnChildren) {
+            for (child in children) {
+                child.resetToDefaultState(
+                    applyOnChildren = true,
+                    shouldNotifyThatVerticesChanged = false
+                )
+            }
+        }
+        if (shouldNotifyThatVerticesChanged) {
+            notifyVerticesChanged()
+        }
     }
-    companion object{
+
+    companion object {
         private const val radiansToDegreesFactor = Math.PI.toFloat() / 180f
+        private val debugTextPaint = Paint(0).apply {
+            color = Color.WHITE
+        }
+
     }
 }
