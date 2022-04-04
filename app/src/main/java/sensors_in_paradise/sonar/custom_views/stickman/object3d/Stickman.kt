@@ -6,31 +6,42 @@ import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 
 class Stickman : LineObject3D(
     arrayOf(
-        leftFoot,
-        rightFoot,
-        leftKnee,
-        rightKnee,
-        center,
-        backTop,
-        throatTop,
-        leftElbow,
-        rightElbow,
-        leftWrist,
-        rightWrist
+        leftFoot.clone(),
+        rightFoot.clone(),
+        leftKnee.clone(),
+        rightKnee.clone(),
+        center.clone(),
+        backTop.clone(),
+        throatTop.clone(),
+        leftElbow.clone(),
+        rightElbow.clone(),
+        leftWrist.clone(),
+        rightWrist.clone()
     ), arrayListOf(head)
 ) {
+    private val _leftFoot = vertices[0]
+    private val _rightFoot = vertices[1]
+    private val _leftKnee = vertices[2]
+    private val _rightKnee = vertices[3]
+    private val _center = vertices[4]
+    private val _backTop = vertices[5]
+    private val _leftElbow = vertices[6]
+    private val _rightElbow = vertices[7]
+    private val _leftWrist = vertices[8]
+    private val _rightWrist = vertices[9]
+    private val _throatTop = vertices[10]
 
     private val linesToDraw = arrayOf(
-        Pair(leftFoot, leftKnee),
-        Pair(rightFoot, rightKnee),
-        Pair(leftKnee, center),
-        Pair(rightKnee, center),
-        Pair(backTop, center),
-        Pair(leftElbow, backTop),
-        Pair(rightElbow, backTop),
-        Pair(leftWrist, leftElbow),
-        Pair(rightWrist, rightElbow),
-        Pair(backTop, throatTop),
+        Pair(_leftFoot, _leftKnee),
+        Pair(_rightFoot, _rightKnee),
+        Pair(_leftKnee, _center),
+        Pair(_rightKnee, _center),
+        Pair(_backTop, _center),
+        Pair(_leftElbow, _backTop),
+        Pair(_rightElbow, _backTop),
+        Pair(_leftWrist, _leftElbow),
+        Pair(_rightWrist, _rightElbow),
+        Pair(_backTop, _throatTop),
     )
 
     private val linePaint = Paint(0).apply {
