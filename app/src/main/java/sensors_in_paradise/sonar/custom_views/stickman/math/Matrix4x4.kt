@@ -1,7 +1,6 @@
 package sensors_in_paradise.sonar.custom_views.stickman.math
 
 import android.opengl.Matrix
-import java.lang.IndexOutOfBoundsException
 
 class Matrix4x4(private val data: FloatArray) {
     constructor() : this(
@@ -36,9 +35,9 @@ class Matrix4x4(private val data: FloatArray) {
         }
     }
     override operator fun equals(other: Any?): Boolean {
-        if(other is Matrix4x4){
-            for(i in data.indices){
-                if(other.data[i]!=data[i]){
+        if (other is Matrix4x4) {
+            for (i in data.indices) {
+                if (other.data[i] != data[i]) {
                     return false
                 }
             }
@@ -100,15 +99,16 @@ class Matrix4x4(private val data: FloatArray) {
     }
 
     fun rotateY(degrees: Float) {
-        rotate(degrees,0f,1f, 0f)
+        rotate(degrees, 0f, 1f, 0f)
     }
 
     fun rotateX(degrees: Float) {
-        rotate(degrees,1f, 0f, 0f)
+        rotate(degrees, 1f, 0f, 0f)
     }
 
-    fun rotate(degrees: Float, xFactor: Float,yFactor: Float, zFactor:Float) {
-        Matrix.rotateM(data, 0, degrees, xFactor, yFactor, zFactor)
+    fun rotate(degrees: Float, xFactor: Float, yFactor: Float, zFactor: Float) {
+        // switch z and x so that we get the correct operation for our coordinate system
+        Matrix.rotateM(data, 0, degrees, zFactor, yFactor, xFactor)
     }
 
     fun scale(x: Float, y: Float, z: Float) {
@@ -116,6 +116,10 @@ class Matrix4x4(private val data: FloatArray) {
     }
     fun translate(x: Float, y: Float, z: Float) {
         Matrix.translateM(this.data, 0, x, y, z)
+    }
+
+    override fun hashCode(): Int {
+        return data.contentHashCode()
     }
 
     companion object {
@@ -157,16 +161,27 @@ class Matrix4x4(private val data: FloatArray) {
             )
             return m ?: Matrix4x4(data)
         }
-
+        fun project(m: Matrix4x4, fovy: Float, aspect: Float, zNear: Float, zFar: Float) {
+            Matrix.perspectiveM(m.data, 0, fovy, aspect, zNear, zFar)
+        }
         fun project(fovy: Float, aspect: Float, zNear: Float, zFar: Float): Matrix4x4 {
             val data = FloatArray(16)
             Matrix.perspectiveM(data, 0, fovy, aspect, zNear, zFar)
             return Matrix4x4(data)
         }
-        fun rotateEuler(xDegrees: Float, yDegrees: Float, zDegrees: Float): Matrix4x4 {
+        fun rotate(degrees: Float, x: Float, y: Float, z: Float): Matrix4x4 {
             val data = FloatArray(16)
-            Matrix.setRotateEulerM(data, 0, xDegrees, yDegrees, zDegrees)
+            Matrix.setRotateM(data, 0, degrees, x, y, z)
             return Matrix4x4(data)
+        }
+        fun rotateEuler(xDegrees: Float, yDegrees: Float, zDegrees: Float): Matrix4x4 {
+            // switch z and x so that we get the correct operation for our coordinate system
+            return rotate(xDegrees, 0f, 0f, 1f) * rotate(yDegrees, 0f, 1f, 0f) * rotate(
+                zDegrees,
+                1f,
+                0f,
+                0f
+            ) // Matrix4x4(data)
         }
     }
 }

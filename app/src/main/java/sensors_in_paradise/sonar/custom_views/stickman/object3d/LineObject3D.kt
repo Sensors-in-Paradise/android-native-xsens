@@ -6,9 +6,10 @@ import android.graphics.PointF
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 
 abstract class LineObject3D(
-    vertices: Array<Vec4>,children: ArrayList<Object3D> = ArrayList(),
+    vertices: Array<Vec4>,
+    children: ArrayList<Object3D> = ArrayList(),
     onObjectChanged: OnObjectChangedInterface? = null
-) : Object3D(vertices, children,onObjectChanged) {
+) : Object3D(vertices, children, onObjectChanged) {
     abstract fun getVectorPaint(): Paint
     abstract fun get3DLinesToDraw(): Array<Pair<Vec4, Vec4>>
     abstract fun getLinePaint(lineIndex: Int? = null): Paint
@@ -25,8 +26,6 @@ abstract class LineObject3D(
                 drawCircle(p1.x, p1.y, 4f, vectorPaint)
                 i++
             }
-
         }
-
     }
 }

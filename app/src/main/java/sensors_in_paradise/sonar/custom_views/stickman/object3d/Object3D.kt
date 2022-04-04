@@ -3,11 +3,13 @@ package sensors_in_paradise.sonar.custom_views.stickman.object3d
 import android.graphics.*
 import sensors_in_paradise.sonar.custom_views.stickman.math.Matrix4x4
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.min
 
 abstract class Object3D(
     protected val vertices: Array<Vec4>,
-    private val children: ArrayList<Object3D> = ArrayList(),
+    protected val children: ArrayList<Object3D> = ArrayList(),
     var onObjectChanged: OnObjectChangedInterface? = null
 ) {
     private val defaultVertices = vertices.map { it.clone() }
@@ -22,31 +24,47 @@ abstract class Object3D(
         )
     }
 
-    fun scale(x: Float, y: Float, z: Float) {
+    fun scale(x: Float, y: Float, z: Float, shouldNotifyThatVerticesChanged: Boolean = true) {
         val m = Matrix4x4().apply { scale(x, y, z) }
-        applyOnAllVertices(m)
+        applyOnAllVertices(m, shouldNotifyThatVerticesChanged = shouldNotifyThatVerticesChanged)
     }
 
-    fun translate(x: Float, y: Float, z: Float) {
+    fun translate(x: Float, y: Float, z: Float, shouldNotifyThatVerticesChanged: Boolean = true) {
         val m = Matrix4x4().apply { translate(x, y, z) }
-        applyOnAllVertices(m)
+        applyOnAllVertices(m, shouldNotifyThatVerticesChanged = shouldNotifyThatVerticesChanged)
     }
 
-    fun rotate(degrees: Float, xFactor: Float,yFactor: Float, zFactor:Float) {
-        val m = Matrix4x4().apply { this.rotate(degrees,xFactor, yFactor, zFactor) }
-        applyOnAllVertices(m)
+    fun rotate(
+        degrees: Float,
+        xFactor: Float,
+        yFactor: Float,
+        zFactor: Float,
+        shouldNotifyThatVerticesChanged: Boolean = true
+    ) {
+        val m = Matrix4x4().apply { this.rotate(degrees, xFactor, yFactor, zFactor) }
+        applyOnAllVertices(m, shouldNotifyThatVerticesChanged = shouldNotifyThatVerticesChanged)
     }
 
-    fun rotateEuler(xDegrees: Float, yDegrees: Float, zDegrees: Float) {
+    fun rotateEuler(
+        xDegrees: Float,
+        yDegrees: Float,
+        zDegrees: Float,
+        shouldNotifyThatVerticesChanged: Boolean = true
+    ) {
         val m = Matrix4x4.rotateEuler(xDegrees, yDegrees, zDegrees)
-        applyOnAllVertices(m)
+        applyOnAllVertices(m, shouldNotifyThatVerticesChanged = shouldNotifyThatVerticesChanged)
     }
 
-    fun rotateEulerRadians(x: Float, y: Float, z: Float) {
+    fun rotateEulerRadians(
+        x: Float,
+        y: Float,
+        z: Float,
+        shouldNotifyThatVerticesChanged: Boolean = true
+    ) {
         rotateEuler(
             radiansToDegrees(x),
             radiansToDegrees(y),
-            radiansToDegrees(z)
+            radiansToDegrees(z), shouldNotifyThatVerticesChanged
         )
     }
 
@@ -80,7 +98,7 @@ abstract class Object3D(
             y,
             debugTextPaint
         )
-        val f = { x: Float -> String.format("%.2f", x) }
+        val f = { x: Float -> String.format(Locale.US, "%.2f", x) }
         val i = { i: Int -> i.toString().padStart(2, ' ') }
 
         for (index in 0 until min(vertices.size, 99)) {
@@ -137,6 +155,5 @@ abstract class Object3D(
         private val debugTextPaint = Paint(0).apply {
             color = Color.WHITE
         }
-
     }
 }

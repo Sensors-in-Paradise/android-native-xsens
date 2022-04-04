@@ -8,9 +8,11 @@ class Camera(val center: Vec3, eye: Vec3, val up: Vec3, private val onCameraChan
     val eye = Vec4(eye)
     val lookAtMatrix = Matrix4x4.lookAt(eye, center, up)
 
-    fun rotateY(degrees: Float) {
+    fun rotateY(degrees: Float, shouldNotifyThatCameraChanged: Boolean = true) {
         eye *= Matrix4x4().apply { rotateY(degrees) }
-        notifyCameraChanged()
+        if (shouldNotifyThatCameraChanged) {
+            notifyCameraChanged()
+        }
     }
     fun notifyCameraChanged() {
         Matrix4x4.lookAt(eye.xyz, center, up, lookAtMatrix)

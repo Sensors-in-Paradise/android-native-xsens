@@ -1,9 +1,7 @@
 package sensors_in_paradise.sonar.custom_views.stickman.object3d
 
-import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.PointF
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 
 class Stickman : LineObject3D(

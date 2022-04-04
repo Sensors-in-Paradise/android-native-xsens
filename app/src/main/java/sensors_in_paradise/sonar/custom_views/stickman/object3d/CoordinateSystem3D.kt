@@ -5,8 +5,8 @@ import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 
 class CoordinateSystem3D : LineObject3D(
     arrayOf(
-        origin, xAxis, yAxis, zAxis
-    ), arrayListOf(sensorBoundingBox)
+        origin.clone(), xAxis.clone(), yAxis.clone(), zAxis.clone()
+    )
 ) {
 
     private val linesToDraw = arrayOf(
@@ -79,10 +79,5 @@ class CoordinateSystem3D : LineObject3D(
         private val xAxis = Vec4(1f, 0f, 0f)
         private val yAxis = Vec4(0f, 1f, 0f)
         private val zAxis = Vec4(0f, 0f, 1f)
-        private val sensorBoundingBox = Cube().apply {
-            // translate(0.5f, 0f, 0.5f)
-            scale(1f, 1f, 1f)
-            translate(0f,-0.5f,0f)
-        }
     }
 }

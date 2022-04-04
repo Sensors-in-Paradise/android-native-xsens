@@ -285,29 +285,29 @@ class Matrix4x4Test {
     fun equalityOperatorTest() {
         val m1 = Matrix4x4()
         val m2 = Matrix4x4()
-        assert(m1==m2)
-        m2[2,3] = 34f
-        assertFalse(m1==m2)
-        m1[2,3] = 34f
-        assert(m1==m2)
+        assert(m1 == m2)
+        m2[2, 3] = 34f
+        assertFalse(m1 == m2)
+        m1[2, 3] = 34f
+        assert(m1 == m2)
     }
     @Test
     fun rotateEulerXTest() {
-        val m1 = Matrix4x4.rotateEuler(180f, 0f,0f)
-        val m2 = Matrix4x4().apply { rotate(180f,1f, 0f, 0f) }
-        assert(m1==m2)
+        val m1 = Matrix4x4.rotateEuler(180f, 0f, 0f)
+        val m2 = Matrix4x4().apply { rotate(180f, 1f, 0f, 0f) }
+        assert(m1 == m2)
     }
     @Test
     fun rotateEulerYTest() {
-        val m1 = Matrix4x4.rotateEuler(0f, 180f,0f)
-        val m2 = Matrix4x4().apply { rotate(180f,0f, 1f, 0f) }
-        assert(m1==m2)
+        val m1 = Matrix4x4.rotateEuler(0f, 180f, 0f)
+        val m2 = Matrix4x4().apply { rotate(180f, 0f, 1f, 0f) }
+        assert(m1 == m2)
     }
     @Test
     fun rotateEulerZTest() {
-        val m1 = Matrix4x4.rotateEuler(0f,0f, 180f)
-        val m2 = Matrix4x4().apply { rotate(180f,0f, 0f, 1f) }
-        assert(m1==m2)
+        val m1 = Matrix4x4.rotateEuler(0f, 0f, 180f)
+        val m2 = Matrix4x4().apply { rotate(180f, 0f, 0f, 1f) }
+        assert(m1 == m2)
     }
     @After
     fun cleanUp() {

@@ -9,9 +9,17 @@
         android:title="Item"
         app:showAsAction="ifRoom" />
     <item
+        android:id="@+id/menuItem_orientation_activityMain"
+        android:onClick="onOrientationMenuItemClicked"
+        android:title="Display sensor orientation(s)"
+        android:checkable="true"
+        android:enabled="false"
+        />
+    <item
         android:id="@+id/menuItem_stickman_activityMain"
         android:onClick="onStickmanMenuItemClicked"
-        android:title="Stickman" />
+        android:title="Stickman"
+        android:visible="false"/>
     <item
         android:id="@+id/menuItem_settings_activityMain"
         android:onClick="onSettingsMenuItemClicked"
