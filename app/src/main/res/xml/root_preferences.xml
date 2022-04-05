@@ -46,6 +46,14 @@
             android:singleLine="true"
             android:title="Recordings subdirectory"
             android:summary="Choose the name of the subdirectory in which recordings should be stored. This directory will then also be mirrored in the cloud on upload."/>
+        <SwitchPreferenceCompat
+            app:key="recordWithCamera"
+            app:title="Display camera feed while recording sensors" />
+        <SwitchPreferenceCompat
+            app:dependency="recordWithCamera"
+            app:key="storeRawCameraVideo"
+            app:title="Store camera video "
+            app:summary="Store the raw video from the smartphone camera when recording. "/>
     </PreferenceCategory>
     <PreferenceCategory app:title="Cloud">
         <EditTextPreference

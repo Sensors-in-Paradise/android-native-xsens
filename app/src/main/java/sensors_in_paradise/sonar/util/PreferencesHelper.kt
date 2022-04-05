@@ -51,5 +51,11 @@ class PreferencesHelper private constructor() {
                 ""
             )!!
         }
+        fun shouldRecordWithCamera(context: Context): Boolean {
+            return getSharedPreferences(context).getBoolean("recordWithCamera", false)
+        }
+        fun shouldStoreRawCameraRecordings(context: Context): Boolean {
+            return getSharedPreferences(context).getBoolean("storeRawCameraVideo", false)
+        }
     }
 }

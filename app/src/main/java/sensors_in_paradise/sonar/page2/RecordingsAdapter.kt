@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.page2
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.GlobalValues
+import sensors_in_paradise.sonar.MessageDialog
 import sensors_in_paradise.sonar.R
 import java.text.DateFormat
 import java.util.*
@@ -36,6 +38,7 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager, pri
         return ViewHolder(view)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val recording = dataSet[position]
         val metadata = recording.metadataStorage
@@ -45,17 +48,22 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager, pri
             notifyItemRemoved(index)
         }
 
-        val activityNames =
-            metadata.getActivities().joinToString(", ") { (_, activity) -> activity }
+        val activitiesSummary =
+            metadata.getActivities().joinToString("\n") { (activityStartTime, activity) ->
+                GlobalValues.getDurationAsString(activityStartTime - metadata.getTimeStarted()) + "   " +
+                activity }
+        viewHolder.itemView.setOnClickListener {
+            MessageDialog(context, activitiesSummary)
+        }
         val personName = metadata.getPerson()
-        val activityDuration = metadata.getDuration()
+        val duration = metadata.getDuration()
 
         val start = dateFormat.format(Date(metadata.getTimeStarted()))
-
-        viewHolder.activityTextView.text = activityNames
-        viewHolder.durationTextView.text = "Duration: " + GlobalValues.getDurationAsString(activityDuration)
+        val numActivities = metadata.getActivities().size
+        viewHolder.activityTextView.text = "$numActivities ${if (numActivities == 1) "activity" else "activities"}"
+        viewHolder.durationTextView.text = "Duration: " + GlobalValues.getDurationAsString(duration)
         viewHolder.startTimeTextView.text = "Start: $start"
-        viewHolder.personTextView.text = "Person: " + personName
+        viewHolder.personTextView.text = "Person: $personName"
 
         // Set check file text & color conditionally
         viewHolder.checkFilesTextView.setTextColor(getCheckFileColor(recording))

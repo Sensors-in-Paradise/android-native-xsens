@@ -23,7 +23,7 @@ class PermissionsHelper private constructor() {
             return result
         }
 
-        private fun isPermissionGranted(context: Context, permission: String): Boolean {
+        fun isPermissionGranted(context: Context, permission: String): Boolean {
             return (ContextCompat.checkSelfPermission(
                 context,
                 permission
