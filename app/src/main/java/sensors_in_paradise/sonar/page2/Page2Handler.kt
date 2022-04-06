@@ -2,6 +2,7 @@ package sensors_in_paradise.sonar.page2
 
 import android.app.Activity
 import android.content.Context
+import android.view.SurfaceView
 import android.view.View
 import android.widget.*
 import androidx.core.view.size
@@ -13,6 +14,10 @@ import com.xsens.dot.android.sdk.events.XsensDotData
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
+import sensors_in_paradise.sonar.poseEstimation.CameraProcessing
+import sensors_in_paradise.sonar.poseEstimation.ModelType
+import sensors_in_paradise.sonar.poseEstimation.MoveNet
+import sensors_in_paradise.sonar.poseEstimation.data.Device
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.IOException
 
@@ -72,6 +77,8 @@ class Page2Handler(
         tabLayout.addOnTabSelectedListener(this)
         cameraManager =
             CameraManager(context, activity.findViewById(R.id.previewView_camera_captureFragment))
+
+        createPoseEstimator(context)
     }
 
     private fun initializeLoggingManagerCallbacks() {
@@ -167,5 +174,17 @@ class Page2Handler(
                 tabLayout.removeTab(cameraTab)
             }
         }
+    }
+
+    private fun createPoseEstimator(context: Context) {
+        val modelType = ModelType.LightningF16
+        val targetDevice = Device.GPU
+        // TODO: Replace with actual camera
+        val cameraSource = CameraProcessing(SurfaceView(context))
+
+        val poseDetector = MoveNet.create(context, targetDevice, modelType)
+
+        cameraSource.setDetector(poseDetector)
+
     }
 }

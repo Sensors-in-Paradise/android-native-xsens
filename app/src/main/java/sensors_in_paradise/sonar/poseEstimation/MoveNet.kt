@@ -77,6 +77,8 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
                 ),
                 gpuDelegate
             )
+
+
         }
 
         // default to lightning.

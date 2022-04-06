@@ -80,4 +80,14 @@ class CameraProcessing(private val surfaceView: SurfaceView)
             surfaceView.holder.unlockCanvasAndPost(canvas)
         }
     }
+
+    fun setDetector(detector: PoseDetector) {
+        synchronized(lock) {
+            if (this.detector != null) {
+                this.detector?.close()
+                this.detector = null
+            }
+            this.detector = detector
+        }
+    }
 }
