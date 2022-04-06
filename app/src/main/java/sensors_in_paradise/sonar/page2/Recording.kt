@@ -44,7 +44,15 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
         }
         return true
     }
-
+    fun getDisplayTitle(): String {
+        val numActivities = metadataStorage.getActivities().size
+        var result = ""
+        if (hasVideoRecording()) {
+            result += "\uD83D\uDCF9 "
+        }
+        result += "numActivities ${if (numActivities == 1) "activity" else "activities"}"
+        return result
+    }
     fun getDirectory(): File {
         return dir
     }
@@ -57,6 +65,13 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
                 }
             }
         dir.delete()
+    }
+
+    fun hasVideoRecording(): Boolean {
+        return getVideoFile().exists()
+    }
+    fun getVideoFile(): File {
+        return dir.resolve(videoCaptureFileName)
     }
 
     private fun computeRecordingState(): RecordingFileState {
@@ -200,5 +215,9 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
         }
 
         metadataStorage.setRecordingState(recordingState)
+    }
+
+    companion object {
+        const val videoCaptureFileName = "recording.mp4"
     }
 }

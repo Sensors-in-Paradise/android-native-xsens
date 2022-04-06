@@ -16,7 +16,10 @@ import java.text.DateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class RecordingsAdapter(private val recordingsManager: RecordingDataManager, private val context: Context) :
+class RecordingsAdapter(
+    private val recordingsManager: RecordingDataManager,
+    private val context: Context
+) :
 
     RecyclerView.Adapter<RecordingsAdapter.ViewHolder>() {
     private val dateFormat = DateFormat.getDateTimeInstance()
@@ -51,7 +54,8 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager, pri
         val activitiesSummary =
             metadata.getActivities().joinToString("\n") { (activityStartTime, activity) ->
                 GlobalValues.getDurationAsString(activityStartTime - metadata.getTimeStarted()) + "   " +
-                activity }
+                        activity
+            }
         viewHolder.itemView.setOnClickListener {
             MessageDialog(context, activitiesSummary)
         }
@@ -59,8 +63,8 @@ class RecordingsAdapter(private val recordingsManager: RecordingDataManager, pri
         val duration = metadata.getDuration()
 
         val start = dateFormat.format(Date(metadata.getTimeStarted()))
-        val numActivities = metadata.getActivities().size
-        viewHolder.activityTextView.text = "$numActivities ${if (numActivities == 1) "activity" else "activities"}"
+        viewHolder.activityTextView.text =
+          recording.getDisplayTitle()
         viewHolder.durationTextView.text = "Duration: " + GlobalValues.getDurationAsString(duration)
         viewHolder.startTimeTextView.text = "Start: $start"
         viewHolder.personTextView.text = "Person: $personName"

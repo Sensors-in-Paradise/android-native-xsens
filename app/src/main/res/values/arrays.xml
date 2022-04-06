@@ -9,4 +9,20 @@
         <item>reply</item>
         <item>reply_all</item>
     </string-array>
+    <string-array name="video_quality_labels">
+        <item>Highest available</item>
+        <item>UHD</item>
+        <item>FHD</item>
+        <item>HD</item>
+        <item>SD</item>
+        <item>Lowest available</item>
+    </string-array>
+    <string-array name="video_quality_values">
+        <item>HIGHEST</item>
+        <item>UHD</item>
+        <item>FHD</item>
+        <item>HD</item>
+        <item>SD</item>
+        <item>LOWEST</item>
+    </string-array>
 </resources>
