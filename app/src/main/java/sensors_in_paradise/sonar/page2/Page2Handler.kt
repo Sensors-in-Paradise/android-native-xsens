@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.view.View
 import android.widget.*
-import androidx.core.view.get
 import androidx.core.view.size
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -102,7 +101,7 @@ class Page2Handler(
             cameraManager.stopRecording { videoCaptureStartTime, videoTempFile ->
                 metadata.setVideoCaptureStartedTime(videoCaptureStartTime, true)
                 try {
-                    Files.move(videoTempFile, dir.resolve(Recording.videoCaptureFileName))
+                    Files.move(videoTempFile, dir.resolve(Recording.VIDEO_CAPTURE_FILENAME))
                     val recordingIndex =
                         recordingsManager.recordingsList.indexOfFirst { r -> r.dir == dir }
                     recordingsAdapter.notifyItemChanged(recordingIndex)

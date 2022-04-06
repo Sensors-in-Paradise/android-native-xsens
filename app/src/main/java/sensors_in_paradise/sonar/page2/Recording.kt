@@ -71,7 +71,7 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
         return getVideoFile().exists()
     }
     fun getVideoFile(): File {
-        return dir.resolve(videoCaptureFileName)
+        return dir.resolve(VIDEO_CAPTURE_FILENAME)
     }
 
     private fun computeRecordingState(): RecordingFileState {
@@ -218,6 +218,6 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
     }
 
     companion object {
-        const val videoCaptureFileName = "recording.mp4"
+        const val VIDEO_CAPTURE_FILENAME = "recording.mp4"
     }
 }
