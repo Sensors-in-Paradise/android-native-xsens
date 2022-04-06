@@ -54,6 +54,14 @@
             app:key="storeRawCameraVideo"
             app:title="Store camera video "
             app:summary="Store the raw video from the smartphone camera when recording. "/>
+        <ListPreference
+            app:dependency="storeRawCameraVideo"
+            app:key="videoRecordingQuality"
+            app:defaultValue="HD"
+            app:title="Camera recording quality"
+            android:entries="@array/video_quality_labels"
+            android:entryValues="@array/video_quality_values"
+            />
     </PreferenceCategory>
     <PreferenceCategory app:title="Cloud">
         <EditTextPreference

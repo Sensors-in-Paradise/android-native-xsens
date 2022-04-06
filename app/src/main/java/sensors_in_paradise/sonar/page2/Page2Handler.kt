@@ -8,11 +8,13 @@ import androidx.core.view.size
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
+import com.google.common.io.Files
 import com.xsens.dot.android.sdk.events.XsensDotData
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.util.PreferencesHelper
+import java.io.IOException
 
 class Page2Handler(
     private val devices: XSENSArrayList,
@@ -65,6 +67,14 @@ class Page2Handler(
             activity.findViewById(R.id.tv_person_captureFragment),
             activity.findViewById(R.id.recyclerView_activities_captureFragment)
         )
+        initializeLoggingManagerCallbacks()
+
+        tabLayout.addOnTabSelectedListener(this)
+        cameraManager =
+            CameraManager(context, activity.findViewById(R.id.previewView_camera_captureFragment))
+    }
+
+    private fun initializeLoggingManagerCallbacks() {
         loggingManager.setOnRecordingDone { recording ->
             tabLayout.selectTab(recordingsTab)
             addRecordingToUI(
@@ -77,10 +87,31 @@ class Page2Handler(
                 tabLayout.selectTab(activitiesTab)
             }
             activitiesCenterTV.visibility = View.GONE
+            if (cameraManager.shouldRecordVideo()) {
+                val dir = GlobalValues.getVideoRecordingsTempDir(context)
+                dir.mkdir()
+                cameraManager.startRecording(
+                    dir.resolve(
+                        "before_" + System.currentTimeMillis().toString() + ".mp4"
+                    )
+                )
+            }
         }
-
-        tabLayout.addOnTabSelectedListener(this)
-        cameraManager = CameraManager(context, activity.findViewById(R.id.previewView_camera_captureFragment))
+        loggingManager.setOnFinalizingRecording { dir, metadata ->
+            cameraManager.stopRecording { videoCaptureStartTime, videoTempFile ->
+                metadata.setVideoCaptureStartedTime(videoCaptureStartTime, true)
+                try {
+                    Files.move(videoTempFile, dir.resolve(Recording.VIDEO_CAPTURE_FILENAME))
+                    val recordingIndex =
+                        recordingsManager.recordingsList.indexOfFirst { r -> r.dir == dir }
+                    recordingsAdapter.notifyItemChanged(recordingIndex)
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                } catch (e: IllegalArgumentException) {
+                    e.printStackTrace()
+                }
+            }
+        }
     }
 
     private fun addRecordingToUI(recording: Recording) {
@@ -125,15 +156,16 @@ class Page2Handler(
     override fun onTabReselected(tab: TabLayout.Tab?) {
         // TODO("Not yet implemented")
     }
+
     private fun setCameraTabVisible(visible: Boolean) {
-       if (visible) {
-           if (tabLayout.size <3) {
+        if (visible) {
+            if (tabLayout.tabCount < 3) {
                 tabLayout.addTab(cameraTab)
-           }
-       } else {
-           if (tabLayout.size> 2) {
-               tabLayout.removeTab(cameraTab)
-           }
-       }
+            }
+        } else {
+            if (tabLayout.size > 2) {
+                tabLayout.removeTab(cameraTab)
+            }
+        }
     }
 }
