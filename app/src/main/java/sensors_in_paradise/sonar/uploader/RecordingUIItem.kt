@@ -21,7 +21,7 @@ class RecordingUIItem(recording: Recording, private val recordingsBaseDir: File)
         val files = ArrayList<File>()
         files.addAll(getRecordingFiles())
         files.add(metadataStorage.file)
-        if(hasVideoRecording()){
+        if (hasVideoRecording()) {
             files.add(getVideoFile())
         }
         var dirToBeCreated = dir
@@ -78,10 +78,10 @@ class RecordingUIItem(recording: Recording, private val recordingsBaseDir: File)
         val fileEmoji = "\uD83D\uDCC4"
         val videoEmoji = "\uD83C\uDFA5"
         for (file in filesToBeUploaded) {
-            val docItem = when (file.name){
-                GlobalValues.METADATA_JSON_FILENAME-> metadataEmoji
+            val docItem = when (file.name) {
+                GlobalValues.METADATA_JSON_FILENAME -> metadataEmoji
                 VIDEO_CAPTURE_FILENAME -> videoEmoji
-                else -> fileEmoji}
+                else -> fileEmoji }
             result += " ".repeat(indent * 4) + "${getEmojiStatusOfFileOrDir(file)}  $docItem${file.name}\n"
         }
         return result
