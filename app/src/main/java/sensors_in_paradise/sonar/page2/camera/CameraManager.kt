@@ -1,6 +1,5 @@
-package sensors_in_paradise.sonar.page2.camera
+package sensors_in_paradise.sonar.page2
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import android.util.Size
@@ -67,7 +66,6 @@ class CameraManager(val context: Context, private val previewView: PreviewView, 
         ProcessCameraProvider.getInstance(context).apply {
             addListener({
                 cameraProvider = this.get()
-                bindPreview()
             }, ContextCompat.getMainExecutor(context))
         }
     }

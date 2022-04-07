@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar
+package sensors_in_paradise.sonar.util.dialogs
 
 import android.app.AlertDialog
 import android.app.Dialog
@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
+import sensors_in_paradise.sonar.R
 
 class TextInputDialog(
     context: Context,

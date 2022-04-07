@@ -50,7 +50,7 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
         if (hasVideoRecording()) {
             result += "\uD83D\uDCF9 "
         }
-        result += "numActivities ${if (numActivities == 1) "activity" else "activities"}"
+        result += "$numActivities ${if (numActivities == 1) "activity" else "activities"}"
         return result
     }
     fun getDirectory(): File {

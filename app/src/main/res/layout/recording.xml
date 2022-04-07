@@ -6,7 +6,9 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="8dp"
     android:layout_marginVertical="4dp"
-    app:cardCornerRadius="8dp">
+    app:cardCornerRadius="8dp"
+    android:foreground="?android:attr/selectableItemBackground"
+   >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -24,9 +26,25 @@
             app:layout_constraintHorizontal_bias="0.08"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+            <!-- Needed to wrap the video view in a layout so that onClickListener works correctly
+            (don't ask me why, must have sth to do with focus) -->
+            <FrameLayout
+                android:id="@+id/frameLayout_videoCapture_recording"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical">
 
+                <VideoView
+                    android:layout_width="50dp"
+                    android:layout_height="100dp"
+                    android:id="@+id/videoView_videoCapture_recording"
+
+                    android:layout_gravity="center_vertical"
+                   />
+            </FrameLayout>
 
             <LinearLayout
+                android:id="@+id/linearLayout_textInfo_recording"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
@@ -36,9 +54,9 @@
                     android:id="@+id/tv_activity"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="16dp"
                     android:layout_marginBottom="2dp"
                     android:text="TextView"
+                    android:textSize="16dp"
                     android:textStyle="bold"
                     android:visibility="visible" />
 
@@ -65,9 +83,9 @@
                     android:id="@+id/tv_check_files"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
                     android:text="TextView"
-                    android:textSize="12dp"
-                    android:layout_marginTop="2dp"/>
+                    android:textSize="12dp" />
 
             </LinearLayout>
 
