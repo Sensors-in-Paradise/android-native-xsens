@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.page2
+package sensors_in_paradise.sonar.page2.camera
 
 import android.content.Context
 import android.util.Log
@@ -17,7 +17,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.util.Consumer
 import androidx.lifecycle.LifecycleOwner
 import sensors_in_paradise.sonar.page2.LoggingManager
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.ModelType
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.MoveNet
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.SkeletonDrawer
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Device
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.File
 import java.time.LocalDateTime
@@ -40,7 +43,7 @@ class CameraManager(val context: Context, private val previewView: PreviewView, 
     private val videoCapture: androidx.camera.video.VideoCapture<Recorder> = withOutput(recorder)
     private var videoRecording: Recording? = null
 
-    private val cameraProcessing = SkeletonDrawer()
+    private var skeletonDrawer: SkeletonDrawer? = null
     private val imageAnalysisExecutor = Executors.newFixedThreadPool(2)
     private val imageAnalysis = ImageAnalysis.Builder()
         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
@@ -52,11 +55,9 @@ class CameraManager(val context: Context, private val previewView: PreviewView, 
                 val rotationDegrees = imageProxy.imageInfo.rotationDegrees
                 // insert your code here.
                 imageProxy.image?.let {
-                    cameraProcessing.processImage(
+                    skeletonDrawer?.processImage(
                         it, overlayView)
                 }
-
-
 
                 // after done, release the ImageProxy object
                 imageProxy.close()
@@ -144,6 +145,26 @@ class CameraManager(val context: Context, private val previewView: PreviewView, 
         return PreferencesHelper.shouldStoreRawCameraRecordings(context)
     }
 
+
+    override fun accept(t: VideoRecordEvent?) {
+        when (t) {
+            is VideoRecordEvent.Start -> {
+                videoStartTime = LoggingManager.normalizeTimeStamp(LocalDateTime.now())
+                Log.d("CameraManager", "Video Recording started")
+            }
+            is VideoRecordEvent.Finalize -> {
+                onRecordingFinalized?.let { it(videoStartTime, videoFile!!) }
+                Log.d("CameraManager", "Video Recording finalized")
+            }
+            is VideoRecordEvent.Pause -> {
+                Log.d("CameraManager", "Video Recording paused")
+            }
+            is VideoRecordEvent.Status -> {
+                Log.d("CameraManager", "Video Recording status updated")
+            }
+        }
+    }
+
     private var isAnalyzerBound = false
 
     private fun bindImageAnalyzer(): Boolean {
@@ -169,8 +190,8 @@ class CameraManager(val context: Context, private val previewView: PreviewView, 
     fun startRecordingPose() {
         if (!isAnalyzerBound) {
             bindImageAnalyzer()
-            Log.d("CameraManager", "Trying to bind Analyzer...")
         }
+        setPoseEstimator()
     }
 
     private var onPoseRecordingFinalized: ((poseCaptureStartTime: Long, poseTempFile: File) -> Unit)? = null
@@ -187,22 +208,11 @@ class CameraManager(val context: Context, private val previewView: PreviewView, 
         return PreferencesHelper.shouldStorePoseEstimation(context)
     }
 
-    override fun accept(t: VideoRecordEvent?) {
-        when (t) {
-            is VideoRecordEvent.Start -> {
-                videoStartTime = LoggingManager.normalizeTimeStamp(LocalDateTime.now())
-                Log.d("CameraManager", "Video Recording started")
-            }
-            is VideoRecordEvent.Finalize -> {
-                onRecordingFinalized?.let { it(videoStartTime, videoFile!!) }
-                Log.d("CameraManager", "Video Recording finalized")
-            }
-            is VideoRecordEvent.Pause -> {
-                Log.d("CameraManager", "Video Recording paused")
-            }
-            is VideoRecordEvent.Status -> {
-                Log.d("CameraManager", "Video Recording status updated")
-            }
-        }
+    private fun setPoseEstimator() {
+        val modelType = ModelType.LightningF16
+        val targetDevice = Device.CPU
+        val poseDetector = MoveNet.create(context, targetDevice, modelType)
+
+        skeletonDrawer = SkeletonDrawer(poseDetector)
     }
 }

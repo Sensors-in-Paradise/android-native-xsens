@@ -2,9 +2,10 @@ package sensors_in_paradise.sonar.page2
 
 import android.app.Activity
 import android.content.Context
+import android.view.SurfaceView
 import android.view.View
 import android.widget.*
-import androidx.core.view.size
+import androidx.camera.view.PreviewView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
@@ -75,10 +76,11 @@ class Page2Handler(
         initializeLoggingManagerCallbacks()
 
         tabLayout.addOnTabSelectedListener(this)
+        val previewView = activity.findViewById<PreviewView>(R.id.previewView_camera_captureFragment)
+        val overlayView = activity.findViewById<SurfaceView>(R.id.surfaceView_camera_captureFragment)
+        overlayView.setZOrderOnTop(true)
         cameraManager =
-            CameraManager(context, activity.findViewById(R.id.previewView_camera_captureFragment), activity.findViewById(R.id.surfaceView_camera_captureFragment))
-
-        createPoseEstimator(context)
+            CameraManager(context, previewView, overlayView)
     }
 
     private fun initializeLoggingManagerCallbacks() {
@@ -178,17 +180,5 @@ class Page2Handler(
                 tabLayout.removeTab(cameraTab)
             }
         }
-    }
-
-    private fun createPoseEstimator(context: Context) {
-        val modelType = ModelType.LightningF16
-        val targetDevice = Device.GPU
-        // TODO: Replace with actual camera
-        val skeletonDrawer = SkeletonDrawer()
-
-        val poseDetector = MoveNet.create(context, targetDevice, modelType)
-
-        skeletonDrawer.setDetector(poseDetector)
-
     }
 }

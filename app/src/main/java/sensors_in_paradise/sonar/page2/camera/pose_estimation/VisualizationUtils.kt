@@ -85,8 +85,9 @@ object VisualizationUtils {
             textAlign = Paint.Align.LEFT
         }
 
-        val output =  input.copy(Bitmap.Config.ARGB_8888, true)
-        output.eraseColor(Color.GREEN)
+        val output = input.copy(Bitmap.Config.ARGB_8888, true)
+        //output.eraseColor(Color.TRANSPARENT)
+
         val originalSizeCanvas = Canvas(output)
         persons.forEach { person ->
             // draw person id if tracker is enable
