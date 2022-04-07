@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate.*
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import sensors_in_paradise.sonar.custom_views.stickman.StickmanDialog
 import sensors_in_paradise.sonar.page1.Page1Handler
 import sensors_in_paradise.sonar.page2.Page2Handler
 import sensors_in_paradise.sonar.page2.RecordingDataManager
@@ -29,7 +30,8 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
 
     private val pageHandlers = ArrayList<PageInterface>()
     private val scannedDevices = XSENSArrayList()
-
+    private lateinit var page1Handler: Page1Handler
+    private lateinit var sensorTrafficVisualizationHandler: SensorTrafficVisualizationHandler
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -41,7 +43,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
         )
 
         initClickListeners()
-        val page1Handler = Page1Handler(scannedDevices)
+        page1Handler = Page1Handler(scannedDevices)
         pageHandlers.add(page1Handler)
         val page2Handler = Page2Handler(scannedDevices, recordingsManager)
         pageHandlers.add(page2Handler)
@@ -49,13 +51,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
         pageHandlers.add(page3Handler)
         page1Handler.addConnectionInterface(page2Handler)
         page1Handler.addConnectionInterface(page3Handler)
-        page1Handler.addConnectionInterface(
-            SensorTrafficIndicatorHandler(
-                this,
-                scannedDevices,
-                findViewById(R.id.sensorDataTrafficIndicator_captureFragment)
-            )
-        )
+
         val permissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) {}
@@ -111,6 +107,16 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.activity_main_menu, menu)
+        sensorTrafficVisualizationHandler = SensorTrafficVisualizationHandler(
+            this,
+            scannedDevices,
+            findViewById(R.id.sensorDataTrafficIndicator_captureFragment),
+            findViewById(R.id.linearLayout_sensorOrientation_activityMain),
+            menu.findItem(R.id.menuItem_orientation_activityMain)
+        )
+        page1Handler.addConnectionInterface(
+            sensorTrafficVisualizationHandler
+        )
         return true
     }
 
@@ -121,5 +127,12 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
     fun onSettingsMenuItemClicked(ignored: MenuItem) {
         val intent = Intent(this, SettingsActivity::class.java)
         startActivity(intent)
+    }
+    fun onStickmanMenuItemClicked(ignored: MenuItem) {
+        StickmanDialog(this)
+    }
+    fun onOrientationMenuItemClicked(mI: MenuItem) {
+        mI.isChecked = !mI.isChecked
+        sensorTrafficVisualizationHandler.setOrientationVisible(mI.isChecked)
     }
 }
