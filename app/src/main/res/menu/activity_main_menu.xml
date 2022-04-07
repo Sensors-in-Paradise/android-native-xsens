@@ -19,7 +19,7 @@
         android:id="@+id/menuItem_stickman_activityMain"
         android:onClick="onStickmanMenuItemClicked"
         android:title="Stickman"
-        android:visible="false"/>
+        android:visible="true"/>
     <item
         android:id="@+id/menuItem_settings_activityMain"
         android:onClick="onSettingsMenuItemClicked"
