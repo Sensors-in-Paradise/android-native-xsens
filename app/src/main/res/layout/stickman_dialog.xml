@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <sensors_in_paradise.sonar.custom_views.stickman.Render3DView
+    <sensors_in_paradise.sonar.main_activity.custom_views.stickman.Render3DView
         android:id="@+id/stickmanView"
         android:layout_width="match_parent"
         android:layout_height="400dp"

@@ -3,7 +3,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import sensors_in_paradise.sonar.uploader.FileUploader
+import sensors_in_paradise.sonar.main_activity.uploader.FileUploader
 import java.io.File
 
 class FileUploaderTest {

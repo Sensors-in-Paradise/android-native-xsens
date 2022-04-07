@@ -7,7 +7,7 @@
     android:maxHeight="30dp"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".MainActivity">
+    tools:context=".main_activity.MainActivity">
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textField"

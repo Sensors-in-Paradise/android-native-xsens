@@ -4,6 +4,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import junit.framework.TestCase.*
 import org.junit.Before
 import org.junit.Test
+import sensors_in_paradise.sonar.main_activity.all_pages.JSONStorage
 import java.io.File
 
 class JSONStorageTest {

@@ -4,8 +4,8 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import sensors_in_paradise.sonar.custom_views.stickman.math.Vec3
-import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
+import sensors_in_paradise.sonar.main_activity.custom_views.stickman.math.Vec3
+import sensors_in_paradise.sonar.main_activity.custom_views.stickman.math.Vec4
 
 class VecXTest {
     @Before

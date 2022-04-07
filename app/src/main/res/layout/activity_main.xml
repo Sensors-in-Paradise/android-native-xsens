@@ -9,9 +9,9 @@
     android:layout_height="match_parent"
     android:gravity="bottom"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".main_activity.MainActivity">
 
-    <sensors_in_paradise.sonar.custom_views.SensorDataTrafficIndicatorView
+    <sensors_in_paradise.sonar.main_activity.custom_views.SensorDataTrafficIndicatorView
         android:id="@+id/sensorDataTrafficIndicator_captureFragment"
         android:layout_width="match_parent"
         android:layout_height="8dp"

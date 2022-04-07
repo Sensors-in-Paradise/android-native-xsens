@@ -2,8 +2,8 @@ package sensors_in_paradise.sonar
 
 import org.junit.Assert
 import org.junit.Test
-import sensors_in_paradise.sonar.custom_views.stickman.math.Matrix4x4
-import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
+import sensors_in_paradise.sonar.main_activity.custom_views.stickman.math.Matrix4x4
+import sensors_in_paradise.sonar.main_activity.custom_views.stickman.math.Vec4
 
 class Vec4IntegrationTest {
     @Test

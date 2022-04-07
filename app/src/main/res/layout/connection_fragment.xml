@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:textAlignment="center"
-    tools:context=".MainActivity">
+    tools:context=".main_activity.MainActivity">
 
     <LinearLayout
         android:id="@+id/linearLayout_center_activity_main"

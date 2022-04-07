@@ -27,9 +27,9 @@
             android:name=".SettingsActivity"
             android:exported="false"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".MainActivity"/>
+            android:parentActivityName=".main_activity.MainActivity"/>
         <activity
-            android:name=".MainActivity"
+            android:name=".main_activity.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity">
