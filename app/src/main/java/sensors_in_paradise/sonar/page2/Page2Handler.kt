@@ -163,7 +163,7 @@ class Page2Handler(
                 tabLayout.addTab(cameraTab)
             }
         } else {
-            if (tabLayout.size > 2) {
+            if (tabLayout.tabCount > 2) {
                 tabLayout.removeTab(cameraTab)
             }
         }
