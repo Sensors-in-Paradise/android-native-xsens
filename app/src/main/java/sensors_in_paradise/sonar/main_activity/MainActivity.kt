@@ -22,7 +22,7 @@ import sensors_in_paradise.sonar.main_activity.all_pages.xsens.XSENSArrayList
 import sensors_in_paradise.sonar.main_activity.custom_views.stickman.StickmanDialog
 import sensors_in_paradise.sonar.main_activity.page1.Page1Handler
 import sensors_in_paradise.sonar.main_activity.page2.Page2Handler
-import sensors_in_paradise.sonar.main_activity.page2.RecordingDataManager
+import sensors_in_paradise.sonar.main_activity.page2.recordings.RecordingDataManager
 import sensors_in_paradise.sonar.main_activity.page3.Page3Handler
 import sensors_in_paradise.sonar.main_activity.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.main_activity.uploader.DavCloudRecordingsUploader

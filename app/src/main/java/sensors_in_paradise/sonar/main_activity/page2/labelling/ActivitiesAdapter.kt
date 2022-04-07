@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.main_activity.page2
+package sensors_in_paradise.sonar.main_activity.page2.labelling
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.main_activity.all_pages.GlobalValues
 import sensors_in_paradise.sonar.R
+import sensors_in_paradise.sonar.main_activity.page2.LoggingManager
 
 class ActivitiesAdapter(
     var activities: java.util.ArrayList<Pair<Long, String>>,

@@ -14,6 +14,9 @@ import sensors_in_paradise.sonar.main_activity.page1.ConnectionInterface
 import sensors_in_paradise.sonar.main_activity.all_pages.xsens.XSENSArrayList
 import sensors_in_paradise.sonar.main_activity.all_pages.PageInterface
 import sensors_in_paradise.sonar.main_activity.all_pages.GlobalValues
+import sensors_in_paradise.sonar.main_activity.page2.recordings.Recording
+import sensors_in_paradise.sonar.main_activity.page2.recordings.RecordingDataManager
+import sensors_in_paradise.sonar.main_activity.page2.recordings.RecordingsAdapter
 import sensors_in_paradise.sonar.main_activity.util.PreferencesHelper
 import java.io.IOException
 

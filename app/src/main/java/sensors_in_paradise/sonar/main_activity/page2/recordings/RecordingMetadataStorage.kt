@@ -1,5 +1,5 @@
 @file:Suppress("SwallowedException")
-package sensors_in_paradise.sonar.main_activity.page2
+package sensors_in_paradise.sonar.main_activity.page2.recordings
 
 import org.json.JSONArray
 import org.json.JSONException

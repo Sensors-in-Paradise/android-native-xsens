@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.main_activity.page2
+package sensors_in_paradise.sonar.main_activity.page2.labelling
 
 import org.json.JSONArray
 import sensors_in_paradise.sonar.main_activity.all_pages.JSONStorage

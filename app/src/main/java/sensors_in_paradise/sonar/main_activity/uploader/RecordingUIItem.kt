@@ -1,7 +1,7 @@
 package sensors_in_paradise.sonar.main_activity.uploader
 
 import sensors_in_paradise.sonar.main_activity.all_pages.GlobalValues
-import sensors_in_paradise.sonar.main_activity.page2.Recording
+import sensors_in_paradise.sonar.main_activity.page2.recordings.Recording
 import java.io.File
 import java.lang.Exception
 

@@ -13,6 +13,11 @@ import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.main_activity.all_pages.GlobalValues
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.main_activity.all_pages.xsens.XSENSArrayList
+import sensors_in_paradise.sonar.main_activity.page2.labelling.ActivitiesAdapter
+import sensors_in_paradise.sonar.main_activity.page2.labelling.PersistentCategoriesDialog
+import sensors_in_paradise.sonar.main_activity.page2.labelling.PersistentStringArrayDialog
+import sensors_in_paradise.sonar.main_activity.page2.recordings.Recording
+import sensors_in_paradise.sonar.main_activity.page2.recordings.RecordingMetadataStorage
 import sensors_in_paradise.sonar.main_activity.util.PreferencesHelper
 import sensors_in_paradise.sonar.main_activity.util.UIHelper
 import java.io.File

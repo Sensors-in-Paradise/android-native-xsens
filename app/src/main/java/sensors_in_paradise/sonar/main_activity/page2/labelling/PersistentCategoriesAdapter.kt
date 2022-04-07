@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.main_activity.page2
+package sensors_in_paradise.sonar.main_activity.page2.labelling
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog

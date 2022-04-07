@@ -6,7 +6,7 @@ import android.util.Log
 import com.google.common.net.MediaType
 import sensors_in_paradise.sonar.main_activity.all_pages.GlobalValues
 import sensors_in_paradise.sonar.main_activity.util.dialogs.MessageDialog
-import sensors_in_paradise.sonar.main_activity.page2.RecordingDataManager
+import sensors_in_paradise.sonar.main_activity.page2.recordings.RecordingDataManager
 import java.io.File
 
 class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: RecordingDataManager) :
