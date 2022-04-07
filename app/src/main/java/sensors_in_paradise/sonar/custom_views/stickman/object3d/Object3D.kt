@@ -130,7 +130,7 @@ abstract class Object3D(
         onObjectChanged?.onObjectChanged()
     }
     /**Updates the default state of this object 3d using it's current state*/
-    fun updateDefaultState(applyOnChildren: Boolean = true){
+    fun updateDefaultState(applyOnChildren: Boolean = true) {
         for (i in vertices.indices) {
             defaultVertices[i].assign(vertices[i])
         }
