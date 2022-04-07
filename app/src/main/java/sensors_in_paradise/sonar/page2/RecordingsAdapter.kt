@@ -2,7 +2,6 @@ package sensors_in_paradise.sonar.page2
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +14,6 @@ import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.util.dialogs.VideoDialog
 import java.text.DateFormat
 import java.util.*
-
 
 class RecordingsAdapter(
     private val recordingsManager: RecordingDataManager,
@@ -76,19 +74,18 @@ class RecordingsAdapter(
             // Set check file text & color conditionally
             checkFilesTextView.setTextColor(getCheckFileColor(recording))
             checkFilesTextView.text = getCheckFileText(recording)
-            if(recording.hasVideoRecording()) {
+            if (recording.hasVideoRecording()) {
                 videoViewFrameLayout.setOnClickListener {
                     VideoDialog(context, recording.getVideoFile())
                 }
             }
             videoView.apply {
-                if(recording.hasVideoRecording()){
+                if (recording.hasVideoRecording()) {
                     visibility = View.VISIBLE
                     setVideoPath(recording.getVideoFile().absolutePath)
                     setOnPreparedListener { mp -> mp.isLooping = true }
                     start()
-                }
-                else{
+                } else {
                     videoView.visibility = View.GONE
                 }
             }

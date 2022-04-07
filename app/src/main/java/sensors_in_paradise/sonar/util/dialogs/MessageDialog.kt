@@ -8,14 +8,14 @@ class MessageDialog(
     context: Context,
     message: String,
     onPositiveButtonClickListener: DialogInterface.OnClickListener? = null,
-    neutralButtonText: String= "Neutral",
+    neutralButtonText: String = "Neutral",
     onNeutralButtonClickListener: DialogInterface.OnClickListener? = null
 ) {
     init {
         val builder = AlertDialog.Builder(context)
         builder.setMessage(message)
 
-        if(onNeutralButtonClickListener!=null){
+        if (onNeutralButtonClickListener != null) {
             builder.setNeutralButton(neutralButtonText, onNeutralButtonClickListener)
         }
 

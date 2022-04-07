@@ -9,10 +9,10 @@ import java.io.File
 class VideoDialog(
     context: Context,
     videoFile: File,
-    title: String?=null,
-    message: String?=null,
+    title: String? = null,
+    message: String? = null,
     onPositiveButtonClickListener: DialogInterface.OnClickListener? = null,
-    neutralButtonText: String= "Neutral",
+    neutralButtonText: String = "Neutral",
     onNeutralButtonClickListener: DialogInterface.OnClickListener? = null
 ) {
     init {
@@ -24,13 +24,13 @@ class VideoDialog(
         }
 
         builder.setView(videoView)
-        if(title!=null) {
+        if (title != null) {
             builder.setTitle(title)
         }
-        if(message!=null) {
+        if (message != null) {
             builder.setMessage(message)
         }
-        if(onNeutralButtonClickListener!=null){
+        if (onNeutralButtonClickListener != null) {
             builder.setNeutralButton(neutralButtonText, onNeutralButtonClickListener)
         }
 
