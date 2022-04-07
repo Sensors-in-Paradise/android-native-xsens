@@ -38,8 +38,6 @@ class CameraManager(val context: Context, private val previewView: PreviewView) 
         ProcessCameraProvider.getInstance(context).apply {
             addListener({
                 cameraProvider = this.get()
-                bindPreview()
-                bindVideoCapture()
             }, ContextCompat.getMainExecutor(context))
         }
     }

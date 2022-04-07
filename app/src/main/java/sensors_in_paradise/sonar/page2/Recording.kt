@@ -1,11 +1,17 @@
 package sensors_in_paradise.sonar.page2
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.FileProvider
 import sensors_in_paradise.sonar.GlobalValues
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
 import kotlin.math.floor
 import kotlin.random.Random
+
 
 const val XSENS_HEADER_SIZE = 9
 const val XSENS_EMPTY_FILE_SIZE = 435
@@ -50,7 +56,7 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
         if (hasVideoRecording()) {
             result += "\uD83D\uDCF9 "
         }
-        result += "numActivities ${if (numActivities == 1) "activity" else "activities"}"
+        result += "$numActivities ${if (numActivities == 1) "activity" else "activities"}"
         return result
     }
     fun getDirectory(): File {
