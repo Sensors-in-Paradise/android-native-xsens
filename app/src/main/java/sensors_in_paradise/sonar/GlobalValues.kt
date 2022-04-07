@@ -80,6 +80,9 @@ class GlobalValues private constructor() {
         fun getSensorRecordingsTempDir(context: Context): File {
             return context.dataDir.resolve("temp")
         }
+        fun getVideoRecordingsTempDir(context: Context): File {
+            return context.dataDir.resolve("videoTemp")
+        }
 
         fun getActivityLabelsJSONFile(context: Context): File {
             return File(context.getExternalFilesDir(null) ?: context.dataDir, "labels.json")
@@ -98,7 +101,8 @@ class GlobalValues private constructor() {
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.INTERNET,
-                Manifest.permission.ACCESS_NETWORK_STATE
+                Manifest.permission.ACCESS_NETWORK_STATE,
+                Manifest.permission.CAMERA
             )
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 result.add(Manifest.permission.BLUETOOTH_SCAN)

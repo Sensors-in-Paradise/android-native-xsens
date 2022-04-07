@@ -35,6 +35,12 @@ class RecordingMetadataStorage(file: File) : JSONStorage(file) {
         setSensorMacMap(sensorMacMap)
         save()
     }
+    fun setVideoCaptureStartedTime(timeStarted: Long, save: Boolean = false) {
+        json.put("videoCaptureStartTime", timeStarted)
+        if (save) {
+            save()
+        }
+    }
     fun getActivities(): ArrayList<Pair<Long, String>> {
         val result = ArrayList<Pair<Long, String>>()
         for (i in 0 until activities.length()) {
@@ -44,6 +50,10 @@ class RecordingMetadataStorage(file: File) : JSONStorage(file) {
             result.add(Pair(timeStarted, label))
         }
         return result
+    }
+    fun getVideoCaptureStartedTime(): Long? {
+        val v = json.optLong("videoCaptureStartTime")
+        return if (v != 0L) v else null
     }
     fun getDuration(): Long {
         return getTimeEnded() - getTimeStarted()

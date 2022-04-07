@@ -2,6 +2,7 @@ package sensors_in_paradise.sonar.util
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.camera.video.Quality
 import androidx.preference.PreferenceManager
 import sensors_in_paradise.sonar.R
 
@@ -50,6 +51,23 @@ class PreferencesHelper private constructor() {
                 "cloudWebDavToken",
                 ""
             )!!
+        }
+        fun shouldRecordWithCamera(context: Context): Boolean {
+            return getSharedPreferences(context).getBoolean("recordWithCamera", false)
+        }
+        fun shouldStoreRawCameraRecordings(context: Context): Boolean {
+            return getSharedPreferences(context).getBoolean("storeRawCameraVideo", false)
+        }
+        fun getCameraRecordingQuality(context: Context): Quality {
+            return when (getSharedPreferences(context).getString("videoRecordingQuality", "LOWEST")) {
+                "HIGHEST" -> Quality.HIGHEST
+                "UHD" -> Quality.UHD
+                "FHD" -> Quality.FHD
+                "HD" -> Quality.HD
+                "SD" -> Quality.SD
+                "LOWEST" -> Quality.LOWEST
+                else -> Quality.LOWEST
+            }
         }
     }
 }

@@ -115,7 +115,7 @@ complexity:
     active: true
     functionThreshold: 6
     constructorThreshold: 7
-    ignoreDefaultParameters: false
+    ignoreDefaultParameters: true
     ignoreDataClasses: true
     ignoreAnnotated: []
   MethodOverloading:
@@ -142,7 +142,7 @@ complexity:
     thresholdInFiles: 30
     thresholdInClasses: 30
     thresholdInInterfaces: 11
-    thresholdInObjects: 11
+    thresholdInObjects: 20
     thresholdInEnums: 11
     ignoreDeprecated: false
     ignorePrivate: false
@@ -800,3 +800,4 @@ style:
       - 'sensors_in_paradise.sonar.*'
       - 'androidx.appcompat.app.AppCompatDelegate.*'
       - 'android.graphics.*'
+      - 'androidx.camera.video.*'

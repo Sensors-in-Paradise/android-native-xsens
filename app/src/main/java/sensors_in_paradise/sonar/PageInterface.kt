@@ -10,4 +10,6 @@ interface PageInterface {
     fun activityResumed()
     @UiThread
     fun activityWillDestroy()
+    @UiThread
+    fun activityStopped() {}
 }
