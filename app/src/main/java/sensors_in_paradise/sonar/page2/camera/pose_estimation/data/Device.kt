@@ -1,7 +1,4 @@
-/*
-Code from: https://github.com/tensorflow/examples/tree/master/lite/examples/pose_estimation/android
-==============================================================================
-Copyright 2021 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2021 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,14 +14,10 @@ limitations under the License.
 ==============================================================================
 */
 
-package sensors_in_paradise.sonar.poseEstimation
+package sensors_in_paradise.sonar.page2.camera.pose_estimation.data
 
-import android.graphics.Bitmap
-import sensors_in_paradise.sonar.poseEstimation.data.Person
-
-interface PoseDetector : AutoCloseable {
-
-    fun estimatePoses(bitmap: Bitmap): List<Person>
-
-    fun lastInferenceTimeNanos(): Long
+enum class Device {
+    CPU,
+    NNAPI,
+    GPU
 }

@@ -2,7 +2,6 @@ package sensors_in_paradise.sonar.page2
 
 import android.app.Activity
 import android.content.Context
-import android.view.SurfaceView
 import android.view.View
 import android.widget.*
 import androidx.core.view.size
@@ -14,10 +13,11 @@ import com.xsens.dot.android.sdk.events.XsensDotData
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
-import sensors_in_paradise.sonar.poseEstimation.CameraProcessing
-import sensors_in_paradise.sonar.poseEstimation.ModelType
-import sensors_in_paradise.sonar.poseEstimation.MoveNet
-import sensors_in_paradise.sonar.poseEstimation.data.Device
+import sensors_in_paradise.sonar.page2.camera.CameraManager
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.SkeletonDrawer
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.ModelType
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.MoveNet
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Device
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.IOException
 
@@ -76,7 +76,7 @@ class Page2Handler(
 
         tabLayout.addOnTabSelectedListener(this)
         cameraManager =
-            CameraManager(context, activity.findViewById(R.id.previewView_camera_captureFragment))
+            CameraManager(context, activity.findViewById(R.id.previewView_camera_captureFragment), activity.findViewById(R.id.surfaceView_camera_captureFragment))
 
         createPoseEstimator(context)
     }
@@ -97,15 +97,18 @@ class Page2Handler(
             if (cameraManager.shouldRecordVideo()) {
                 val dir = GlobalValues.getVideoRecordingsTempDir(context)
                 dir.mkdir()
-                cameraManager.startRecording(
+                cameraManager.startRecordingVideo(
                     dir.resolve(
                         "before_" + System.currentTimeMillis().toString() + ".mp4"
                     )
                 )
             }
+            if (cameraManager.shouldRecordPose()) {
+                cameraManager.startRecordingPose()
+            }
         }
         loggingManager.setOnFinalizingRecording { dir, metadata ->
-            cameraManager.stopRecording { videoCaptureStartTime, videoTempFile ->
+            cameraManager.stopRecordingVideo { videoCaptureStartTime, videoTempFile ->
                 metadata.setVideoCaptureStartedTime(videoCaptureStartTime, true)
                 try {
                     Files.move(videoTempFile, dir.resolve(Recording.VIDEO_CAPTURE_FILENAME))
@@ -118,6 +121,7 @@ class Page2Handler(
                     e.printStackTrace()
                 }
             }
+            cameraManager.stopRecordingPose()
         }
     }
 
@@ -180,11 +184,11 @@ class Page2Handler(
         val modelType = ModelType.LightningF16
         val targetDevice = Device.GPU
         // TODO: Replace with actual camera
-        val cameraSource = CameraProcessing(SurfaceView(context))
+        val skeletonDrawer = SkeletonDrawer()
 
         val poseDetector = MoveNet.create(context, targetDevice, modelType)
 
-        cameraSource.setDetector(poseDetector)
+        skeletonDrawer.setDetector(poseDetector)
 
     }
 }

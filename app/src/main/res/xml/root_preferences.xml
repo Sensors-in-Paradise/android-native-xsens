@@ -62,6 +62,11 @@
             android:entries="@array/video_quality_labels"
             android:entryValues="@array/video_quality_values"
             />
+        <SwitchPreferenceCompat
+            app:dependency="recordWithCamera"
+            app:key="storePoseEstimation"
+            app:title="Store TensorFlow Poses"
+            app:summary="Store pose data estimated by TensorFlow when recording. "/>
     </PreferenceCategory>
     <PreferenceCategory app:title="Cloud">
         <EditTextPreference

@@ -17,14 +17,14 @@ limitations under the License.
 ==============================================================================
 */
 
-package sensors_in_paradise.sonar.poseEstimation
+package sensors_in_paradise.sonar.page2.camera.pose_estimation
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import sensors_in_paradise.sonar.poseEstimation.data.BodyPart
-import sensors_in_paradise.sonar.poseEstimation.data.Person
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.BodyPart
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
 import kotlin.math.max
 
 object VisualizationUtils {
@@ -85,7 +85,8 @@ object VisualizationUtils {
             textAlign = Paint.Align.LEFT
         }
 
-        val output = input.copy(Bitmap.Config.ARGB_8888, true)
+        val output =  input.copy(Bitmap.Config.ARGB_8888, true)
+        output.eraseColor(Color.GREEN)
         val originalSizeCanvas = Canvas(output)
         persons.forEach { person ->
             // draw person id if tracker is enable

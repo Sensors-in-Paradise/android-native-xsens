@@ -1,14 +1,14 @@
 // TODO: Has to be merged with existing camera implementation
 
-package sensors_in_paradise.sonar.poseEstimation
+package sensors_in_paradise.sonar.page2.camera.pose_estimation
 
 
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.media.Image
 import android.view.SurfaceView
-import sensors_in_paradise.sonar.poseEstimation.data.Person
-
-class CameraProcessing(private val surfaceView: SurfaceView)
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
+class SkeletonDrawer
 // private val listener: CameraSourceListener? = null
 {
     companion object {
@@ -20,12 +20,27 @@ class CameraProcessing(private val surfaceView: SurfaceView)
     private val lock = Any()
     private var detector: PoseDetector? = null
     private val isTrackerEnabled = false
+    private lateinit var imageBytes: ByteArray
+
 
     private var frameProcessedInOneSecondInterval = 0
     private var framesPerSecond = 0
 
+    private fun imageToBitmap(image: Image): Bitmap {
+        val buffer = image.planes[0].buffer;
+
+        val pixelStride: Int = image.planes[0].pixelStride
+        val rowStride: Int = image.planes[0].rowStride
+        val rowPadding = rowStride - pixelStride * image.width
+
+        val bitmap = Bitmap.createBitmap(image.width + rowPadding / pixelStride, image.height, Bitmap.Config.ARGB_8888);
+        bitmap.copyPixelsFromBuffer(buffer);
+        return bitmap
+    }
+
     // process image
-    private fun processImage(bitmap: Bitmap) {
+    fun processImage(image: Image, overlayView: SurfaceView) {
+        val bitmap = imageToBitmap(image)
         val persons = mutableListOf<Person>()
 
         synchronized(lock) {
@@ -39,17 +54,17 @@ class CameraProcessing(private val surfaceView: SurfaceView)
         //    listener?.onFPSListener(framesPerSecond)
         // }
 
-        visualize(persons, bitmap)
+        visualize(persons, bitmap, overlayView)
     }
 
-    private fun visualize(persons: List<Person>, bitmap: Bitmap) {
+    private fun visualize(persons: List<Person>, bitmap: Bitmap, overlayView: SurfaceView) {
 
         val outputBitmap = VisualizationUtils.drawBodyKeypoints(
             bitmap,
             persons.filter { it.score > MIN_CONFIDENCE }, isTrackerEnabled
         )
 
-        val holder = surfaceView.holder
+        val holder = overlayView.holder
         val surfaceCanvas = holder.lockCanvas()
         surfaceCanvas?.let { canvas ->
             val screenWidth: Int
@@ -77,7 +92,7 @@ class CameraProcessing(private val surfaceView: SurfaceView)
                 outputBitmap, Rect(0, 0, outputBitmap.width, outputBitmap.height),
                 Rect(left, top, right, bottom), null
             )
-            surfaceView.holder.unlockCanvasAndPost(canvas)
+            overlayView.holder.unlockCanvasAndPost(canvas)
         }
     }
 

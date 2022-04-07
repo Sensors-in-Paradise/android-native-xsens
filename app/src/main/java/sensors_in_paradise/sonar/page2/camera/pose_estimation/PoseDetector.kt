@@ -1,4 +1,7 @@
-/* Copyright 2021 The TensorFlow Authors. All Rights Reserved.
+/*
+Code from: https://github.com/tensorflow/examples/tree/master/lite/examples/pose_estimation/android
+==============================================================================
+Copyright 2021 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,13 +17,14 @@ limitations under the License.
 ==============================================================================
 */
 
-package sensors_in_paradise.sonar.poseEstimation.data
+package sensors_in_paradise.sonar.page2.camera.pose_estimation
 
-import android.graphics.RectF
+import android.graphics.Bitmap
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
 
-data class Person(
-    var id: Int = -1, // default id is -1
-    val keyPoints: List<KeyPoint>,
-    val boundingBox: RectF? = null, // Only MoveNet MultiPose return bounding box.
-    val score: Float
-)
+interface PoseDetector : AutoCloseable {
+
+    fun estimatePoses(bitmap: Bitmap): List<Person>
+
+    fun lastInferenceTimeNanos(): Long
+}

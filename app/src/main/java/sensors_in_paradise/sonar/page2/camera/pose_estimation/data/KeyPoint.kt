@@ -14,11 +14,8 @@ limitations under the License.
 ==============================================================================
 */
 
-package sensors_in_paradise.sonar.poseEstimation.data
+package sensors_in_paradise.sonar.page2.camera.pose_estimation.data
 
-data class TorsoAndBodyDistance(
-    val maxTorsoYDistance: Float,
-    val maxTorsoXDistance: Float,
-    val maxBodyYDistance: Float,
-    val maxBodyXDistance: Float
-)
+import android.graphics.PointF
+
+data class KeyPoint(val bodyPart: BodyPart, var coordinate: PointF, val score: Float)
