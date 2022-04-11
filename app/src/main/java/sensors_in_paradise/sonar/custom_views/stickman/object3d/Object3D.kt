@@ -129,7 +129,19 @@ abstract class Object3D(
     fun notifyVerticesChanged() {
         onObjectChanged?.onObjectChanged()
     }
-
+    /**Updates the default state of this object 3d using it's current state*/
+    fun updateDefaultState(applyOnChildren: Boolean = true) {
+        for (i in vertices.indices) {
+            defaultVertices[i].assign(vertices[i])
+        }
+        if (applyOnChildren) {
+            for (child in children) {
+                child.updateDefaultState(
+                    applyOnChildren = true
+                )
+            }
+        }
+    }
     fun resetToDefaultState(
         applyOnChildren: Boolean = true,
         shouldNotifyThatVerticesChanged: Boolean = true

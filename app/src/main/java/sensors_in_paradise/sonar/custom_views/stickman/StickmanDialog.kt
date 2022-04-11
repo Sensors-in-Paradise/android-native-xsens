@@ -6,11 +6,11 @@ import android.view.LayoutInflater
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import sensors_in_paradise.sonar.R
-import sensors_in_paradise.sonar.custom_views.stickman.object3d.CoordinateSystem3D
+import sensors_in_paradise.sonar.custom_views.stickman.object3d.Sensor3D
 
 class StickmanDialog(context: Context) : OnSeekBarChangeListener {
     private var dialog: AlertDialog
-    private val coordinateSystem3D = CoordinateSystem3D().apply {
+    private val coordinateSystem3D = Sensor3D().apply {
         drawVertexPositionsForDebugging = true
     }
     private var xSlider: SeekBar
