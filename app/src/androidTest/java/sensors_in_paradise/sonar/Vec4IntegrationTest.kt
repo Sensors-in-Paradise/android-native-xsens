@@ -37,4 +37,13 @@ class Vec4IntegrationTest {
 
         assert(b === v)
     }
+    @Test
+    fun translateTest() {
+        val m = Matrix4x4().apply { translate(2f, 1f, -1f) }
+        val v = Vec4(0.5f, 21f, 10f)
+        val r = m * v
+        Assert.assertEquals(2.5f, r.x)
+        Assert.assertEquals(22f, r.y)
+        Assert.assertEquals(9f, r.z)
+    }
 }

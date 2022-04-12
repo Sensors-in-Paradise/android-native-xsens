@@ -4,7 +4,7 @@ import android.opengl.Matrix
 
 class Matrix4x4(private val data: FloatArray) {
     constructor() : this(
-       FloatArray(16).apply { Matrix.setIdentityM(this, 0) }
+        FloatArray(16).apply { Matrix.setIdentityM(this, 0) }
     )
 
     constructor(
@@ -24,7 +24,9 @@ class Matrix4x4(private val data: FloatArray) {
             throw InvalidSizeException("Matrix data size is invalid. Must be 16 but is ${data.size}")
         }
     }
-
+    fun assign(m: Matrix4x4) {
+        m.data.copyInto(this.data)
+    }
     fun getCol(col: Int): FloatArray {
         return when (col) {
             0 -> data.copyOfRange(0, 4)
@@ -34,6 +36,7 @@ class Matrix4x4(private val data: FloatArray) {
             else -> throw IndexOutOfBoundsException("Col-Index must be 0 <= index <= 3")
         }
     }
+
     override operator fun equals(other: Any?): Boolean {
         if (other is Matrix4x4) {
             for (i in data.indices) {
@@ -45,6 +48,7 @@ class Matrix4x4(private val data: FloatArray) {
         }
         return false
     }
+
     operator fun get(row: Int, col: Int): Float {
         return data[col * 4 + row]
     }
@@ -55,10 +59,10 @@ class Matrix4x4(private val data: FloatArray) {
 
     fun getRow(row: Int): FloatArray {
         return FloatArray(4).apply {
-            this[0] = this@Matrix4x4[0, row]
-            this[1] = this@Matrix4x4[1, row]
-            this[2] = this@Matrix4x4[2, row]
-            this[3] = this@Matrix4x4[3, row]
+            this[0] = this@Matrix4x4[row, 0]
+            this[1] = this@Matrix4x4[row, 1]
+            this[2] = this@Matrix4x4[row, 2]
+            this[3] = this@Matrix4x4[row, 3]
         }
     }
 
@@ -75,9 +79,9 @@ class Matrix4x4(private val data: FloatArray) {
     }
 
     operator fun times(m: Matrix4x4): Matrix4x4 {
-        val data = FloatArray(16)
-        Matrix.multiplyMM(data, 0, this.data, 0, m.data, 0)
-        return Matrix4x4(data)
+        val result = Matrix4x4()
+        multiply(result, this, m)
+        return result
     }
 
     fun clone(): Matrix4x4 {
@@ -107,15 +111,31 @@ class Matrix4x4(private val data: FloatArray) {
     }
 
     fun rotate(degrees: Float, xFactor: Float, yFactor: Float, zFactor: Float) {
-        // switch z and x so that we get the correct operation for our coordinate system
-        Matrix.rotateM(data, 0, degrees, zFactor, yFactor, xFactor)
+        Matrix.rotateM(data, 0, degrees, xFactor, yFactor, zFactor)
     }
 
     fun scale(x: Float, y: Float, z: Float) {
         Matrix.scaleM(this.data, 0, x, y, z)
     }
+
     fun translate(x: Float, y: Float, z: Float) {
         Matrix.translateM(this.data, 0, x, y, z)
+    }
+
+    fun rotateEuler(xDegrees: Float, yDegrees: Float, zDegrees: Float) {
+        rotate(xDegrees, 1f, 0f, 0f)
+        rotate(
+            yDegrees,
+            0f,
+            1f,
+            0f
+        )
+        rotate(
+            zDegrees,
+            0f,
+            0f,
+            1f
+        )
     }
 
     override fun hashCode(): Int {
@@ -161,27 +181,67 @@ class Matrix4x4(private val data: FloatArray) {
             )
             return m ?: Matrix4x4(data)
         }
+        fun multiply(target: Matrix4x4, leftHandSide: Matrix4x4, rightHandSide: Matrix4x4) {
+            Matrix.multiplyMM(target.data, 0, leftHandSide.data, 0, rightHandSide.data, 0)
+        }
         fun project(m: Matrix4x4, fovy: Float, aspect: Float, zNear: Float, zFar: Float) {
             Matrix.perspectiveM(m.data, 0, fovy, aspect, zNear, zFar)
         }
+
         fun project(fovy: Float, aspect: Float, zNear: Float, zFar: Float): Matrix4x4 {
             val data = FloatArray(16)
             Matrix.perspectiveM(data, 0, fovy, aspect, zNear, zFar)
             return Matrix4x4(data)
         }
+
         fun rotate(degrees: Float, x: Float, y: Float, z: Float): Matrix4x4 {
             val data = FloatArray(16)
             Matrix.setRotateM(data, 0, degrees, x, y, z)
             return Matrix4x4(data)
         }
+
         fun rotateEuler(xDegrees: Float, yDegrees: Float, zDegrees: Float): Matrix4x4 {
-            // switch z and x so that we get the correct operation for our coordinate system
-            return rotate(xDegrees, 0f, 0f, 1f) * rotate(yDegrees, 0f, 1f, 0f) * rotate(
+            return rotate(xDegrees, 1f, 0f, 0f) * rotate(yDegrees, 0f, 1f, 0f) * rotate(
                 zDegrees,
-                1f,
                 0f,
-                0f
-            ) // Matrix4x4(data)
+                0f,
+                1f
+            )
+        }
+        fun fromQuaternions(q: Vec4, center: Vec3 = Vec3(0f, 0f, 0f), target: Matrix4x4 = Matrix4x4()): Matrix4x4 {
+            val sqw: Float = q.w * q.w
+            val sqx: Float = q.x * q.x
+            val sqy: Float = q.y * q.y
+            val sqz: Float = q.z * q.z
+            target[0, 0] = sqx - sqy - sqz + sqw // since sqw + sqx + sqy + sqz =1
+
+            target[1, 1] = -sqx + sqy - sqz + sqw
+            target[2, 2] = -sqx - sqy + sqz + sqw
+
+            var tmp1: Float = q.x * q.y
+            var tmp2: Float = q.z * q.w
+            target[0, 1] = 2.0f * (tmp1 + tmp2)
+            target[1, 0] = 2.0f * (tmp1 - tmp2)
+
+            tmp1 = q.x * q.z
+            tmp2 = q.y * q.w
+            target[0, 2] = 2.0f * (tmp1 - tmp2)
+            target[2, 0] = 2.0f * (tmp1 + tmp2)
+
+            tmp1 = q.x * q.z
+            tmp2 = q.y * q.w
+            target[1, 2] = 2.0f * (tmp1 + tmp2)
+            target[2, 1] = 2.0f * (tmp1 - tmp2)
+
+            val a1: Float = center.x
+            val a2: Float = center.y
+            val a3: Float = center.z
+            target[0, 3] = a1 - a1 * target[0, 0] - a2 * target[0, 1] - a3 * target[0, 2]
+            target[1, 3] = a2 - a1 * target[1, 0] - a2 * target[1, 1] - a3 * target[1, 2]
+            target[2, 3] = a3 - a1 * target[2, 0] - a2 * target[2, 1] - a3 * target[2, 2]
+            target[3, 0] = 0.0f.also { target[3, 2] = it }.also { target[3, 1] = it }
+            target[3, 3] = 1.0f
+            return target
         }
     }
 }

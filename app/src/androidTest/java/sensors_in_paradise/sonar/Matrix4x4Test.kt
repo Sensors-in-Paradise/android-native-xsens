@@ -1,11 +1,13 @@
 package sensors_in_paradise.sonar
 
+import android.util.Log
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 import sensors_in_paradise.sonar.custom_views.stickman.math.Matrix4x4
+import sensors_in_paradise.sonar.custom_views.stickman.math.Vec3
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 
 class Matrix4x4Test {
@@ -16,11 +18,12 @@ class Matrix4x4Test {
     @Test
     fun accessRowTest() {
         val m = Matrix4x4()
-        val row = m.getRow(2)
-        assertEquals(0f, row[0])
+        m[3, 0] = 24f
+        val row = m.getRow(3)
+        assertEquals(24f, row[0])
         assertEquals(0f, row[1])
-        assertEquals(1f, row[2])
-        assertEquals(0f, row[3])
+        assertEquals(0f, row[2])
+        assertEquals(1f, row[3])
     }
 
     @Test
@@ -293,8 +296,8 @@ class Matrix4x4Test {
     }
     @Test
     fun rotateEulerXTest() {
-        val m1 = Matrix4x4.rotateEuler(180f, 0f, 0f)
-        val m2 = Matrix4x4().apply { rotate(180f, 1f, 0f, 0f) }
+        val m1 = Matrix4x4.rotateEuler(90f, 0f, 0f)
+        val m2 = Matrix4x4().apply { rotate(90f, 1f, 0f, 0f) }
         assert(m1 == m2)
     }
     @Test
@@ -308,6 +311,43 @@ class Matrix4x4Test {
         val m1 = Matrix4x4.rotateEuler(0f, 0f, 180f)
         val m2 = Matrix4x4().apply { rotate(180f, 0f, 0f, 1f) }
         assert(m1 == m2)
+    }
+    @Test
+    fun transformationCompositionTest1() {
+        val center = Vec3(10f, 2f, 0f)
+        val translationToOrigin = Matrix4x4().apply { translate(-center.x, -center.y, -center.z) }
+        val rotation = Matrix4x4.rotateEuler(00f, 0f, 90f)
+        val translationFromOrigin = Matrix4x4().apply { translate(center.x, center.y, center.z) }
+
+        val t = (translationFromOrigin * rotation) * translationToOrigin
+        val t2 = Matrix4x4().apply {
+            translate(center.x, center.y, center.z)
+            rotate(90f, 0f, 0f, 1f)
+            translate(-center.x, -center.y, -center.z)
+        }
+
+        assert(t == t2)
+    }
+    @Test
+    fun transformationCompositionTest2() {
+        val center = Vec3(10f, 2f, 0f)
+        val translationToOrigin = Matrix4x4().apply { translate(-center.x, -center.y, -center.z) }
+        val rotation = Matrix4x4.rotateEuler(00f, 0f, 90f)
+        val translationFromOrigin = Matrix4x4().apply { translate(center.x, center.y, center.z) }
+
+        val p = Vec4(11f, 2f, 0f)
+
+        val t = translationFromOrigin * (rotation * translationToOrigin)
+        val pTransformed = translationToOrigin * p
+        pTransformed *= rotation
+        pTransformed *= translationFromOrigin
+
+        Log.d("Matrix4x4Test- transformationCompositionTest", pTransformed.asString())
+
+        assertEquals(10f, pTransformed[0])
+        assertEquals(3f, pTransformed[1])
+        assertEquals(0f, pTransformed[ 2])
+        assertEquals(1f, pTransformed[ 3])
     }
     @After
     fun cleanUp() {

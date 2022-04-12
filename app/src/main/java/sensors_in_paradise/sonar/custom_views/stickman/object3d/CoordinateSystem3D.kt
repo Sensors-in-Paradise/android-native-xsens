@@ -1,6 +1,7 @@
 package sensors_in_paradise.sonar.custom_views.stickman.object3d
 
 import android.graphics.*
+import sensors_in_paradise.sonar.custom_views.stickman.math.Matrix4x4
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 
 class CoordinateSystem3D : LineObject3D(
@@ -49,8 +50,8 @@ class CoordinateSystem3D : LineObject3D(
         return vectorPaint
     }
 
-    override fun drawSelf(canvas: Canvas, projectPoint: (p: Vec4) -> PointF) {
-        super.drawSelf(canvas, projectPoint)
+    override fun drawSelf(canvas: Canvas, projectedPointToScreen: (p: Vec4) -> PointF, projectionMatrix: Matrix4x4) {
+        super.drawSelf(canvas, projectedPointToScreen, projectionMatrix)
 
         canvas.apply {
             drawText(

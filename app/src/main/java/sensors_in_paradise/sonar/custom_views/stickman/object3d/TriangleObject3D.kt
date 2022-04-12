@@ -3,24 +3,33 @@ package sensors_in_paradise.sonar.custom_views.stickman.object3d
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.PointF
+import sensors_in_paradise.sonar.custom_views.stickman.math.Matrix4x4
+import sensors_in_paradise.sonar.custom_views.stickman.math.Vec3
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 
-abstract class TriangleObject3D(vertices: Array<Vec4>, val fillColor: Int) : Object3D(vertices) {
+abstract class TriangleObject3D(
+    vertices: Array<Vec4>,
+    val fillColor: Int,
+    center: Vec3 = Vec3(0f, 0f, 0f)
+) : Object3D(vertices, center = center) {
     abstract fun get3DTrianglesToDraw(): Array<Triple<Vec4, Vec4, Vec4>>
     abstract fun hasChanged(): Boolean
     abstract fun onDrawn()
 
     private val emptyPaint = Paint(0)
     private var colors: IntArray? = null
-    private fun getTriangleVertexArray(projectPoint: (p: Vec4) -> PointF): FloatArray {
+    private fun getTriangleVertexArray(
+        projectedPointToScreen: (p: Vec4) -> PointF,
+        projectionMatrix: Matrix4x4
+    ): FloatArray {
         val triangles = get3DTrianglesToDraw()
         val result = FloatArray(triangles.size * 3 * 2)
 
         for ((t, triangle) in triangles.withIndex()) {
             val index = t * 3 * 2
-            val p1 = projectPoint(triangle.first)
-            val p2 = projectPoint(triangle.second)
-            val p3 = projectPoint(triangle.third)
+            val p1 = projectedPointToScreen(projectionMatrix * triangle.first)
+            val p2 = projectedPointToScreen(projectionMatrix * triangle.second)
+            val p3 = projectedPointToScreen(projectionMatrix * triangle.third)
             result[index] = p1.x
             result[index + 1] = p1.y
             result[index + 2] = p2.x
@@ -31,9 +40,13 @@ abstract class TriangleObject3D(vertices: Array<Vec4>, val fillColor: Int) : Obj
         return result
     }
 
-    override fun drawSelf(canvas: Canvas, projectPoint: (p: Vec4) -> PointF) {
+    override fun drawSelf(
+        canvas: Canvas,
+        projectedPointToScreen: (p: Vec4) -> PointF,
+        projectionMatrix: Matrix4x4
+    ) {
 
-        val triangleVertexArray = getTriangleVertexArray(projectPoint)
+        val triangleVertexArray = getTriangleVertexArray(projectedPointToScreen, projectionMatrix)
 
         if (colors == null || hasChanged()) {
             colors = IntArray(triangleVertexArray.size / 2) { _ -> fillColor }

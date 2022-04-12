@@ -12,51 +12,174 @@
 
         />
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="wrap_content">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingStart="16dp"
-            android:text="x" />
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <SeekBar
-            android:id="@+id/slider_zEuler_stickmanDialog"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="360"
-            android:tag="x" />
+            <TextView
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingStart="16dp"
-            android:text="y" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
 
-        <SeekBar
-            android:id="@+id/slider_yEuler_stickmanDialog"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="360"
-            android:tag="y" />
+                android:text="Translation"
+                android:textStyle="bold" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingStart="16dp"
-            android:text="z" />
+            <TextView
+                android:id="@+id/tv_translationX_stickmanDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:text="x" />
 
-        <SeekBar
-            android:id="@+id/slider_xEuler_stickmanDialog"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:tag="z"
-            android:max="360" />
+            <SeekBar
+                android:id="@+id/slider_xTranslate_stickmanDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="4"
+                android:min="-4"
+                android:progress="0"
+                android:tag="translate_x" />
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/tv_translationY_stickmanDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:text="y" />
 
+            <SeekBar
+                android:id="@+id/slider_yTranslate_stickmanDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="4"
+                android:min="-4"
+                android:progress="0"
+                android:tag="translate_y" />
+
+            <TextView
+                android:id="@+id/tv_translationZ_stickmanDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:text="z" />
+
+            <SeekBar
+                android:id="@+id/slider_zTranslate_stickmanDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="4"
+                android:min="-4"
+                android:progress="0"
+                android:tag="translate_z" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Scale"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_scaleX_stickmanDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:text="x" />
+
+            <SeekBar
+                android:id="@+id/slider_xScale_stickmanDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="5"
+                android:min="1"
+                android:progress="1"
+                android:tag="scale_x" />
+
+            <TextView
+                android:id="@+id/tv_scaleY_stickmanDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:text="y" />
+
+            <SeekBar
+                android:id="@+id/slider_yScale_stickmanDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="5"
+                android:min="1"
+                android:progress="1"
+                android:tag="scale_y" />
+
+            <TextView
+                android:id="@+id/tv_scaleZ_stickmanDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:text="z" />
+
+            <SeekBar
+                android:id="@+id/slider_zScale_stickmanDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="5"
+                android:min="1"
+                android:tag="scale_z"
+                android:progress="1" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Rotation"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_eulerX_stickmanDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:text="x" />
+
+            <SeekBar
+                android:id="@+id/slider_xEuler_stickmanDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="360"
+                android:tag="euler_x" />
+
+            <TextView
+                android:id="@+id/tv_eulerY_stickmanDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:text="y" />
+
+            <SeekBar
+                android:id="@+id/slider_yEuler_stickmanDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="360"
+                android:tag="euler_y" />
+
+            <TextView
+                android:id="@+id/tv_eulerZ_stickmanDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:text="z" />
+
+            <SeekBar
+                android:id="@+id/slider_zEuler_stickmanDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="360"
+                android:tag="euler_z" />
+
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

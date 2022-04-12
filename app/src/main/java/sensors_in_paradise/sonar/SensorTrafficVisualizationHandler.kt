@@ -10,9 +10,9 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.LinearLayout
 import androidx.annotation.UiThread
 import com.xsens.dot.android.sdk.events.XsensDotData
-import com.xsens.dot.android.sdk.utils.XsensDotParser
 import sensors_in_paradise.sonar.custom_views.SensorDataTrafficIndicatorView
 import sensors_in_paradise.sonar.custom_views.stickman.Render3DView
+import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 import sensors_in_paradise.sonar.custom_views.stickman.object3d.Sensor3D
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 
@@ -58,15 +58,17 @@ class SensorTrafficVisualizationHandler(
             }
 
             if (orientationLLExpanded) {
-                val eulerAngles = XsensDotParser.quaternion2Euler(xsensDotData.quat)
+                // val eulerAngles = XsensDotParser.quaternion2Euler(xsensDotData.quat)
                 activity.runOnUiThread {
                     orientationRenderViews[index].objects3DToDraw[0].apply {
                         resetToDefaultState()
-                        rotateEuler(
+                        /*rotateEuler(
                             eulerAngles[1].toFloat(),
                             eulerAngles[2].toFloat(),
                             eulerAngles[0].toFloat()
-                        )
+                        )*/
+                        // TODO fix
+                        rotateQuaternions(Vec4(xsensDotData.quat))
                     }
                 }
                 lastRefreshTime = System.currentTimeMillis()

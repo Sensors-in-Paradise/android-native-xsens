@@ -2,9 +2,10 @@ package sensors_in_paradise.sonar.custom_views.stickman.object3d
 
 import android.graphics.Color
 import android.graphics.Paint
+import sensors_in_paradise.sonar.custom_views.stickman.math.Vec3
 import sensors_in_paradise.sonar.custom_views.stickman.math.Vec4
 
-open class Cube(children: ArrayList<Object3D> = ArrayList()) : LineObject3D(
+open class Cube(children: ArrayList<Object3D> = ArrayList(), center: Vec3 = Vec3(0f, 0.5f, 0f)) : LineObject3D(
     arrayOf(
         lbb.clone(),
         lbf.clone(),
@@ -14,7 +15,7 @@ open class Cube(children: ArrayList<Object3D> = ArrayList()) : LineObject3D(
         rbf.clone(),
         rtb.clone(),
         rtf.clone()
-    ), children
+    ), children, center = center
 ) {
     private val _lbb = vertices[0]
     private val _lbf = vertices[1]
@@ -58,13 +59,13 @@ open class Cube(children: ArrayList<Object3D> = ArrayList()) : LineObject3D(
     }
     companion object {
         // lbb for left-bottom-back
-        private val lbb = Vec4(-0.5f, 0f, 0.5f)
-        private val lbf = Vec4(-0.5f, 0f, -0.5f)
-        private val ltb = Vec4(-0.5f, 1f, 0.5f)
-        private val ltf = Vec4(-0.5f, 1f, -0.5f)
-        private val rbb = Vec4(0.5f, 0f, 0.5f)
-        private val rbf = Vec4(0.5f, 0f, -0.5f)
-        private val rtb = Vec4(0.5f, 1f, 0.5f)
-        private val rtf = Vec4(0.5f, 1f, -0.5f)
+        private val lbb = Vec4(-0.5f, -0.5f, 0.5f)
+        private val lbf = Vec4(-0.5f, -0.5f, -0.5f)
+        private val ltb = Vec4(-0.5f, 0.5f, 0.5f)
+        private val ltf = Vec4(-0.5f, 0.5f, -0.5f)
+        private val rbb = Vec4(0.5f, -0.5f, 0.5f)
+        private val rbf = Vec4(0.5f, -0.5f, -0.5f)
+        private val rtb = Vec4(0.5f, 0.5f, 0.5f)
+        private val rtf = Vec4(0.5f, .5f, -0.5f)
     }
 }

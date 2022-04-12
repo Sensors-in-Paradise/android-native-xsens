@@ -89,4 +89,7 @@ open class VecBase(protected val values: FloatArray, size: Int) {
         result = 31 * result + size
         return result
     }
+    fun asString(): String {
+        return values.joinToString()
+    }
 }

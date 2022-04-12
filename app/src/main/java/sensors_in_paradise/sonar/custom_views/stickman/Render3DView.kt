@@ -49,7 +49,9 @@ class Render3DView(
         val startTime = System.currentTimeMillis()
         canvas.apply {
             for (obj in objects3DToDraw) {
-                obj.draw(canvas, this@Render3DView::project3DPoint)
+                // TODO add Scene Object3d instead of multiple Objects 3D
+                    // Also add camera to that scene
+                obj.draw(canvas, this@Render3DView::projectedPointToScreen, projection * camera.lookAtMatrix)
             }
         }
         if (showFPS) {
@@ -78,11 +80,8 @@ class Render3DView(
             }
         }
     }
-
-    private fun project3DPoint(vec4: Vec4): PointF {
-        val projected = projection * camera.lookAtMatrix * vec4
+    private fun projectedPointToScreen(projected: Vec4): PointF {
         val p = (projected.xy / projected.w + 1f) * 0.5f
-
         return PointF(p.x * width.toFloat(), height - p.y * height.toFloat())
     }
 
