@@ -58,6 +58,9 @@ class PreferencesHelper private constructor() {
         fun shouldStoreRawCameraRecordings(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("storeRawCameraVideo", false)
         }
+        fun shouldPlaySoundOnRecordingStart(context: Context): Boolean {
+            return getSharedPreferences(context).getBoolean("playSoundOnRecordingStart", false)
+        }
         fun shouldViewSensorHeadingMenuItems(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("viewHeadingMenuItems", false)
         }
