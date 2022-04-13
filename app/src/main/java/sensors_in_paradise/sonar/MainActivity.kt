@@ -22,7 +22,8 @@ import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.uploader.DavCloudRecordingsUploader
 import sensors_in_paradise.sonar.util.PreferencesHelper
 
-class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface, SensorOccupationInterface {
+class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface,
+    SensorOccupationInterface {
 
     private lateinit var switcher: ViewAnimator
     private lateinit var tabLayout: TabLayout
@@ -56,9 +57,9 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         }
         page1Handler.addConnectionInterface(headingResetHandler)
         pageHandlers.add(page1Handler)
-        val page2Handler = Page2Handler(scannedDevices, recordingsManager,this)
+        val page2Handler = Page2Handler(scannedDevices, recordingsManager, this)
         pageHandlers.add(page2Handler)
-        val page3Handler = Page3Handler(scannedDevices,this)
+        val page3Handler = Page3Handler(scannedDevices, this)
         pageHandlers.add(page3Handler)
         page1Handler.addConnectionInterface(page2Handler)
         page1Handler.addConnectionInterface(page3Handler)
@@ -143,16 +144,20 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         val intent = Intent(this, SettingsActivity::class.java)
         startActivity(intent)
     }
+
     fun onStickmanMenuItemClicked(ignored: MenuItem) {
         StickmanDialog(this)
     }
+
     fun onOrientationMenuItemClicked(mI: MenuItem) {
         mI.isChecked = !mI.isChecked
         sensorTrafficVisualizationHandler.setOrientationVisible(mI.isChecked)
     }
+
     fun onHeadingResetMenuItemClicked(ignored: MenuItem) {
         headingResetHandler.resetHeadings()
     }
+
     fun onHeadingRevertMenuItemClicked(ignored: MenuItem) {
         headingResetHandler.revertHeadings()
     }
@@ -160,15 +165,16 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
         updateHeadingMis()
     }
+
     private var areConnectedSensorsOccupied = false
     override fun onSensorOccupationStatusChanged(occupied: Boolean) {
         areConnectedSensorsOccupied = occupied
         updateHeadingMis()
     }
-    private fun updateHeadingMis(){
+
+    private fun updateHeadingMis() {
         val hasConnectedSensors = scannedDevices.getConnected().size > 0
         resetHeadingMi.isEnabled = !areConnectedSensorsOccupied && hasConnectedSensors
         revertHeadingMi.isEnabled = !areConnectedSensorsOccupied && hasConnectedSensors
     }
-
 }
