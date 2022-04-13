@@ -47,6 +47,11 @@
             android:title="Recordings subdirectory"
             android:summary="Choose the name of the subdirectory in which recordings should be stored. This directory will then also be mirrored in the cloud on upload."/>
         <SwitchPreferenceCompat
+            app:key="playSoundOnRecordingStart"
+            app:title="Play sound when starting to record"
+            app:summary="This can be useful to synchronize the sensor recordings with recordings from external cameras etc."
+            />
+        <SwitchPreferenceCompat
             app:key="recordWithCamera"
             app:title="Enable camera on recording screen" />
         <SwitchPreferenceCompat
