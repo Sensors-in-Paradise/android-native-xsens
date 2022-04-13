@@ -58,6 +58,9 @@ class PreferencesHelper private constructor() {
         fun shouldStoreRawCameraRecordings(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("storeRawCameraVideo", false)
         }
+        fun shouldViewSensorHeadingMenuItems(context: Context): Boolean {
+            return getSharedPreferences(context).getBoolean("viewHeadingMenuItems", false)
+        }
         fun getCameraRecordingQuality(context: Context): Quality {
             return when (getSharedPreferences(context).getString("videoRecordingQuality", "LOWEST")) {
                 "HIGHEST" -> Quality.HIGHEST

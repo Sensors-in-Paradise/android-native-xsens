@@ -63,6 +63,18 @@
             android:entryValues="@array/video_quality_values"
             />
     </PreferenceCategory>
+    <PreferenceCategory app:title="Advanced sensor options">
+        <SwitchPreferenceCompat
+            app:key="viewHeadingMenuItems"
+            app:defaultValue="false"
+            app:summary="Show menu items for resetting or reverting sensor heading. \nHeading reset aligns heading (orientation) outputs among all sensors and with
+the object they are connected to. \nMore detailed information can be found in the Xsens Dot User Manual subsection 4.1.3"
+            app:title="Sensor heading options" />
+        <Preference android:title="XSens Dot User Manual" >
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://www.xsens.com/hubfs/Downloads/Manuals/Xsens%20DOT%20User%20Manual.pdf" />
+        </Preference>
+    </PreferenceCategory>
     <PreferenceCategory app:title="Cloud">
         <EditTextPreference
             android:defaultValue="@string/default_webdav_cloud_url"

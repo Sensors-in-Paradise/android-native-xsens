@@ -18,7 +18,8 @@ import java.io.IOException
 
 class Page2Handler(
     private val devices: XSENSArrayList,
-    private val recordingsManager: RecordingDataManager
+    private val recordingsManager: RecordingDataManager,
+    private val sensorOccupationInterface: SensorOccupationInterface?
 ) : PageInterface, ConnectionInterface,
     TabLayout.OnTabSelectedListener {
     private lateinit var context: Context
@@ -83,6 +84,7 @@ class Page2Handler(
             activitiesCenterTV.visibility = View.VISIBLE
         }
         loggingManager.setOnRecordingStarted {
+            sensorOccupationInterface?.onSensorOccupationStatusChanged(true)
             if (tabLayout.selectedTabPosition != 2) {
                 tabLayout.selectTab(activitiesTab)
             }
@@ -111,6 +113,7 @@ class Page2Handler(
                     e.printStackTrace()
                 }
             }
+            sensorOccupationInterface?.onSensorOccupationStatusChanged(false)
         }
     }
 

@@ -29,7 +29,10 @@ import kotlin.collections.ArrayList
 import java.nio.ByteBuffer
 import kotlin.math.round
 
-class Page3Handler(private val devices: XSENSArrayList) : PageInterface, ConnectionInterface {
+class Page3Handler(
+    private val devices: XSENSArrayList,
+    private val sensorOccupationInterface: SensorOccupationInterface?
+) : PageInterface, ConnectionInterface {
     private lateinit var activity: Activity
     private lateinit var context: Context
     private lateinit var recyclerView: RecyclerView
@@ -66,12 +69,14 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             var progress = 0
 
             if (isRunning) {
-                progress = ((100 * (System.currentTimeMillis() - lastPrediction)) / predictionInterval).toInt()
+                progress =
+                    ((100 * (System.currentTimeMillis() - lastPrediction)) / predictionInterval).toInt()
                 mainHandler.postDelayed(this, 40)
             }
             progressBar.progress = progress
         }
     }
+
     private fun togglePrediction() {
         if (isRunning) {
             stopDataCollection()
@@ -83,12 +88,15 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     private fun clearBuffers() {
         rawSensorDataMap.clear()
     }
+
     private fun resetSensorDataLists() {
         for (key in rawSensorDataMap.keys) {
             rawSensorDataMap[key]?.clear()
         }
     }
+
     private fun startDataCollection() {
+        sensorOccupationInterface?.onSensorOccupationStatusChanged(true)
         clearBuffers()
         lastPrediction = 0L
         if (tryInitializeSensorDataMap()) {
@@ -113,7 +121,9 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
             Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
             return false
         }
-        val deviceSetKey = metadataStorage.tryGetDeviceSetKey(devices.getConnectedWithOfflineMetadata()) ?: return false
+        val deviceSetKey =
+            metadataStorage.tryGetDeviceSetKey(devices.getConnectedWithOfflineMetadata())
+                ?: return false
 
         for (tagPrefix in GlobalValues.sensorTagPrefixes) {
             rawSensorDataMap[GlobalValues.formatTag(tagPrefix, deviceSetKey)] = mutableListOf()
@@ -122,6 +132,7 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
     }
 
     private fun stopDataCollection() {
+        sensorOccupationInterface?.onSensorOccupationStatusChanged(false)
         timer.stop()
         for (device in devices.getConnected()) {
             device.stopMeasuring()
@@ -176,7 +187,8 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         // Creates inputs for reference.
         val inputFeature0 = TensorBuffer.createFixedSize(
             intArrayOf(1, predictionHelper.dataVectorSize, predictionHelper.dataLineFloatSize),
-            DataType.FLOAT32)
+            DataType.FLOAT32
+        )
         inputFeature0.loadBuffer(sensorDataByteBuffer)
 
         // Runs model inference and gets result
@@ -192,7 +204,8 @@ class Page3Handler(private val devices: XSENSArrayList) : PageInterface, Connect
         this.context = activity
 
         metadataStorage = XSensDotMetadataStorage(context)
-        predictionHelper = PredictionHelper(context, PreferencesHelper.shouldShowToastsVerbose(context))
+        predictionHelper =
+            PredictionHelper(context, PreferencesHelper.shouldShowToastsVerbose(context))
 
         // Initializing prediction RV
         recyclerView = activity.findViewById(R.id.rv_prediction)
