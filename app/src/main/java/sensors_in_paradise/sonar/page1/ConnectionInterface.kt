@@ -8,7 +8,7 @@ interface ConnectionInterface {
     @UiThread
     fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean)
     @AnyThread
-    fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData)
+    fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {}
     @AnyThread
-    fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int)
+    fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {}
 }

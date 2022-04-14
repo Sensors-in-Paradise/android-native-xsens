@@ -81,6 +81,7 @@ class SensorAdapter(
         if (isConnected) {
             detailsText = if (isSynced) "Synced" else "Connected"
             detailsText += " " + device.currentOutputRate + "Hz"
+            detailsText += "\nHeading " + getHeadingStateLabel(device.headingStatus)
         }
         viewHolder.detailsTextView.text = detailsText
         viewHolder.batteryPB.progress = if (isConnected) device.batteryPercentage else 0
@@ -109,6 +110,14 @@ class SensorAdapter(
             XsensDotDevice.CONN_STATE_RECONNECTING -> "Reconnecting"
             XsensDotDevice.CONN_STATE_START_RECONNECTING -> "Starting to reconnect"
             else -> "Unknown"
+        }
+    }
+    private fun getHeadingStateLabel(headingState: Int): String {
+        return when (headingState) {
+            XsensDotDevice.HEADING_STATUS_XRM_DEFAULT_ALIGNMENT -> "default"
+            XsensDotDevice.HEADING_STATUS_XRM_HEADING -> "reset"
+            XsensDotDevice.HEADING_STATUS_XRM_NONE -> "default"
+            else -> "unknown"
         }
     }
     // Return the size of your dataset (invoked by the layout manager)

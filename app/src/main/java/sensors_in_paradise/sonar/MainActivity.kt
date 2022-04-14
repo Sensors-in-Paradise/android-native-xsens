@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatDelegate.*
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import sensors_in_paradise.sonar.custom_views.stickman.StickmanDialog
+import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.page1.Page1Handler
 import sensors_in_paradise.sonar.page2.Page2Handler
 import sensors_in_paradise.sonar.page2.RecordingDataManager
@@ -21,7 +22,8 @@ import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.uploader.DavCloudRecordingsUploader
 import sensors_in_paradise.sonar.util.PreferencesHelper
 
-class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
+class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface,
+    SensorOccupationInterface {
 
     private lateinit var switcher: ViewAnimator
     private lateinit var tabLayout: TabLayout
@@ -32,6 +34,9 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
     private val scannedDevices = XSENSArrayList()
     private lateinit var page1Handler: Page1Handler
     private lateinit var sensorTrafficVisualizationHandler: SensorTrafficVisualizationHandler
+    private lateinit var resetHeadingMi: MenuItem
+    private lateinit var revertHeadingMi: MenuItem
+    private lateinit var headingResetHandler: HeadingResetHandler
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -43,15 +48,22 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
         )
 
         initClickListeners()
+
         page1Handler = Page1Handler(scannedDevices)
+        headingResetHandler = HeadingResetHandler(this, scannedDevices) { address ->
+            runOnUiThread {
+                page1Handler.notifyItemChanged(address)
+            }
+        }
+        page1Handler.addConnectionInterface(headingResetHandler)
         pageHandlers.add(page1Handler)
-        val page2Handler = Page2Handler(scannedDevices, recordingsManager)
+        val page2Handler = Page2Handler(scannedDevices, recordingsManager, this)
         pageHandlers.add(page2Handler)
-        val page3Handler = Page3Handler(scannedDevices)
+        val page3Handler = Page3Handler(scannedDevices, this)
         pageHandlers.add(page3Handler)
         page1Handler.addConnectionInterface(page2Handler)
         page1Handler.addConnectionInterface(page3Handler)
-
+        page1Handler.addConnectionInterface(this)
         val permissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) {}
@@ -117,6 +129,10 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
         page1Handler.addConnectionInterface(
             sensorTrafficVisualizationHandler
         )
+        resetHeadingMi = menu.findItem(R.id.menuItem_headingReset_activityMain)
+        revertHeadingMi = menu.findItem(R.id.menuItem_headingRevert_activityMain)
+        resetHeadingMi.isVisible = PreferencesHelper.shouldViewSensorHeadingMenuItems(this)
+        revertHeadingMi.isVisible = PreferencesHelper.shouldViewSensorHeadingMenuItems(this)
         return true
     }
 
@@ -128,11 +144,37 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener {
         val intent = Intent(this, SettingsActivity::class.java)
         startActivity(intent)
     }
+
     fun onStickmanMenuItemClicked(ignored: MenuItem) {
         StickmanDialog(this)
     }
+
     fun onOrientationMenuItemClicked(mI: MenuItem) {
         mI.isChecked = !mI.isChecked
         sensorTrafficVisualizationHandler.setOrientationVisible(mI.isChecked)
+    }
+
+    fun onHeadingResetMenuItemClicked(ignored: MenuItem) {
+        headingResetHandler.resetHeadings()
+    }
+
+    fun onHeadingRevertMenuItemClicked(ignored: MenuItem) {
+        headingResetHandler.revertHeadings()
+    }
+
+    override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
+        updateHeadingMenuItems()
+    }
+
+    private var areConnectedSensorsOccupied = false
+    override fun onSensorOccupationStatusChanged(occupied: Boolean) {
+        areConnectedSensorsOccupied = occupied
+        updateHeadingMenuItems()
+    }
+
+    private fun updateHeadingMenuItems() {
+        val hasConnectedSensors = scannedDevices.getConnected().size > 0
+        resetHeadingMi.isEnabled = !areConnectedSensorsOccupied && hasConnectedSensors
+        revertHeadingMi.isEnabled = !areConnectedSensorsOccupied && hasConnectedSensors
     }
 }
