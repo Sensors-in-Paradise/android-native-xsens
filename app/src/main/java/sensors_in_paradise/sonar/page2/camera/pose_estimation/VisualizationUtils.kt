@@ -94,6 +94,8 @@ object VisualizationUtils {
         val output = input.copy(Bitmap.Config.ARGB_8888, true)
         output.eraseColor(Color.TRANSPARENT)
 
+        // TODO Refactor bitmap usage
+        // TODO get scaling right. (poseEstimation works on distorted (nearly quadratic) camera image)
         //val originalSizeCanvas = Canvas(output)
         val cv2 = cv
         cv2.drawColor(Color.GREEN, PorterDuff.Mode.CLEAR)

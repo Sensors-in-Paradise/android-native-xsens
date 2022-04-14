@@ -34,6 +34,7 @@ class SkeletonDrawer(private val poseDetector: PoseDetector)
         return bitmap //.rotate(90f)
     }
 
+    // TODO delete
     fun Bitmap.rotate(degrees: Float): Bitmap {
         val matrix = Matrix().apply { postRotate(degrees) }
         return Bitmap.createBitmap(this, 0, 0, width, height, matrix, true)
@@ -60,6 +61,7 @@ class SkeletonDrawer(private val poseDetector: PoseDetector)
             persons.filter { it.score > MIN_CONFIDENCE }, isTrackerEnabled
         ) */
 
+        // TODO delte commented code and refactor bitmap usage
         val surfaceCanvas = overlayView.lockCanvas()
         surfaceCanvas?.let { canvas ->
             //canvas.rotate(90f, canvas.width.toFloat() / 2f, canvas.height.toFloat() / 2f)
