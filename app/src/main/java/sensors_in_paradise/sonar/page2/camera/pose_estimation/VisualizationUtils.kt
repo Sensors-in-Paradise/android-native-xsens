@@ -19,20 +19,18 @@ limitations under the License.
 
 package sensors_in_paradise.sonar.page2.camera.pose_estimation
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
+import android.graphics.*
+import android.util.Log
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.BodyPart
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
 import kotlin.math.max
 
 object VisualizationUtils {
     /** Radius of circle used to draw keypoints.  */
-    private const val CIRCLE_RADIUS = 6f
+    private const val CIRCLE_RADIUS = 9f
 
     /** Width of line used to connected two keypoints.  */
-    private const val LINE_WIDTH = 4f
+    private const val LINE_WIDTH = 6f
 
     /** The text size of the person id that will be displayed when the tracker is available.  */
     private const val PERSON_ID_TEXT_SIZE = 30f
@@ -62,20 +60,28 @@ object VisualizationUtils {
         Pair(BodyPart.RIGHT_KNEE, BodyPart.RIGHT_ANKLE)
     )
 
+    private fun rotate90Degrees(p: PointF, width: Int, height: Int, bm: Bitmap): PointF {
+       val p_norm = PointF(p.x / bm.width.toFloat(), p.y / bm.height.toFloat())
+       val p_norm_rot = PointF(1f-p_norm.y, p_norm.x)
+       val p_rot = PointF(p_norm_rot.x * height.toFloat(), p_norm_rot.y * width.toFloat())
+        //Log.d("CameraManager", "${p_norm_rot.x} - ${p_norm_rot.y}")
+        return p_rot //PointF(p.x * (width.toFloat() / bm.width.toFloat()), p.y * (height.toFloat() / bm.height.toFloat()))
+    }
     // Draw line and point indicate body pose
     fun drawBodyKeypoints(
         input: Bitmap,
+        cv: Canvas,
         persons: List<Person>,
         isTrackerEnabled: Boolean = false
     ): Bitmap {
         val paintCircle = Paint().apply {
             strokeWidth = CIRCLE_RADIUS
-            color = Color.RED
+            color = Color.BLUE
             style = Paint.Style.FILL
         }
         val paintLine = Paint().apply {
             strokeWidth = LINE_WIDTH
-            color = Color.RED
+            color = Color.WHITE
             style = Paint.Style.STROKE
         }
 
@@ -86,9 +92,16 @@ object VisualizationUtils {
         }
 
         val output = input.copy(Bitmap.Config.ARGB_8888, true)
-        //output.eraseColor(Color.TRANSPARENT)
+        output.eraseColor(Color.TRANSPARENT)
 
-        val originalSizeCanvas = Canvas(output)
+        //val originalSizeCanvas = Canvas(output)
+        val cv2 = cv
+        cv2.drawColor(Color.GREEN, PorterDuff.Mode.CLEAR)
+        cv2.drawLine(3f, 3f, 3f, cv2.height - 3f, paintLine)
+        cv2.drawLine(3f, 3f, cv2.width - 3f, 3f, paintLine)
+        cv2.drawLine(cv2.width - 3f, 3f, cv2.width - 3f, cv2.height - 3f, paintLine)
+        cv2.drawLine(3f, cv2.height - 3f, cv2.width - 3f, cv2.height - 3f, paintLine)
+
         persons.forEach { person ->
             // draw person id if tracker is enable
             if (isTrackerEnabled) {
@@ -96,25 +109,26 @@ object VisualizationUtils {
                     val personIdX = max(0f, it.left)
                     val personIdY = max(0f, it.top)
 
-                    originalSizeCanvas.drawText(
+                    cv2.drawText(
                         person.id.toString(),
                         personIdX,
                         personIdY - PERSON_ID_MARGIN,
                         paintText
                     )
-                    originalSizeCanvas.drawRect(it, paintLine)
+                    cv2.drawRect(it, paintLine)
                 }
             }
             bodyJoints.forEach {
-                val pointA = person.keyPoints[it.first.position].coordinate
-                val pointB = person.keyPoints[it.second.position].coordinate
-                originalSizeCanvas.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintLine)
+                val pointA = rotate90Degrees(person.keyPoints[it.first.position].coordinate, cv2.width, cv2.height, input)
+                val pointB = rotate90Degrees(person.keyPoints[it.second.position].coordinate, cv2.width, cv2.height, input)
+                cv2.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintLine)
             }
 
             person.keyPoints.forEach { point ->
-                originalSizeCanvas.drawCircle(
-                    point.coordinate.x,
-                    point.coordinate.y,
+                val coordinate = rotate90Degrees(point.coordinate, cv2.width, cv2.height, input)
+                cv2.drawCircle(
+                    coordinate.x,
+                    coordinate.y,
                     CIRCLE_RADIUS,
                     paintCircle
                 )

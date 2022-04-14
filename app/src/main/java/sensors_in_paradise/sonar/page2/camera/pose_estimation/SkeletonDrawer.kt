@@ -4,9 +4,11 @@ package sensors_in_paradise.sonar.page2.camera.pose_estimation
 
 
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.graphics.Rect
 import android.media.Image
-import android.view.SurfaceView
+import android.util.Log
+import android.view.TextureView
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
 
 class SkeletonDrawer(private val poseDetector: PoseDetector)
@@ -29,11 +31,16 @@ class SkeletonDrawer(private val poseDetector: PoseDetector)
 
         val bitmap = Bitmap.createBitmap(image.width + rowPadding / pixelStride, image.height, Bitmap.Config.ARGB_8888)
         bitmap.copyPixelsFromBuffer(buffer)
-        return bitmap
+        return bitmap //.rotate(90f)
+    }
+
+    fun Bitmap.rotate(degrees: Float): Bitmap {
+        val matrix = Matrix().apply { postRotate(degrees) }
+        return Bitmap.createBitmap(this, 0, 0, width, height, matrix, true)
     }
 
     // process image
-    fun processImage(image: Image, overlayView: SurfaceView) {
+    fun processImage(image: Image, overlayView: TextureView) {
         val bitmap = imageToBitmap(image)
         val persons = mutableListOf<Person>()
 
@@ -42,21 +49,26 @@ class SkeletonDrawer(private val poseDetector: PoseDetector)
                 persons.addAll(it)
             }
         }
-
+        //Log.d("CameraManager", "num persons: ${persons.size}, num first person: ${if (persons.size > 0) persons[0].keyPoints.size else -1}")
         visualize(persons, bitmap, overlayView)
     }
 
-    private fun visualize(persons: List<Person>, bitmap: Bitmap, overlayView: SurfaceView) {
+    private fun visualize(persons: List<Person>, bitmap: Bitmap, overlayView: TextureView) {
 
-        val outputBitmap = VisualizationUtils.drawBodyKeypoints(
+       /*  val outputBitmap = VisualizationUtils.drawBodyKeypoints(
             bitmap,
             persons.filter { it.score > MIN_CONFIDENCE }, isTrackerEnabled
-        )
+        ) */
 
-        val holder = overlayView.holder
-        val surfaceCanvas = holder.lockCanvas()
+        val surfaceCanvas = overlayView.lockCanvas()
         surfaceCanvas?.let { canvas ->
-            val screenWidth: Int
+            //canvas.rotate(90f, canvas.width.toFloat() / 2f, canvas.height.toFloat() / 2f)
+            VisualizationUtils.drawBodyKeypoints(
+                bitmap,
+                canvas,
+                persons.filter { it.score > MIN_CONFIDENCE }, isTrackerEnabled
+            )
+            /*val screenWidth: Int
             val screenHeight: Int
             val left: Int
             val top: Int
@@ -81,8 +93,9 @@ class SkeletonDrawer(private val poseDetector: PoseDetector)
             canvas.drawBitmap(
                 outputBitmap, Rect(0, 0, outputBitmap.width, outputBitmap.height),
                 Rect(left, top, right, bottom), null
-            )
-            overlayView.holder.unlockCanvasAndPost(canvas)
+            ) */
+
+            overlayView.unlockCanvasAndPost(canvas)
         }
     }
 }

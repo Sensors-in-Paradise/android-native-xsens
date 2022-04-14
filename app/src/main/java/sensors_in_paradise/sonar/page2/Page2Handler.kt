@@ -3,6 +3,7 @@ package sensors_in_paradise.sonar.page2
 import android.app.Activity
 import android.content.Context
 import android.view.SurfaceView
+import android.view.TextureView
 import android.view.View
 import android.widget.*
 import androidx.camera.view.PreviewView
@@ -77,8 +78,9 @@ class Page2Handler(
 
         tabLayout.addOnTabSelectedListener(this)
         val previewView = activity.findViewById<PreviewView>(R.id.previewView_camera_captureFragment)
-        val overlayView = activity.findViewById<SurfaceView>(R.id.surfaceView_camera_captureFragment)
-        overlayView.setZOrderOnTop(true)
+        val overlayView = activity.findViewById<TextureView>(R.id.surfaceView_camera_captureFragment)
+        previewView.scaleType = PreviewView.ScaleType.FIT_CENTER
+
         cameraManager =
             CameraManager(context, previewView, overlayView)
     }

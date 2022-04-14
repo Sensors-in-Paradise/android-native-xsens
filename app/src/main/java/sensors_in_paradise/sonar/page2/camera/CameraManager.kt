@@ -3,7 +3,7 @@ package sensors_in_paradise.sonar.page2.camera
 import android.content.Context
 import android.util.Log
 import android.util.Size
-import android.view.SurfaceView
+import android.view.TextureView
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
@@ -26,7 +26,7 @@ import java.io.File
 import java.time.LocalDateTime
 import java.util.concurrent.Executors
 
-class CameraManager(val context: Context, private val previewView: PreviewView, overlayView: SurfaceView) :
+class CameraManager(val context: Context, private val previewView: PreviewView, overlayView: TextureView) :
     Consumer<VideoRecordEvent> {
     private var cameraProvider: ProcessCameraProvider? = null
     private var isPreviewBound = false

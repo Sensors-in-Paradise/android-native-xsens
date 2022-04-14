@@ -179,10 +179,10 @@
                 android:visibility="visible">
             </androidx.camera.view.PreviewView>
 
-            <SurfaceView
-            android:id="@+id/surfaceView_camera_captureFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            <TextureView
+                android:id="@+id/surfaceView_camera_captureFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
         </FrameLayout>
 
     </android.widget.ViewAnimator>
