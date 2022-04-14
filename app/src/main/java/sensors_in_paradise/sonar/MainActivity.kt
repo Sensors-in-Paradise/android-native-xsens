@@ -163,16 +163,16 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     }
 
     override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
-        updateHeadingMis()
+        updateHeadingMenuItems()
     }
 
     private var areConnectedSensorsOccupied = false
     override fun onSensorOccupationStatusChanged(occupied: Boolean) {
         areConnectedSensorsOccupied = occupied
-        updateHeadingMis()
+        updateHeadingMenuItems()
     }
 
-    private fun updateHeadingMis() {
+    private fun updateHeadingMenuItems() {
         val hasConnectedSensors = scannedDevices.getConnected().size > 0
         resetHeadingMi.isEnabled = !areConnectedSensorsOccupied && hasConnectedSensors
         revertHeadingMi.isEnabled = !areConnectedSensorsOccupied && hasConnectedSensors
