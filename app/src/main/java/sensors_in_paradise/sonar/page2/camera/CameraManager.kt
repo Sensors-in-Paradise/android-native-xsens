@@ -19,7 +19,7 @@ import androidx.lifecycle.LifecycleOwner
 import sensors_in_paradise.sonar.page2.LoggingManager
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.ModelType
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.MoveNet
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.SkeletonDrawer
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.ImageProcessor
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Device
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.File
@@ -43,7 +43,7 @@ class CameraManager(val context: Context, private val previewView: PreviewView, 
     private val videoCapture: androidx.camera.video.VideoCapture<Recorder> = withOutput(recorder)
     private var videoRecording: Recording? = null
 
-    private var skeletonDrawer: SkeletonDrawer? = null
+    private var imageProcessor: ImageProcessor? = null
     private val imageAnalysisExecutor = Executors.newFixedThreadPool(2)
     private val imageAnalysis = ImageAnalysis.Builder()
         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
@@ -55,7 +55,7 @@ class CameraManager(val context: Context, private val previewView: PreviewView, 
                 val rotationDegrees = imageProxy.imageInfo.rotationDegrees
                 // insert your code here.
                 imageProxy.image?.let {
-                    skeletonDrawer?.processImage(
+                    imageProcessor?.processImage(
                         it, overlayView)
                 }
 
@@ -213,6 +213,6 @@ class CameraManager(val context: Context, private val previewView: PreviewView, 
         val targetDevice = Device.CPU
         val poseDetector = MoveNet.create(context, targetDevice, modelType)
 
-        skeletonDrawer = SkeletonDrawer(poseDetector)
+        imageProcessor = ImageProcessor(poseDetector)
     }
 }

@@ -2,7 +2,6 @@ package sensors_in_paradise.sonar.page2
 
 import android.app.Activity
 import android.content.Context
-import android.view.SurfaceView
 import android.view.TextureView
 import android.view.View
 import android.widget.*
@@ -16,10 +15,6 @@ import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.page2.camera.CameraManager
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.SkeletonDrawer
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.ModelType
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.MoveNet
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Device
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.IOException
 
@@ -79,8 +74,6 @@ class Page2Handler(
         tabLayout.addOnTabSelectedListener(this)
         val previewView = activity.findViewById<PreviewView>(R.id.previewView_camera_captureFragment)
         val overlayView = activity.findViewById<TextureView>(R.id.surfaceView_camera_captureFragment)
-        previewView.scaleType = PreviewView.ScaleType.FIT_CENTER
-
         cameraManager =
             CameraManager(context, previewView, overlayView)
     }

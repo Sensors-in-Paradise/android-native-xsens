@@ -20,8 +20,8 @@ limitations under the License.
 package sensors_in_paradise.sonar.page2.camera.pose_estimation
 
 import android.graphics.*
-import android.util.Log
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.BodyPart
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.KeyPoint
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
 import kotlin.math.max
 
@@ -31,12 +31,6 @@ object VisualizationUtils {
 
     /** Width of line used to connected two keypoints.  */
     private const val LINE_WIDTH = 6f
-
-    /** The text size of the person id that will be displayed when the tracker is available.  */
-    private const val PERSON_ID_TEXT_SIZE = 30f
-
-    /** Distance from person id to the nose keypoint.  */
-    private const val PERSON_ID_MARGIN = 6f
 
     /** Pair of keypoints to draw lines between.  */
     private val bodyJoints = listOf(
@@ -60,20 +54,63 @@ object VisualizationUtils {
         Pair(BodyPart.RIGHT_KNEE, BodyPart.RIGHT_ANKLE)
     )
 
-    private fun rotate90Degrees(p: PointF, width: Int, height: Int, bm: Bitmap): PointF {
-       val p_norm = PointF(p.x / bm.width.toFloat(), p.y / bm.height.toFloat())
-       val p_norm_rot = PointF(1f-p_norm.y, p_norm.x)
-       val p_rot = PointF(p_norm_rot.x * height.toFloat(), p_norm_rot.y * width.toFloat())
-        //Log.d("CameraManager", "${p_norm_rot.x} - ${p_norm_rot.y}")
-        return p_rot //PointF(p.x * (width.toFloat() / bm.width.toFloat()), p.y * (height.toFloat() / bm.height.toFloat()))
+    enum class Transformation {
+        NORMALIZE,
+        ROTATE90,
+        PROJECT_ON_CANVAS,
     }
+
+    private fun normalizePoint(p: PointF, inputSize: PointF): PointF {
+        return PointF(p.x / inputSize.x, p.y / inputSize.y)
+    }
+
+    private fun rotatePoint90(p: PointF): PointF {
+        return PointF(1f - p.y, p.x)
+    }
+
+    private fun projectPointOnCanvas(
+        p: PointF,
+        inputSize: PointF,
+        outputSize: PointF,
+        isRotated: Boolean
+    ): PointF {
+        // p should be normalized to [0,1]
+        val actualInputSize = if (isRotated) PointF(inputSize.y, inputSize.x) else inputSize
+        val heightRatio = (actualInputSize.y * outputSize.x) / (outputSize.y * actualInputSize.x)
+
+        val pScaled = PointF(p.x, (p.y * heightRatio) - ((heightRatio - 1f) / 2f))
+        return PointF(pScaled.x * outputSize.x, pScaled.y * outputSize.y)
+    }
+
+    fun transformKeypoints(
+        persons: List<Person>,
+        bitmap: Bitmap?,
+        canvas: Canvas?,
+        transformation: Transformation
+    ) {
+        val inputSize = bitmap?.let { PointF(bitmap.width.toFloat(), bitmap.height.toFloat()) }
+        val outputSize = canvas?.let { PointF(canvas.width.toFloat(), canvas.height.toFloat()) }
+        persons.forEach { person ->
+            person.keyPoints.forEach { keyPoint ->
+                when (transformation) {
+                    Transformation.NORMALIZE -> keyPoint.coordinate =
+                        normalizePoint(keyPoint.coordinate, inputSize!!)
+
+                    Transformation.ROTATE90 -> keyPoint.coordinate =
+                        rotatePoint90(keyPoint.coordinate)
+
+                    Transformation.PROJECT_ON_CANVAS -> keyPoint.coordinate =
+                        projectPointOnCanvas(keyPoint.coordinate, inputSize!!, outputSize!!, true)
+                }
+            }
+        }
+    }
+
     // Draw line and point indicate body pose
     fun drawBodyKeypoints(
-        input: Bitmap,
-        cv: Canvas,
+        canvas: Canvas,
         persons: List<Person>,
-        isTrackerEnabled: Boolean = false
-    ): Bitmap {
+    ) {
         val paintCircle = Paint().apply {
             strokeWidth = CIRCLE_RADIUS
             color = Color.BLUE
@@ -85,50 +122,18 @@ object VisualizationUtils {
             style = Paint.Style.STROKE
         }
 
-        val paintText = Paint().apply {
-            textSize = PERSON_ID_TEXT_SIZE
-            color = Color.BLUE
-            textAlign = Paint.Align.LEFT
-        }
-
-        val output = input.copy(Bitmap.Config.ARGB_8888, true)
-        output.eraseColor(Color.TRANSPARENT)
-
-        // TODO Refactor bitmap usage
-        // TODO get scaling right. (poseEstimation works on distorted (nearly quadratic) camera image)
-        //val originalSizeCanvas = Canvas(output)
-        val cv2 = cv
-        cv2.drawColor(Color.GREEN, PorterDuff.Mode.CLEAR)
-        cv2.drawLine(3f, 3f, 3f, cv2.height - 3f, paintLine)
-        cv2.drawLine(3f, 3f, cv2.width - 3f, 3f, paintLine)
-        cv2.drawLine(cv2.width - 3f, 3f, cv2.width - 3f, cv2.height - 3f, paintLine)
-        cv2.drawLine(3f, cv2.height - 3f, cv2.width - 3f, cv2.height - 3f, paintLine)
+        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
 
         persons.forEach { person ->
-            // draw person id if tracker is enable
-            if (isTrackerEnabled) {
-                person.boundingBox?.let {
-                    val personIdX = max(0f, it.left)
-                    val personIdY = max(0f, it.top)
-
-                    cv2.drawText(
-                        person.id.toString(),
-                        personIdX,
-                        personIdY - PERSON_ID_MARGIN,
-                        paintText
-                    )
-                    cv2.drawRect(it, paintLine)
-                }
-            }
             bodyJoints.forEach {
-                val pointA = rotate90Degrees(person.keyPoints[it.first.position].coordinate, cv2.width, cv2.height, input)
-                val pointB = rotate90Degrees(person.keyPoints[it.second.position].coordinate, cv2.width, cv2.height, input)
-                cv2.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintLine)
+                val pointA = person.keyPoints[it.first.position].coordinate
+                val pointB = person.keyPoints[it.second.position].coordinate
+                canvas.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintLine)
             }
 
             person.keyPoints.forEach { point ->
-                val coordinate = rotate90Degrees(point.coordinate, cv2.width, cv2.height, input)
-                cv2.drawCircle(
+                val coordinate = point.coordinate
+                canvas.drawCircle(
                     coordinate.x,
                     coordinate.y,
                     CIRCLE_RADIUS,
@@ -136,6 +141,5 @@ object VisualizationUtils {
                 )
             }
         }
-        return output
     }
 }
