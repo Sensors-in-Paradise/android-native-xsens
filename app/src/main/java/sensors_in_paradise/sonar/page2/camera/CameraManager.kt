@@ -47,7 +47,7 @@ class CameraManager(val context: Context, private val previewView: PreviewView, 
     private val imageAnalysisExecutor = Executors.newFixedThreadPool(2)
     private val imageAnalysis = ImageAnalysis.Builder()
         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-        .setTargetResolution(Size(1280, 720))
+        .setTargetResolution(Size(1280, 720)) //TODO generalize
         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
         .build()
         .apply {
@@ -187,11 +187,14 @@ class CameraManager(val context: Context, private val previewView: PreviewView, 
         cameraProvider?.unbind(imageAnalysis)
     }
 
-    fun startRecordingPose() {
+    private var poseStartTime: Long = 0L
+
+    fun startRecordingPose(outputFile: File) {
         if (!isAnalyzerBound) {
             bindImageAnalyzer()
         }
-        setPoseEstimator()
+        val poseEstimator = createPoseEstimator()
+        imageProcessor = ImageProcessor(poseEstimator, outputFile)
     }
 
     private var onPoseRecordingFinalized: ((poseCaptureStartTime: Long, poseTempFile: File) -> Unit)? = null
@@ -208,11 +211,10 @@ class CameraManager(val context: Context, private val previewView: PreviewView, 
         return PreferencesHelper.shouldStorePoseEstimation(context)
     }
 
-    private fun setPoseEstimator() {
+    private fun createPoseEstimator(): MoveNet {
         val modelType = ModelType.LightningF16
         val targetDevice = Device.CPU
-        val poseDetector = MoveNet.create(context, targetDevice, modelType)
 
-        imageProcessor = ImageProcessor(poseDetector)
+        return MoveNet.create(context, targetDevice, modelType)
     }
 }

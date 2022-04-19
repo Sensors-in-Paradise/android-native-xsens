@@ -41,6 +41,14 @@ class RecordingMetadataStorage(file: File) : JSONStorage(file) {
             save()
         }
     }
+
+    fun setPoseCaptureStartedTime(timeStarted: Long, save: Boolean = false) {
+        json.put("poseCaptureStartTime", timeStarted)
+        if (save) {
+            save()
+        }
+    }
+
     fun getActivities(): ArrayList<Pair<Long, String>> {
         val result = ArrayList<Pair<Long, String>>()
         for (i in 0 until activities.length()) {

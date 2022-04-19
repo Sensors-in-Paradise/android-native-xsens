@@ -83,6 +83,9 @@ class GlobalValues private constructor() {
         fun getVideoRecordingsTempDir(context: Context): File {
             return context.dataDir.resolve("videoTemp")
         }
+        fun getPoseRecordingsTempDir(context: Context): File {
+            return context.dataDir.resolve("poseTemp")
+        }
 
         fun getActivityLabelsJSONFile(context: Context): File {
             return File(context.getExternalFilesDir(null) ?: context.dataDir, "labels.json")

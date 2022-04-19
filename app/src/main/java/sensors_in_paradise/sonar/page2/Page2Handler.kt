@@ -101,7 +101,13 @@ class Page2Handler(
                 )
             }
             if (cameraManager.shouldRecordPose()) {
-                cameraManager.startRecordingPose()
+                val dir = GlobalValues.getPoseRecordingsTempDir(context)
+                dir.mkdir()
+                cameraManager.startRecordingPose(
+                    dir.resolve(
+                        "poseEstimation_" + System.currentTimeMillis().toString() + ".csv"
+                    )
+                )
             }
         }
         loggingManager.setOnFinalizingRecording { dir, metadata ->
@@ -118,7 +124,19 @@ class Page2Handler(
                     e.printStackTrace()
                 }
             }
-            cameraManager.stopRecordingPose()
+            cameraManager.stopRecordingPose { poseCaptureStartTime, poseTempFile ->
+                metadata.setPoseCaptureStartedTime(poseCaptureStartTime, true)
+                try {
+                    Files.move(poseTempFile, dir.resolve(Recording.POSE_CAPTURE_FILENAME))
+                    val recordingIndex =
+                        recordingsManager.recordingsList.indexOfFirst { r -> r.dir == dir }
+                    recordingsAdapter.notifyItemChanged(recordingIndex)
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                } catch (e: IllegalArgumentException) {
+                    e.printStackTrace()
+                }
+            }
         }
     }
 
