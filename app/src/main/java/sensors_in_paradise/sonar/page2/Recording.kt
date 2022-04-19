@@ -184,6 +184,8 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
         return dir.listFiles { file -> file.isFile && file.name.endsWith(".csv") } ?: emptyArray()
     }
 
+
+
     private fun checkCache(): RecordingFileState? {
         val state = metadataStorage.getRecordingState()
         if (state == null) return state

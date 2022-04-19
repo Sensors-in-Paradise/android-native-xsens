@@ -82,8 +82,8 @@ class RecordingsAdapter(
             videoView.apply {
                 if (recording.hasVideoRecording()) {
                     visibility = View.VISIBLE
-                    setVideoPath(recording.getVideoFile().absolutePath)
                     setOnPreparedListener { mp -> mp.isLooping = true }
+                    setVideoPath(recording.getVideoFile().absolutePath)
                     start()
                 } else {
                     videoView.visibility = View.GONE
