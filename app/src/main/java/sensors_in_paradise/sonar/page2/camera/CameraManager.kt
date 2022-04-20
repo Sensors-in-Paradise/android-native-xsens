@@ -20,13 +20,18 @@ import sensors_in_paradise.sonar.page2.LoggingManager
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.ModelType
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.MoveNet
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.ImageProcessor
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.StorageManager
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Device
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.File
 import java.time.LocalDateTime
 import java.util.concurrent.Executors
 
-class CameraManager(val context: Context, private val previewView: PreviewView, overlayView: TextureView) :
+class CameraManager(
+    val context: Context,
+    private val previewView: PreviewView,
+    overlayView: TextureView
+) :
     Consumer<VideoRecordEvent> {
     private var cameraProvider: ProcessCameraProvider? = null
     private var isPreviewBound = false
@@ -44,6 +49,7 @@ class CameraManager(val context: Context, private val previewView: PreviewView, 
     private var videoRecording: Recording? = null
 
     private var imageProcessor: ImageProcessor? = null
+    private var storageManager: StorageManager? = null
     private val imageAnalysisExecutor = Executors.newFixedThreadPool(2)
     private val imageAnalysis = ImageAnalysis.Builder()
         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
@@ -56,13 +62,15 @@ class CameraManager(val context: Context, private val previewView: PreviewView, 
                 // insert your code here.
                 imageProxy.image?.let {
                     imageProcessor?.processImage(
-                        it, overlayView)
+                        it, overlayView
+                    )
                 }
 
                 // after done, release the ImageProxy object
                 imageProxy.close()
             })
         }
+
     init {
         ProcessCameraProvider.getInstance(context).apply {
             addListener({
@@ -122,14 +130,16 @@ class CameraManager(val context: Context, private val previewView: PreviewView, 
         videoFile = outputFile
         val outputOptions = FileOutputOptions.Builder(outputFile).build()
 
-       val recording = videoCapture.output
+        val recording = videoCapture.output
             .prepareRecording(context, outputOptions)
             .start(ContextCompat.getMainExecutor(context), this)
         videoRecording = recording
         return recording
     }
 
-    private var onRecordingFinalized: ((videoCaptureStartTime: Long, videoTempFile: File) -> Unit)? = null
+    private var onRecordingFinalized: ((videoCaptureStartTime: Long, videoTempFile: File) -> Unit)? =
+        null
+
     /** Stops the recording and returns the UNIX timestamp of
      * when the recording did actually start and the file where it's stored
      * */
@@ -141,6 +151,7 @@ class CameraManager(val context: Context, private val previewView: PreviewView, 
         videoRecording?.close()
         unbindVideoCapture()
     }
+
     fun shouldRecordVideo(): Boolean {
         return PreferencesHelper.shouldStoreRawCameraRecordings(context)
     }
@@ -187,23 +198,29 @@ class CameraManager(val context: Context, private val previewView: PreviewView, 
         cameraProvider?.unbind(imageAnalysis)
     }
 
-    private var poseStartTime: Long = 0L
+    private var poseStartTime: Long? = null
 
     fun startRecordingPose(outputFile: File) {
         if (!isAnalyzerBound) {
             bindImageAnalyzer()
         }
         val poseEstimator = createPoseEstimator()
-        imageProcessor = ImageProcessor(poseEstimator, outputFile)
+        storageManager = storageManager ?: StorageManager(outputFile)
+        imageProcessor = imageProcessor ?: ImageProcessor(poseEstimator, storageManager!!)
+
+        val localDateTime = LocalDateTime.now()
+        // TODO use actual setting to get model type and dimensions
+        storageManager!!.writeHeader(localDateTime, "LightningF16", 2)
+        poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
     }
 
-    private var onPoseRecordingFinalized: ((poseCaptureStartTime: Long, poseTempFile: File) -> Unit)? = null
     /** Stops the recording and returns the UNIX timestamp of
      * when the recording did actually start and the file where it's stored
      * */
     fun stopRecordingPose(onPoseRecordingFinalized: ((poseCaptureStartTime: Long, poseTempFile: File) -> Unit)? = null) {
-        this.onPoseRecordingFinalized = onPoseRecordingFinalized
-
+        if (imageProcessor != null && storageManager != null) {
+            onPoseRecordingFinalized?.invoke(poseStartTime ?: 0L, storageManager!!.outputFile)
+        }
         unbindImageAnalyzer()
     }
 
