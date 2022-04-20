@@ -21,9 +21,7 @@ package sensors_in_paradise.sonar.page2.camera.pose_estimation
 
 import android.graphics.*
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.BodyPart
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.KeyPoint
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
-import kotlin.math.max
 
 object VisualizationUtils {
     /** Radius of circle used to draw keypoints.  */
@@ -110,14 +108,16 @@ object VisualizationUtils {
     fun drawBodyKeypoints(
         canvas: Canvas,
         persons: List<Person>,
+        circleRadius: Float = CIRCLE_RADIUS,
+        lineWidth: Float = LINE_WIDTH
     ) {
         val paintCircle = Paint().apply {
-            strokeWidth = CIRCLE_RADIUS
+            strokeWidth = circleRadius
             color = Color.BLUE
             style = Paint.Style.FILL
         }
         val paintLine = Paint().apply {
-            strokeWidth = LINE_WIDTH
+            strokeWidth = lineWidth
             color = Color.WHITE
             style = Paint.Style.STROKE
         }
@@ -136,7 +136,7 @@ object VisualizationUtils {
                 canvas.drawCircle(
                     coordinate.x,
                     coordinate.y,
-                    CIRCLE_RADIUS,
+                    circleRadius,
                     paintCircle
                 )
             }

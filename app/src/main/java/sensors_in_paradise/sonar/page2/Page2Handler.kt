@@ -15,6 +15,7 @@ import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.page2.camera.CameraManager
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.StorageManager
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.IOException
 
@@ -124,10 +125,12 @@ class Page2Handler(
                     e.printStackTrace()
                 }
             }
-            cameraManager.stopRecordingPose { poseCaptureStartTime, poseTempFile ->
+            cameraManager.stopRecordingPose { poseCaptureStartTime, poseTempFile, storageManager->
                 metadata.setPoseCaptureStartedTime(poseCaptureStartTime, true)
                 try {
-                    Files.move(poseTempFile, dir.resolve(Recording.POSE_CAPTURE_FILENAME))
+                    Files.move(poseTempFile, dir.resolve(StorageManager.POSE_CAPTURE_FILENAME))
+                    // TODO delete next line
+                    storageManager.createVideoFromCSV(dir.resolve(StorageManager.POSE_CAPTURE_FILENAME).absolutePath, dir.resolve("poseEstimation.mp4"))
                     val recordingIndex =
                         recordingsManager.recordingsList.indexOfFirst { r -> r.dir == dir }
                     recordingsAdapter.notifyItemChanged(recordingIndex)

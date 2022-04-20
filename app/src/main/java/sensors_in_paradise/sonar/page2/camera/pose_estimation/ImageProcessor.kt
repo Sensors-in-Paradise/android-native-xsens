@@ -32,13 +32,14 @@ class ImageProcessor(private val poseDetector: PoseDetector, private val storage
     // process image
     fun processImage(image: Image, overlayView: TextureView) {
         val bitmap = imageToBitmap(image)
-        val persons = mutableListOf<Person>()
+        var persons = mutableListOf<Person>()
 
         synchronized(lock) {
             poseDetector.estimatePoses(bitmap).let {
                 persons.addAll(it)
             }
         }
+        persons = persons.filter { it.score > MIN_CONFIDENCE }.toMutableList()
 
         VisualizationUtils.transformKeypoints(
             persons, bitmap, null,
@@ -59,9 +60,10 @@ class ImageProcessor(private val poseDetector: PoseDetector, private val storage
             )
 
             VisualizationUtils.drawBodyKeypoints(
-                canvas,
-                persons.filter { it.score > MIN_CONFIDENCE }
-            )
+                    canvas,
+                    persons
+                    )
+
             overlayView.unlockCanvasAndPost(canvas)
         }
     }

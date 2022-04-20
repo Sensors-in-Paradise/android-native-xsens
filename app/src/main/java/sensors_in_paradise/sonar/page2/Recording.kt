@@ -219,6 +219,5 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
 
     companion object {
         const val VIDEO_CAPTURE_FILENAME = "recording.mp4"
-        const val POSE_CAPTURE_FILENAME = "poseEstimation.csv"
     }
 }

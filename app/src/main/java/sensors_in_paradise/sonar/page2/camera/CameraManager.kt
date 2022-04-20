@@ -206,20 +206,21 @@ class CameraManager(
         }
         val poseEstimator = createPoseEstimator()
         storageManager = storageManager ?: StorageManager(outputFile)
-        imageProcessor = imageProcessor ?: ImageProcessor(poseEstimator, storageManager!!)
 
         val localDateTime = LocalDateTime.now()
         // TODO use actual setting to get model type and dimensions
         storageManager!!.writeHeader(localDateTime, "LightningF16", 2)
         poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
+
+        imageProcessor = imageProcessor ?: ImageProcessor(poseEstimator, storageManager!!)
     }
 
     /** Stops the recording and returns the UNIX timestamp of
      * when the recording did actually start and the file where it's stored
-     * */
-    fun stopRecordingPose(onPoseRecordingFinalized: ((poseCaptureStartTime: Long, poseTempFile: File) -> Unit)? = null) {
+     * MEIN CODE IST SCHEIßE - ALEX! */
+    fun stopRecordingPose(onPoseRecordingFinalized: ((poseCaptureStartTime: Long, poseTempFile: File, storageManager: StorageManager) -> Unit)? = null) {
         if (imageProcessor != null && storageManager != null) {
-            onPoseRecordingFinalized?.invoke(poseStartTime ?: 0L, storageManager!!.outputFile)
+            onPoseRecordingFinalized?.invoke(poseStartTime ?: 0L, storageManager!!.outputFile, storageManager!!)
         }
         unbindImageAnalyzer()
     }

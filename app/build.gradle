@@ -63,6 +63,9 @@ android {
             universalApk true
         }
     }
+    configurations.all {
+        resolutionStrategy.force 'com.google.code.findbugs:jsr305:3.0.2'
+    }
 }
 
 dependencies {
@@ -107,6 +110,10 @@ dependencies {
     implementation("androidx.camera:camera-camera2:${camerax_version}")
     implementation("androidx.camera:camera-video:${camerax_version}")
     implementation("androidx.camera:camera-view:${camerax_version}")
+
+    implementation("org.jcodec:jcodec:0.2.3")
+    implementation("org.jcodec:jcodec-android:0.2.2")
+    implementation("com.opencsv:opencsv:4.6")
 }
 repositories {
     mavenCentral()
