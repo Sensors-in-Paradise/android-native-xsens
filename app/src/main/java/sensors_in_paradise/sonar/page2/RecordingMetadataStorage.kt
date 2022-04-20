@@ -7,9 +7,11 @@ import org.json.JSONObject
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
 
-class RecordingMetadataStorage(file: File, initialJson: JSONObject?=null) : JSONStorage(file,initialJson) {
-    data class LabelEntry(var timeStarted: Long,
-                     var activity: String)
+class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JSONStorage(file, initialJson) {
+    data class LabelEntry(
+        var timeStarted: Long,
+        var activity: String
+    )
     private lateinit var activities: JSONArray
     override fun onFileNewlyCreated() {
         activities = JSONArray()
@@ -108,7 +110,7 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject?=null) : JSON
         }
         json.put("sensorMapping", obj)
     }
-    fun clone():RecordingMetadataStorage {
+    fun clone(): RecordingMetadataStorage {
         return RecordingMetadataStorage(file, json)
     }
 }

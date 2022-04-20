@@ -184,8 +184,6 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
         return dir.listFiles { file -> file.isFile && file.name.endsWith(".csv") } ?: emptyArray()
     }
 
-
-
     private fun checkCache(): RecordingFileState? {
         val state = metadataStorage.getRecordingState()
         if (state == null) return state
@@ -217,6 +215,12 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
         }
 
         metadataStorage.setRecordingState(recordingState)
+    }
+    fun getActivitiesSummary(): String {
+        return metadataStorage.getActivities().joinToString("\n") { (activityStartTime, activity) ->
+            GlobalValues.getDurationAsString(activityStartTime - metadataStorage.getTimeStarted()) + "   " +
+                    activity
+        }
     }
 
     companion object {

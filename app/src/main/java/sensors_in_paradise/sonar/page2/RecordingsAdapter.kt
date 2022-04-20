@@ -47,11 +47,7 @@ class RecordingsAdapter(
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val recording = dataSet[position]
         val metadata = recording.metadataStorage
-        val activitiesSummary =
-            metadata.getActivities().joinToString("\n") { (activityStartTime, activity) ->
-                GlobalValues.getDurationAsString(activityStartTime - metadata.getTimeStarted()) + "   " +
-                        activity
-            }
+
         val personName = metadata.getPerson()
         val duration = metadata.getDuration()
         val start = dateFormat.format(Date(metadata.getTimeStarted()))
