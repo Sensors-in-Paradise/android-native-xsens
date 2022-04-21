@@ -59,7 +59,9 @@ class RecordingsAdapter(
                 notifyItemRemoved(index)
             }
            itemView.setOnClickListener {
-                LabelsEditorDialog(context, recording)
+                LabelsEditorDialog(context, recording) {
+                    notifyItemChanged(position)
+                }
             }
             activityTextView.text =
                 recording.getDisplayTitle()

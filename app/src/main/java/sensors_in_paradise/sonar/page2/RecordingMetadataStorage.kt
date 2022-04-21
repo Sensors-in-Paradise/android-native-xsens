@@ -24,12 +24,13 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
     }
 
     fun setData(
-        activities: ArrayList<Pair<Long, String>>,
+        activities: ArrayList<LabelEntry>,
         totalStartTime: Long,
         endTime: Long,
         person: String,
         sensorMacMap: Map<String, String>
     ) {
+        activities.clear()
         for (activity in activities) {
             addActivity(activity)
         }
@@ -41,6 +42,15 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
     }
     fun setVideoCaptureStartedTime(timeStarted: Long, save: Boolean = false) {
         json.put("videoCaptureStartTime", timeStarted)
+        if (save) {
+            save()
+        }
+    }
+    fun setActivities(activities: ArrayList<LabelEntry>, save: Boolean = false) {
+        clearActivities()
+        for (activity in activities) {
+            addActivity(activity)
+        }
         if (save) {
             save()
         }
@@ -84,11 +94,15 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
             null
         }
     }
-
-    private fun addActivity(activity: Pair<Long, String>) {
+    private fun clearActivities() {
+       while (activities.length()> 0) {
+               activities.remove(0)
+           }
+    }
+    private fun addActivity(activity: LabelEntry) {
         val obj = JSONObject()
-        obj.put("timeStarted", activity.first)
-        obj.put("label", activity.second)
+        obj.put("timeStarted", activity.timeStarted)
+        obj.put("label", activity.activity)
         activities.put(obj)
     }
 
@@ -109,6 +123,15 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
             obj.put(entry.key, entry.value)
         }
         json.put("sensorMapping", obj)
+    }
+    fun getSensorMacMap(): Map<String, String> {
+        val result = mutableMapOf<String, String>()
+        val obj = json.getJSONObject("sensorMapping")
+
+        for (key in obj.keys()) {
+            result[key] = obj.getString(key)
+        }
+        return result
     }
     fun clone(): RecordingMetadataStorage {
         return RecordingMetadataStorage(file, json)

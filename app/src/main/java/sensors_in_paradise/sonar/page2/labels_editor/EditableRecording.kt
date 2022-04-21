@@ -20,6 +20,10 @@ class EditableRecording(
     private fun getActualTimeStarted(): Long {
         return activities[0].timeStarted
     }
+    fun save() {
+        metadataCopy.setActivities(activities, true)
+        recording.metadataStorage = metadataCopy
+    }
 
     fun getDuration(): Long {
         return metadataCopy.getTimeEnded() - getActualTimeStarted()
@@ -96,17 +100,17 @@ class EditableRecording(
         }
     }
 
-    fun relativeSensorTimeToVideoTime(relativeSensorTime: Long): Long? {
+    fun relativeSensorTimeToVideoTime(relativeSensorTime: Long): Long {
         val videoStartTime = metadataCopy.getVideoCaptureStartedTime()
         if (videoStartTime != null) {
             val videoDelay = videoStartTime - getActualTimeStarted()
             return relativeSensorTime - videoDelay
         }
-        return null
+        return relativeSensorTime
     }
 
     fun areTimeStampsConsistent(): Boolean {
-        var lastTime = metadataCopy.getTimeStarted()
+        var lastTime = 0L
         for (activity in activities) {
             if (lastTime > activity.timeStarted) {
                 return false

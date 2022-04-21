@@ -345,7 +345,7 @@ class LoggingManager(
  */
 class ActiveRecording(val context: Context, private val devices: XSENSArrayList) {
     private val xsLoggers: ArrayList<XsensDotLogger> = ArrayList()
-    var labels = ArrayList<Pair<Long, String>>()
+    var labels = ArrayList<RecordingMetadataStorage.LabelEntry>()
     private val sensorMacToTagMap = mutableMapOf<String, String>()
     private val tempSensorFiles = arrayListOf<Pair<String, File>>()
 
@@ -394,7 +394,7 @@ class ActiveRecording(val context: Context, private val devices: XSENSArrayList)
     fun addLabel(timestamp: Long, label: String): Int {
         // If its the first label, it has to start at recordingStartTime
         val actualTimestamp = if (labels.isEmpty()) recordingStartTime.toSonarLong() else timestamp
-        labels.add(Pair(actualTimestamp, label))
+        labels.add(RecordingMetadataStorage.LabelEntry(actualTimestamp, label))
         return labels.size - 1
     }
 
@@ -472,7 +472,7 @@ class ActiveRecording(val context: Context, private val devices: XSENSArrayList)
     }
 
     fun changeLabel(position: Int, value: String) {
-        labels[position] = labels[position].copy(second = value)
+        labels[position].activity = value
     }
 }
 

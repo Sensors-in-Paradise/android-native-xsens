@@ -3,7 +3,6 @@ package sensors_in_paradise.sonar.page2.labels_editor
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
-import android.media.MediaPlayer
 import android.util.Log
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.LayoutInflater
@@ -22,7 +21,8 @@ import sensors_in_paradise.sonar.page2.Recording
 
 class LabelsEditorDialog(
     val context: Context,
-    val recording: Recording
+    val recording: Recording,
+    private val onRecordingChanged: () -> Unit
 ) : RangeSlider.OnSliderTouchListener {
     internal class CustomGestureListener(val onClick: () -> Unit) : SimpleOnGestureListener() {
 
@@ -48,7 +48,7 @@ class LabelsEditorDialog(
     private var endTV: TextView
     private var statusTV: TextView
     private var startTV: TextView
-    private var mediaPlayer: MediaPlayer? = null
+    private var visualizer: VisualSequenceViewHolder
     private var rangeSlider: RangeSlider
     var selectedItemIndex = 0
     private lateinit var neutralButton: Button
@@ -68,13 +68,13 @@ class LabelsEditorDialog(
         statusTV = root.findViewById(R.id.tv_consistencyStatus_labelEditor)
         rangeSlider = root.findViewById(R.id.rangeSlider_labelEditor)
         motionLayout = root.findViewById(R.id.motionLayout_carouselParent_labelEditor)
+        visualizer = VideoViewHolder(videoView) {
+            // TODO: implement UI for signaling that we are ready
+        }
 
         rangeSlider.setLabelFormatter { value -> GlobalValues.getDurationAsString(value.toLong()) }
         if (recording.hasVideoRecording()) {
-            videoView.setVideoPath(recording.getVideoFile().absolutePath)
-            videoView.setOnPreparedListener { mp ->
-                mediaPlayer = mp
-            }
+            visualizer.sourcePath = recording.getVideoFile().absolutePath
         } else {
             videoView.visibility = View.GONE
         }
@@ -92,9 +92,9 @@ class LabelsEditorDialog(
                     value.toLong()
                 )
             }
-            mediaPlayer?.seekTo(
-                editableRecording.relativeSensorTimeToVideoTime(value.toLong())!!,
-                MediaPlayer.SEEK_CLOSEST
+            visualizer.stopLooping()
+            visualizer.seekTo(
+                editableRecording.relativeSensorTimeToVideoTime(value.toLong())
             )
             Log.d("LabelsEditorDialog", "activeThumb: ${slider.activeThumbIndex}")
         }
@@ -129,17 +129,21 @@ class LabelsEditorDialog(
             Log.d("LabelsEditorDialog", "nextItem clicked")
             carousel.transitionToIndex(selectedItemIndex + 1, 1000)
         }*/
-
-        currentItem.setOnClickListener {
-            showActivitiesDialog()
+        /*
+        currentItem.setOnTouchListener { v, event ->
+            Log.d("LabelsEditorDialog", "onTouchCurrentItem")
+            false
         }
-
+        */
         // currentItem.setOnTouchListener(LabelTouchListener({showActivitiesDialog()}))
 
         builder.setView(root)
         builder.setPositiveButton(
-            "Yes", null
-        )
+            "Save"
+        ) { _, _ ->
+            editableRecording.save()
+            onRecordingChanged()
+        }
         builder.setNeutralButton(
             "Split", null
         )
@@ -153,6 +157,14 @@ class LabelsEditorDialog(
             neutralButton.setOnClickListener {
                 splitCurrentActivity()
             }
+            val cancelButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+            cancelButton.setOnClickListener {
+                dialog.dismiss()
+            }
+            dialog.setCancelable(false)
+        }
+        dialog.setOnDismissListener {
+            visualizer.stopLooping()
         }
         dialog.show()
     }
@@ -197,11 +209,25 @@ class LabelsEditorDialog(
             endTime
         )
     }
-
+    private fun loopVisualizerForSelectedActivity() {
+        visualizer.loopInterval(
+            editableRecording.relativeSensorTimeToVideoTime(
+                editableRecording.getRelativeStartTimeOfActivity(
+                    selectedItemIndex
+                )
+            ),
+            editableRecording.relativeSensorTimeToVideoTime(
+                editableRecording.getRelativeEndTimeOfActivity(
+                    selectedItemIndex
+                )
+            )
+        )
+    }
     private fun notifyNewActivitySelected() {
         updateRangeSlider()
         statusTV.text =
-            if (editableRecording.areTimeStampsConsistent()) "consistent" else "inconsistent timestamps"
+            if (editableRecording.areTimeStampsConsistent()) "" else "inconsistent timestamps"
+        loopVisualizerForSelectedActivity()
     }
 
     private fun showActivitiesDialog() {
@@ -254,6 +280,7 @@ class LabelsEditorDialog(
         if (!isInSplittingMode()) {
             updateRangeSlider()
         }
+        loopVisualizerForSelectedActivity()
     }
 
     private fun isInSplittingMode(): Boolean {
