@@ -48,6 +48,7 @@
                 android:alpha="0.2"
                 android:maxWidth="100dp"
                 android:textAlignment="center"
+
                 />
 
             <sensors_in_paradise.sonar.page2.labels_editor.ClickableCarouselTextView

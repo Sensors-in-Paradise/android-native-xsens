@@ -66,6 +66,7 @@ class LabelsEditorDialog(
             visualizer.sourcePath = recording.getVideoFile().absolutePath
         } else {
             videoView.visibility = View.GONE
+            visualizerPreparingIndicator.visibility = View.GONE
         }
         rangeSlider.addOnChangeListener { slider, value, _ ->
             val numThumbs = slider.values.size
