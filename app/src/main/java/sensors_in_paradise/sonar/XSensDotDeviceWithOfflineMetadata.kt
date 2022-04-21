@@ -14,6 +14,8 @@ class XSensDotDeviceWithOfflineMetadata(
     private val _tag: String?
 ) : XsensDotDevice(context, device, cb) {
     private val defaultTag = "Xsens DOT"
+    var isResettingHeading = false
+    var isRevertingHeading = false
 
     override fun getTag(): String {
         val shouldUseOfflineTag =

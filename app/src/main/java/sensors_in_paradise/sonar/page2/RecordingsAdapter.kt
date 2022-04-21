@@ -9,8 +9,8 @@ import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.GlobalValues
-import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import sensors_in_paradise.sonar.R
+import sensors_in_paradise.sonar.page2.labels_editor.LabelsEditorDialog
 import sensors_in_paradise.sonar.util.dialogs.VideoDialog
 import java.text.DateFormat
 import java.util.*
@@ -47,11 +47,7 @@ class RecordingsAdapter(
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val recording = dataSet[position]
         val metadata = recording.metadataStorage
-        val activitiesSummary =
-            metadata.getActivities().joinToString("\n") { (activityStartTime, activity) ->
-                GlobalValues.getDurationAsString(activityStartTime - metadata.getTimeStarted()) + "   " +
-                        activity
-            }
+
         val personName = metadata.getPerson()
         val duration = metadata.getDuration()
         val start = dateFormat.format(Date(metadata.getTimeStarted()))
@@ -63,7 +59,9 @@ class RecordingsAdapter(
                 notifyItemRemoved(index)
             }
            itemView.setOnClickListener {
-                MessageDialog(context, activitiesSummary)
+                LabelsEditorDialog(context, recording) {
+                    notifyItemChanged(position)
+                }
             }
             activityTextView.text =
                 recording.getDisplayTitle()
@@ -82,8 +80,8 @@ class RecordingsAdapter(
             videoView.apply {
                 if (recording.hasVideoRecording()) {
                     visibility = View.VISIBLE
-                    setVideoPath(recording.getVideoFile().absolutePath)
                     setOnPreparedListener { mp -> mp.isLooping = true }
+                    setVideoPath(recording.getVideoFile().absolutePath)
                     start()
                 } else {
                     videoView.visibility = View.GONE

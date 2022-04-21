@@ -47,6 +47,11 @@
             android:title="Recordings subdirectory"
             android:summary="Choose the name of the subdirectory in which recordings should be stored. This directory will then also be mirrored in the cloud on upload."/>
         <SwitchPreferenceCompat
+            app:key="playSoundOnRecordingStart"
+            app:title="Play sound when starting to record"
+            app:summary="This can be useful to synchronize the sensor recordings with recordings from external cameras etc."
+            />
+        <SwitchPreferenceCompat
             app:key="recordWithCamera"
             app:title="Enable camera on recording screen" />
         <SwitchPreferenceCompat
@@ -67,6 +72,18 @@
             app:key="storePoseEstimation"
             app:title="Store TensorFlow Poses"
             app:summary="Store pose data estimated by TensorFlow when recording. "/>
+    </PreferenceCategory>
+    <PreferenceCategory app:title="Advanced sensor options">
+        <SwitchPreferenceCompat
+            app:key="viewHeadingMenuItems"
+            app:defaultValue="false"
+            app:summary="Show menu items for resetting or reverting sensor heading. \nHeading reset aligns heading (orientation) outputs among all sensors and with
+the object they are connected to. \nMore detailed information can be found in the Xsens Dot User Manual subsection 4.1.3"
+            app:title="Sensor heading options" />
+        <Preference android:title="XSens Dot User Manual" >
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://www.xsens.com/hubfs/Downloads/Manuals/Xsens%20DOT%20User%20Manual.pdf" />
+        </Preference>
     </PreferenceCategory>
     <PreferenceCategory app:title="Cloud">
         <EditTextPreference

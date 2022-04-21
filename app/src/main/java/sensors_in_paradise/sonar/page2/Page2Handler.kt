@@ -3,6 +3,7 @@ package sensors_in_paradise.sonar.page2
 import android.app.Activity
 import android.content.Context
 import android.view.TextureView
+import android.media.MediaPlayer
 import android.view.View
 import android.widget.*
 import androidx.camera.view.PreviewView
@@ -21,7 +22,8 @@ import java.io.IOException
 
 class Page2Handler(
     private val devices: XSENSArrayList,
-    private val recordingsManager: RecordingDataManager
+    private val recordingsManager: RecordingDataManager,
+    private val sensorOccupationInterface: SensorOccupationInterface?
 ) : PageInterface, ConnectionInterface,
     TabLayout.OnTabSelectedListener {
     private lateinit var context: Context
@@ -40,12 +42,12 @@ class Page2Handler(
     private lateinit var loggingManager: LoggingManager
     private lateinit var activity: Activity
     private lateinit var cameraManager: CameraManager
-
+    private lateinit var mediaPlayerSound: MediaPlayer
     override fun activityCreated(activity: Activity) {
         this.context = activity
         this.activity = activity
         timer = activity.findViewById(R.id.timer)
-
+        mediaPlayerSound = MediaPlayer.create(context, R.raw.beep)
         recyclerViewRecordings = activity.findViewById(R.id.recyclerView_recordings_captureFragment)
         val linearLayoutManager = LinearLayoutManager(context)
         recyclerViewRecordings.layoutManager = linearLayoutManager
@@ -88,6 +90,10 @@ class Page2Handler(
             activitiesCenterTV.visibility = View.VISIBLE
         }
         loggingManager.setOnRecordingStarted {
+            sensorOccupationInterface?.onSensorOccupationStatusChanged(true)
+            if (PreferencesHelper.shouldPlaySoundOnRecordingStart(context)) {
+                mediaPlayerSound.start()
+            }
             if (tabLayout.selectedTabPosition != 2) {
                 tabLayout.selectTab(activitiesTab)
             }
@@ -138,6 +144,7 @@ class Page2Handler(
                     e.printStackTrace()
                 }
             }
+            sensorOccupationInterface?.onSensorOccupationStatusChanged(false)
         }
     }
 
@@ -180,9 +187,7 @@ class Page2Handler(
         }
     }
 
-    override fun onTabReselected(tab: TabLayout.Tab?) {
-        // TODO("Not yet implemented")
-    }
+    override fun onTabReselected(tab: TabLayout.Tab?) {}
 
     private fun setCameraTabVisible(visible: Boolean) {
         if (visible) {

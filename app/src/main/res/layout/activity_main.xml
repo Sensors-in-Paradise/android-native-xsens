@@ -1,32 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/rv"
 
+    android:id="@+id/rv"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:orientation="vertical"
     android:gravity="bottom"
-    xmlns:custom="http://schemas.android.com/apk/res-auto">
-    <sensors_in_paradise.sonar.SensorDataTrafficIndicatorView
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <sensors_in_paradise.sonar.custom_views.SensorDataTrafficIndicatorView
         android:id="@+id/sensorDataTrafficIndicator_captureFragment"
         android:layout_width="match_parent"
         android:layout_height="8dp"
-        custom:indicatorColor="@color/colorPrimary"
+        custom:fadeOutDuration="200"
         custom:idleColor="@color/slightBackgroundContrast"
-        custom:textColor="?android:textColorPrimary"
-        custom:fadeOutDuration="200"/>
+        custom:indicatorColor="@color/colorPrimary"
+        custom:textColor="?android:textColorPrimary" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout_sensorOrientation_activityMain"
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:orientation="horizontal"
+        android:visibility="gone" />
     <android.widget.ViewAnimator
         android:id="@+id/switcher_activity_main"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        >
-        <include android:id="@+id/first_activity_main"  layout="@layout/connection_fragment" />
-        <include android:id="@+id/second_activity_main"  layout="@layout/capture_fragment" />
-        <include android:id="@+id/second_activity_main"  layout="@layout/prediction_fragment" />
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <include
+            android:id="@+id/first_activity_main"
+            layout="@layout/connection_fragment" />
+
+        <include
+            android:id="@+id/second_activity_main"
+            layout="@layout/capture_fragment" />
+
+        <include
+            android:id="@+id/second_activity_main"
+            layout="@layout/prediction_fragment" />
     </android.widget.ViewAnimator>
     <!--        android:background="@drawable/tablayout_background"-->
     <com.google.android.material.tabs.TabLayout
@@ -34,25 +50,27 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/slightBackgroundContrast"
-        app:tabIndicatorColor="@color/colorAccent"
         app:tabIconTint="@color/primary_selector"
+        app:tabIndicatorColor="@color/colorAccent"
         app:tabSelectedTextColor="@color/colorPrimary"
-        app:tabTextColor="?android:textColorSecondary"
-        >
+        app:tabTextColor="?android:textColorSecondary">
+
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Connection"
-            android:icon="@drawable/ic_baseline_bluetooth_connected_24"/>
+            android:icon="@drawable/ic_baseline_bluetooth_connected_24"
+            android:text="Connection" />
+
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Recording"
-            android:icon="@drawable/ic_baseline_label_24"/>
+            android:icon="@drawable/ic_baseline_label_24"
+            android:text="Recording" />
+
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Prediction"
-            android:icon="@drawable/ic_baseline_local_fire_department_24"/>
+            android:icon="@drawable/ic_baseline_local_fire_department_24"
+            android:text="Prediction" />
     </com.google.android.material.tabs.TabLayout>
 </LinearLayout>

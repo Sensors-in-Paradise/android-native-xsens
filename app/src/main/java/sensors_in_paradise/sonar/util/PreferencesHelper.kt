@@ -61,6 +61,12 @@ class PreferencesHelper private constructor() {
         fun shouldStorePoseEstimation(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("storePoseEstimation", false)
         }
+        fun shouldPlaySoundOnRecordingStart(context: Context): Boolean {
+            return getSharedPreferences(context).getBoolean("playSoundOnRecordingStart", false)
+        }
+        fun shouldViewSensorHeadingMenuItems(context: Context): Boolean {
+            return getSharedPreferences(context).getBoolean("viewHeadingMenuItems", false)
+        }
         fun getCameraRecordingQuality(context: Context): Quality {
             return when (getSharedPreferences(context).getString("videoRecordingQuality", "LOWEST")) {
                 "HIGHEST" -> Quality.HIGHEST

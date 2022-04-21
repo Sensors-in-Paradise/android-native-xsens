@@ -1,10 +1,11 @@
-package sensors_in_paradise.sonar
+package sensors_in_paradise.sonar.custom_views
 
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.view.postDelayed
+import sensors_in_paradise.sonar.R
 import java.lang.Integer.max
 
 class SensorDataTrafficIndicatorView(context: Context, attrs: AttributeSet) : View(context, attrs) {

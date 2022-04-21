@@ -63,7 +63,7 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
     }
     override fun onXsensDotFirmwareVersionRead(s: String, s1: String) {}
     override fun onXsensDotTagChanged(address: String, tag: String) {
-        val device = scannedDevices.get(address)
+        val device = scannedDevices[address]
         if (device != null) {
             Log.d("CONNECTION_SCREEN", "setting tag for device $address tag: $tag")
             xsensDotMetadata.setTagForAddress(address, tag)
@@ -110,6 +110,7 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
             refreshLinearLayout.visibility = View.VISIBLE
         }
     }
+
     @SuppressLint("NotifyDataSetChanged")
     @RequiresApi(Build.VERSION_CODES.S)
     override fun activityCreated(activity: Activity) {
@@ -142,6 +143,7 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
             mXsScanner!!.startScan()
         }
     }
+    @SuppressLint("SetTextI18n")
     override fun activityResumed() {
         if (PermissionsHelper.areAllPermissionsGranted(context)) {
             val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
@@ -248,6 +250,7 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
             setSyncProgress(progress)
         }
     }
+    @SuppressLint("SetTextI18n")
     private fun setSyncProgress(progress: Int) {
         syncBtn.text = "Syncing connected sensors: $progress%"
     }
@@ -265,5 +268,8 @@ class Page1Handler(private val scannedDevices: XSENSArrayList) :
 
     fun addConnectionInterface(connectionInterface: ConnectionInterface) {
         connectionInterfaces.add(connectionInterface)
+    }
+    fun notifyItemChanged(address: String) {
+        sensorAdapter.notifyItemChanged(address)
     }
 }
