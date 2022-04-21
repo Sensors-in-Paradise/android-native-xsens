@@ -1,9 +1,11 @@
 package sensors_in_paradise.sonar.page2.labels_editor
 
 import android.media.MediaPlayer
+import android.util.Log
 import android.widget.VideoView
 
-class VideoViewHolder(private val videoView: VideoView, onPreparedListener: () -> Unit) : VisualSequenceViewHolder(onPreparedListener) {
+class VideoViewHolder(private val videoView: VideoView, onPreparedListener: () -> Unit) :
+    VisualSequenceViewHolder(onPreparedListener) {
     private var mediaPlayer: MediaPlayer? = null
 
     override fun loadSource(sourcePath: String) {
@@ -18,7 +20,7 @@ class VideoViewHolder(private val videoView: VideoView, onPreparedListener: () -
         try {
             mediaPlayer?.seekTo(ms, MediaPlayer.SEEK_CLOSEST)
         } catch (e: IllegalStateException) {
-            e.printStackTrace()
+            e.message?.let { Log.e("VideoViewHolder", it) }
         }
     }
 

@@ -4,11 +4,10 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.util.Log
-import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.VideoView
 import androidx.constraintlayout.helper.widget.Carousel
@@ -24,17 +23,6 @@ class LabelsEditorDialog(
     val recording: Recording,
     private val onRecordingChanged: () -> Unit
 ) : RangeSlider.OnSliderTouchListener {
-    internal class CustomGestureListener(val onClick: () -> Unit) : SimpleOnGestureListener() {
-
-        override fun onDown(e: MotionEvent): Boolean {
-            return true
-        }
-
-        override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-            onClick()
-            return false
-        }
-    }
 
     private var activitiesDialog: PersistentCategoriesDialog? = null
     private val editableRecording =
@@ -42,9 +30,9 @@ class LabelsEditorDialog(
     private val activities = editableRecording.activities
     private var carousel: Carousel
     private var motionLayout: MotionLayout
-    private var previousItem: TextView
-    private var currentItem: TextView
-    private var nextItem: TextView
+    private var previousItem: ClickableCarouselTextView
+    private var currentItem: ClickableCarouselTextView
+    private var nextItem: ClickableCarouselTextView
     private var endTV: TextView
     private var statusTV: TextView
     private var startTV: TextView
@@ -68,8 +56,9 @@ class LabelsEditorDialog(
         statusTV = root.findViewById(R.id.tv_consistencyStatus_labelEditor)
         rangeSlider = root.findViewById(R.id.rangeSlider_labelEditor)
         motionLayout = root.findViewById(R.id.motionLayout_carouselParent_labelEditor)
+        val visualizerPreparingIndicator = root.findViewById<ProgressBar>(R.id.progressBar_visualizer_labelEditor)
         visualizer = VideoViewHolder(videoView) {
-            // TODO: implement UI for signaling that we are ready
+            visualizerPreparingIndicator.visibility = View.GONE
         }
 
         rangeSlider.setLabelFormatter { value -> GlobalValues.getDurationAsString(value.toLong()) }
@@ -121,21 +110,18 @@ class LabelsEditorDialog(
                 Log.d("LabelsEditorDialog", "onNewItem $index")
             }
         })
-        /*previousItem.setOnClickListener {
+        previousItem.setOnClickListener {
             Log.d("LabelsEditorDialog", "previousItem clicked")
             carousel.transitionToIndex(selectedItemIndex - 1, 1000)
         }
         nextItem.setOnClickListener {
             Log.d("LabelsEditorDialog", "nextItem clicked")
             carousel.transitionToIndex(selectedItemIndex + 1, 1000)
-        }*/
-        /*
-        currentItem.setOnTouchListener { v, event ->
-            Log.d("LabelsEditorDialog", "onTouchCurrentItem")
-            false
         }
-        */
-        // currentItem.setOnTouchListener(LabelTouchListener({showActivitiesDialog()}))
+        currentItem.setOnClickListener {
+            Log.d("LabelsEditorDialog-", "onClick currentITem")
+            showActivitiesDialog()
+        }
 
         builder.setView(root)
         builder.setPositiveButton(
@@ -239,7 +225,7 @@ class LabelsEditorDialog(
                 defaultItems = GlobalValues.DEFINED_ACTIVITIES,
                 callback = { value ->
                     activities[selectedItemIndex].activity = value
-                    currentItem.text = value
+                    carousel.refresh()
                 },
             )
         }
@@ -287,6 +273,7 @@ class LabelsEditorDialog(
         return rangeSlider.values.size == 3
     }
 
+    @SuppressLint("SetTextI18n")
     private fun splitCurrentActivity() {
         val values = rangeSlider.values
         if (isInSplittingMode()) {

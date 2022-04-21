@@ -18,22 +18,16 @@ enum class RecordingFileState {
     Unsynchronized,
     Valid
 }
-// TODO: remove onDisplayInfoChanged?
-open class Recording(val dir: File, metadataStorage: RecordingMetadataStorage, private val onDisplayInfoChanged: ((recording: Recording) -> Unit)? = null) {
-    constructor(dir: File, onDisplayInfoChanged: ((recording: Recording) -> Unit)? = null) : this(
+
+open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorage) {
+    constructor(dir: File) : this(
         dir,
-        RecordingMetadataStorage(dir.resolve(GlobalValues.METADATA_JSON_FILENAME)),
-        onDisplayInfoChanged
+        RecordingMetadataStorage(dir.resolve(GlobalValues.METADATA_JSON_FILENAME))
     )
     constructor(recording: Recording) : this(
         recording.dir,
         recording.metadataStorage
     )
-    var metadataStorage: RecordingMetadataStorage = metadataStorage
-        set(value) {
-            onDisplayInfoChanged?.let { it(this) }
-            field = value
-        }
 
     val state = computeRecordingState()
     val isValid

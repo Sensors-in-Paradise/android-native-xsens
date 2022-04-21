@@ -1,82 +1,76 @@
 package sensors_in_paradise.sonar.page2.labels_editor
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Matrix
 import android.util.AttributeSet
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewConfiguration
 import androidx.constraintlayout.motion.widget.MotionLayout
+import kotlin.math.abs
 
 class ItemClickableMotionLayout(context: Context, attributeSet: AttributeSet) :
     MotionLayout(context, attributeSet) {
-    /*
-    // TODO: fix not scrolling on child view with onClickListener
+    private val touchSlop: Int = ViewConfiguration.get(context).scaledTouchSlop
+    private var initialX = 0f
+    private var initialY = 0f
+    private var downTimeStamp = 0L
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+       if (event != null) {
+          if (event.actionMasked == MotionEvent.ACTION_UP) {
+              if (isClick(event)) {
+                       val view = findChildByPosition(event.x, event.y)
+                       if (view is ClickableCarouselTextView) {
+                           view.performClick()
+                       }
+                   }
+           }
+           if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+               initialX = event.x
+               initialY = event.y
+               downTimeStamp = System.currentTimeMillis()
+           }
+       }
 
-      private val mTouchSlop: Int = ViewConfiguration.get(context).scaledTouchSlop
+        return super.onTouchEvent(event)
+    }
 
-      private var isScrolling = false
-
-      private var initialTouchX = -1
-      private var initialTouchY = -1
-
-      override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
-          /*
-           * This method JUST determines whether we want to intercept the motion.
-           * If we return true, onTouchEvent will be called and we do the actual
-           * scrolling there.
-           */
-          val action: Int = ev.actionMasked
-          val actionIndex: Int = ev.actionIndex
-
-          return when (action) {
-              MotionEvent.ACTION_DOWN -> {
-                  initialTouchX = (ev.getX() + 0.5f).toInt()
-                  initialTouchY = (ev.getY() + 0.5f).toInt()
-
-                  true
-              }
-              // Always handle the case of the touch gesture being complete.
-              MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_UP -> {
-                  // Release the scroll.
-                  Log.d("ItemClickableMotionLayout", "releasing scroll")
-                  isScrolling = false
-                  false // Do not intercept touch event, let the child handle it
-              }
-              MotionEvent.ACTION_MOVE -> {
-                  Log.d("ItemClickableMotionLayout", "isScrolling: $isScrolling")
-                  if (isScrolling) {
-                      // We're currently scrolling, so yes, intercept the
-                      // touch event!
-
-                      true
-                  } else {
-
-                      // If the user has dragged their finger horizontally more than
-                      // the touch slop, start the scroll
-
-                      // left as an exercise for the reader
-                      val xDiff: Int =
-                          if (ev.historySize > 0) kotlin.math.abs((ev.x - ev.getHistoricalX(0)).toInt()) else 0
-
-                      Log.d("ItemClickableMotionLayout", "xDiff: $xDiff, touchSlop: $mTouchSlop")
-                      // Touch slop should be calculated using ViewConfiguration
-                      // constants.
-                      if (xDiff > mTouchSlop) {
-                          // Start scrolling!
-
-                          isScrolling = true
-                          true
-                      } else {
-                          isScrolling = false
-                          false
-                      }
-                  }
-              }
-
-              else -> {
-                  // In general, we don't want to intercept touch events. They should be
-                  // handled by the child view.
-                  isScrolling = false
-                  false
-              }
-          }
-      }
-  */
+    private fun isClick(event: MotionEvent): Boolean {
+        if (abs((initialX - event.x).toInt()) <touchSlop && abs((initialY - event.y).toInt()) <touchSlop) {
+            if (System.currentTimeMillis() - downTimeStamp <600L) {
+                return true
+            }
+        }
+        return false
+    }
+    private fun findChildByPosition(x: Float, y: Float): View? {
+        val count = childCount
+        for (i in count - 1 downTo 0) {
+            val child = getChildAt(i)
+            if (child.visibility == VISIBLE) {
+                if (isPositionInChildView(child, x, y)) {
+                    return child
+                }
+            }
+        }
+        return null
+    }
+    private val sPoint = FloatArray(2)
+    private val sInvMatrix = Matrix()
+    private fun isPositionInChildView(child: View, xPos: Float, yPos: Float): Boolean {
+        var x = xPos
+        var y = yPos
+        sPoint[0] = x + scrollX - child.left
+        sPoint[1] = y + scrollY - child.top
+        val childMatrix: Matrix = child.matrix
+        if (!childMatrix.isIdentity) {
+            childMatrix.invert(sInvMatrix)
+            sInvMatrix.mapPoints(sPoint)
+        }
+        x = sPoint[0]
+        y = sPoint[1]
+        return x >= 0 && y >= 0 && x < child.width && y < child.height
+    }
 }
