@@ -5,11 +5,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
-    <VideoView
-        android:layout_gravity="center"
-        android:id="@+id/videoView_labelEditor"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="400dp" />
+        android:layout_height="match_parent">
+
+        <VideoView
+            android:id="@+id/videoView_labelEditor"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:layout_gravity="center" />
+
+        <ProgressBar
+            android:id="@+id/progressBar_visualizer_labelEditor"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+    </FrameLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -22,7 +35,7 @@
             android:layout_gravity="center"
             app:layoutDescription="@xml/demo_carousel_scene1">
 
-            <TextView
+            <sensors_in_paradise.sonar.page2.labels_editor.ClickableCarouselTextView
                 android:id="@+id/tv_carouselItem0_labelEditor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -35,9 +48,10 @@
                 android:alpha="0.2"
                 android:maxWidth="100dp"
                 android:textAlignment="center"
+
                 />
 
-            <TextView
+            <sensors_in_paradise.sonar.page2.labels_editor.ClickableCarouselTextView
                 android:id="@+id/tv_carouselItem1_labelEditor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -51,7 +65,7 @@
                 android:maxWidth="100dp"
                 android:textAlignment="center"/>
 
-            <TextView
+            <sensors_in_paradise.sonar.page2.labels_editor.ClickableCarouselTextView
                 android:id="@+id/tv_carouselItem2_labelEditor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -67,7 +81,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
+            <sensors_in_paradise.sonar.page2.labels_editor.ClickableCarouselTextView
                 android:id="@+id/tv_carouselItem3_labelEditor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -80,7 +94,7 @@
                 android:maxWidth="100dp"
                 android:textAlignment="center"/>
 
-            <TextView
+            <sensors_in_paradise.sonar.page2.labels_editor.ClickableCarouselTextView
                 android:id="@+id/tv_carouselItem4_labelEditor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

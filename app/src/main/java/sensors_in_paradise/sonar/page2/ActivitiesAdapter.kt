@@ -10,7 +10,7 @@ import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 
 class ActivitiesAdapter(
-    var activities: java.util.ArrayList<RecordingMetadataStorage.LabelEntry>,
+    private var activities: java.util.ArrayList<RecordingMetadataStorage.LabelEntry>,
     private var loggingManager: LoggingManager
 ) :
     RecyclerView.Adapter<ActivitiesAdapter.ViewHolder>() {

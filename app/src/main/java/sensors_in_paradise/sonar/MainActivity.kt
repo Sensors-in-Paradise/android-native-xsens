@@ -108,13 +108,9 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         }
     }
 
-    override fun onTabUnselected(tab: TabLayout.Tab?) {
-        // TODO("Not yet implemented")
-    }
+    override fun onTabUnselected(tab: TabLayout.Tab?) {}
 
-    override fun onTabReselected(tab: TabLayout.Tab?) {
-        // TODO("Not yet implemented")
-    }
+    override fun onTabReselected(tab: TabLayout.Tab?) {}
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater: MenuInflater = menuInflater
