@@ -6,7 +6,7 @@ import android.media.Image
 import android.view.TextureView
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
 
-class ImageProcessor(private val poseDetector: PoseDetector, private val storageManager: StorageManager) {
+class ImageProcessor(private val poseDetector: PoseDetector, private val poseEstimationStorageManager: PoseEstimationStorageManager) {
     companion object {
         /** Threshold for confidence score. */
         private const val MIN_CONFIDENCE = .4f
@@ -50,7 +50,7 @@ class ImageProcessor(private val poseDetector: PoseDetector, private val storage
             VisualizationUtils.Transformation.ROTATE90
         )
 
-        storageManager.storePoses(persons)
+        poseEstimationStorageManager.storePoses(persons)
 
         val surfaceCanvas = overlayView.lockCanvas()
         surfaceCanvas?.let { canvas ->

@@ -16,7 +16,7 @@ import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.page2.camera.CameraManager
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.StorageManager
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.PoseEstimationStorageManager
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.IOException
 
@@ -134,7 +134,7 @@ class Page2Handler(
             cameraManager.stopRecordingPose { poseCaptureStartTime, poseTempFile, storageManager->
                 metadata.setPoseCaptureStartedTime(poseCaptureStartTime, true)
                 try {
-                    Files.move(poseTempFile, dir.resolve(StorageManager.POSE_CAPTURE_FILENAME))
+                    Files.move(poseTempFile, dir.resolve(PoseEstimationStorageManager.POSE_CAPTURE_FILENAME))
                     val recordingIndex =
                         recordingsManager.recordingsList.indexOfFirst { r -> r.dir == dir }
                     recordingsAdapter.notifyItemChanged(recordingIndex)

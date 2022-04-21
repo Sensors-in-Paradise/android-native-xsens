@@ -57,6 +57,9 @@ open class Recording(val dir: File, metadataStorage: RecordingMetadataStorage, p
         if (hasVideoRecording()) {
             result += "\uD83D\uDCF9 "
         }
+        if (hasPoseSequenceRecording()) {
+            result += "\uD83E\uDD38 "
+        }
         result += "$numActivities ${if (numActivities == 1) "activity" else "activities"}"
         return result
     }
@@ -79,6 +82,13 @@ open class Recording(val dir: File, metadataStorage: RecordingMetadataStorage, p
     }
     fun getVideoFile(): File {
         return dir.resolve(VIDEO_CAPTURE_FILENAME)
+    }
+
+    fun hasPoseSequenceRecording(): Boolean {
+        return getPoseSequenceFile().exists()
+    }
+    fun getPoseSequenceFile(): File {
+        return dir.resolve(POSE_CAPTURE_FILENAME)
     }
 
     private fun computeRecordingState(): RecordingFileState {
@@ -232,5 +242,6 @@ open class Recording(val dir: File, metadataStorage: RecordingMetadataStorage, p
 
     companion object {
         const val VIDEO_CAPTURE_FILENAME = "recording.mp4"
+        const val POSE_CAPTURE_FILENAME = "poseSequence.csv"
     }
 }

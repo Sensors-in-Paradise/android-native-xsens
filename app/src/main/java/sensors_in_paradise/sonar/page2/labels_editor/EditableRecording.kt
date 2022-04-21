@@ -109,6 +109,15 @@ class EditableRecording(
         return relativeSensorTime
     }
 
+    fun relativeSensorTimeToPoseSequenceTime(relativeSensorTime: Long): Long {
+        val videoStartTime = metadataCopy.getVideoCaptureStartedTime()
+        if (videoStartTime != null) {
+            val videoDelay = videoStartTime - getActualTimeStarted()
+            return relativeSensorTime - videoDelay
+        }
+        return relativeSensorTime
+    }
+
     fun areTimeStampsConsistent(): Boolean {
         var lastTime = 0L
         for (activity in activities) {

@@ -53,7 +53,15 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
             save()
         }
     }
-
+    fun setActivities(activities: ArrayList<LabelEntry>, save: Boolean = false) {
+        clearActivities()
+        for (activity in activities) {
+            addActivity(activity)
+        }
+        if (save) {
+            save()
+        }
+    }
     fun getActivities(): ArrayList<LabelEntry> {
         val result = ArrayList<LabelEntry>()
         for (i in 0 until activities.length()) {
@@ -66,6 +74,10 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
     }
     fun getVideoCaptureStartedTime(): Long? {
         val v = json.optLong("videoCaptureStartTime")
+        return if (v != 0L) v else null
+    }
+    fun getPoseCaptureStartedTime(): Long? {
+        val v = json.optLong("poseCaptureStartTime")
         return if (v != 0L) v else null
     }
     fun getDuration(): Long {

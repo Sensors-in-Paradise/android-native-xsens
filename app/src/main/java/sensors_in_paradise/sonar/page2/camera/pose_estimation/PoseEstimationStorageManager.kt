@@ -15,14 +15,12 @@ import org.jcodec.common.io.FileChannelWrapper
 import org.jcodec.common.io.NIOUtils
 import org.jcodec.common.model.Rational
 import com.opencsv.CSVReaderHeaderAware
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.PoseSequence
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.KeyPoint
+import java.io.BufferedReader
 import java.io.FileReader
 
-class StorageManager(val outputFile: File) {
-    companion object {
-        const val POSE_CAPTURE_FILENAME = "poseEstimation.csv"
-    }
-
+class PoseEstimationStorageManager(val outputFile: File) {
     private val separator = ", "
     private val fileWriter = FileWriter(outputFile)
 
@@ -32,6 +30,7 @@ class StorageManager(val outputFile: File) {
             "ModelType: $modelType",
             "Dimensions: $dimensions",
             "StartTime: $startTime",
+            "StartTimeStamp: ${LoggingManager.normalizeTimeStamp(startTime)}",
         ).joinToString("\n", "", "\n")
 
         fileWriter.appendLine("HeaderSize = ${header.length}")
@@ -55,20 +54,14 @@ class StorageManager(val outputFile: File) {
             fileWriter.appendLine(outputLine)
         }
     }
-
-    private fun personsFromCSVLine(line: Map<String, String>): List<Person> {
-        var personScore = 1f
-        val keyPoints = BodyPart.values().map { bp ->
-            try {
-                val x = line["${bp}_X"]!!.toFloat()
-                val y = line["${bp}_Y"]!!.toFloat()
-                KeyPoint(bp, PointF(x, y), 1f)
-            } catch (_: Exception) {
-                personScore = .5f
-                KeyPoint(bp, PointF(.5f, .5f), .5f)
-            }
+    private fun extractStartTimeFromCSV(inputFile:String): Long {
+        val fileReader = BufferedReader(FileReader(inputFile))
+        var line = fileReader.readLine()
+        while (!line.contains("StartTimeStamp")) {
+            line = fileReader.readLine()
         }
-        return listOf<Person>(Person(0, keyPoints, null, personScore))
+        fileReader.close()
+        return line.filter { it.isDigit() }.toLong()
     }
 
     private fun getHeaderAwareFileReader(inputFile: String): FileReader {
@@ -87,6 +80,21 @@ class StorageManager(val outputFile: File) {
         } catch (_: Exception) {
             throw Exception("CSV header corrupt")
         }
+    }
+
+    private fun personsFromCSVLine(line: Map<String, String>): List<Person> {
+        var personScore = 1f
+        val keyPoints = BodyPart.values().map { bp ->
+            try {
+                val x = line["${bp}_X"]!!.toFloat()
+                val y = line["${bp}_Y"]!!.toFloat()
+                KeyPoint(bp, PointF(x, y), 1f)
+            } catch (_: Exception) {
+                personScore = .5f
+                KeyPoint(bp, PointF(.5f, .5f), .5f)
+            }
+        }
+        return listOf<Person>(Person(0, keyPoints, null, personScore))
     }
 
     // TODO delete if not needed in the end
@@ -125,11 +133,12 @@ class StorageManager(val outputFile: File) {
         }
     }
 
-    fun loadCSV(inputFile: String): Any {
-        val csvDataObject = object {
-            val timeStamps = ArrayList<Long>()
-            val persons = ArrayList<List<Person>>()
-        }
+    fun loadPoseSequenceFromCSV(inputFile: String): PoseSequence {
+        val csvData = PoseSequence(
+            ArrayList<Long>(),
+            ArrayList<List<Person>>(),
+            extractStartTimeFromCSV(inputFile)
+        )
         try {
             val fileReader = getHeaderAwareFileReader(inputFile)
             val csvReader = CSVReaderHeaderAware(fileReader)
@@ -138,8 +147,8 @@ class StorageManager(val outputFile: File) {
             while (line != null) {
                 try {
                     line = csvReader.readMap()
-                    csvDataObject.timeStamps.add(line["TimeStamp"]!!.toLong())
-                    csvDataObject.persons.add(personsFromCSVLine(line))
+                    csvData.timeStamps.add(line["TimeStamp"]!!.toLong())
+                    csvData.personsArray.add(personsFromCSVLine(line))
                 } catch (_: Exception) {
                     break
                 }
@@ -148,6 +157,6 @@ class StorageManager(val outputFile: File) {
         } catch (e: Exception) {
             Log.d("PoseEstimation", e.toString())
         }
-        return csvDataObject
+        return csvData
     }
 }

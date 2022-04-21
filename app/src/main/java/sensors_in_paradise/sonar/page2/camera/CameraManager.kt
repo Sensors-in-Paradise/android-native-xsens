@@ -20,7 +20,7 @@ import sensors_in_paradise.sonar.page2.LoggingManager
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.ModelType
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.MoveNet
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.ImageProcessor
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.StorageManager
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.PoseEstimationStorageManager
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Device
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.File
@@ -49,7 +49,7 @@ class CameraManager(
     private var videoRecording: Recording? = null
 
     private var imageProcessor: ImageProcessor? = null
-    private var storageManager: StorageManager? = null
+    private var storageManager: PoseEstimationStorageManager? = null
     private val imageAnalysisExecutor = Executors.newFixedThreadPool(2)
     private val imageAnalysis = ImageAnalysis.Builder()
         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
@@ -205,7 +205,7 @@ class CameraManager(
             bindImageAnalyzer()
         }
         val poseEstimator = createPoseEstimator()
-        storageManager = storageManager ?: StorageManager(outputFile)
+        storageManager = storageManager ?: PoseEstimationStorageManager(outputFile)
 
         val localDateTime = LocalDateTime.now()
         // TODO use actual setting to get model type and dimensions
@@ -218,7 +218,7 @@ class CameraManager(
     /** Stops the recording and returns the UNIX timestamp of
      * when the recording did actually start and the file where it's stored
      * MEIN CODE IST SCHEIßE - ALEX! */
-    fun stopRecordingPose(onPoseRecordingFinalized: ((poseCaptureStartTime: Long, poseTempFile: File, storageManager: StorageManager) -> Unit)? = null) {
+    fun stopRecordingPose(onPoseRecordingFinalized: ((poseCaptureStartTime: Long, poseTempFile: File, poseEstimationStorageManager: PoseEstimationStorageManager) -> Unit)? = null) {
         if (imageProcessor != null && storageManager != null) {
             onPoseRecordingFinalized?.invoke(poseStartTime ?: 0L, storageManager!!.outputFile, storageManager!!)
         }
