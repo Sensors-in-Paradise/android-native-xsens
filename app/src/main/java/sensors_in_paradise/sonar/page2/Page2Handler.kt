@@ -129,8 +129,6 @@ class Page2Handler(
                 metadata.setPoseCaptureStartedTime(poseCaptureStartTime, true)
                 try {
                     Files.move(poseTempFile, dir.resolve(StorageManager.POSE_CAPTURE_FILENAME))
-                    // TODO delete next line
-                    storageManager.createVideoFromCSV(dir.resolve(StorageManager.POSE_CAPTURE_FILENAME).absolutePath, dir.resolve("poseEstimation.mp4"))
                     val recordingIndex =
                         recordingsManager.recordingsList.indexOfFirst { r -> r.dir == dir }
                     recordingsAdapter.notifyItemChanged(recordingIndex)

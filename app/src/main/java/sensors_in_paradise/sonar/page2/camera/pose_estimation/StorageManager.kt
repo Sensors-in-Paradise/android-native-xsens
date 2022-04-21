@@ -3,6 +3,7 @@ package sensors_in_paradise.sonar.page2.camera.pose_estimation
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PointF
+import android.util.Log
 import org.jcodec.api.android.AndroidSequenceEncoder
 import sensors_in_paradise.sonar.page2.LoggingManager
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.BodyPart
@@ -23,7 +24,6 @@ class StorageManager(val outputFile: File) {
     }
 
     private val separator = ", "
-    private var headerSize: Int? = null
     private val fileWriter = FileWriter(outputFile)
 
     fun writeHeader(startTime: LocalDateTime, modelType: String, dimensions: Int) {
@@ -34,8 +34,8 @@ class StorageManager(val outputFile: File) {
             "StartTime: $startTime",
         ).joinToString("\n", "", "\n")
 
-        headerSize = header.length
-        fileWriter.write(header)
+        fileWriter.appendLine("HeaderSize = ${header.length}")
+        fileWriter.appendLine(header)
 
         val columns = BodyPart.values().joinToString(
             ",",
@@ -71,7 +71,25 @@ class StorageManager(val outputFile: File) {
         return listOf<Person>(Person(0, keyPoints, null, personScore))
     }
 
-    // TODO sometimes it crashes because the csv file is empty (maybe move operation isnt done yet)
+    private fun getHeaderAwareFileReader(inputFile: String): FileReader {
+        try {
+            val fileReader = FileReader(inputFile)
+            var headerSize = ""
+            var c = fileReader.read().toChar()
+            while (c != '\n') {
+                c = fileReader.read().toChar()
+                if (c.isDigit()) {
+                    headerSize += c
+                }
+            }
+            fileReader.skip(headerSize.toLong() + 1)
+            return fileReader
+        } catch (_: Exception) {
+            throw Exception("CSV header corrupt")
+        }
+    }
+
+    // TODO delete if not needed in the end
     fun createVideoFromCSV(inputFile: String, outputFile: File) {
         val width = 480
         val height = 640
@@ -80,8 +98,7 @@ class StorageManager(val outputFile: File) {
 
         var out: FileChannelWrapper? = null
         try {
-            val fileReader = FileReader(inputFile)
-            fileReader.skip(headerSize!!.toLong())
+            val fileReader = getHeaderAwareFileReader(inputFile)
             val csvReader = CSVReaderHeaderAware(fileReader)
 
             out = NIOUtils.writableFileChannel(outputFile.absolutePath)
@@ -106,5 +123,31 @@ class StorageManager(val outputFile: File) {
         } finally {
             NIOUtils.closeQuietly(out)
         }
+    }
+
+    fun loadCSV(inputFile: String): Any {
+        val csvDataObject = object {
+            val timeStamps = ArrayList<Long>()
+            val persons = ArrayList<List<Person>>()
+        }
+        try {
+            val fileReader = getHeaderAwareFileReader(inputFile)
+            val csvReader = CSVReaderHeaderAware(fileReader)
+
+            var line: Map<String, String>? = mapOf("_" to "")
+            while (line != null) {
+                try {
+                    line = csvReader.readMap()
+                    csvDataObject.timeStamps.add(line["TimeStamp"]!!.toLong())
+                    csvDataObject.persons.add(personsFromCSVLine(line))
+                } catch (_: Exception) {
+                    break
+                }
+            }
+            csvReader.close()
+        } catch (e: Exception) {
+            Log.d("PoseEstimation", e.toString())
+        }
+        return csvDataObject
     }
 }
