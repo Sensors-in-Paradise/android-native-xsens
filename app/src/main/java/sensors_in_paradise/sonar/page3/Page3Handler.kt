@@ -57,11 +57,11 @@ class Page3Handler(
     private lateinit var predictionModel: Lstmmodel118
     private lateinit var mainHandler: Handler
 
-    private val predictionInterval = 4000L
+    private val predictionInterval = 1000 / 60
     private val updatePredictionTask = object : Runnable {
         override fun run() {
             processAndPredict()
-            mainHandler.postDelayed(this, predictionInterval)
+            mainHandler.postDelayed(this, predictionInterval.toLong())
         }
     }
     private val updateProgressBarTask = object : Runnable {
@@ -150,12 +150,8 @@ class Page3Handler(
         predictions.clear()
 
         val outputLabelMap = mapOf(
-            0 to "Running",
-            1 to "Squats",
-            2 to "Stairs Down",
-            3 to "Stairs Up",
-            4 to "Standing",
-            5 to "Walking"
+            0 to "Non-fatigue",
+            1 to "Fatigue"
         ).withDefault { "" }
 
         for (i in output.indices) {
@@ -244,11 +240,13 @@ class Page3Handler(
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
 
         val timeStamp: Long = xsensDotData.sampleTimeFine
-        val quat: FloatArray = xsensDotData.quat
+        val rps: DoubleArray = xsensDotData.gyr
+        // convert rps to degrees per second
+        val dps: FloatArray = rps.map { (it * 6 * 60).toFloat() }.toFloatArray()
         val freeAcc: FloatArray = xsensDotData.freeAcc
 
         val deviceTag = metadataStorage.getTagForAddress(deviceAddress)
-        rawSensorDataMap[deviceTag]?.add(Pair(timeStamp, quat + freeAcc))
+        rawSensorDataMap[deviceTag]?.add(Pair(timeStamp, dps + freeAcc))
     }
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
