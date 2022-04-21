@@ -20,9 +20,9 @@ import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.KeyPoint
 import java.io.BufferedReader
 import java.io.FileReader
 
-class PoseEstimationStorageManager(val outputFile: File) {
+class PoseEstimationStorageManager(val csvFile: File) {
     private val separator = ", "
-    private val fileWriter = FileWriter(outputFile)
+    private val fileWriter = FileWriter(csvFile)
 
     fun writeHeader(startTime: LocalDateTime, modelType: String, dimensions: Int) {
         val header = listOf<String>(
@@ -54,109 +54,116 @@ class PoseEstimationStorageManager(val outputFile: File) {
             fileWriter.appendLine(outputLine)
         }
     }
-    private fun extractStartTimeFromCSV(inputFile:String): Long {
-        val fileReader = BufferedReader(FileReader(inputFile))
-        var line = fileReader.readLine()
-        while (!line.contains("StartTimeStamp")) {
-            line = fileReader.readLine()
-        }
-        fileReader.close()
-        return line.filter { it.isDigit() }.toLong()
-    }
 
-    private fun getHeaderAwareFileReader(inputFile: String): FileReader {
-        try {
-            val fileReader = FileReader(inputFile)
-            var headerSize = ""
-            var c = fileReader.read().toChar()
-            while (c != '\n') {
-                c = fileReader.read().toChar()
-                if (c.isDigit()) {
-                    headerSize += c
-                }
-            }
-            fileReader.skip(headerSize.toLong() + 1)
-            return fileReader
-        } catch (_: Exception) {
-            throw Exception("CSV header corrupt")
-        }
-    }
-
-    private fun personsFromCSVLine(line: Map<String, String>): List<Person> {
-        var personScore = 1f
-        val keyPoints = BodyPart.values().map { bp ->
+    companion object {
+        private fun extractStartTimeFromCSV(inputFile: String): Long {
             try {
-                val x = line["${bp}_X"]!!.toFloat()
-                val y = line["${bp}_Y"]!!.toFloat()
-                KeyPoint(bp, PointF(x, y), 1f)
+                val fileReader = BufferedReader(FileReader(inputFile))
+                var line = fileReader.readLine()
+                while (!line.contains("StartTimeStamp")) {
+                    line = fileReader.readLine()
+                }
+                fileReader.close()
+                return line.filter { it.isDigit() }.toLong()
             } catch (_: Exception) {
-                personScore = .5f
-                KeyPoint(bp, PointF(.5f, .5f), .5f)
+                throw Exception("CSV header corrupt")
             }
         }
-        return listOf<Person>(Person(0, keyPoints, null, personScore))
-    }
 
-    // TODO delete if not needed in the end
-    fun createVideoFromCSV(inputFile: String, outputFile: File) {
-        val width = 480
-        val height = 640
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
+        private fun getHeaderAwareFileReader(inputFile: String): FileReader {
+            try {
+                val fileReader = FileReader(inputFile)
+                var headerSize = ""
+                var c = fileReader.read().toChar()
+                while (c != '\n') {
+                    c = fileReader.read().toChar()
+                    if (c.isDigit()) {
+                        headerSize += c
+                    }
+                }
+                fileReader.skip(headerSize.toLong() + 1)
+                return fileReader
+            } catch (_: Exception) {
+                throw Exception("CSV header corrupt")
+            }
+        }
 
-        var out: FileChannelWrapper? = null
-        try {
-            val fileReader = getHeaderAwareFileReader(inputFile)
-            val csvReader = CSVReaderHeaderAware(fileReader)
-
-            out = NIOUtils.writableFileChannel(outputFile.absolutePath)
-            val encoder = AndroidSequenceEncoder(out, Rational.R(15, 1))
-
-            var line = csvReader.readMap()
-            while (line != null) {
+        private fun personsFromCSVLine(line: Map<String, String>): List<Person> {
+            var personScore = 1f
+            val keyPoints = BodyPart.values().map { bp ->
                 try {
-                    line = csvReader.readMap()
-                    val persons = personsFromCSVLine(line)
-                    VisualizationUtils.transformKeypoints(
-                        persons, bitmap, canvas,
-                        VisualizationUtils.Transformation.PROJECT_ON_CANVAS
-                    )
-                    VisualizationUtils.drawBodyKeypoints(canvas, persons, 2f, 1f)
-                    encoder.encodeImage(bitmap)
+                    val x = line["${bp}_X"]!!.toFloat()
+                    val y = line["${bp}_Y"]!!.toFloat()
+                    KeyPoint(bp, PointF(x, y), 1f)
                 } catch (_: Exception) {
-                    break
+                    personScore = .5f
+                    KeyPoint(bp, PointF(.5f, .5f), .5f)
                 }
             }
-            encoder.finish()
-        } finally {
-            NIOUtils.closeQuietly(out)
+            return listOf<Person>(Person(0, keyPoints, null, personScore))
         }
-    }
 
-    fun loadPoseSequenceFromCSV(inputFile: String): PoseSequence {
-        val csvData = PoseSequence(
-            ArrayList<Long>(),
-            ArrayList<List<Person>>(),
-            extractStartTimeFromCSV(inputFile)
-        )
-        try {
-            val fileReader = getHeaderAwareFileReader(inputFile)
-            val csvReader = CSVReaderHeaderAware(fileReader)
+        fun loadPoseSequenceFromCSV(inputFile: String): PoseSequence {
+            val csvData = PoseSequence(
+                ArrayList<Long>(),
+                ArrayList<List<Person>>(),
+                extractStartTimeFromCSV(inputFile)
+            )
+            try {
+                val fileReader = getHeaderAwareFileReader(inputFile)
+                val csvReader = CSVReaderHeaderAware(fileReader)
 
-            var line: Map<String, String>? = mapOf("_" to "")
-            while (line != null) {
-                try {
-                    line = csvReader.readMap()
-                    csvData.timeStamps.add(line["TimeStamp"]!!.toLong())
-                    csvData.personsArray.add(personsFromCSVLine(line))
-                } catch (_: Exception) {
-                    break
+                var line: Map<String, String>? = mapOf("_" to "")
+                while (line != null) {
+                    try {
+                        line = csvReader.readMap()
+                        csvData.timeStamps.add(line["TimeStamp"]!!.toLong())
+                        csvData.personsArray.add(personsFromCSVLine(line))
+                    } catch (_: Exception) {
+                        break
+                    }
                 }
+                csvReader.close()
+            } catch (e: Exception) {
+                Log.d("PoseEstimation", e.toString())
             }
-            csvReader.close()
-        } catch (e: Exception) {
-            Log.d("PoseEstimation", e.toString())
+            return csvData
         }
-        return csvData
+
+        // TODO delete if not needed in the end
+        fun createVideoFromCSV(inputFile: String, outputFile: File) {
+            val width = 480
+            val height = 640
+            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+
+            var out: FileChannelWrapper? = null
+            try {
+                val fileReader = getHeaderAwareFileReader(inputFile)
+                val csvReader = CSVReaderHeaderAware(fileReader)
+
+                out = NIOUtils.writableFileChannel(outputFile.absolutePath)
+                val encoder = AndroidSequenceEncoder(out, Rational.R(15, 1))
+
+                var line = csvReader.readMap()
+                while (line != null) {
+                    try {
+                        line = csvReader.readMap()
+                        val persons = personsFromCSVLine(line)
+                        VisualizationUtils.transformKeypoints(
+                            persons, bitmap, canvas,
+                            VisualizationUtils.Transformation.PROJECT_ON_CANVAS
+                        )
+                        VisualizationUtils.drawBodyKeypoints(canvas, persons, circleRadius = 2f, lineWidth = 1f)
+                        encoder.encodeImage(bitmap)
+                    } catch (_: Exception) {
+                        break
+                    }
+                }
+                encoder.finish()
+            } finally {
+                NIOUtils.closeQuietly(out)
+            }
+        }
     }
 }

@@ -5,11 +5,9 @@ import android.app.AlertDialog
 import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.TextureView
 import android.view.View
-import android.widget.Button
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.VideoView
+import android.widget.*
 import androidx.constraintlayout.helper.widget.Carousel
 import androidx.constraintlayout.motion.widget.MotionLayout
 import com.google.android.material.slider.RangeSlider
@@ -46,7 +44,9 @@ class LabelsEditorDialog(
         val root = LayoutInflater.from(context).inflate(R.layout.label_editor, null)
 
         previousItem = root.findViewById(R.id.tv_carouselItem1_labelEditor)
+
         val videoView = root.findViewById<VideoView>(R.id.videoView_labelEditor)
+        val poseSequenceView = root.findViewById<TextureView>(R.id.textureView_labelEditor)
         previousItem = root.findViewById(R.id.tv_carouselItem1_labelEditor)
         currentItem = root.findViewById(R.id.tv_carouselItem2_labelEditor)
         nextItem = root.findViewById(R.id.tv_carouselItem3_labelEditor)
@@ -56,18 +56,27 @@ class LabelsEditorDialog(
         statusTV = root.findViewById(R.id.tv_consistencyStatus_labelEditor)
         rangeSlider = root.findViewById(R.id.rangeSlider_labelEditor)
         motionLayout = root.findViewById(R.id.motionLayout_carouselParent_labelEditor)
+        rangeSlider.setLabelFormatter { value -> GlobalValues.getDurationAsString(value.toLong()) }
         val visualizerPreparingIndicator = root.findViewById<ProgressBar>(R.id.progressBar_visualizer_labelEditor)
-        visualizer = VideoViewHolder(videoView) {
-            visualizerPreparingIndicator.visibility = View.GONE
+
+        //val viewSwitcher = ViewSwitcher(context)
+        val onPreparedListener = {visualizerPreparingIndicator.visibility = View.GONE}
+        // TODO handle both together
+        if (recording.hasVideoRecording()) {
+            //viewSwitcher.addView(videoView)
+            visualizer = VideoViewHolder(videoView, onPreparedListener)
+            visualizer.sourcePath = recording.getVideoFile().absolutePath
+
+            poseSequenceView.visibility = View.GONE
+        } else {
+            //viewSwitcher.addView(poseSequenceView)
+            visualizer = PoseSequenceViewHolder(poseSequenceView, onPreparedListener)
+            visualizer.sourcePath = recording.getPoseSequenceFile().absolutePath
+
+            videoView.visibility = View.GONE
         }
 
-        rangeSlider.setLabelFormatter { value -> GlobalValues.getDurationAsString(value.toLong()) }
-        if (recording.hasVideoRecording()) {
-            visualizer.sourcePath = recording.getVideoFile().absolutePath
-        } else {
-            videoView.visibility = View.GONE
-            visualizerPreparingIndicator.visibility = View.GONE
-        }
+
         rangeSlider.addOnChangeListener { slider, value, _ ->
             val numThumbs = slider.values.size
 

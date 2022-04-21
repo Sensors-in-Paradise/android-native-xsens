@@ -220,7 +220,7 @@ class CameraManager(
      * MEIN CODE IST SCHEIßE - ALEX! */
     fun stopRecordingPose(onPoseRecordingFinalized: ((poseCaptureStartTime: Long, poseTempFile: File, poseEstimationStorageManager: PoseEstimationStorageManager) -> Unit)? = null) {
         if (imageProcessor != null && storageManager != null) {
-            onPoseRecordingFinalized?.invoke(poseStartTime ?: 0L, storageManager!!.outputFile, storageManager!!)
+            onPoseRecordingFinalized?.invoke(poseStartTime ?: 0L, storageManager!!.csvFile, storageManager!!)
         }
         unbindImageAnalyzer()
     }

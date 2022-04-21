@@ -15,6 +15,12 @@
             android:layout_height="400dp"
             android:layout_gravity="center" />
 
+        <TextureView
+            android:id="@+id/textureView_labelEditor"
+            android:layout_width="wrap_content"
+            android:layout_height="400dp"
+            android:layout_gravity="center" />
+
         <ProgressBar
             android:id="@+id/progressBar_visualizer_labelEditor"
             style="?android:attr/progressBarStyle"

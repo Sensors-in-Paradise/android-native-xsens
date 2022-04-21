@@ -108,6 +108,7 @@ object VisualizationUtils {
     fun drawBodyKeypoints(
         canvas: Canvas,
         persons: List<Person>,
+        clearColor: Int? = null,
         circleRadius: Float = CIRCLE_RADIUS,
         lineWidth: Float = LINE_WIDTH
     ) {
@@ -122,7 +123,11 @@ object VisualizationUtils {
             style = Paint.Style.STROKE
         }
 
-        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+        if (clearColor == null) {
+            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+        } else {
+            canvas.drawColor(clearColor)
+        }
 
         persons.forEach { person ->
             bodyJoints.forEach {

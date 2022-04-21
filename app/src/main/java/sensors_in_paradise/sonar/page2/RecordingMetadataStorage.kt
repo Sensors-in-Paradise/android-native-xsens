@@ -24,14 +24,14 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
     }
 
     fun setData(
-        activities: ArrayList<LabelEntry>,
+        activityArray: ArrayList<LabelEntry>,
         totalStartTime: Long,
         endTime: Long,
         person: String,
         sensorMacMap: Map<String, String>
     ) {
-        activities.clear()
-        for (activity in activities) {
+        clearActivities()
+        for (activity in activityArray) {
             addActivity(activity)
         }
         setTimeFinished(endTime)
@@ -106,7 +106,7 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
         }
     }
     private fun clearActivities() {
-       while (activities.length()> 0) {
+       while (activities.length() > 0) {
                activities.remove(0)
            }
     }

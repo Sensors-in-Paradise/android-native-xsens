@@ -23,4 +23,9 @@ data class Person(
     var keyPoints: List<KeyPoint>,
     val boundingBox: RectF? = null, // Only MoveNet MultiPose return bounding box.
     val score: Float
-)
+) {
+    fun copy(): Person {
+        return Person(id, keyPoints.map { it.copy() }, boundingBox, score)
+    }
+}
+

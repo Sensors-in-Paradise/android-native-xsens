@@ -134,7 +134,7 @@ class Page2Handler(
             cameraManager.stopRecordingPose { poseCaptureStartTime, poseTempFile, storageManager->
                 metadata.setPoseCaptureStartedTime(poseCaptureStartTime, true)
                 try {
-                    Files.move(poseTempFile, dir.resolve(PoseEstimationStorageManager.POSE_CAPTURE_FILENAME))
+                    Files.move(poseTempFile, dir.resolve(Recording.POSE_CAPTURE_FILENAME))
                     val recordingIndex =
                         recordingsManager.recordingsList.indexOfFirst { r -> r.dir == dir }
                     recordingsAdapter.notifyItemChanged(recordingIndex)

@@ -18,4 +18,8 @@ package sensors_in_paradise.sonar.page2.camera.pose_estimation.data
 
 import android.graphics.PointF
 
-data class KeyPoint(val bodyPart: BodyPart, var coordinate: PointF, val score: Float)
+data class KeyPoint(val bodyPart: BodyPart, var coordinate: PointF, val score: Float) {
+    fun copy(): KeyPoint {
+        return KeyPoint(bodyPart, PointF(coordinate.x, coordinate.y), score)
+    }
+}
