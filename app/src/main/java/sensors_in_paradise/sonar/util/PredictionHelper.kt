@@ -11,7 +11,7 @@ import kotlin.math.min
 
 class PredictionHelper(
     private val context: Context,
-    private val showToasts: Boolean
+    // private val showToasts: Boolean
 ) {
 
     private val numDevices = 3
