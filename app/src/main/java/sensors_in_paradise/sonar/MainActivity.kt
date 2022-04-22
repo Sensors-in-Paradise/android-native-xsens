@@ -18,6 +18,7 @@ import sensors_in_paradise.sonar.page1.Page1Handler
 import sensors_in_paradise.sonar.page2.Page2Handler
 import sensors_in_paradise.sonar.page2.RecordingDataManager
 import sensors_in_paradise.sonar.page3.Page3Handler
+import sensors_in_paradise.sonar.page4.Page4Handler
 import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.uploader.DavCloudRecordingsUploader
 import sensors_in_paradise.sonar.util.PreferencesHelper
@@ -61,9 +62,13 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         pageHandlers.add(page2Handler)
         val page3Handler = Page3Handler(scannedDevices, this)
         pageHandlers.add(page3Handler)
+        val page4Handler = Page4Handler()
+        pageHandlers.add(page4Handler)
+
         page1Handler.addConnectionInterface(page2Handler)
         page1Handler.addConnectionInterface(page3Handler)
         page1Handler.addConnectionInterface(this)
+
         val permissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) {}

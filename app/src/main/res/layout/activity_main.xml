@@ -41,8 +41,11 @@
             layout="@layout/capture_fragment" />
 
         <include
-            android:id="@+id/second_activity_main"
+            android:id="@+id/third_activity_main"
             layout="@layout/prediction_fragment" />
+        <include
+            android:id="@+id/fourth_activity_main"
+            layout="@layout/training_fragment" />
     </android.widget.ViewAnimator>
     <!--        android:background="@drawable/tablayout_background"-->
     <com.google.android.material.tabs.TabLayout
@@ -72,5 +75,10 @@
             android:layout_height="wrap_content"
             android:icon="@drawable/ic_baseline_local_fire_department_24"
             android:text="Prediction" />
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/ic_baseline_model_training_24"
+            android:text="Training" />
     </com.google.android.material.tabs.TabLayout>
 </LinearLayout>
