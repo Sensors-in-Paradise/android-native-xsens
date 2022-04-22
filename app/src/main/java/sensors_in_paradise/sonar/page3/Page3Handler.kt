@@ -23,7 +23,7 @@ import sensors_in_paradise.sonar.util.PredictionHelper
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
-import sensors_in_paradise.sonar.ml.Lstmmodel118
+import sensors_in_paradise.sonar.ml.LopoModel
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import kotlin.collections.ArrayList
 import java.nio.ByteBuffer
@@ -54,7 +54,7 @@ class Page3Handler(
     private var numConnectedDevices = 0
     private var isRunning = false
 
-    private lateinit var predictionModel: Lstmmodel118
+    private lateinit var predictionModel: LopoModel
     private lateinit var mainHandler: Handler
 
     private val predictionInterval = 4000L
@@ -216,7 +216,7 @@ class Page3Handler(
             togglePrediction()
         }
 
-        predictionModel = Lstmmodel118.newInstance(context)
+        predictionModel = LopoModel.newInstance(context)
         mainHandler = Handler(Looper.getMainLooper())
     }
 

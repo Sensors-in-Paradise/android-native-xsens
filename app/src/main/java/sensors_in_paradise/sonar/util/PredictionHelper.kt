@@ -15,13 +15,13 @@ class PredictionHelper(
 
     private val numDevices = 5
     private val sizeOfFloat = 4
-    private val numQuats = 0
-    private val numFreeAccs = 3
+    private val numGyro = 3
+    private val numAcc = 3
     private var numDataLines = 0
 
-    private val dataLineByteSize = sizeOfFloat * (numQuats + numFreeAccs) * numDevices
-    val dataLineFloatSize = (numQuats + numFreeAccs) * numDevices
-    val dataVectorSize = 180
+    private val dataLineByteSize = sizeOfFloat * (numGyro + numAcc) * numDevices
+    val dataLineFloatSize = (numGyro + numAcc) * numDevices
+    val dataVectorSize = 600
 
     private fun fillEmptyDataLines(rawSensorDataMap: MutableMap<String, MutableList<Pair<Long, FloatArray>>>) {
         val frequency = 60
@@ -94,7 +94,7 @@ class PredictionHelper(
 
     private fun normalizeLine(dataArray: FloatArray, minArray: DoubleArray, maxArray: DoubleArray): FloatArray {
         // val numElements = numQuats + numFreeAccs
-        val numElements = 4 + numFreeAccs
+        val numElements = numGyro + numAcc
         val normalizedArray = FloatArray(numElements)
 
         val lowerBound = 0.0001
