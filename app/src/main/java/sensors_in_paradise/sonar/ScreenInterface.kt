@@ -3,7 +3,7 @@ package sensors_in_paradise.sonar
 import android.app.Activity
 import androidx.annotation.UiThread
 
-interface PageInterface {
+interface ScreenInterface {
     @UiThread
     fun activityCreated(activity: Activity)
     @UiThread

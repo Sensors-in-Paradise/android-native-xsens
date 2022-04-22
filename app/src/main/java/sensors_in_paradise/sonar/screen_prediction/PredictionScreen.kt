@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.page3
+package sensors_in_paradise.sonar.screen_prediction
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -21,7 +21,7 @@ import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.util.PredictionHelper
 import sensors_in_paradise.sonar.R
-import sensors_in_paradise.sonar.page1.ConnectionInterface
+import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.ml.Lstmmodel118
 import sensors_in_paradise.sonar.util.PreferencesHelper
@@ -29,10 +29,10 @@ import kotlin.collections.ArrayList
 import java.nio.ByteBuffer
 import kotlin.math.round
 
-class Page3Handler(
+class PredictionScreen(
     private val devices: XSENSArrayList,
     private val sensorOccupationInterface: SensorOccupationInterface?
-) : PageInterface, ConnectionInterface {
+) : ScreenInterface, ConnectionInterface {
     private lateinit var activity: Activity
     private lateinit var context: Context
     private lateinit var recyclerView: RecyclerView

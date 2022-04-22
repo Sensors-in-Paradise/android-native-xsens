@@ -1,27 +1,26 @@
-package sensors_in_paradise.sonar.page2
+package sensors_in_paradise.sonar.screen_recording
 
 import android.app.Activity
 import android.content.Context
 import android.media.MediaPlayer
 import android.view.View
 import android.widget.*
-import androidx.core.view.size
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
 import com.google.common.io.Files
 import com.xsens.dot.android.sdk.events.XsensDotData
 import sensors_in_paradise.sonar.*
-import sensors_in_paradise.sonar.page1.ConnectionInterface
+import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.IOException
 
-class Page2Handler(
+class RecordingScreen(
     private val devices: XSENSArrayList,
     private val recordingsManager: RecordingDataManager,
     private val sensorOccupationInterface: SensorOccupationInterface?
-) : PageInterface, ConnectionInterface,
+) : ScreenInterface, ConnectionInterface,
     TabLayout.OnTabSelectedListener {
     private lateinit var context: Context
     private lateinit var timer: Chronometer

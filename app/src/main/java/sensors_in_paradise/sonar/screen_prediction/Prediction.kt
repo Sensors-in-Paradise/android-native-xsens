@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.page3
+package sensors_in_paradise.sonar.screen_prediction
 
 class Prediction(var title: String, var percentage: Float) {
     fun percentageAsString(): String {

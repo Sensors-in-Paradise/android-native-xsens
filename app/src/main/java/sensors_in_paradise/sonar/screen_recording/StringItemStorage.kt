@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.page2
+package sensors_in_paradise.sonar.screen_recording
 
 import org.json.JSONArray
 import sensors_in_paradise.sonar.JSONStorage

@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.page1
+package sensors_in_paradise.sonar.screen_connection
 
 import android.content.Context
 import android.graphics.drawable.Drawable

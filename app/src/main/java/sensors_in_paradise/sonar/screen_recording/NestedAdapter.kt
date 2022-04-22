@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.page2
+package sensors_in_paradise.sonar.screen_recording
 
 import android.app.AlertDialog
 import android.view.LayoutInflater

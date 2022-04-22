@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.page2
+package sensors_in_paradise.sonar.screen_recording
 
 import android.content.Context
 import android.util.Log

@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.page1
+package sensors_in_paradise.sonar.screen_connection
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -28,8 +28,8 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import sensors_in_paradise.sonar.*
 import kotlin.properties.Delegates
 
-class Page1Handler(private val scannedDevices: XSENSArrayList) :
-    XsensDotScannerCallback, XsensDotDeviceCallback, PageInterface,
+class ConnectionScreen(private val scannedDevices: XSENSArrayList) :
+    XsensDotScannerCallback, XsensDotDeviceCallback, ScreenInterface,
     UIDeviceConnectionInterface, SyncInterface {
     private lateinit var context: Context
     private lateinit var activity: Activity

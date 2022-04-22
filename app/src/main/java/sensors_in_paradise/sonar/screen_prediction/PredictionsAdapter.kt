@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.page3
+package sensors_in_paradise.sonar.screen_prediction
 
 import android.view.LayoutInflater
 import android.view.View

@@ -13,12 +13,12 @@ import androidx.appcompat.app.AppCompatDelegate.*
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import sensors_in_paradise.sonar.custom_views.stickman.StickmanDialog
-import sensors_in_paradise.sonar.page1.ConnectionInterface
-import sensors_in_paradise.sonar.page1.Page1Handler
-import sensors_in_paradise.sonar.page2.Page2Handler
-import sensors_in_paradise.sonar.page2.RecordingDataManager
-import sensors_in_paradise.sonar.page3.Page3Handler
-import sensors_in_paradise.sonar.page4.Page4Handler
+import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
+import sensors_in_paradise.sonar.screen_connection.ConnectionScreen
+import sensors_in_paradise.sonar.screen_recording.RecordingScreen
+import sensors_in_paradise.sonar.screen_recording.RecordingDataManager
+import sensors_in_paradise.sonar.screen_prediction.PredictionScreen
+import sensors_in_paradise.sonar.screen_train.TrainingScreen
 import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.uploader.DavCloudRecordingsUploader
 import sensors_in_paradise.sonar.util.PreferencesHelper
@@ -31,13 +31,20 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     private lateinit var davCloudUploader: DavCloudRecordingsUploader
     private lateinit var recordingsManager: RecordingDataManager
 
-    private val pageHandlers = ArrayList<PageInterface>()
+    private val pageHandlers = ArrayList<ScreenInterface>()
     private val scannedDevices = XSENSArrayList()
-    private lateinit var page1Handler: Page1Handler
+    private lateinit var connectionScreen: ConnectionScreen
     private lateinit var sensorTrafficVisualizationHandler: SensorTrafficVisualizationHandler
     private lateinit var resetHeadingMi: MenuItem
     private lateinit var revertHeadingMi: MenuItem
     private lateinit var headingResetHandler: HeadingResetHandler
+    private val tabIndexToScreenIndexMap = mutableMapOf(
+        0 to 0,
+        1 to 1,
+        2 to 3
+    )
+    private lateinit var trainingTab: TabLayout.Tab
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -47,27 +54,28 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         recordingsManager = RecordingDataManager(
             GlobalValues.getSensorRecordingsBaseDir(this)
         )
+        trainingTab = tabLayout.getTabAt(2)!!
 
         initClickListeners()
 
-        page1Handler = Page1Handler(scannedDevices)
+        connectionScreen = ConnectionScreen(scannedDevices)
         headingResetHandler = HeadingResetHandler(this, scannedDevices) { address ->
             runOnUiThread {
-                page1Handler.notifyItemChanged(address)
+                connectionScreen.notifyItemChanged(address)
             }
         }
-        page1Handler.addConnectionInterface(headingResetHandler)
-        pageHandlers.add(page1Handler)
-        val page2Handler = Page2Handler(scannedDevices, recordingsManager, this)
-        pageHandlers.add(page2Handler)
-        val page3Handler = Page3Handler(scannedDevices, this)
-        pageHandlers.add(page3Handler)
-        val page4Handler = Page4Handler()
-        pageHandlers.add(page4Handler)
+        connectionScreen.addConnectionInterface(headingResetHandler)
+        pageHandlers.add(connectionScreen)
+        val recordingScreen = RecordingScreen(scannedDevices, recordingsManager, this)
+        pageHandlers.add(recordingScreen)
+        val predictionScreen = PredictionScreen(scannedDevices, this)
+        pageHandlers.add(predictionScreen)
+        val trainingScreen = TrainingScreen()
+        pageHandlers.add(trainingScreen)
 
-        page1Handler.addConnectionInterface(page2Handler)
-        page1Handler.addConnectionInterface(page3Handler)
-        page1Handler.addConnectionInterface(this)
+        connectionScreen.addConnectionInterface(recordingScreen)
+        connectionScreen.addConnectionInterface(predictionScreen)
+        connectionScreen.addConnectionInterface(this)
 
         val permissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
@@ -95,6 +103,8 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         for (handler in pageHandlers) {
             handler.activityResumed()
         }
+        setTrainingTabVisible(PreferencesHelper.isOnDeviceTrainingScreenEnabled(this))
+
     }
 
     override fun onDestroy() {
@@ -102,14 +112,29 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
 
         super.onDestroy()
     }
-
+    private fun setTrainingTabVisible(visible: Boolean) {
+        if(visible){
+            tabIndexToScreenIndexMap[2] = 2
+            tabIndexToScreenIndexMap[3] = 3
+            if (tabLayout.tabCount < 4) {
+                tabLayout.addTab(trainingTab, 2)
+            }
+        }
+        else{
+            tabIndexToScreenIndexMap[2] = 3
+            tabIndexToScreenIndexMap.remove(3)
+            if (tabLayout.tabCount > 3) {
+                tabLayout.removeTab(trainingTab)
+            }
+        }
+    }
     private fun initClickListeners() {
         tabLayout.addOnTabSelectedListener(this)
     }
 
     override fun onTabSelected(tab: TabLayout.Tab?) {
         if (tab != null) {
-            switcher.displayedChild = tab.position
+            switcher.displayedChild = tabIndexToScreenIndexMap[tab.position]!!
         }
     }
 
@@ -131,7 +156,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
             findViewById(R.id.linearLayout_sensorOrientation_activityMain),
             menu.findItem(R.id.menuItem_orientation_activityMain)
         )
-        page1Handler.addConnectionInterface(
+        connectionScreen.addConnectionInterface(
             sensorTrafficVisualizationHandler
         )
         resetHeadingMi = menu.findItem(R.id.menuItem_headingReset_activityMain)
@@ -182,4 +207,5 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         resetHeadingMi.isEnabled = !areConnectedSensorsOccupied && hasConnectedSensors
         revertHeadingMi.isEnabled = !areConnectedSensorsOccupied && hasConnectedSensors
     }
+
 }
