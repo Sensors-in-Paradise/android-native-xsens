@@ -33,7 +33,7 @@
             android:layout_width="match_parent"
             android:layout_height="70dp"
             android:layout_gravity="center"
-            app:layoutDescription="@xml/demo_carousel_scene1">
+            app:layoutDescription="@xml/label_editor_carousel_scene">
 
             <sensors_in_paradise.sonar.page2.labels_editor.ClickableCarouselTextView
                 android:id="@+id/tv_carouselItem0_labelEditor"

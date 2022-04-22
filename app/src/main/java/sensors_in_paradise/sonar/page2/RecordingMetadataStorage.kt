@@ -30,7 +30,6 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
         person: String,
         sensorMacMap: Map<String, String>
     ) {
-        activities.clear()
         for (activity in activities) {
             addActivity(activity)
         }
