@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.page2.camera
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import android.util.Size
@@ -51,6 +52,7 @@ class CameraManager(
     private var imageProcessor: ImageProcessor? = null
     private var storageManager: PoseEstimationStorageManager? = null
     private val imageAnalysisExecutor = Executors.newFixedThreadPool(2)
+    @SuppressLint("UnsafeOptInUsageError")
     private val imageAnalysis = ImageAnalysis.Builder()
         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
         .setTargetResolution(Size(1280, 720)) //TODO generalize
