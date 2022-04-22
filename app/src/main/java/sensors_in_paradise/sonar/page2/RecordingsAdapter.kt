@@ -33,7 +33,6 @@ class RecordingsAdapter(
         val startTimeTextView: TextView = view.findViewById(R.id.tv_start)
         val checkFilesTextView: TextView = view.findViewById(R.id.tv_check_files)
         val deleteButton: Button = view.findViewById(R.id.button_delete)
-        val textInfoLL: LinearLayout = view.findViewById(R.id.linearLayout_textInfo_recording)
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
@@ -58,27 +57,32 @@ class RecordingsAdapter(
                 recordingsManager.deleteRecording(recording)
                 notifyItemRemoved(index)
             }
-           itemView.setOnClickListener {
-               val onEditBtnClickListener = DialogInterface.OnClickListener{
-                       _:DialogInterface,_:Int ->
-                   LabelsEditorDialog(context, recording) {
-                       notifyItemChanged(position)
-                   }
-               }
-               if(recording.hasVideoRecording()) {
-                   MessageDialog(context,
-                       recording.getActivitiesSummary(),
-                       "Edit",
-                       onEditBtnClickListener,
-                       "Show video"
-                   ) { _, _ -> VideoDialog(context, recording.getVideoFile()) }
-               }
-               else{
-                   MessageDialog(context,
-                       recording.getActivitiesSummary(),
-                       "Edit",
-                       onEditBtnClickListener)
-               }
+            itemView.setOnClickListener {
+                val onEditBtnClickListener =
+                    DialogInterface.OnClickListener { _: DialogInterface, _: Int ->
+                        LabelsEditorDialog(context, recording) {
+                            notifyItemChanged(position)
+                        }
+                    }
+                val title = recording.getDisplayTitle() + " ($personName)"
+                if (recording.hasVideoRecording()) {
+                    MessageDialog(
+                        context,
+                        recording.getActivitiesSummary(),
+                        title,
+                        "Edit",
+                        onEditBtnClickListener,
+                        "Show video"
+                    ) { _, _ -> VideoDialog(context, recording.getVideoFile()) }
+                } else {
+                    MessageDialog(
+                        context,
+                        recording.getActivitiesSummary(),
+                        title = title,
+                        "Edit",
+                        onEditBtnClickListener
+                    )
+                }
             }
             activityTextView.text =
                 recording.getDisplayTitle()

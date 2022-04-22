@@ -7,6 +7,7 @@ import android.content.DialogInterface
 class MessageDialog(
     context: Context,
     message: String,
+    title: String? = null,
     positiveButtonText: String = "Yes",
     onPositiveButtonClickListener: DialogInterface.OnClickListener? = null,
     neutralButtonText: String = "Neutral",
@@ -15,7 +16,9 @@ class MessageDialog(
     init {
         val builder = AlertDialog.Builder(context)
         builder.setMessage(message)
-
+        if(title!=null){
+            builder.setTitle(title)
+        }
         if (onNeutralButtonClickListener != null) {
             builder.setNeutralButton(neutralButtonText, onNeutralButtonClickListener)
         }
