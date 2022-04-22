@@ -50,18 +50,18 @@ class Page3Handler(
 
     private var lastPrediction = 0L
 
-    private val numDevices = 5
+    private val numDevices = 3
     private var numConnectedDevices = 0
     private var isRunning = false
 
     private lateinit var predictionModel: Lstmmodel118
     private lateinit var mainHandler: Handler
 
-    private val predictionInterval = 1000 / 60
+    private val predictionInterval = 4000L
     private val updatePredictionTask = object : Runnable {
         override fun run() {
             processAndPredict()
-            mainHandler.postDelayed(this, predictionInterval.toLong())
+            mainHandler.postDelayed(this, predictionInterval)
         }
     }
     private val updateProgressBarTask = object : Runnable {
