@@ -201,7 +201,7 @@ class Page3Handler(
 
         metadataStorage = XSensDotMetadataStorage(context)
         predictionHelper =
-            PredictionHelper(context, PreferencesHelper.shouldShowToastsVerbose(context))
+            PredictionHelper(context) //PreferencesHelper.shouldShowToastsVerbose(context))
 
         // Initializing prediction RV
         recyclerView = activity.findViewById(R.id.rv_prediction)
