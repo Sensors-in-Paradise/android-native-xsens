@@ -16,7 +16,7 @@ class MessageDialog(
     init {
         val builder = AlertDialog.Builder(context)
         builder.setMessage(message)
-        if(title!=null){
+        if (title != null) {
             builder.setTitle(title)
         }
         if (onNeutralButtonClickListener != null) {

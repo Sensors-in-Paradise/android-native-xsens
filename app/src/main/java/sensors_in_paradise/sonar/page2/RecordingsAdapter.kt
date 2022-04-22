@@ -93,7 +93,6 @@ class RecordingsAdapter(
             // Set check file text & color conditionally
             checkFilesTextView.setTextColor(getCheckFileColor(recording))
             checkFilesTextView.text = getCheckFileText(recording)
-
         }
     }
 
