@@ -76,14 +76,6 @@ class LabelsEditorDialog(
             videoView.visibility = View.GONE
         }
 
-        fun switchVisualizer(newVisualizer: VisualSequenceViewHolder) {
-            visualizer?.getView()?.visibility = View.GONE
-
-            newVisualizer.getView().visibility = View.VISIBLE
-            visualizer = newVisualizer
-
-        }
-
         rangeSlider.addOnChangeListener { slider, value, _ ->
             val numThumbs = slider.values.size
 

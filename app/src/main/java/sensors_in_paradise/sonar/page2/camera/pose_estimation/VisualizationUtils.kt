@@ -116,25 +116,32 @@ object VisualizationUtils {
         val upperTimeStamp = poseSequence.timeStamps.getOrNull(floorIndex + 1)
         val lowerPerson = poseSequence.personsArray[floorIndex].getOrNull(0)
         val upperPerson = poseSequence.personsArray.getOrNull(floorIndex + 1)?.getOrNull(0)
-        if (upperTimeStamp == null || lowerPerson == null || upperPerson == null
+        if (lowerPerson == null
             || timeStamp < lowerTimeStamp
-            || timeStamp > upperTimeStamp
-            || (timeStamp - lowerTimeStamp) > timeMargin) {
+            || timeStamp > upperTimeStamp ?: Long.MAX_VALUE
+            || (timeStamp - lowerTimeStamp) > timeMargin
+        ) { // No prior sample / TimeStamp inconsistent / big gap to prior AND next sample
             return listOf<Person>()
+        } else if (upperPerson == null
+            || upperTimeStamp == null
+            || (upperTimeStamp - lowerTimeStamp) > timeMargin
+        ) { // No next sample / big gap to next sample
+            return listOf(lowerPerson)
         } else {
-            val interpolateFactor = (timeStamp - lowerTimeStamp).toFloat() / (upperTimeStamp - lowerTimeStamp).toFloat()
+            val interpolateFactor =
+                (timeStamp - lowerTimeStamp).toFloat() / (upperTimeStamp - lowerTimeStamp).toFloat()
             val person = Person(
                 lowerPerson.id,
-            BodyPart.values().map { bp ->
-                val lowerP = lowerPerson.keyPoints[bp.position].coordinate
-                val upperP = upperPerson.keyPoints[bp.position].coordinate
+                BodyPart.values().map { bp ->
+                    val lowerP = lowerPerson.keyPoints[bp.position].coordinate
+                    val upperP = upperPerson.keyPoints[bp.position].coordinate
 
-                val x = lowerP.x + (upperP.x - lowerP.x) * interpolateFactor
-                val y = lowerP.y + (upperP.y - lowerP.y) * interpolateFactor
+                    val x = lowerP.x + (upperP.x - lowerP.x) * interpolateFactor
+                    val y = lowerP.y + (upperP.y - lowerP.y) * interpolateFactor
 
-                KeyPoint(bp, PointF(x, y), 1f)
-            }.toList(),
-            lowerPerson.boundingBox,
+                    KeyPoint(bp, PointF(x, y), 1f)
+                }.toList(),
+                lowerPerson.boundingBox,
                 lowerPerson.score
             )
             return listOf(person)
