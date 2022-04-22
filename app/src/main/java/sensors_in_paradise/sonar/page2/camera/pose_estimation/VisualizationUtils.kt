@@ -21,7 +21,9 @@ package sensors_in_paradise.sonar.page2.camera.pose_estimation
 
 import android.graphics.*
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.BodyPart
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.KeyPoint
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.PoseSequence
 
 object VisualizationUtils {
     /** Radius of circle used to draw keypoints.  */
@@ -101,6 +103,41 @@ object VisualizationUtils {
                         projectPointOnCanvas(keyPoint.coordinate, inputSize!!, outputSize!!, true)
                 }
             }
+        }
+    }
+
+    fun interpolatePersons(
+        poseSequence: PoseSequence,
+        floorIndex: Int,
+        timeStamp: Long,
+        timeMargin: Long = 500
+    ): List<Person> {
+        val lowerTimeStamp = poseSequence.timeStamps[floorIndex]
+        val upperTimeStamp = poseSequence.timeStamps.getOrNull(floorIndex + 1)
+        val lowerPerson = poseSequence.personsArray[floorIndex].getOrNull(0)
+        val upperPerson = poseSequence.personsArray.getOrNull(floorIndex + 1)?.getOrNull(0)
+        if (upperTimeStamp == null || lowerPerson == null || upperPerson == null
+            || timeStamp < lowerTimeStamp
+            || timeStamp > upperTimeStamp
+            || (timeStamp - lowerTimeStamp) > timeMargin) {
+            return listOf<Person>()
+        } else {
+            val interpolateFactor = (timeStamp - lowerTimeStamp).toFloat() / (upperTimeStamp - lowerTimeStamp).toFloat()
+            val person = Person(
+                lowerPerson.id,
+            BodyPart.values().map { bp ->
+                val lowerP = lowerPerson.keyPoints[bp.position].coordinate
+                val upperP = upperPerson.keyPoints[bp.position].coordinate
+
+                val x = lowerP.x + (upperP.x - lowerP.x) * interpolateFactor
+                val y = lowerP.y + (upperP.y - lowerP.y) * interpolateFactor
+
+                KeyPoint(bp, PointF(x, y), 1f)
+            }.toList(),
+            lowerPerson.boundingBox,
+                lowerPerson.score
+            )
+            return listOf(person)
         }
     }
 
