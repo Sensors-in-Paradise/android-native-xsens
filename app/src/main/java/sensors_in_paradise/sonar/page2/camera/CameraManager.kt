@@ -232,8 +232,8 @@ class CameraManager(
     }
 
     private fun createPoseEstimator(): MoveNet {
-        val modelType = ModelType.LightningF16
-        val targetDevice = Device.CPU
+        val modelType = ModelType.ThunderI8
+        val targetDevice = Device.GPU
 
         return MoveNet.create(context, targetDevice, modelType)
     }

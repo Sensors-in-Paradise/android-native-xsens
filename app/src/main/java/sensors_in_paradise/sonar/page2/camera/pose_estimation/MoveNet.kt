@@ -21,6 +21,7 @@ import android.os.SystemClock
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.gpu.GpuDelegate
+import org.tensorflow.lite.nnapi.NnApiDelegate
 import org.tensorflow.lite.support.common.FileUtil
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
@@ -34,10 +35,12 @@ import kotlin.math.min
 
 enum class ModelType {
     LightningF16,
-    LightningI8
+    LightningI8,
+    ThunderF16,
+    ThunderI8
 }
 
-class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: GpuDelegate?) :
+class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: NnApiDelegate?) :
     PoseDetector {
 
     companion object {
@@ -52,27 +55,34 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         // TFLite file names.
         private const val LIGHTNING_F16_FILENAME = "lite-model_movenet_singlepose_lightning_tflite_float16_4.tflite"
         private const val LIGHTNING_I8_FILENAME = "lite-model_movenet_singlepose_lightning_tflite_int8_4.tflite"
+        private const val THUNDER_F16_FILENAME = "lite-model_movenet_singlepose_thunder_tflite_float16_4.tflite"
+        private const val THUNDER_I8_FILENAME = "lite-model_movenet_singlepose_thunder_tflite_int8_4.tflite"
+
 
         // allow specifying model type.
         fun create(context: Context, device: Device, modelType: ModelType): MoveNet {
             val options = Interpreter.Options()
-            var gpuDelegate: GpuDelegate? = null
+            var gpuDelegate: NnApiDelegate? = null
             options.setNumThreads(CPU_NUM_THREADS)
             when (device) {
                 Device.CPU -> {
                 }
                 Device.GPU -> {
-                    gpuDelegate = GpuDelegate()
+                    gpuDelegate = NnApiDelegate()
                     options.addDelegate(gpuDelegate)
                 }
-                Device.NNAPI -> options.setUseNNAPI(true)
+                // Device.NNAPI -> options.setUseNNAPI(true)
             }
             return MoveNet(
                 Interpreter(
                     FileUtil.loadMappedFile(
                         context,
-                        if (modelType == ModelType.LightningF16) LIGHTNING_F16_FILENAME
-                        else LIGHTNING_I8_FILENAME
+                        when (modelType) {
+                            ModelType.LightningF16 -> LIGHTNING_F16_FILENAME
+                            ModelType.LightningI8 -> LIGHTNING_I8_FILENAME
+                            ModelType.ThunderF16 -> THUNDER_F16_FILENAME
+                            ModelType.ThunderI8 -> THUNDER_I8_FILENAME
+                        }
                     ), options
                 ),
                 gpuDelegate
