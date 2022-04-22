@@ -111,7 +111,7 @@ class GlobalValues private constructor() {
             return result
         }
 
-        val sensorTagPrefixes = listOf("LF", "LW", "ST", "RW", "RF")
+        val sensorTagPrefixes = listOf("LF", "ST", "RF")
 
         fun formatTag(tagPrefix: String, deviceSetKey: String): String {
             return "$tagPrefix-$deviceSetKey"

@@ -57,7 +57,7 @@ class Page3Handler(
     private lateinit var predictionModel: LopoModel
     private lateinit var mainHandler: Handler
 
-    private val predictionInterval = 4000L
+    private val predictionInterval = 15000L
     private val updatePredictionTask = object : Runnable {
         override fun run() {
             processAndPredict()
@@ -108,7 +108,7 @@ class Page3Handler(
             timer.start()
 
             isRunning = true
-            mainHandler.postDelayed(updatePredictionTask, 4000)
+            mainHandler.postDelayed(updatePredictionTask, predictionInterval)
             mainHandler.postDelayed(updateProgressBarTask, 100)
             progressBar.visibility = View.VISIBLE
             predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)

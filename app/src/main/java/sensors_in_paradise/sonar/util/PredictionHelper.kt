@@ -1,6 +1,7 @@
 package sensors_in_paradise.sonar.util
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import sensors_in_paradise.sonar.XSensDotDeviceWithOfflineMetadata
 import java.nio.ByteBuffer
@@ -13,7 +14,7 @@ class PredictionHelper(
     private val showToasts: Boolean
 ) {
 
-    private val numDevices = 5
+    private val numDevices = 3
     private val sizeOfFloat = 4
     private val numGyro = 3
     private val numAcc = 3
@@ -31,13 +32,13 @@ class PredictionHelper(
         val startingTimestamp = rawSensorDataMap.maxOf { it.value.first().first }
         val finishingTimestamp = rawSensorDataMap.minOf { it.value.last().first }
 
-        if (finishingTimestamp <= startingTimestamp) {
+        /*if (finishingTimestamp <= startingTimestamp) {
             if (showToasts) {
                 Toast.makeText(context, "Timestamps not in sync", Toast.LENGTH_LONG).show()
                 Toast.makeText(context, "Data may be inconsistent!", Toast.LENGTH_SHORT).show()
             }
             return
-        }
+        }*/
 
         // cut off every entry outside of 'starting-' and 'finishingTimestamp'
         // use 'startingEntries' to ensure having a starting value if entry at 'startingTimestamp' is missing
@@ -131,6 +132,7 @@ class PredictionHelper(
 
         // check for minimal length
         val recordedLinesCount = rawSensorDataMap.minOfOrNull { it.value.size }!!
+        Log.d("prediction", "recordedLinesCount: $recordedLinesCount")
         if (recordedLinesCount < dataVectorSize) {
             Toast.makeText(context, "Not enough data collected!", Toast.LENGTH_SHORT).show()
             return null
@@ -159,7 +161,7 @@ class PredictionHelper(
                 }
 
                 // Take only free acc
-                lineFloatArray += normalizedFloatArray.takeLast(3)
+                lineFloatArray += normalizedFloatArray
             }
             floatArray += lineFloatArray
         }
