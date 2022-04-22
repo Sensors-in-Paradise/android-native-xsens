@@ -7,6 +7,7 @@ import android.content.DialogInterface
 class MessageDialog(
     context: Context,
     message: String,
+    positiveButtonText: String = "Yes",
     onPositiveButtonClickListener: DialogInterface.OnClickListener? = null,
     neutralButtonText: String = "Neutral",
     onNeutralButtonClickListener: DialogInterface.OnClickListener? = null
@@ -21,11 +22,11 @@ class MessageDialog(
 
         if (onPositiveButtonClickListener != null) {
             builder.setPositiveButton(
-                "Yes",
+                positiveButtonText,
                 onPositiveButtonClickListener
             )
             builder.setNegativeButton("Cancel",
-                DialogInterface.OnClickListener { dialog, id ->
+                { dialog, id ->
                     // User cancelled the dialog
                     dialog.cancel()
                 })
