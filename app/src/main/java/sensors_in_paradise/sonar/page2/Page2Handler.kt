@@ -131,7 +131,7 @@ class Page2Handler(
                     e.printStackTrace()
                 }
             }
-            cameraManager.stopRecordingPose { poseCaptureStartTime, poseTempFile, storageManager->
+            cameraManager.stopRecordingPose { poseCaptureStartTime, poseTempFile ->
                 metadata.setPoseCaptureStartedTime(poseCaptureStartTime, true)
                 try {
                     Files.move(poseTempFile, dir.resolve(Recording.POSE_CAPTURE_FILENAME))

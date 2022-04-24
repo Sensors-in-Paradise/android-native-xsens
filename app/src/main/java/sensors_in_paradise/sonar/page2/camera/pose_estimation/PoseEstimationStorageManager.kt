@@ -20,9 +20,17 @@ import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.KeyPoint
 import java.io.BufferedReader
 import java.io.FileReader
 
-class PoseEstimationStorageManager(val csvFile: File) {
+class PoseEstimationStorageManager(var csvFile: File) {
     private val separator = ", "
-    private val fileWriter = FileWriter(csvFile)
+
+    private var fileWriter = FileWriter(csvFile)
+
+    fun reset(newCsvFile: File): PoseEstimationStorageManager {
+        csvFile = newCsvFile
+        fileWriter = FileWriter(csvFile)
+
+        return this
+    }
 
     fun writeHeader(startTime: LocalDateTime, modelType: String, dimensions: Int) {
         val header = listOf<String>(
@@ -125,6 +133,7 @@ class PoseEstimationStorageManager(val csvFile: File) {
                 }
                 csvReader.close()
             } catch (e: Exception) {
+                // TODO use Toasts or whatever to handle exception right (and prevent app crash)
                 Log.d("PoseEstimation", e.toString())
             }
             return csvData

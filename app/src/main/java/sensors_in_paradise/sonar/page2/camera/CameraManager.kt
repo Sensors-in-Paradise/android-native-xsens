@@ -18,11 +18,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.util.Consumer
 import androidx.lifecycle.LifecycleOwner
 import sensors_in_paradise.sonar.page2.LoggingManager
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.ModelType
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.MoveNet
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.ImageProcessor
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.PoseEstimationStorageManager
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.*
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Device
+import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.File
 import java.time.LocalDateTime
@@ -31,7 +29,7 @@ import java.util.concurrent.Executors
 class CameraManager(
     val context: Context,
     private val previewView: PreviewView,
-    overlayView: TextureView
+    private val overlayView: TextureView
 ) :
     Consumer<VideoRecordEvent> {
     private var cameraProvider: ProcessCameraProvider? = null
@@ -50,7 +48,7 @@ class CameraManager(
     private var videoRecording: Recording? = null
 
     private var imageProcessor: ImageProcessor? = null
-    private var storageManager: PoseEstimationStorageManager? = null
+    private var poseStorageManager: PoseEstimationStorageManager? = null
     private val imageAnalysisExecutor = Executors.newFixedThreadPool(2)
     @SuppressLint("UnsafeOptInUsageError")
     private val imageAnalysis = ImageAnalysis.Builder()
@@ -207,22 +205,25 @@ class CameraManager(
             bindImageAnalyzer()
         }
         val poseEstimator = createPoseEstimator()
-        storageManager = storageManager ?: PoseEstimationStorageManager(outputFile)
+        poseStorageManager =  if (poseStorageManager == null)
+            PoseEstimationStorageManager(outputFile)
+            else poseStorageManager!!.reset(outputFile)
 
         val localDateTime = LocalDateTime.now()
         // TODO use actual setting to get model type and dimensions
-        storageManager!!.writeHeader(localDateTime, "LightningF16", 2)
+        poseStorageManager!!.writeHeader(localDateTime, "LightningF16", 2)
         poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
 
-        imageProcessor = imageProcessor ?: ImageProcessor(poseEstimator, storageManager!!)
+        imageProcessor = imageProcessor ?: ImageProcessor(poseEstimator, poseStorageManager!!)
     }
 
     /** Stops the recording and returns the UNIX timestamp of
      * when the recording did actually start and the file where it's stored
      * MEIN CODE IST SCHEIßE - ALEX! */
-    fun stopRecordingPose(onPoseRecordingFinalized: ((poseCaptureStartTime: Long, poseTempFile: File, poseEstimationStorageManager: PoseEstimationStorageManager) -> Unit)? = null) {
-        if (imageProcessor != null && storageManager != null) {
-            onPoseRecordingFinalized?.invoke(poseStartTime ?: 0L, storageManager!!.csvFile, storageManager!!)
+    fun stopRecordingPose(onPoseRecordingFinalized: ((poseCaptureStartTime: Long, poseTempFile: File) -> Unit)? = null) {
+        if (imageProcessor != null && poseStorageManager != null) {
+            imageProcessor?.clearView(overlayView)
+            onPoseRecordingFinalized?.invoke(poseStartTime ?: 0L, poseStorageManager!!.csvFile)
         }
         unbindImageAnalyzer()
     }

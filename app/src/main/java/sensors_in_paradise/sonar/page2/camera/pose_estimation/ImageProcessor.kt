@@ -29,6 +29,14 @@ class ImageProcessor(private val poseDetector: PoseDetector, private val poseEst
         return bitmap
     }
 
+    fun clearView(overlayView: TextureView) {
+        val surfaceCanvas = overlayView.lockCanvas()
+        surfaceCanvas?.let { canvas ->
+            VisualizationUtils.drawBodyKeypoints(canvas, listOf<Person>())
+            overlayView.unlockCanvasAndPost(canvas)
+        }
+    }
+
     // process image
     fun processImage(image: Image, overlayView: TextureView) {
         val bitmap = imageToBitmap(image)

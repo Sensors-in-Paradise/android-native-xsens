@@ -16,6 +16,7 @@ limitations under the License.
 
 package sensors_in_paradise.sonar.page2.camera.pose_estimation.data
 
+import android.graphics.PointF
 import android.graphics.RectF
 
 data class Person(
@@ -26,6 +27,17 @@ data class Person(
 ) {
     fun copy(): Person {
         return Person(id, keyPoints.map { it.copy() }, boundingBox, score)
+    }
+
+    companion object {
+        fun getNULLPerson(): Person {
+            return Person(
+                -1,
+                BodyPart.values().map { bp -> KeyPoint(bp, PointF(-1f, -1f), 0f) },
+                RectF(),
+                0f
+            )
+        }
     }
 }
 
