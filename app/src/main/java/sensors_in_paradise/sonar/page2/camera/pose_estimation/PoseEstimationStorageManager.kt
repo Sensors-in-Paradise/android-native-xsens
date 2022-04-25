@@ -23,7 +23,7 @@ import java.io.FileReader
 class PoseEstimationStorageManager(var csvFile: File) {
     private val separator = ", "
 
-    private var fileWriter = FileWriter(csvFile)
+    private var fileWriter: FileWriter? = FileWriter(csvFile)
 
     fun reset(newCsvFile: File): PoseEstimationStorageManager {
         csvFile = newCsvFile
@@ -41,14 +41,14 @@ class PoseEstimationStorageManager(var csvFile: File) {
             "StartTimeStamp: ${LoggingManager.normalizeTimeStamp(startTime)}",
         ).joinToString("\n", "", "\n")
 
-        fileWriter.appendLine("HeaderSize = ${header.length}")
-        fileWriter.appendLine(header)
+        fileWriter?.appendLine("HeaderSize = ${header.length}")
+        fileWriter?.appendLine(header)
 
         val columns = BodyPart.values().joinToString(
             ",",
             "TimeStamp,Confidence,",
             transform = { bp -> "${bp}_X,${bp}_Y" })
-        fileWriter.appendLine(columns)
+        fileWriter?.appendLine(columns)
     }
 
     fun storePoses(persons: List<Person>) {
@@ -61,12 +61,13 @@ class PoseEstimationStorageManager(var csvFile: File) {
                 ",",
                 "$timeStamp,$confidence,",
                 transform = { kp -> "${kp.coordinate.x},${kp.coordinate.y}" })
-            fileWriter.appendLine(outputLine)
+            fileWriter?.appendLine(outputLine)
         }
     }
 
     fun closeFile() {
-        fileWriter.close()
+        fileWriter?.close()
+        fileWriter = null
     }
 
     companion object {
@@ -167,7 +168,8 @@ class PoseEstimationStorageManager(var csvFile: File) {
                         val persons = personsFromCSVLine(line)
                         VisualizationUtils.transformKeypoints(
                             persons, bitmap, canvas,
-                            VisualizationUtils.Transformation.PROJECT_ON_CANVAS
+                            VisualizationUtils.Transformation.PROJECT_ON_CANVAS,
+                            false
                         )
                         VisualizationUtils.drawBodyKeypoints(
                             persons,

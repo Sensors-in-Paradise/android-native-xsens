@@ -77,7 +77,6 @@ object VisualizationUtils {
         // p should be normalized to [0,1]
         val actualInputSize = if (isRotated) PointF(inputSize.y, inputSize.x) else inputSize
         val heightRatio = (actualInputSize.y * outputSize.x) / (outputSize.y * actualInputSize.x)
-
         val pScaled = PointF(p.x, (p.y * heightRatio) - ((heightRatio - 1f) / 2f))
         return PointF(pScaled.x * outputSize.x, pScaled.y * outputSize.y)
     }
@@ -86,7 +85,8 @@ object VisualizationUtils {
         persons: List<Person>,
         bitmap: Bitmap?,
         canvas: Canvas?,
-        transformation: Transformation
+        transformation: Transformation,
+        isRotated: Boolean = false
     ) {
         val inputSize = bitmap?.let { PointF(bitmap.width.toFloat(), bitmap.height.toFloat()) }
         val outputSize = canvas?.let { PointF(canvas.width.toFloat(), canvas.height.toFloat()) }
@@ -100,7 +100,7 @@ object VisualizationUtils {
                         rotatePoint90(keyPoint.coordinate)
 
                     Transformation.PROJECT_ON_CANVAS -> keyPoint.coordinate =
-                        projectPointOnCanvas(keyPoint.coordinate, inputSize!!, outputSize!!, true)
+                        projectPointOnCanvas(keyPoint.coordinate, inputSize!!, outputSize!!, isRotated!!)
                 }
             }
         }

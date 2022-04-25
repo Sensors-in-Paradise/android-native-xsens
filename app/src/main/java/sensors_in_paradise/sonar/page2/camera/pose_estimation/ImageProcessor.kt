@@ -68,7 +68,8 @@ class ImageProcessor(
         surfaceCanvas?.let { canvas ->
             VisualizationUtils.transformKeypoints(
                 persons, bitmap, canvas,
-                VisualizationUtils.Transformation.PROJECT_ON_CANVAS
+                VisualizationUtils.Transformation.PROJECT_ON_CANVAS,
+                isRotated90
             )
 
             VisualizationUtils.drawBodyKeypoints(

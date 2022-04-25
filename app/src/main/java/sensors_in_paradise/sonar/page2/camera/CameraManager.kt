@@ -66,7 +66,6 @@ class CameraManager(
                         it, overlayView, true
                     )
                 }
-
                 // after done, release the ImageProxy object
                 imageProxy.close()
             })
@@ -246,18 +245,18 @@ class CameraManager(
      * when the recording did actually start and the file where it's stored
      * MEIN CODE IST SCHEIßE - ALEX! */
     fun stopRecordingPose(onPoseRecordingFinalized: ((poseCaptureStartTime: Long, poseTempFile: File) -> Unit)? = null) {
-        if (imageProcessor != null && poseStorageManager != null) {
-            imageProcessor?.clearView(overlayView)
-            poseStorageManager?.closeFile()
-            onPoseRecordingFinalized?.invoke(poseStartTime ?: 0L, poseStorageManager!!.csvFile)
-        }
-
         timer?.let {
             it.cancel()
             timer = null
         }
         if (isAnalyzerBound) {
             unbindImageAnalyzer()
+        }
+
+        if (imageProcessor != null && poseStorageManager != null) {
+            imageProcessor?.clearView(overlayView)
+            poseStorageManager?.closeFile()
+            onPoseRecordingFinalized?.invoke(poseStartTime ?: 0L, poseStorageManager!!.csvFile)
         }
     }
 
