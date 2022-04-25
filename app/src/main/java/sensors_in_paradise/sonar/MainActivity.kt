@@ -214,5 +214,4 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         resetHeadingMi.isEnabled = !areConnectedSensorsOccupied && hasConnectedSensors
         revertHeadingMi.isEnabled = !areConnectedSensorsOccupied && hasConnectedSensors
     }
-
 }

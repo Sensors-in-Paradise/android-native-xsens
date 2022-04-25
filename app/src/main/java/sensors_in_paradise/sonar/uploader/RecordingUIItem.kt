@@ -12,7 +12,7 @@ class RecordingUIItem(recording: Recording, private val recordingsBaseDir: File)
     val dirsToBeCreated = filesAndDirsToBeUploaded.filter { file -> file.isDirectory }
     val filesToBeUploaded = filesAndDirsToBeUploaded.filter { file -> file.isFile }
     val label = "${metadataStorage.getPerson()} - ${
-        metadataStorage.getActivities().joinToString { it.second }
+        metadataStorage.getActivities().joinToString { it.activity }
     }"
     private val filesAndDirsUploadStatus: MutableMap<File, UploadStatus> =
         getFilesAndDirsToBeUploadedList().associateWith { UploadStatus.NOT_UPLOADED } as MutableMap<File, UploadStatus>

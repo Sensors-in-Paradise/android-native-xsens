@@ -9,7 +9,11 @@ import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
 
-class RecordingMetadataStorage(file: File) : JSONStorage(file) {
+class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JSONStorage(file, initialJson) {
+    data class LabelEntry(
+        var timeStarted: Long,
+        var activity: String
+    )
     private lateinit var activities: JSONArray
     override fun onFileNewlyCreated() {
         activities = JSONArray()
@@ -22,7 +26,7 @@ class RecordingMetadataStorage(file: File) : JSONStorage(file) {
     }
 
     fun setData(
-        activities: ArrayList<Pair<Long, String>>,
+        activities: ArrayList<LabelEntry>,
         totalStartTime: Long,
         endTime: Long,
         person: String,
@@ -43,13 +47,22 @@ class RecordingMetadataStorage(file: File) : JSONStorage(file) {
             save()
         }
     }
-    fun getActivities(): ArrayList<Pair<Long, String>> {
-        val result = ArrayList<Pair<Long, String>>()
+    fun setActivities(activities: ArrayList<LabelEntry>, save: Boolean = false) {
+        clearActivities()
+        for (activity in activities) {
+            addActivity(activity)
+        }
+        if (save) {
+            save()
+        }
+    }
+    fun getActivities(): ArrayList<LabelEntry> {
+        val result = ArrayList<LabelEntry>()
         for (i in 0 until activities.length()) {
             val activityObj = activities[i] as JSONObject
             val timeStarted = activityObj.getLong("timeStarted")
             val label = activityObj.getString("label")
-            result.add(Pair(timeStarted, label))
+            result.add(LabelEntry(timeStarted, label))
         }
         return result
     }
@@ -110,9 +123,15 @@ class RecordingMetadataStorage(file: File) : JSONStorage(file) {
         }
     }
     private fun addActivity(activity: Pair<Long, String>) {
+    private fun clearActivities() {
+       while (activities.length()> 0) {
+               activities.remove(0)
+           }
+    }
+    private fun addActivity(activity: LabelEntry) {
         val obj = JSONObject()
-        obj.put("timeStarted", activity.first)
-        obj.put("label", activity.second)
+        obj.put("timeStarted", activity.timeStarted)
+        obj.put("label", activity.activity)
         activities.put(obj)
     }
 
@@ -136,5 +155,17 @@ class RecordingMetadataStorage(file: File) : JSONStorage(file) {
     }
     companion object{
         private const val ON_DEVICE_TRAINING_METADATA_KEY = "onDeviceTraining"
+    }
+    fun getSensorMacMap(): Map<String, String> {
+        val result = mutableMapOf<String, String>()
+        val obj = json.getJSONObject("sensorMapping")
+
+        for (key in obj.keys()) {
+            result[key] = obj.getString(key)
+        }
+        return result
+    }
+    fun clone(): RecordingMetadataStorage {
+        return RecordingMetadataStorage(file, json)
     }
 }

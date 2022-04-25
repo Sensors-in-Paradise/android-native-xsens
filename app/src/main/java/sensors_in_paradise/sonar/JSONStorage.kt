@@ -12,20 +12,35 @@ abstract class JSONStorage @Throws(
     IOException::class,
     SecurityException::class,
     JSONException::class
-) constructor(val file: File) {
+) constructor(val file: File, initialJson: JSONObject? = null) {
+    constructor(file: File) : this(file, null)
+
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     lateinit var json: JSONObject
 
     init {
-        if (!file.exists()) {
-            file.createNewFile()
-            json = JSONObject()
-            onFileNewlyCreated()
-            save()
+        if (initialJson == null) {
+            if (!file.exists()) {
+                file.createNewFile()
+                json = JSONObject()
+                onFileNewlyCreated()
+                save()
+            } else {
+                val fileContentRaw = Files.readAllBytes(file.toPath())
+                val fileContent = String(fileContentRaw, StandardCharsets.UTF_8)
+                json = JSONObject(fileContent)
+            }
         } else {
-            val fileContentRaw = Files.readAllBytes(file.toPath())
-            val fileContent = String(fileContentRaw, StandardCharsets.UTF_8)
-            json = JSONObject(fileContent)
+            val jsonCopy = JSONObject(initialJson.toString())
+            if (!file.exists()) {
+                file.createNewFile()
+                json = jsonCopy
+                onFileNewlyCreated()
+                save()
+            } else {
+                json = jsonCopy
+                save()
+            }
         }
         onJSONInitialized()
     }
