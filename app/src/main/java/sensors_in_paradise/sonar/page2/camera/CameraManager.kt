@@ -2,6 +2,7 @@ package sensors_in_paradise.sonar.page2.camera
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.CountDownTimer
 import android.util.Log
 import android.util.Size
 import android.view.TextureView
@@ -50,6 +51,7 @@ class CameraManager(
     private var imageProcessor: ImageProcessor? = null
     private var poseStorageManager: PoseEstimationStorageManager? = null
     private val imageAnalysisExecutor = Executors.newFixedThreadPool(2)
+
     @SuppressLint("UnsafeOptInUsageError")
     private val imageAnalysis = ImageAnalysis.Builder()
         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
@@ -62,7 +64,7 @@ class CameraManager(
                 // insert your code here.
                 imageProxy.image?.let {
                     imageProcessor?.processImage(
-                        it, overlayView
+                        it, overlayView, true
                     )
                 }
 
@@ -70,6 +72,8 @@ class CameraManager(
                 imageProxy.close()
             })
         }
+    private val POSE_ESTIMATION_FREQUENCY = 25
+    private var timer: CountDownTimer? = null
 
     init {
         ProcessCameraProvider.getInstance(context).apply {
@@ -201,13 +205,18 @@ class CameraManager(
     private var poseStartTime: Long? = null
 
     fun startRecordingPose(outputFile: File) {
-        if (!isAnalyzerBound) {
+        // Video Capture and Image Analysis are not combinable as use case
+        if (shouldCaptureVideo()) {
+            timer = getTimerObject(Long.MAX_VALUE, 1000L / POSE_ESTIMATION_FREQUENCY)
+            timer!!.start()
+        } else if (!isAnalyzerBound) {
             bindImageAnalyzer()
         }
+
         val poseEstimator = createPoseEstimator()
-        poseStorageManager =  if (poseStorageManager == null)
+        poseStorageManager = if (poseStorageManager == null)
             PoseEstimationStorageManager(outputFile)
-            else poseStorageManager!!.reset(outputFile)
+        else poseStorageManager!!.reset(outputFile)
 
         val localDateTime = LocalDateTime.now()
         // TODO use actual setting to get model type and dimensions
@@ -225,7 +234,14 @@ class CameraManager(
             imageProcessor?.clearView(overlayView)
             onPoseRecordingFinalized?.invoke(poseStartTime ?: 0L, poseStorageManager!!.csvFile)
         }
-        unbindImageAnalyzer()
+
+        timer?.let {
+            it.cancel()
+            timer = null
+        }
+        if (isAnalyzerBound) {
+            unbindImageAnalyzer()
+        }
     }
 
     fun shouldRecordPose(): Boolean {
