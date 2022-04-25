@@ -5,6 +5,6 @@ import sensors_in_paradise.sonar.ScreenInterface
 
 class TrainingScreen : ScreenInterface {
 
-    override fun activityCreated(activity: Activity) {
+    override fun onActivityCreated(activity: Activity) {
     }
 }

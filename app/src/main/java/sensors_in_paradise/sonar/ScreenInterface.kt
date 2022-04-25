@@ -5,11 +5,15 @@ import androidx.annotation.UiThread
 
 interface ScreenInterface {
     @UiThread
-    fun activityCreated(activity: Activity)
+    fun onActivityCreated(activity: Activity)
     @UiThread
-    fun activityResumed() {}
+    fun onActivityResumed() {}
     @UiThread
-    fun activityWillDestroy() {}
+    fun onActivityWillDestroy() {}
     @UiThread
-    fun activityStopped() {}
+    fun onActivityStopped() {}
+    @UiThread
+    fun onScreenOpened() {}
+    @UiThread
+    fun onScreenClosed() {}
 }

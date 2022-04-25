@@ -113,7 +113,7 @@ class ConnectionScreen(private val scannedDevices: XSENSArrayList) :
 
     @SuppressLint("NotifyDataSetChanged")
     @RequiresApi(Build.VERSION_CODES.S)
-    override fun activityCreated(activity: Activity) {
+    override fun onActivityCreated(activity: Activity) {
         this.context = activity
         this.activity = activity
         tv = activity.findViewById(R.id.tv_center_acitivity_main)
@@ -144,7 +144,7 @@ class ConnectionScreen(private val scannedDevices: XSENSArrayList) :
         }
     }
     @SuppressLint("SetTextI18n")
-    override fun activityResumed() {
+    override fun onActivityResumed() {
         if (PermissionsHelper.areAllPermissionsGranted(context)) {
             val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
             if (mBluetoothAdapter == null) {
@@ -168,7 +168,7 @@ class ConnectionScreen(private val scannedDevices: XSENSArrayList) :
         }
     }
 
-    override fun activityWillDestroy() {
+    override fun onActivityWillDestroy() {
         // Nothing to do
     }
 

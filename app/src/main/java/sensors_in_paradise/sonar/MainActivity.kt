@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     private lateinit var davCloudUploader: DavCloudRecordingsUploader
     private lateinit var recordingsManager: RecordingDataManager
 
-    private val pageHandlers = ArrayList<ScreenInterface>()
+    private val screenHandlers = ArrayList<ScreenInterface>()
     private val scannedDevices = XSENSArrayList()
     private lateinit var connectionScreen: ConnectionScreen
     private lateinit var sensorTrafficVisualizationHandler: SensorTrafficVisualizationHandler
@@ -65,13 +65,17 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
             }
         }
         connectionScreen.addConnectionInterface(headingResetHandler)
-        pageHandlers.add(connectionScreen)
+        screenHandlers.add(connectionScreen)
+
         val recordingScreen = RecordingScreen(scannedDevices, recordingsManager, this)
-        pageHandlers.add(recordingScreen)
-        val predictionScreen = PredictionScreen(scannedDevices, this)
-        pageHandlers.add(predictionScreen)
+        screenHandlers.add(recordingScreen)
+
         val trainingScreen = TrainingScreen()
-        pageHandlers.add(trainingScreen)
+        screenHandlers.add(trainingScreen)
+
+        val predictionScreen = PredictionScreen(scannedDevices, this)
+        screenHandlers.add(predictionScreen)
+
 
         connectionScreen.addConnectionInterface(recordingScreen)
         connectionScreen.addConnectionInterface(predictionScreen)
@@ -80,10 +84,10 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         val permissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) {}
-        pageHandlers.add(PermissionsHandler(permissionLauncher))
+        screenHandlers.add(PermissionsHandler(permissionLauncher))
 
-        for (handler in pageHandlers) {
-            handler.activityCreated(this)
+        for (handler in screenHandlers) {
+            handler.onActivityCreated(this)
         }
         supportActionBar?.setBackgroundDrawable(ColorDrawable(getColor(R.color.colorPrimary)))
 
@@ -100,15 +104,15 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
             mode = if (PreferencesHelper.shouldUseDarkMode(this)) MODE_NIGHT_YES else MODE_NIGHT_NO
         }
         setDefaultNightMode(mode)
-        for (handler in pageHandlers) {
-            handler.activityResumed()
+        for (handler in screenHandlers) {
+            handler.onActivityResumed()
         }
         setTrainingTabVisible(PreferencesHelper.isOnDeviceTrainingScreenEnabled(this))
 
     }
 
     override fun onDestroy() {
-        pageHandlers.forEach { handler -> handler.activityWillDestroy() }
+        screenHandlers.forEach { handler -> handler.onActivityWillDestroy() }
 
         super.onDestroy()
     }
@@ -134,17 +138,20 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
 
     override fun onTabSelected(tab: TabLayout.Tab?) {
         if (tab != null) {
-            switcher.displayedChild = tabIndexToScreenIndexMap[tab.position]!!
+            val screenIndex = tabIndexToScreenIndexMap[tab.position]!!
+            switcher.displayedChild = screenIndex
+            screenHandlers[screenIndex].onScreenOpened()
         }
     }
 
     override fun onTabUnselected(tab: TabLayout.Tab?) {
-        // TODO("Not yet implemented")
+        if (tab != null) {
+            val screenIndex = tabIndexToScreenIndexMap[tab.position]!!
+            screenHandlers[screenIndex].onScreenClosed()
+        }
     }
 
-    override fun onTabReselected(tab: TabLayout.Tab?) {
-        // TODO("Not yet implemented")
-    }
+    override fun onTabReselected(tab: TabLayout.Tab?) {}
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater: MenuInflater = menuInflater

@@ -198,7 +198,7 @@ class PredictionScreen(
         addPredictionViews(outputFeature0.floatArray)
     }
 
-    override fun activityCreated(activity: Activity) {
+    override fun onActivityCreated(activity: Activity) {
 
         this.activity = activity
         this.context = activity
@@ -224,10 +224,10 @@ class PredictionScreen(
         mainHandler = Handler(Looper.getMainLooper())
     }
 
-    override fun activityResumed() {
+    override fun onActivityResumed() {
     }
 
-    override fun activityWillDestroy() {
+    override fun onActivityWillDestroy() {
         // Nothing to do
     }
 

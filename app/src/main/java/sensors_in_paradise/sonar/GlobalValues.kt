@@ -5,6 +5,9 @@ import android.content.Context
 import android.os.Build
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import java.io.File
+import java.net.NetworkInterface
+import java.util.*
+import kotlin.collections.ArrayList
 
 class GlobalValues private constructor() {
     companion object {
@@ -123,6 +126,29 @@ class GlobalValues private constructor() {
             val seconds = diffSecs - (diffSecs / 60) * 60
 
             return minutes.toString().padStart(2, '0') + ":" + seconds.toString().padStart(2, '0')
+        }
+        fun getMacAddress(): String {
+            try {
+                val all = Collections.list(NetworkInterface.getNetworkInterfaces())
+                for (nif in all) {
+                    if (!nif.name.equals("wlan0", ignoreCase=true)) continue
+
+                    val macBytes = nif.hardwareAddress ?: return ""
+
+                    val res1 = StringBuilder()
+                    for (b in macBytes) {
+                        res1.append(String.format("%02X:", b))
+                    }
+
+                    if (res1.isNotEmpty()) {
+                        res1.deleteCharAt(res1.length - 1)
+                    }
+                    return res1.toString()
+                }
+            } catch (ex: Exception) {
+            }
+
+            return "02:00:00:00:00:00"
         }
     }
 }

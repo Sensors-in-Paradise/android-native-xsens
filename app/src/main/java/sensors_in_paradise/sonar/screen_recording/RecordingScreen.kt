@@ -39,7 +39,7 @@ class RecordingScreen(
     private lateinit var activity: Activity
     private lateinit var cameraManager: CameraManager
     private lateinit var mediaPlayerSound: MediaPlayer
-    override fun activityCreated(activity: Activity) {
+    override fun onActivityCreated(activity: Activity) {
         this.context = activity
         this.activity = activity
         timer = activity.findViewById(R.id.timer)
@@ -125,11 +125,11 @@ class RecordingScreen(
         recordingsAdapter.notifyItemInserted(0)
     }
 
-    override fun activityResumed() {
+    override fun onActivityResumed() {
         setCameraTabVisible(PreferencesHelper.shouldRecordWithCamera(context))
     }
 
-    override fun activityWillDestroy() {
+    override fun onActivityWillDestroy() {
         loggingManager.stopLoggingImmediately()
     }
 

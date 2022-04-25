@@ -1,9 +1,11 @@
 @file:Suppress("SwallowedException")
 package sensors_in_paradise.sonar.screen_recording
 
+import android.os.Build
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
 
@@ -80,7 +82,33 @@ class RecordingMetadataStorage(file: File) : JSONStorage(file) {
             null
         }
     }
-
+    fun hasBeenUsedForOnDeviceTraining(): Boolean{
+        val macAddress = GlobalValues.getMacAddress()
+        if(json.has(ON_DEVICE_TRAINING_METADATA_KEY)){
+            return json.has(macAddress)
+        }
+        return false
+    }
+    fun setUsedForOnDeviceTraining(save: Boolean = true){
+        if(!json.has(ON_DEVICE_TRAINING_METADATA_KEY)){
+            json.put(ON_DEVICE_TRAINING_METADATA_KEY, JSONObject())
+        }
+        val onDeviceTrainingObj = json.getJSONObject(ON_DEVICE_TRAINING_METADATA_KEY)
+        val macAddress = GlobalValues.getMacAddress()
+        if(!onDeviceTrainingObj.has(macAddress)){
+            val deviceInfoObj = JSONObject()
+            deviceInfoObj.put("device_model", Build.MODEL)
+            deviceInfoObj.put("device", Build.DEVICE)
+            deviceInfoObj.put("trainingHistory",JSONArray())
+            onDeviceTrainingObj.put(macAddress, deviceInfoObj)
+        }
+        val deviceInfoObj = onDeviceTrainingObj.getJSONObject(macAddress)
+        val trainingHistory = deviceInfoObj.getJSONArray("trainingHistory")
+        trainingHistory.put(System.currentTimeMillis())
+        if(save){
+            save()
+        }
+    }
     private fun addActivity(activity: Pair<Long, String>) {
         val obj = JSONObject()
         obj.put("timeStarted", activity.first)
@@ -105,5 +133,8 @@ class RecordingMetadataStorage(file: File) : JSONStorage(file) {
             obj.put(entry.key, entry.value)
         }
         json.put("sensorMapping", obj)
+    }
+    companion object{
+        private const val ON_DEVICE_TRAINING_METADATA_KEY = "onDeviceTraining"
     }
 }
