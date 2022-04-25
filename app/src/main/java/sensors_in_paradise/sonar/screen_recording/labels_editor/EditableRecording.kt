@@ -1,8 +1,8 @@
 package sensors_in_paradise.sonar.page2.labels_editor
 
 import sensors_in_paradise.sonar.GlobalValues
-import sensors_in_paradise.sonar.page2.Recording
-import sensors_in_paradise.sonar.page2.RecordingMetadataStorage
+import sensors_in_paradise.sonar.screen_recording.Recording
+import sensors_in_paradise.sonar.screen_recording.RecordingMetadataStorage
 
 class EditableRecording(
     private val recording: Recording,

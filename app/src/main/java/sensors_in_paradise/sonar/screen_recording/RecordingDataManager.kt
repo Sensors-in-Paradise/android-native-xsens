@@ -3,7 +3,10 @@ package sensors_in_paradise.sonar.screen_recording
 import sensors_in_paradise.sonar.GlobalValues
 import java.io.File
 
-class RecordingDataManager(private val recordingsDir: File, val recordingsList: ArrayList<Recording>) {
+class RecordingDataManager(
+    private val recordingsDir: File,
+    val recordingsList: ArrayList<Recording>
+) {
     constructor(recordingsDir: File) : this(recordingsDir, ArrayList<Recording>()) {
         loadRecordingsFromStorage()
     }
@@ -42,5 +45,33 @@ class RecordingDataManager(private val recordingsDir: File, val recordingsList: 
     fun deleteRecording(recording: Recording) {
         recording.delete()
         recordingsList.remove(recording)
+    }
+
+    fun getActivityDurationsOfTrainableRecordings(): Map<String, Long> {
+        val result = mutableMapOf<String, Long>()
+        for (recording in recordingsList) {
+
+            val metadata = recording.metadataStorage
+            if (!metadata.hasBeenUsedForOnDeviceTraining()) {
+                val activities = metadata.getActivities()
+                for ((index, labelEntry) in activities.withIndex()) {
+                    val timeEnded =
+                        if (index + 1 < activities.size) activities[index + 1].timeStarted else metadata.getTimeEnded()
+                    val duration = timeEnded - labelEntry.timeStarted
+                    result[labelEntry.activity] = duration + (result[labelEntry.activity] ?: 0L)
+                }
+            }
+        }
+
+        return result
+    }
+    fun getPeopleDurationsOfTrainableRecordings(): Map<String, Long> {
+        val result = mutableMapOf<String, Long>()
+        for (recording in recordingsList) {
+            val metadata = recording.metadataStorage
+            val person = metadata.getPerson()
+            result[person] = metadata.getDuration() + (result[person] ?: 0L)
+        }
+        return result
     }
 }

@@ -7,7 +7,8 @@ import androidx.activity.result.ActivityResultLauncher
 import sensors_in_paradise.sonar.util.PermissionsHelper
 import sensors_in_paradise.sonar.util.UIHelper
 
-class PermissionsHandler(private val requestPermissionLauncher: ActivityResultLauncher<Array<String>>) : ScreenInterface {
+class PermissionsHandler(private val requestPermissionLauncher: ActivityResultLauncher<Array<String>>) :
+    ScreenInterface {
     lateinit var context: Context
     private var dialog: AlertDialog? = null
 

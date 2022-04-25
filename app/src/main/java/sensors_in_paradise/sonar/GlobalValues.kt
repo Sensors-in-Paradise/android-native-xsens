@@ -3,9 +3,11 @@ package sensors_in_paradise.sonar
 import android.Manifest
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import java.io.File
 import java.net.NetworkInterface
+import java.net.SocketException
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -137,7 +139,7 @@ class GlobalValues private constructor() {
 
                     val res1 = StringBuilder()
                     for (b in macBytes) {
-                        res1.append(String.format("%02X:", b))
+                        res1.append(String.format(Locale.US, "%02X:", b))
                     }
 
                     if (res1.isNotEmpty()) {
@@ -145,7 +147,8 @@ class GlobalValues private constructor() {
                     }
                     return res1.toString()
                 }
-            } catch (ex: Exception) {
+            } catch (ex: SocketException) {
+                ex.message?.let { Log.e("GlobalValues", it) }
             }
 
             return "02:00:00:00:00:00"

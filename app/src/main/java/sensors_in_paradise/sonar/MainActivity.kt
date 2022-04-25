@@ -70,12 +70,11 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         val recordingScreen = RecordingScreen(scannedDevices, recordingsManager, this)
         screenHandlers.add(recordingScreen)
 
-        val trainingScreen = TrainingScreen()
+        val trainingScreen = TrainingScreen(recordingsManager)
         screenHandlers.add(trainingScreen)
 
         val predictionScreen = PredictionScreen(scannedDevices, this)
         screenHandlers.add(predictionScreen)
-
 
         connectionScreen.addConnectionInterface(recordingScreen)
         connectionScreen.addConnectionInterface(predictionScreen)
@@ -108,7 +107,6 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
             handler.onActivityResumed()
         }
         setTrainingTabVisible(PreferencesHelper.isOnDeviceTrainingScreenEnabled(this))
-
     }
 
     override fun onDestroy() {
@@ -117,14 +115,13 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         super.onDestroy()
     }
     private fun setTrainingTabVisible(visible: Boolean) {
-        if(visible){
+        if (visible) {
             tabIndexToScreenIndexMap[2] = 2
             tabIndexToScreenIndexMap[3] = 3
             if (tabLayout.tabCount < 4) {
                 tabLayout.addTab(trainingTab, 2)
             }
-        }
-        else{
+        } else {
             tabIndexToScreenIndexMap[2] = 3
             tabIndexToScreenIndexMap.remove(3)
             if (tabLayout.tabCount > 3) {

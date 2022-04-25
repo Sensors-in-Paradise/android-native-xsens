@@ -95,34 +95,33 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
             null
         }
     }
-    fun hasBeenUsedForOnDeviceTraining(): Boolean{
+    fun hasBeenUsedForOnDeviceTraining(): Boolean {
         val macAddress = GlobalValues.getMacAddress()
-        if(json.has(ON_DEVICE_TRAINING_METADATA_KEY)){
+        if (json.has(ON_DEVICE_TRAINING_METADATA_KEY)) {
             return json.has(macAddress)
         }
         return false
     }
-    fun setUsedForOnDeviceTraining(save: Boolean = true){
-        if(!json.has(ON_DEVICE_TRAINING_METADATA_KEY)){
+    fun setUsedForOnDeviceTraining(save: Boolean = true) {
+        if (!json.has(ON_DEVICE_TRAINING_METADATA_KEY)) {
             json.put(ON_DEVICE_TRAINING_METADATA_KEY, JSONObject())
         }
         val onDeviceTrainingObj = json.getJSONObject(ON_DEVICE_TRAINING_METADATA_KEY)
         val macAddress = GlobalValues.getMacAddress()
-        if(!onDeviceTrainingObj.has(macAddress)){
+        if (!onDeviceTrainingObj.has(macAddress)) {
             val deviceInfoObj = JSONObject()
             deviceInfoObj.put("device_model", Build.MODEL)
             deviceInfoObj.put("device", Build.DEVICE)
-            deviceInfoObj.put("trainingHistory",JSONArray())
+            deviceInfoObj.put("trainingHistory", JSONArray())
             onDeviceTrainingObj.put(macAddress, deviceInfoObj)
         }
         val deviceInfoObj = onDeviceTrainingObj.getJSONObject(macAddress)
         val trainingHistory = deviceInfoObj.getJSONArray("trainingHistory")
         trainingHistory.put(System.currentTimeMillis())
-        if(save){
+        if (save) {
             save()
         }
     }
-    private fun addActivity(activity: Pair<Long, String>) {
     private fun clearActivities() {
        while (activities.length()> 0) {
                activities.remove(0)
@@ -153,9 +152,7 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
         }
         json.put("sensorMapping", obj)
     }
-    companion object{
-        private const val ON_DEVICE_TRAINING_METADATA_KEY = "onDeviceTraining"
-    }
+
     fun getSensorMacMap(): Map<String, String> {
         val result = mutableMapOf<String, String>()
         val obj = json.getJSONObject("sensorMapping")
@@ -168,4 +165,7 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
     fun clone(): RecordingMetadataStorage {
         return RecordingMetadataStorage(file, json)
     }
+        companion object {
+            private const val ON_DEVICE_TRAINING_METADATA_KEY = "onDeviceTraining"
+        }
 }

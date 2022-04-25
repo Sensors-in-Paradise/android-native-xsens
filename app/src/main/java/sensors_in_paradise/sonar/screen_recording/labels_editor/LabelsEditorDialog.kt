@@ -15,8 +15,8 @@ import androidx.constraintlayout.motion.widget.MotionLayout
 import com.google.android.material.slider.RangeSlider
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
-import sensors_in_paradise.sonar.page2.PersistentCategoriesDialog
-import sensors_in_paradise.sonar.page2.Recording
+import sensors_in_paradise.sonar.screen_recording.PersistentCategoriesDialog
+import sensors_in_paradise.sonar.screen_recording.Recording
 
 class LabelsEditorDialog(
     val context: Context,

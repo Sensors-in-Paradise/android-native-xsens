@@ -110,8 +110,7 @@ dependencies {
 repositories {
     mavenCentral()
     maven {
-        name 'ossrh-snapshot'
-        url 'https://oss.sonatype.org/content/repositories/snapshots'
+        url 'https://jitpack.io'
     }
 
 }
