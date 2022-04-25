@@ -176,6 +176,7 @@ class LabelsEditorDialog(
         }
         if (recording.hasPoseSequenceRecording()) {
             val visualizer = PoseSequenceViewHolder(
+                context,
                 poseSequenceView,
                 this::onVisualizerSourceLoaded,
                 this::onVisualizerStartLoadingSource

@@ -27,7 +27,7 @@ import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.PoseSequence
 
 object VisualizationUtils {
     /** Radius of circle used to draw keypoints.  */
-    private const val CIRCLE_RADIUS = 9f
+    private const val CIRCLE_RADIUS = 8f
 
     /** Width of line used to connected two keypoints.  */
     private const val LINE_WIDTH = 6f
@@ -153,17 +153,19 @@ object VisualizationUtils {
         persons: List<Person>,
         canvas: Canvas,
         clearColor: Int? = null,
+        circleColor: Int = Color.parseColor("#c97b63"),
+        lineColor: Int = Color.WHITE,
         circleRadius: Float = CIRCLE_RADIUS,
         lineWidth: Float = LINE_WIDTH
     ) {
         val paintCircle = Paint().apply {
             strokeWidth = circleRadius
-            color = Color.parseColor("#c97b63")
-            style = Paint.Style.FILL
+            color = circleColor
+            style = Paint.Style.FILL_AND_STROKE
         }
         val paintLine = Paint().apply {
             strokeWidth = lineWidth
-            color = Color.WHITE
+            color = lineColor
             style = Paint.Style.STROKE
         }
 

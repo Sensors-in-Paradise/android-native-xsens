@@ -238,7 +238,7 @@ class CameraManager(
         poseStorageManager!!.writeHeader(localDateTime, "ThunderI8", 2)
         poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
 
-        imageProcessor = imageProcessor ?: ImageProcessor(poseEstimator, poseStorageManager!!)
+        imageProcessor = imageProcessor ?: ImageProcessor(context, poseEstimator, poseStorageManager!!)
     }
 
     /** Stops the recording and returns the UNIX timestamp of
