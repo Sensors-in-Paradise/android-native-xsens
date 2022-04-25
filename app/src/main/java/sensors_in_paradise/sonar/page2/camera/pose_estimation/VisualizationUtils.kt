@@ -110,7 +110,7 @@ object VisualizationUtils {
         poseSequence: PoseSequence,
         floorIndex: Int,
         timeStamp: Long,
-        timeMargin: Long = 500
+        timeMargin: Long = 800
     ): List<Person> {
         val lowerTimeStamp = poseSequence.timeStamps[floorIndex]
         val upperTimeStamp = poseSequence.timeStamps.getOrNull(floorIndex + 1)
@@ -150,15 +150,15 @@ object VisualizationUtils {
 
     // Draw line and point indicate body pose
     fun drawBodyKeypoints(
-        canvas: Canvas,
         persons: List<Person>,
+        canvas: Canvas,
         clearColor: Int? = null,
         circleRadius: Float = CIRCLE_RADIUS,
         lineWidth: Float = LINE_WIDTH
     ) {
         val paintCircle = Paint().apply {
             strokeWidth = circleRadius
-            color = Color.BLUE
+            color = Color.parseColor("#c97b63")
             style = Paint.Style.FILL
         }
         val paintLine = Paint().apply {

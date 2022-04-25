@@ -46,21 +46,27 @@ class PoseEstimationStorageManager(var csvFile: File) {
 
         val columns = BodyPart.values().joinToString(
             ",",
-            "TimeStamp,",
+            "TimeStamp,Confidence,",
             transform = { bp -> "${bp}_X,${bp}_Y" })
         fileWriter.appendLine(columns)
     }
 
     fun storePoses(persons: List<Person>) {
-        val keyPoints = persons.getOrNull(0)?.keyPoints
-        if (keyPoints != null) {
+        val person = persons.getOrNull(0)
+        if (person != null) {
             val timeStamp = LoggingManager.normalizeTimeStamp(LocalDateTime.now())
+            val confidence = person.score
+            val keyPoints = person.keyPoints
             val outputLine = keyPoints.joinToString(
                 ",",
-                "$timeStamp,",
+                "$timeStamp,$confidence,",
                 transform = { kp -> "${kp.coordinate.x},${kp.coordinate.y}" })
             fileWriter.appendLine(outputLine)
         }
+    }
+
+    fun closeFile() {
+        fileWriter.close()
     }
 
     companion object {
@@ -97,18 +103,18 @@ class PoseEstimationStorageManager(var csvFile: File) {
         }
 
         private fun personsFromCSVLine(line: Map<String, String>): List<Person> {
-            var personScore = 1f
+            var personConfidence = line["Confidence"]!!.toFloat()
             val keyPoints = BodyPart.values().map { bp ->
                 try {
                     val x = line["${bp}_X"]!!.toFloat()
                     val y = line["${bp}_Y"]!!.toFloat()
                     KeyPoint(bp, PointF(x, y), 1f)
                 } catch (_: Exception) {
-                    personScore = .5f
+                    personConfidence = .1f
                     KeyPoint(bp, PointF(.5f, .5f), .5f)
                 }
             }
-            return listOf<Person>(Person(0, keyPoints, null, personScore))
+            return listOf<Person>(Person(0, keyPoints, null, personConfidence))
         }
 
         fun loadPoseSequenceFromCSV(inputFile: String): PoseSequence {
@@ -163,7 +169,12 @@ class PoseEstimationStorageManager(var csvFile: File) {
                             persons, bitmap, canvas,
                             VisualizationUtils.Transformation.PROJECT_ON_CANVAS
                         )
-                        VisualizationUtils.drawBodyKeypoints(canvas, persons, circleRadius = 2f, lineWidth = 1f)
+                        VisualizationUtils.drawBodyKeypoints(
+                            persons,
+                            canvas,
+                            circleRadius = 2f,
+                            lineWidth = 1f
+                        )
                         encoder.encodeImage(bitmap)
                     } catch (_: Exception) {
                         break

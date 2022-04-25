@@ -49,7 +49,7 @@ class PoseSequenceViewHolder(
                         canvas,
                         VisualizationUtils.Transformation.PROJECT_ON_CANVAS
                     )
-                    VisualizationUtils.drawBodyKeypoints(canvas, persons, Color.DKGRAY)
+                    VisualizationUtils.drawBodyKeypoints(persons, canvas, Color.DKGRAY)
                     textureView.unlockCanvasAndPost(canvas)
                 }
             }

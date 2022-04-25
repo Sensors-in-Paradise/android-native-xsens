@@ -21,7 +21,6 @@ import androidx.lifecycle.LifecycleOwner
 import sensors_in_paradise.sonar.page2.LoggingManager
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.*
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Device
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.File
 import java.time.LocalDateTime
@@ -81,6 +80,24 @@ class CameraManager(
                 cameraProvider = this.get()
             }, ContextCompat.getMainExecutor(context))
         }
+    }
+
+    private fun getTimerObject(delay: Long, interval: Long): CountDownTimer {
+        return object : CountDownTimer(delay, interval) {
+            override fun onTick(millisUntilFinished: Long) {
+                previewView.bitmap?.let { bm ->
+                    imageProcessor?.processImage(
+                        bm, overlayView, false
+                    )
+                }
+            }
+
+            override fun onFinish() {}
+        }
+    }
+
+    fun shouldShowVideo(): Boolean {
+        return PreferencesHelper.shouldRecordWithCamera(context)
     }
 
     fun bindPreview(): Boolean {
@@ -156,10 +173,9 @@ class CameraManager(
         unbindVideoCapture()
     }
 
-    fun shouldRecordVideo(): Boolean {
+    fun shouldCaptureVideo(): Boolean {
         return PreferencesHelper.shouldStoreRawCameraRecordings(context)
     }
-
 
     override fun accept(t: VideoRecordEvent?) {
         when (t) {
@@ -220,7 +236,7 @@ class CameraManager(
 
         val localDateTime = LocalDateTime.now()
         // TODO use actual setting to get model type and dimensions
-        poseStorageManager!!.writeHeader(localDateTime, "LightningF16", 2)
+        poseStorageManager!!.writeHeader(localDateTime, "ThunderI8", 2)
         poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
 
         imageProcessor = imageProcessor ?: ImageProcessor(poseEstimator, poseStorageManager!!)
@@ -232,6 +248,7 @@ class CameraManager(
     fun stopRecordingPose(onPoseRecordingFinalized: ((poseCaptureStartTime: Long, poseTempFile: File) -> Unit)? = null) {
         if (imageProcessor != null && poseStorageManager != null) {
             imageProcessor?.clearView(overlayView)
+            poseStorageManager?.closeFile()
             onPoseRecordingFinalized?.invoke(poseStartTime ?: 0L, poseStorageManager!!.csvFile)
         }
 

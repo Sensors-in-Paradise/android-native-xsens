@@ -16,7 +16,6 @@ import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.page2.camera.CameraManager
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.PoseEstimationStorageManager
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.IOException
 
@@ -75,8 +74,10 @@ class Page2Handler(
         initializeLoggingManagerCallbacks()
 
         tabLayout.addOnTabSelectedListener(this)
-        val previewView = activity.findViewById<PreviewView>(R.id.previewView_camera_captureFragment)
-        val overlayView = activity.findViewById<TextureView>(R.id.surfaceView_camera_captureFragment)
+        val previewView =
+            activity.findViewById<PreviewView>(R.id.previewView_camera_captureFragment)
+        val overlayView =
+            activity.findViewById<TextureView>(R.id.surfaceView_camera_captureFragment)
         cameraManager =
             CameraManager(context, previewView, overlayView)
     }
@@ -98,7 +99,12 @@ class Page2Handler(
                 tabLayout.selectTab(activitiesTab)
             }
             activitiesCenterTV.visibility = View.GONE
-            if (cameraManager.shouldRecordVideo()) {
+
+            if (cameraManager.shouldShowVideo()) {
+                // In case Image Analysis isn't possible, bitmap needs to be extracted from preview
+                cameraManager.bindPreview() // TODO make it work even if camera tab isnt selected initially
+            }
+            if (cameraManager.shouldCaptureVideo()) {
                 val dir = GlobalValues.getVideoRecordingsTempDir(context)
                 dir.mkdir()
                 cameraManager.startRecordingVideo(
@@ -182,7 +188,7 @@ class Page2Handler(
     }
 
     override fun onTabUnselected(tab: TabLayout.Tab?) {
-        if (tab == cameraTab) {
+        if (tab == cameraTab && !loggingManager.isRecording()) {
             cameraManager.unbindPreview()
         }
     }

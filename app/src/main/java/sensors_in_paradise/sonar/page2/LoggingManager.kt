@@ -149,7 +149,7 @@ class LoggingManager(
         return true
     }
 
-    private fun isRecording(): Boolean {
+    fun isRecording(): Boolean {
         return activeRecording?.isRunning() ?: false
     }
 
