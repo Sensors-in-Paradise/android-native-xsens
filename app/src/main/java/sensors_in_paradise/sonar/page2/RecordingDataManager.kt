@@ -18,6 +18,7 @@ class RecordingDataManager(private val recordingsDir: File, val recordingsList: 
                 }
             }
         }
+        recordingsList.sortByDescending { recording -> recording.metadataStorage.getTimeStarted() }
     }
 
     private fun isRecordingDir(file: File): Boolean {

@@ -2,6 +2,7 @@ package sensors_in_paradise.sonar.page2
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.DialogInterface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.page2.labels_editor.LabelsEditorDialog
+import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import sensors_in_paradise.sonar.util.dialogs.VideoDialog
 import java.text.DateFormat
 import java.util.*
@@ -31,9 +33,6 @@ class RecordingsAdapter(
         val startTimeTextView: TextView = view.findViewById(R.id.tv_start)
         val checkFilesTextView: TextView = view.findViewById(R.id.tv_check_files)
         val deleteButton: Button = view.findViewById(R.id.button_delete)
-        val videoView: VideoView = view.findViewById(R.id.videoView_videoCapture_recording)
-        val textInfoLL: LinearLayout = view.findViewById(R.id.linearLayout_textInfo_recording)
-        val videoViewFrameLayout: FrameLayout = view.findViewById(R.id.frameLayout_videoCapture_recording)
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
@@ -58,9 +57,31 @@ class RecordingsAdapter(
                 recordingsManager.deleteRecording(recording)
                 notifyItemRemoved(index)
             }
-           itemView.setOnClickListener {
-                LabelsEditorDialog(context, recording) {
-                    notifyItemChanged(position)
+            itemView.setOnClickListener {
+                val onEditBtnClickListener =
+                    DialogInterface.OnClickListener { _: DialogInterface, _: Int ->
+                        LabelsEditorDialog(context, recording) {
+                            notifyItemChanged(position)
+                        }
+                    }
+                val title = recording.getDisplayTitle() + " ($personName)"
+                if (recording.hasVideoRecording()) {
+                    MessageDialog(
+                        context,
+                        recording.getActivitiesSummary(),
+                        title,
+                        "Edit",
+                        onEditBtnClickListener,
+                        "Show video"
+                    ) { _, _ -> VideoDialog(context, recording.getVideoFile()) }
+                } else {
+                    MessageDialog(
+                        context,
+                        recording.getActivitiesSummary(),
+                        title = title,
+                        "Edit",
+                        onEditBtnClickListener
+                    )
                 }
             }
             activityTextView.text =
@@ -72,21 +93,6 @@ class RecordingsAdapter(
             // Set check file text & color conditionally
             checkFilesTextView.setTextColor(getCheckFileColor(recording))
             checkFilesTextView.text = getCheckFileText(recording)
-            if (recording.hasVideoRecording()) {
-                videoViewFrameLayout.setOnClickListener {
-                    VideoDialog(context, recording.getVideoFile())
-                }
-            }
-            videoView.apply {
-                if (recording.hasVideoRecording()) {
-                    visibility = View.VISIBLE
-                    setOnPreparedListener { mp -> mp.isLooping = true }
-                    setVideoPath(recording.getVideoFile().absolutePath)
-                    start()
-                } else {
-                    videoView.visibility = View.GONE
-                }
-            }
         }
     }
 
