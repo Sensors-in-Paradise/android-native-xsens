@@ -73,8 +73,12 @@ class GlobalValues private constructor() {
         const val UNKNOWN_PERSON = "unknown"
         const val METADATA_JSON_FILENAME = "metadata.json"
         const val MEASUREMENT_MODE = XsensDotPayload.PAYLOAD_TYPE_CUSTOM_MODE_4
-        fun getSensorRecordingsBaseDir(context: Context): File {
-            return context.getExternalFilesDir(null) ?: context.dataDir
+
+        var DEFAULT_USE_CASE_TITLE: String = "default"
+
+        fun getUseCaseBaseDir(context: Context, title: String): File {
+            // maybe this is wrongggg
+            return File(context.getExternalFilesDir(null) ?: context.dataDir, "useCases").resolve(title)
         }
 
         fun getSensorRecordingsTempDir(context: Context): File {
@@ -85,11 +89,15 @@ class GlobalValues private constructor() {
         }
 
         fun getActivityLabelsJSONFile(context: Context): File {
-            return File(context.getExternalFilesDir(null) ?: context.dataDir, "labels.json")
+            return File(getUseCaseBaseDir(context, getCurrentUseCase(context)), "labels.json")
         }
 
         fun getPeopleJSONFile(context: Context): File {
-            return File(context.getExternalFilesDir(null) ?: context.dataDir, "people.json")
+            return File(getUseCaseBaseDir(context, getCurrentUseCase(context)), "people.json")
+        }
+
+        fun getCurrentUseCase(context: Context): String {
+            return UseCaseStorage(File(context.getExternalFilesDir(null) ?: context.dataDir, "CurrentUseCase")).getSelectedUseCase()
         }
 
         fun getRequiredPermissions(): ArrayList<String> {

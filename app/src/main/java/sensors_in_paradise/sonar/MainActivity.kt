@@ -21,6 +21,7 @@ import sensors_in_paradise.sonar.page3.Page3Handler
 import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.uploader.DavCloudRecordingsUploader
 import sensors_in_paradise.sonar.util.PreferencesHelper
+import sensors_in_paradise.sonar.util.use_cases.UseCaseHandler
 
 class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface,
     SensorOccupationInterface {
@@ -29,7 +30,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     private lateinit var tabLayout: TabLayout
     private lateinit var davCloudUploader: DavCloudRecordingsUploader
     private lateinit var recordingsManager: RecordingDataManager
-
+    private lateinit var useCaseHandler: UseCaseHandler
     private val pageHandlers = ArrayList<PageInterface>()
     private val scannedDevices = XSENSArrayList()
     private lateinit var page1Handler: Page1Handler
@@ -44,9 +45,9 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         switcher = findViewById(R.id.switcher_activity_main)
         tabLayout = findViewById(R.id.tab_layout_activity_main)
         recordingsManager = RecordingDataManager(
-            GlobalValues.getSensorRecordingsBaseDir(this)
+            GlobalValues.getUseCaseBaseDir(this, GlobalValues.DEFAULT_USE_CASE_TITLE)
         )
-
+        useCaseHandler = UseCaseHandler(this)
         initClickListeners()
 
         page1Handler = Page1Handler(scannedDevices)

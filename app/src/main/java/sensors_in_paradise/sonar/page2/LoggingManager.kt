@@ -493,7 +493,7 @@ object LogIOHelper {
     fun createRecordingFileDir(context: Context, time: LocalDateTime): File {
         val timeStr = time.toSonarString()
 
-        val dir = GlobalValues.getSensorRecordingsBaseDir(context)
+        val dir = GlobalValues.getUseCaseBaseDir(context)
             .resolve(PreferencesHelper.getRecordingsSubDir(context))
             .resolve(timeStr)
 
