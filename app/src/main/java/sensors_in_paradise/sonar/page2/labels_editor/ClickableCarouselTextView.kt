@@ -6,8 +6,9 @@ import android.util.AttributeSet
 class ClickableCarouselTextView(context: Context, attrSet: AttributeSet) :
     androidx.appcompat.widget.AppCompatTextView(context, attrSet) {
     private var onClickListener: OnClickListener? = null
-    override fun setOnClickListener(l: OnClickListener?) {
-        onClickListener = l
+        
+    override fun setOnClickListener(listener: OnClickListener?) {
+        onClickListener = listener
     }
 
     override fun performClick(): Boolean {
