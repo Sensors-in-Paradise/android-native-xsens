@@ -12,7 +12,7 @@ class UseCaseHandler(
     val context: Context,
     val onUseCaseChanged: (useCase: UseCase) -> Unit
 ) {
-    private lateinit var useCase: UseCase
+    lateinit var useCase: UseCase
     private var useCaseStorage = UseCaseStorage(context)
 
     init {
@@ -23,38 +23,46 @@ class UseCaseHandler(
         }
     }
 
+    fun setUseCase(case: UseCase): Boolean {
+        if (useCaseAlreadyExists(case)) {
+            if (useCase.getModelFile().isFile) {
+                useCase = case
+                onUseCaseChanged(case)
+                useCaseStorage.setSelectedUseCase(case.title)
+                return true
+            } else {
+                Toast.makeText(
+                    context,
+                    "No Model in use Case Folder!", Toast.LENGTH_LONG
+                ).show()
+            }
+        } else {
+
+        }
+        return false
+    }
+
+    fun createUseCase() {
+
+    }
+
+
     private fun loadUseCaseFromStorage() {
         val title = useCaseStorage.getSelectedUseCase()
         useCase = UseCase(context, title)
     }
 
     private fun createDefaultUseCase() {
-        useCase = UseCase(context, "default")
-        useCaseStorage.setSelectedUseCase("default")
-        extractDefaultModel(getUseCaseModel(GlobalValues.DEFAULT_USE_CASE_TITLE))
+        useCase = UseCase(context, GlobalValues.DEFAULT_USE_CASE_TITLE)
+        useCaseStorage.setSelectedUseCase(GlobalValues.DEFAULT_USE_CASE_TITLE)
+        extractDefaultModel(useCase.getModelFile())
     }
 
     private fun defaultUseCaseExists(context: Context): Boolean {
-        return GlobalValues.getUseCaseBaseDir(
-            context,
-            GlobalValues.DEFAULT_USE_CASE_TITLE
-        ).isDirectory
-    }
-
-    fun setUseCase(case: UseCase): Boolean {
-        if (useCaseAlreadyExists(case)) {
-            if (getUseCaseModel(case.title).isFile) {
-                useCase = case
-                onUseCaseChanged(case)
-                useCaseStorage.setSelectedUseCase(case.title)
-                return true
-            } else {
-                Toast.makeText(context,
-                    "No Model in use Case Folder!", Toast.LENGTH_LONG).show()
-            }
-        } else {
-
-        }
+        return File(
+            context.getExternalFilesDir(null) ?: context.dataDir,
+            "useCases"
+        ).resolve(GlobalValues.DEFAULT_USE_CASE_TITLE).isDirectory
     }
 
     private fun extractDefaultModel(destination: File) {
@@ -68,12 +76,8 @@ class UseCaseHandler(
         outStream.close()
     }
 
-    private fun getUseCaseModel(title: String): File {
-        return GlobalValues.getUseCaseBaseDir(context, title).resolve("model.tflite")
-    }
-
     private fun useCaseAlreadyExists(case: UseCase): Boolean {
-        return GlobalValues.getUseCaseBaseDir(context, case.title).isDirectory
+        return case.baseDir.isDirectory
     }
 
     fun getTitle(): String {

@@ -2,6 +2,7 @@ package sensors_in_paradise.sonar.page3
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -11,7 +12,6 @@ import android.widget.Chronometer
 import android.widget.ProgressBar
 import android.widget.Toast
 import android.widget.ViewSwitcher
-import sensors_in_paradise.sonar.util.UIHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
@@ -19,13 +19,12 @@ import com.xsens.dot.android.sdk.models.XsensDotPayload
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import sensors_in_paradise.sonar.*
-import sensors_in_paradise.sonar.util.PredictionHelper
-import sensors_in_paradise.sonar.R
-import sensors_in_paradise.sonar.page1.ConnectionInterface
-import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.ml.Lstmmodel118
+import sensors_in_paradise.sonar.page1.ConnectionInterface
+import sensors_in_paradise.sonar.util.PredictionHelper
 import sensors_in_paradise.sonar.util.PreferencesHelper
-import kotlin.collections.ArrayList
+import sensors_in_paradise.sonar.util.UIHelper
+import sensors_in_paradise.sonar.util.use_cases.UseCase
 import java.nio.ByteBuffer
 import kotlin.math.round
 
@@ -216,11 +215,22 @@ class Page3Handler(
         timer = activity.findViewById(R.id.timer_predict_predict)
         predictionButton = activity.findViewById(R.id.button_start_predict)
         progressBar = activity.findViewById(R.id.progressBar_nextPrediction_predictionFragment)
+
+        //predictionModel = Lstmmodel118.newInstance(context)
+        //replace false with model available check
         predictionButton.setOnClickListener {
-            togglePrediction()
+            if (false) {
+                val builder: AlertDialog.Builder = activity.let {
+                    AlertDialog.Builder(it)
+                }
+                builder.setMessage(R.string.missing_model_dialog_message)
+                    .setTitle(R.string.missing_model_dialog_title)
+                builder.create()?.show()
+            } else {
+                togglePrediction()
+            }
         }
 
-        predictionModel = Lstmmodel118.newInstance(context)
         mainHandler = Handler(Looper.getMainLooper())
     }
 
@@ -253,5 +263,9 @@ class Page3Handler(
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
         // Nothing to do (?)
+    }
+
+    override fun onUseCaseChanged(useCase: UseCase) {
+        //predictionModel = useCase.extractModelFromFile()
     }
 }

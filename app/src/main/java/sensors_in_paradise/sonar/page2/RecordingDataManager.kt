@@ -3,7 +3,7 @@ package sensors_in_paradise.sonar.page2
 import sensors_in_paradise.sonar.GlobalValues
 import java.io.File
 
-class RecordingDataManager(private val recordingsDir: File, val recordingsList: ArrayList<Recording>) {
+class RecordingDataManager(val recordingsDir: File, val recordingsList: ArrayList<Recording>) {
     constructor(recordingsDir: File) : this(recordingsDir, ArrayList<Recording>()) {
         loadRecordingsFromStorage()
     }
