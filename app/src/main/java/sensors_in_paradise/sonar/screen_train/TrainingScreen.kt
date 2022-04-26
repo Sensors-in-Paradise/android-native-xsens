@@ -1,9 +1,16 @@
 package sensors_in_paradise.sonar.screen_train
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
+import android.util.TypedValue
+import android.widget.Button
+import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.RecyclerView
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
@@ -22,11 +29,30 @@ class TrainingScreen(private val recordingsManager: RecordingDataManager) : Scre
     private lateinit var peoplePieChart: PieChart
     private lateinit var context: Context
     private lateinit var activity: Activity
+    private lateinit var historyRV: RecyclerView
+    private lateinit var trainingHistoryAdapter: TrainingHistoryAdapter
+    private lateinit var trainingHistoryStorage: TrainingHistoryStorage
+    private lateinit var trainBtn: Button
     override fun onActivityCreated(activity: Activity) {
         this.activity = activity
         this.context = activity
         activitiesPieChart = activity.findViewById(R.id.pieChart_availableData_trainingFragment)
         peoplePieChart = activity.findViewById(R.id.pieChart_availableDataPeople_trainingFragment)
+        historyRV = activity.findViewById(R.id.recyclerView_history_trainingFragment)
+        trainingHistoryStorage = TrainingHistoryStorage(context)
+        trainingHistoryAdapter = TrainingHistoryAdapter(trainingHistoryStorage.getTrainingHistory())
+        trainBtn = activity.findViewById(R.id.button_trainModel_trainingFragment)
+        historyRV.adapter = trainingHistoryAdapter
+        trainBtn.setOnClickListener {
+            val item = trainingHistoryStorage.addTrainingOccasion(
+                recordingsManager.getPeopleDurationsOfTrainableRecordings(),
+                recordingsManager.getActivityDurationsOfTrainableRecordings()
+            )
+            trainingHistoryAdapter.trainingHistory.add(0,
+               item
+            )
+            trainingHistoryAdapter.notifyItemAdded(0)
+        }
     }
 
     override fun onScreenOpened() {
@@ -56,9 +82,6 @@ class TrainingScreen(private val recordingsManager: RecordingDataManager) : Scre
         val dataSet = PieDataSet(entries, "Election Results")
 
         prepareDataset(dataSet)
-        // dataSet.setSelectionShift(0f);
-
-        // dataSet.setSelectionShift(0f);
         val data = PieData(dataSet)
 
         data.setValueFormatter(object : ValueFormatter() {
@@ -66,16 +89,13 @@ class TrainingScreen(private val recordingsManager: RecordingDataManager) : Scre
                 return GlobalValues.getDurationAsString(value.toLong())
             }
         })
-        data.setValueTextSize(11f)
-        data.setValueTextColor(Color.WHITE)
+        data.setValueTextSize(8f)
+        data.setValueTextColor(context.getColorResCompat(android.R.attr.textColorPrimary))
         data.setValueTypeface(Typeface.DEFAULT)
+
         pieChart.legend.isEnabled = false
         pieChart.setHoleColor(Color.TRANSPARENT)
         pieChart.data = data
-
-        // undo all highlights
-
-        // undo all highlights
         pieChart.highlightValues(null)
         pieChart.invalidate()
         pieChart.animate()
@@ -107,4 +127,13 @@ class TrainingScreen(private val recordingsManager: RecordingDataManager) : Scre
         }
         return result
     }
+}
+
+@ColorInt
+@SuppressLint("ResourceAsColor")
+private fun Context.getColorResCompat(@AttrRes id: Int): Int {
+    val resolvedAttr = TypedValue()
+    theme.resolveAttribute(id, resolvedAttr, true)
+    val colorRes = resolvedAttr.run { if (resourceId != 0) resourceId else data }
+    return ContextCompat.getColor(this, colorRes)
 }

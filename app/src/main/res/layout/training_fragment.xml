@@ -3,24 +3,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:padding="16dp">
+    >
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Data available for training "
-        android:textSize="20sp" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_marginHorizontal="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Data available for training "
+            android:textSize="20sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content"
+
+            android:orientation="horizontal"
+            android:padding="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -32,7 +36,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Activity distribution"
+                    android:text="Activities"
                     android:textAlignment="center" />
 
                 <com.github.mikephil.charting.charts.PieChart
@@ -53,7 +57,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="People distribution"
+                    android:text="People"
                     android:textAlignment="center" />
 
                 <com.github.mikephil.charting.charts.PieChart
@@ -65,14 +69,31 @@
             </LinearLayout>
 
         </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Training history"
+            android:textSize="20sp" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView_history_trainingFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layoutManager="LinearLayoutManager"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:clipToPadding="false"
+            android:paddingBottom="54dp"
+            android:paddingTop="8dp"
+
+            />
 
     </LinearLayout>
 
     <Button
+        android:id="@+id/button_trainModel_trainingFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:drawableLeft="@drawable/ic_baseline_model_training_24"
         android:text="Train model"
-        />
+        android:layout_margin="8dp"/>
 </FrameLayout>

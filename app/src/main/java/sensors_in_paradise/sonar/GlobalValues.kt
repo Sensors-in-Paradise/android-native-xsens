@@ -96,6 +96,9 @@ class GlobalValues private constructor() {
         fun getPeopleJSONFile(context: Context): File {
             return File(context.getExternalFilesDir(null) ?: context.dataDir, "people.json")
         }
+        fun getTrainingHistoryFile(context: Context): File {
+            return File(context.getExternalFilesDir(null) ?: context.dataDir, "trainHistory.json")
+        }
 
         fun getRequiredPermissions(): ArrayList<String> {
             val result = arrayListOf(
