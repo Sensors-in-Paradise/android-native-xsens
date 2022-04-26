@@ -18,9 +18,10 @@ import sensors_in_paradise.sonar.page1.Page1Handler
 import sensors_in_paradise.sonar.page2.Page2Handler
 import sensors_in_paradise.sonar.page2.RecordingDataManager
 import sensors_in_paradise.sonar.page3.Page3Handler
-import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.uploader.DavCloudRecordingsUploader
+import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.util.PreferencesHelper
+import sensors_in_paradise.sonar.util.use_cases.UseCase
 import sensors_in_paradise.sonar.util.use_cases.UseCaseHandler
 
 class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface,
@@ -47,7 +48,13 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         recordingsManager = RecordingDataManager(
             GlobalValues.getUseCaseBaseDir(this, GlobalValues.DEFAULT_USE_CASE_TITLE)
         )
-        useCaseHandler = UseCaseHandler(this)
+        useCaseHandler = UseCaseHandler(this) { useCase: UseCase ->
+            pageHandlers.forEach {
+                it.onUseCaseChanged(
+                        useCase
+                        )
+            }
+        }
         initClickListeners()
 
         page1Handler = Page1Handler(scannedDevices)
@@ -74,7 +81,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
             handler.activityCreated(this)
         }
         supportActionBar?.setBackgroundDrawable(ColorDrawable(getColor(R.color.colorPrimary)))
-
+        supportActionBar?.setSubtitle(useCaseHandler.getTitle())
         davCloudUploader = DavCloudRecordingsUploader(this, recordingsManager)
 
         // Force crashlytics to be enabled (we might want to disable it in debug mode / ...)

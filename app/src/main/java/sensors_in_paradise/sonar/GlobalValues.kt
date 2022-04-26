@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.os.Build
 import com.xsens.dot.android.sdk.models.XsensDotPayload
+import sensors_in_paradise.sonar.util.use_cases.UseCaseStorage
 import java.io.File
 
 class GlobalValues private constructor() {
@@ -75,6 +76,10 @@ class GlobalValues private constructor() {
         const val MEASUREMENT_MODE = XsensDotPayload.PAYLOAD_TYPE_CUSTOM_MODE_4
 
         var DEFAULT_USE_CASE_TITLE: String = "default"
+
+        fun getUseCaseStorageFile(context: Context): File {
+            return context.dataDir.resolve("currentUseCase.json")
+        }
 
         fun getUseCaseBaseDir(context: Context, title: String): File {
             // maybe this is wrongggg

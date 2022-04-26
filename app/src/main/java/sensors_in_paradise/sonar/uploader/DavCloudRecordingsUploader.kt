@@ -5,7 +5,6 @@ import android.content.Context
 import android.util.Log
 import com.google.common.net.MediaType
 import sensors_in_paradise.sonar.GlobalValues
-import sensors_in_paradise.sonar.UseCaseStorage
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import sensors_in_paradise.sonar.page2.RecordingDataManager
 import java.io.File

@@ -15,6 +15,8 @@ import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.util.PreferencesHelper
+import sensors_in_paradise.sonar.util.use_cases.UseCase
+import java.io.File
 import java.io.IOException
 
 class Page2Handler(
@@ -162,6 +164,10 @@ class Page2Handler(
 
     override fun onTabReselected(tab: TabLayout.Tab?) {}
 
+    override fun onUseCaseChanged(useCase: UseCase) {
+        recordingsAdapter.notifyDataSetChanged()
+    }
+
     private fun setCameraTabVisible(visible: Boolean) {
         if (visible) {
             if (tabLayout.tabCount < 3) {
@@ -173,4 +179,5 @@ class Page2Handler(
             }
         }
     }
+
 }

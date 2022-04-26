@@ -14,6 +14,7 @@ class StringItemStorage(file: File) : JSONStorage(file) {
     override fun onJSONInitialized() {
         items = json.getJSONArray("items")
     }
+
     fun addItemIfNotAdded(item: String, deletable: Boolean = true): Boolean {
         var alreadyAdded = false
         for (i in 0 until items.length()) {
@@ -31,6 +32,7 @@ class StringItemStorage(file: File) : JSONStorage(file) {
         }
         return !alreadyAdded
     }
+
     fun addItem(item: String) {
         items.put(item)
         save()
