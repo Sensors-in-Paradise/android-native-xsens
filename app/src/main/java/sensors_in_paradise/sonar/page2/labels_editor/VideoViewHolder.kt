@@ -23,8 +23,4 @@ class VideoViewHolder(private val videoView: VideoView, onPreparedListener: () -
             e.message?.let { Log.e("VideoViewHolder", it) }
         }
     }
-
-    companion object {
-        const val FPS = 60L
-    }
 }

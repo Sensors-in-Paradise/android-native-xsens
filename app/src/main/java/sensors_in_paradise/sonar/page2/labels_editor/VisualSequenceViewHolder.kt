@@ -13,4 +13,8 @@ abstract class VisualSequenceViewHolder(protected val onPreparedListener: () -> 
     protected abstract fun loadSource(sourcePath: String)
 
     abstract override fun seekTo(ms: Long)
+
+    companion object {
+        const val FPS = 60L
+    }
 }

@@ -142,7 +142,7 @@ class LabelsEditorDialog(
         dialog.setOnShowListener {
             neutralButton = dialog.getButton(AlertDialog.BUTTON_NEUTRAL)
             neutralButton.setOnClickListener {
-                splitCurrentActivity()
+                startOrConfirmSplit()
             }
             val cancelButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
             cancelButton.setOnClickListener {
@@ -275,7 +275,7 @@ class LabelsEditorDialog(
     }
 
     @SuppressLint("SetTextI18n")
-    private fun splitCurrentActivity() {
+    private fun startOrConfirmSplit() {
         val values = rangeSlider.values
         if (isInSplittingMode()) {
             neutralButton.text = "Split"
