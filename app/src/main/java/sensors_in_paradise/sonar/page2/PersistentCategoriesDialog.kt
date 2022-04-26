@@ -25,7 +25,7 @@ class PersistentCategoriesDialog(
     var adapter: PersistentCategoriesAdapter
 
     init {
-        addDefaultEntries(defaultItems)
+
 
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         builder.setTitle(title)
@@ -76,7 +76,7 @@ class PersistentCategoriesDialog(
         val builder = AlertDialog.Builder(context)
         val spinner = Spinner(context)
         val spinnerAdapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line,
-            storage.getCategoriesAsArray())
+            storage.getCategories())
         spinner.adapter = spinnerAdapter
 
         builder.setView(spinner)
