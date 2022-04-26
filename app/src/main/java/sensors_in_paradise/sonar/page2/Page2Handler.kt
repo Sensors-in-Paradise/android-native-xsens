@@ -16,13 +16,15 @@ import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.use_cases.UseCase
+import sensors_in_paradise.sonar.util.use_cases.UseCaseHandler
 import java.io.File
 import java.io.IOException
 
 class Page2Handler(
     private val devices: XSENSArrayList,
     private val recordingsManager: RecordingDataManager,
-    private val sensorOccupationInterface: SensorOccupationInterface?
+    private val sensorOccupationInterface: SensorOccupationInterface?,
+    private val useCaseHandler: UseCaseHandler
 ) : PageInterface, ConnectionInterface,
     TabLayout.OnTabSelectedListener {
     private lateinit var context: Context
@@ -64,6 +66,7 @@ class Page2Handler(
 
         loggingManager = LoggingManager(
             context,
+            useCaseHandler.useCase,
             devices,
             activity.findViewById(R.id.buttonRecord),
             timer,

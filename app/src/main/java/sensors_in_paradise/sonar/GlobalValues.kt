@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.os.Build
 import com.xsens.dot.android.sdk.models.XsensDotPayload
-import sensors_in_paradise.sonar.util.use_cases.UseCaseStorage
 import java.io.File
 
 class GlobalValues private constructor() {
@@ -81,28 +80,11 @@ class GlobalValues private constructor() {
             return context.dataDir.resolve("currentUseCase.json")
         }
 
-        fun getUseCaseBaseDir(context: Context, title: String): File {
-            // maybe this is wrongggg
-            return File(context.getExternalFilesDir(null) ?: context.dataDir, "useCases").resolve(title)
-        }
-
         fun getSensorRecordingsTempDir(context: Context): File {
             return context.dataDir.resolve("temp")
         }
         fun getVideoRecordingsTempDir(context: Context): File {
             return context.dataDir.resolve("videoTemp")
-        }
-
-        fun getActivityLabelsJSONFile(context: Context): File {
-            return File(getUseCaseBaseDir(context, getCurrentUseCase(context)), "labels.json")
-        }
-
-        fun getPeopleJSONFile(context: Context): File {
-            return File(getUseCaseBaseDir(context, getCurrentUseCase(context)), "people.json")
-        }
-
-        fun getCurrentUseCase(context: Context): String {
-            return UseCaseStorage(File(context.getExternalFilesDir(null) ?: context.dataDir, "CurrentUseCase")).getSelectedUseCase()
         }
 
         fun getRequiredPermissions(): ArrayList<String> {

@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -23,6 +24,7 @@ import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.use_cases.UseCase
 import sensors_in_paradise.sonar.util.use_cases.UseCaseHandler
+import java.io.File
 
 class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface,
     SensorOccupationInterface {
@@ -45,16 +47,16 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
 
         switcher = findViewById(R.id.switcher_activity_main)
         tabLayout = findViewById(R.id.tab_layout_activity_main)
-        recordingsManager = RecordingDataManager(
-            GlobalValues.getUseCaseBaseDir(this, GlobalValues.DEFAULT_USE_CASE_TITLE)
-        )
         useCaseHandler = UseCaseHandler(this) { useCase: UseCase ->
             pageHandlers.forEach {
                 it.onUseCaseChanged(
-                        useCase
-                        )
+                    useCase
+                )
             }
         }
+        recordingsManager = RecordingDataManager(
+            useCaseHandler.useCase.baseDir
+        )
         initClickListeners()
 
         page1Handler = Page1Handler(scannedDevices)
@@ -65,7 +67,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         }
         page1Handler.addConnectionInterface(headingResetHandler)
         pageHandlers.add(page1Handler)
-        val page2Handler = Page2Handler(scannedDevices, recordingsManager, this)
+        val page2Handler = Page2Handler(scannedDevices, recordingsManager, this, useCaseHandler)
         pageHandlers.add(page2Handler)
         val page3Handler = Page3Handler(scannedDevices, this)
         pageHandlers.add(page3Handler)
@@ -81,7 +83,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
             handler.activityCreated(this)
         }
         supportActionBar?.setBackgroundDrawable(ColorDrawable(getColor(R.color.colorPrimary)))
-        supportActionBar?.setSubtitle(useCaseHandler.getTitle())
+        supportActionBar?.subtitle = useCaseHandler.getTitle()
         davCloudUploader = DavCloudRecordingsUploader(this, recordingsManager)
 
         // Force crashlytics to be enabled (we might want to disable it in debug mode / ...)
@@ -151,6 +153,34 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     fun onSettingsMenuItemClicked(ignored: MenuItem) {
         val intent = Intent(this, SettingsActivity::class.java)
         startActivity(intent)
+    }
+
+    fun onUseCasesMenuItemClicked(ignored: MenuItem) {
+
+        val baseDir = File(this.getExternalFilesDir(null) ?: this.dataDir, "useCases")
+        val names = baseDir.listFiles()?.map { it.name }
+
+        val useCases: Array<String> = names?.toTypedArray() ?: Array(0) { "default" }
+// setup the alert builder
+        // setup the alert builder
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Choose a use case")
+// add a radio button list
+// add a radio button list
+        var checkedItem = useCases.indexOf(useCaseHandler.getTitle())
+
+        builder.setSingleChoiceItems(
+            useCases, checkedItem
+        ) { _, which ->
+            checkedItem = which
+        }
+        builder.setPositiveButton("OK") { _, _ ->
+            useCaseHandler.setUseCase(UseCase(this, useCases[checkedItem]))
+        }
+        builder.setNegativeButton("Cancel", null)
+        val dialog = builder.create()
+        dialog.show()
+
     }
 
     fun onStickmanMenuItemClicked(ignored: MenuItem) {

@@ -13,7 +13,7 @@ class UseCaseStorage(file: File) : JSONStorage(file) {
     }
 
     override fun onFileNewlyCreated() {
-        json.put(SELECTED_USE_CASE_KEY, "default")
+        json.put(SELECTED_USE_CASE_KEY, GlobalValues.DEFAULT_USE_CASE_TITLE)
     }
 
     override fun onJSONInitialized() {
