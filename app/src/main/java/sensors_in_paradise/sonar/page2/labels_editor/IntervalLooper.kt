@@ -18,7 +18,7 @@ abstract class IntervalLooper {
         loopTimerTask = object : TimerTask() {
             override fun run() {
                 val timeInInterval = System.currentTimeMillis() - currentIntervalStartTime
-                if (timeInInterval + msStart> msEnd) {
+                if (timeInInterval + msStart > msEnd) {
                     currentIntervalStartTime = System.currentTimeMillis()
                 }
                 uiHandler.post {
