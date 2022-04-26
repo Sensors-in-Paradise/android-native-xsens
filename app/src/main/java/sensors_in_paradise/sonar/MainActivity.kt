@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
             }
         }
         recordingsManager = RecordingDataManager(
-            useCaseHandler.useCase.baseDir
+            useCaseHandler.getDir()
         )
         initClickListeners()
 
@@ -160,7 +160,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         val baseDir = File(this.getExternalFilesDir(null) ?: this.dataDir, "useCases")
         val names = baseDir.listFiles()?.map { it.name }
 
-        val useCases: Array<String> = names?.toTypedArray() ?: Array(0) { "default" }
+        val useCases: Array<String> = names?.toTypedArray() ?: Array(0) { "none" }
 // setup the alert builder
         // setup the alert builder
         val builder = AlertDialog.Builder(this)
@@ -175,7 +175,10 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
             checkedItem = which
         }
         builder.setPositiveButton("OK") { _, _ ->
-            useCaseHandler.setUseCase(UseCase(this, useCases[checkedItem]))
+            if(useCases[checkedItem] != "none"){
+                useCaseHandler.setUseCase(UseCase(this, useCases[checkedItem]))
+            }
+
         }
         builder.setNegativeButton("Cancel", null)
         val dialog = builder.create()
