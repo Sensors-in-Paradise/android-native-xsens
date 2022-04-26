@@ -4,7 +4,11 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.util.Log
-import android.view.*
+import android.view.View
+import android.view.TextureView
+import android.view.LayoutInflater
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.widget.*
 import androidx.constraintlayout.helper.widget.Carousel
 import androidx.constraintlayout.motion.widget.MotionLayout
@@ -15,7 +19,6 @@ import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.page2.PersistentCategoriesDialog
 import sensors_in_paradise.sonar.page2.Recording
 import kotlin.math.abs
-
 
 @SuppressLint("ClickableViewAccessibility")
 class LabelsEditorDialog(
@@ -36,6 +39,7 @@ class LabelsEditorDialog(
     private var endTV: TextView
     private var statusTV: TextView
     private var startTV: TextView
+
     /*Stores a list of VisualSequenceViewHolder and its position in the viewSwitcher*/
     private var visualizers: ArrayList<Pair<Int, VisualSequenceViewHolder>> = ArrayList()
 
@@ -50,8 +54,9 @@ class LabelsEditorDialog(
     private var poseSequenceView: TextureView
     private val activeVisualizer: VisualSequenceViewHolder?
         get() {
-            return if (activeVisualizerIndex != null)
-                visualizers[activeVisualizerIndex!!].second else null
+            return if (activeVisualizerIndex != null) {
+                visualizers[activeVisualizerIndex!!].second
+            } else null
         }
 
     init {
@@ -164,7 +169,8 @@ class LabelsEditorDialog(
         }
         dialog.show()
     }
-    private fun initVisualizers(){
+
+    private fun initVisualizers() {
         if (recording.hasVideoRecording()) {
             val visualizer = VideoViewHolder(
                 videoView,
@@ -185,14 +191,14 @@ class LabelsEditorDialog(
             visualizers.add(Pair(1, visualizer))
         }
         if (visualizers.isNotEmpty()) {
-            setActiveVisualizer(0,visualizers[0].first)
+            setActiveVisualizer(0, visualizers[0].first)
             if (visualizers.size > 1) {
                 val horizontalSwipeDetector =
                     GestureDetectorCompat(context, HorizontalSwipeDetector { isSwipeToLeft ->
                         if (isSwipeToLeft && activeVisualizerIndex == 0) {
-                            setActiveVisualizer(1,1)
+                            setActiveVisualizer(1, 1)
                         } else if (!isSwipeToLeft && activeVisualizerIndex == 1) {
-                            setActiveVisualizer(0,0)
+                            setActiveVisualizer(0, 0)
                         }
                     })
                 visualizerSwitcher.setOnTouchListener { _, event ->
@@ -203,14 +209,15 @@ class LabelsEditorDialog(
             visualizerFrameLayout.visibility = View.GONE
         }
     }
+
     private fun setActiveVisualizer(visualizerIndex: Int, viewIndex: Int) {
         if (visualizerIndex == activeVisualizerIndex) {
             return
         }
         activeVisualizer?.stopLooping()
-        if (visualizerSwitcher.displayedChild == 0&&viewIndex==1) {
+        if (visualizerSwitcher.displayedChild == 0 && viewIndex == 1) {
             visualizerSwitcher.showNext()
-        } else if (visualizerSwitcher.displayedChild == 1&&viewIndex==0) {
+        } else if (visualizerSwitcher.displayedChild == 1 && viewIndex == 0) {
             visualizerSwitcher.showPrevious()
         }
         activeVisualizerIndex = visualizerIndex

@@ -25,9 +25,11 @@ class UIHelper private constructor() {
         }
 
         fun getPrimaryColor(context: Context): Int {
-            return if (PreferencesHelper.shouldUseDarkMode(context))
+            return if (PreferencesHelper.shouldUseDarkMode(context)) {
                 ContextCompat.getColor(context, R.color.colorPrimaryDark)
-            else ContextCompat.getColor(context, R.color.colorPrimary)
+            } else {
+                ContextCompat.getColor(context, R.color.colorPrimary)
+            }
         }
 
         fun getSlightBackgroundContrast(context: Context): Int {
@@ -35,9 +37,11 @@ class UIHelper private constructor() {
         }
 
         fun getBackroundContrast(context: Context): Int {
-            return if (PreferencesHelper.shouldUseDarkMode(context))
+            return if (PreferencesHelper.shouldUseDarkMode(context)) {
                 ContextCompat.getColor(context, R.color.lightGrey)
-                else ContextCompat.getColor(context, R.color.darkGrey)
+            } else {
+                ContextCompat.getColor(context, R.color.darkGrey)
+            }
         }
     }
 }

@@ -22,48 +22,50 @@ class PoseSequenceViewHolder(
     }
 
     override fun loadSource(sourcePath: String, onSourceLoadedListener: () -> Unit) {
-        poseSequence = PoseEstimationStorageManager.loadPoseSequenceFromCSV(sourcePath)
+        poseSequence = PoseEstimationStorageManager.loadPoseSequenceFromCSV(context, sourcePath)
         onSourceLoadedListener()
     }
 
     override fun seekTo(ms: Long) {
-        try {
-            poseSequence?.let { poseSequence ->
-                val timeStamp = poseSequence.startTime + ms
-                var poseIndex = poseSequence.timeStamps.binarySearch(timeStamp)
-                var persons = listOf<Person>()
-                if (poseIndex < -1) {
-                    // timeStamp lies between two samples
-                    persons = VisualizationUtils.interpolatePersons(
-                        poseSequence,
-                        -(poseIndex + 2),
-                        timeStamp
-                    )
-                } else {
-                    persons = poseSequence.personsArray.getOrElse(poseIndex) { listOf<Person>() }
-                        .map { it.copy() }
-                }
+        poseSequence?.let { poseSequence ->
+            val persons = getPosesAtTime(ms, poseSequence)
+            drawOnCanvas(persons)
+        }
+    }
 
-                textureView.lockCanvas()?.let { canvas ->
-                    VisualizationUtils.transformKeypoints(
-                        persons,
-                        textureView.bitmap,
-                        canvas,
-                        VisualizationUtils.Transformation.PROJECT_ON_CANVAS,
-                        false
-                    )
-                    VisualizationUtils.drawBodyKeypoints(
-                        persons,
-                        canvas,
-                        clearColor = UIHelper.getSlightBackgroundContrast(context),
-                        circleColor = UIHelper.getPrimaryColor(context),
-                        lineColor = UIHelper.getBackroundContrast(context)
-                    )
-                    textureView.unlockCanvasAndPost(canvas)
-                }
-            }
-        } catch (e: IllegalStateException) {
-            e.printStackTrace()
+    private fun getPosesAtTime(ms: Long, poseSequence: PoseSequence): List<Person> {
+        val timeStamp = poseSequence.startTime + ms
+        val poseIndex = poseSequence.timeStamps.binarySearch(timeStamp)
+        return if (poseIndex < -1) {
+            // When timeStamp lies between two samples
+            VisualizationUtils.interpolatePersons(
+                poseSequence,
+                -(poseIndex + 2),
+                timeStamp
+            )
+        } else {
+            poseSequence.personsArray.getOrElse(poseIndex) { listOf<Person>() }
+                .map { it.copy() }
+        }
+    }
+
+    private fun drawOnCanvas(persons: List<Person>) {
+        textureView.lockCanvas()?.let { canvas ->
+            VisualizationUtils.transformKeyPoints(
+                persons,
+                textureView.bitmap,
+                canvas,
+                VisualizationUtils.Transformation.PROJECT_ON_CANVAS,
+                false
+            )
+            VisualizationUtils.drawBodyKeyPoints(
+                persons,
+                canvas,
+                clearColor = UIHelper.getSlightBackgroundContrast(context),
+                circleColor = UIHelper.getPrimaryColor(context),
+                lineColor = UIHelper.getBackroundContrast(context)
+            )
+            textureView.unlockCanvasAndPost(canvas)
         }
     }
 }

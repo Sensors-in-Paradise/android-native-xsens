@@ -1,28 +1,24 @@
 package sensors_in_paradise.sonar.page2.camera.pose_estimation
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
+import android.content.Context
 import android.graphics.PointF
-import android.util.Log
-import org.jcodec.api.android.AndroidSequenceEncoder
+import android.widget.Toast
 import sensors_in_paradise.sonar.page2.LoggingManager
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.BodyPart
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
-import java.io.File
-import java.io.FileWriter
 import java.time.LocalDateTime
-import org.jcodec.common.io.FileChannelWrapper
-import org.jcodec.common.io.NIOUtils
-import org.jcodec.common.model.Rational
 import com.opencsv.CSVReaderHeaderAware
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.PoseSequence
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.KeyPoint
 import java.io.BufferedReader
+import java.io.IOException
+import java.io.File
+import java.io.FileNotFoundException
 import java.io.FileReader
+import java.io.FileWriter
 
 class PoseEstimationStorageManager(var csvFile: File) {
     private val separator = ", "
-
     private var fileWriter: FileWriter? = FileWriter(csvFile)
 
     fun reset(newCsvFile: File): PoseEstimationStorageManager {
@@ -30,6 +26,11 @@ class PoseEstimationStorageManager(var csvFile: File) {
         fileWriter = FileWriter(csvFile)
 
         return this
+    }
+
+    fun closeFile() {
+        fileWriter?.close()
+        fileWriter = null
     }
 
     fun writeHeader(startTime: LocalDateTime, modelType: String, dimensions: Int) {
@@ -65,29 +66,29 @@ class PoseEstimationStorageManager(var csvFile: File) {
         }
     }
 
-    fun closeFile() {
-        fileWriter?.close()
-        fileWriter = null
-    }
-
     companion object {
-        private fun extractStartTimeFromCSV(inputFile: String): Long {
+        private fun extractStartTimeFromCSV(context: Context, inputFile: String): Long {
+            val fileReader = BufferedReader(FileReader(inputFile))
             try {
-                val fileReader = BufferedReader(FileReader(inputFile))
                 var line = fileReader.readLine()
                 while (!line.contains("StartTimeStamp")) {
                     line = fileReader.readLine()
                 }
                 fileReader.close()
                 return line.filter { it.isDigit() }.toLong()
-            } catch (_: Exception) {
-                throw Exception("CSV header corrupt")
+            } catch (_: NumberFormatException) {
+                Toast.makeText(
+                    context,
+                    "CSV Header corrupt",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
+            return 0L
         }
 
-        private fun getHeaderAwareFileReader(inputFile: String): FileReader {
+        private fun getHeaderAwareFileReader(context: Context, inputFile: String): FileReader {
+            val fileReader = FileReader(inputFile)
             try {
-                val fileReader = FileReader(inputFile)
                 var headerSize = ""
                 var c = fileReader.read().toChar()
                 while (c != '\n') {
@@ -97,10 +98,14 @@ class PoseEstimationStorageManager(var csvFile: File) {
                     }
                 }
                 fileReader.skip(headerSize.toLong() + 1)
-                return fileReader
-            } catch (_: Exception) {
-                throw Exception("CSV header corrupt")
+            } catch (_: NumberFormatException) {
+                Toast.makeText(
+                    context,
+                    "CSV Header corrupt",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
+            return fileReader
         }
 
         private fun personsFromCSVLine(line: Map<String, String>): List<Person> {
@@ -118,14 +123,15 @@ class PoseEstimationStorageManager(var csvFile: File) {
             return listOf<Person>(Person(0, keyPoints, null, personConfidence))
         }
 
-        fun loadPoseSequenceFromCSV(inputFile: String): PoseSequence {
+        fun loadPoseSequenceFromCSV(context: Context, inputFile: String): PoseSequence {
             val csvData = PoseSequence(
                 ArrayList<Long>(),
                 ArrayList<List<Person>>(),
-                extractStartTimeFromCSV(inputFile)
+                0L
             )
             try {
-                val fileReader = getHeaderAwareFileReader(inputFile)
+                csvData.startTime = extractStartTimeFromCSV(context, inputFile)
+                val fileReader = getHeaderAwareFileReader(context, inputFile)
                 val csvReader = CSVReaderHeaderAware(fileReader)
 
                 var line: Map<String, String>? = mapOf("_" to "")
@@ -139,53 +145,26 @@ class PoseEstimationStorageManager(var csvFile: File) {
                     }
                 }
                 csvReader.close()
-            } catch (e: Exception) {
-                // TODO use Toasts or whatever to handle exception right (and prevent app crash)
-                Log.d("PoseEstimation", e.toString())
+            } catch (_: IOException) {
+                Toast.makeText(
+                    context,
+                    "CSV File corrupt",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } catch (_: FileNotFoundException) {
+                Toast.makeText(
+                    context,
+                    "CSV File corrupt",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } catch (_: NumberFormatException) {
+                Toast.makeText(
+                    context,
+                    "CSV File corrupt",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             return csvData
-        }
-
-        // TODO delete if not needed in the end
-        fun createVideoFromCSV(inputFile: String, outputFile: File) {
-            val width = 480
-            val height = 640
-            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-            val canvas = Canvas(bitmap)
-
-            var out: FileChannelWrapper? = null
-            try {
-                val fileReader = getHeaderAwareFileReader(inputFile)
-                val csvReader = CSVReaderHeaderAware(fileReader)
-
-                out = NIOUtils.writableFileChannel(outputFile.absolutePath)
-                val encoder = AndroidSequenceEncoder(out, Rational.R(15, 1))
-
-                var line = csvReader.readMap()
-                while (line != null) {
-                    try {
-                        line = csvReader.readMap()
-                        val persons = personsFromCSVLine(line)
-                        VisualizationUtils.transformKeypoints(
-                            persons, bitmap, canvas,
-                            VisualizationUtils.Transformation.PROJECT_ON_CANVAS,
-                            false
-                        )
-                        VisualizationUtils.drawBodyKeypoints(
-                            persons,
-                            canvas,
-                            circleRadius = 2f,
-                            lineWidth = 1f
-                        )
-                        encoder.encodeImage(bitmap)
-                    } catch (_: Exception) {
-                        break
-                    }
-                }
-                encoder.finish()
-            } finally {
-                NIOUtils.closeQuietly(out)
-            }
         }
     }
 }

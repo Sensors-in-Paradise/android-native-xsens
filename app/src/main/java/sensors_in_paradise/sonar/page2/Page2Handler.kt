@@ -82,6 +82,7 @@ class Page2Handler(
             CameraManager(context, previewView, overlayView)
     }
 
+    @Suppress("LongMethod")
     private fun initializeLoggingManagerCallbacks() {
         loggingManager.setOnRecordingDone { recording ->
             tabLayout.selectTab(recordingsTab)
@@ -102,7 +103,7 @@ class Page2Handler(
 
             if (cameraManager.shouldShowVideo()) {
                 // In case Image Analysis isn't possible, bitmap needs to be extracted from preview
-                cameraManager.bindPreview() // TODO make it work even if camera tab isnt selected initially
+                cameraManager.bindPreview()
             }
             if (cameraManager.shouldCaptureVideo()) {
                 val dir = GlobalValues.getVideoRecordingsTempDir(context)

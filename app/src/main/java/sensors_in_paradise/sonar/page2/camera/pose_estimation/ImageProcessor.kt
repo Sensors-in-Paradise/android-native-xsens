@@ -1,6 +1,5 @@
 package sensors_in_paradise.sonar.page2.camera.pose_estimation
 
-
 import android.content.Context
 import android.graphics.*
 import android.media.Image
@@ -16,6 +15,7 @@ class ImageProcessor(
     companion object {
         /** Threshold for confidence score. */
         private const val MIN_CONFIDENCE = .4f
+        const val POSE_ESTIMATION_FREQUENCY = 25
     }
 
     private val lock = Any()
@@ -36,46 +36,26 @@ class ImageProcessor(
         return bitmap
     }
 
-    fun clearView(overlayView: TextureView) {
-        val surfaceCanvas = overlayView.lockCanvas()
-        surfaceCanvas?.let { canvas ->
-            VisualizationUtils.drawBodyKeypoints(listOf<Person>(), canvas)
-            overlayView.unlockCanvasAndPost(canvas)
-        }
-    }
-
-    // process image
-    fun processImage(bitmap: Bitmap, overlayView: TextureView, isRotated90: Boolean) {
-        var persons = mutableListOf<Person>()
+    private fun extractPoses(bitmap: Bitmap): List<Person> {
+        val persons = mutableListOf<Person>()
         synchronized(lock) {
             poseDetector.estimatePoses(bitmap).let {
                 persons.addAll(it)
             }
         }
-        persons = persons.filter { it.score > MIN_CONFIDENCE }.toMutableList()
+        return persons.filter { it.score > MIN_CONFIDENCE }.toList()
+    }
 
-        VisualizationUtils.transformKeypoints(
-            persons, bitmap, null,
-            VisualizationUtils.Transformation.NORMALIZE
-        )
-        if (isRotated90) {
-            VisualizationUtils.transformKeypoints(
-                persons, null, null,
-                VisualizationUtils.Transformation.ROTATE90
-            )
-        }
-
-        poseEstimationStorageManager.storePoses(persons)
-
+    private fun drawOnCanvas(persons: List<Person>, overlayView: TextureView, bitmap: Bitmap, isRotated90: Boolean) {
         val surfaceCanvas = overlayView.lockCanvas()
         surfaceCanvas?.let { canvas ->
-            VisualizationUtils.transformKeypoints(
+            VisualizationUtils.transformKeyPoints(
                 persons, bitmap, canvas,
                 VisualizationUtils.Transformation.PROJECT_ON_CANVAS,
                 isRotated90
             )
 
-            VisualizationUtils.drawBodyKeypoints(
+            VisualizationUtils.drawBodyKeyPoints(
                 persons,
                 canvas,
                 circleColor = UIHelper.getPrimaryColor(context),
@@ -86,8 +66,33 @@ class ImageProcessor(
         }
     }
 
+    fun clearView(overlayView: TextureView) {
+        val surfaceCanvas = overlayView.lockCanvas()
+        surfaceCanvas?.let { canvas ->
+            VisualizationUtils.drawBodyKeyPoints(listOf<Person>(), canvas)
+            overlayView.unlockCanvasAndPost(canvas)
+        }
+    }
+
+    fun processImage(bitmap: Bitmap, overlayView: TextureView, isRotated90: Boolean) {
+        val persons = extractPoses(bitmap)
+
+        VisualizationUtils.transformKeyPoints(
+            persons, bitmap, null,
+            VisualizationUtils.Transformation.NORMALIZE
+        )
+        if (isRotated90) {
+            VisualizationUtils.transformKeyPoints(
+                persons, null, null,
+                VisualizationUtils.Transformation.ROTATE90
+            )
+        }
+        poseEstimationStorageManager.storePoses(persons)
+
+        drawOnCanvas(persons, overlayView, bitmap, isRotated90)
+    }
+
     fun processImage(image: Image, overlayView: TextureView, isRotated90: Boolean) {
         processImage(imageToBitmap(image), overlayView, isRotated90)
     }
-
 }

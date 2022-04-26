@@ -81,7 +81,7 @@ object VisualizationUtils {
         return PointF(pScaled.x * outputSize.x, pScaled.y * outputSize.y)
     }
 
-    fun transformKeypoints(
+    fun transformKeyPoints(
         persons: List<Person>,
         bitmap: Bitmap?,
         canvas: Canvas?,
@@ -100,12 +100,18 @@ object VisualizationUtils {
                         rotatePoint90(keyPoint.coordinate)
 
                     Transformation.PROJECT_ON_CANVAS -> keyPoint.coordinate =
-                        projectPointOnCanvas(keyPoint.coordinate, inputSize!!, outputSize!!, isRotated!!)
+                        projectPointOnCanvas(
+                            keyPoint.coordinate,
+                            inputSize!!,
+                            outputSize!!,
+                            isRotated
+                        )
                 }
             }
         }
     }
 
+    @Suppress("ComplexCondition")
     fun interpolatePersons(
         poseSequence: PoseSequence,
         floorIndex: Int,
@@ -116,15 +122,15 @@ object VisualizationUtils {
         val upperTimeStamp = poseSequence.timeStamps.getOrNull(floorIndex + 1)
         val lowerPerson = poseSequence.personsArray[floorIndex].getOrNull(0)
         val upperPerson = poseSequence.personsArray.getOrNull(floorIndex + 1)?.getOrNull(0)
-        if (lowerPerson == null
-            || timeStamp < lowerTimeStamp
-            || timeStamp > upperTimeStamp ?: Long.MAX_VALUE
-            || (timeStamp - lowerTimeStamp) > timeMargin
+        if (lowerPerson == null ||
+            timeStamp < lowerTimeStamp ||
+            timeStamp > upperTimeStamp ?: Long.MAX_VALUE ||
+            (timeStamp - lowerTimeStamp) > timeMargin
         ) { // No prior sample / TimeStamp inconsistent / big gap to prior AND next sample
             return listOf<Person>()
-        } else if (upperPerson == null
-            || upperTimeStamp == null
-            || (upperTimeStamp - lowerTimeStamp) > timeMargin
+        } else if (upperPerson == null ||
+            upperTimeStamp == null ||
+            (upperTimeStamp - lowerTimeStamp) > timeMargin
         ) { // No next sample / big gap to next sample
             return listOf(lowerPerson)
         } else {
@@ -149,11 +155,11 @@ object VisualizationUtils {
     }
 
     // Draw line and point indicate body pose
-    fun drawBodyKeypoints(
+    fun drawBodyKeyPoints(
         persons: List<Person>,
         canvas: Canvas,
         clearColor: Int? = null,
-        circleColor: Int = Color.parseColor("#c97b63"),
+        circleColor: Int = Color.BLACK,
         lineColor: Int = Color.WHITE,
         circleRadius: Float = CIRCLE_RADIUS,
         lineWidth: Float = LINE_WIDTH

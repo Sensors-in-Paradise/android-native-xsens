@@ -44,7 +44,7 @@ class CameraManager(
     private val cameraSelector: CameraSelector = CameraSelector.Builder()
         .requireLensFacing(CameraSelector.LENS_FACING_BACK)
         .build()
-    private val videoCapture: androidx.camera.video.VideoCapture<Recorder> = withOutput(recorder)
+    private val videoCapture: VideoCapture<Recorder> = withOutput(recorder)
     private var videoRecording: Recording? = null
 
     private var imageProcessor: ImageProcessor? = null
@@ -54,23 +54,21 @@ class CameraManager(
     @SuppressLint("UnsafeOptInUsageError")
     private val imageAnalysis = ImageAnalysis.Builder()
         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-        .setTargetResolution(Size(1280, 720)) //TODO generalize
+        .setTargetResolution(Size(1280, 720))
         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
         .build()
         .apply {
-            setAnalyzer(imageAnalysisExecutor, ImageAnalysis.Analyzer { imageProxy ->
+            setAnalyzer(imageAnalysisExecutor) { imageProxy ->
                 val rotationDegrees = imageProxy.imageInfo.rotationDegrees
-                // insert your code here.
+
                 imageProxy.image?.let {
                     imageProcessor?.processImage(
-                        it, overlayView, true
+                        it, overlayView, rotationDegrees == 90
                     )
                 }
-                // after done, release the ImageProxy object
                 imageProxy.close()
-            })
+            }
         }
-    private val POSE_ESTIMATION_FREQUENCY = 25
     private var timer: CountDownTimer? = null
 
     init {
@@ -81,7 +79,7 @@ class CameraManager(
         }
     }
 
-    private fun getTimerObject(delay: Long, interval: Long): CountDownTimer {
+    private fun getTaskTimerObject(delay: Long, interval: Long): CountDownTimer {
         return object : CountDownTimer(delay, interval) {
             override fun onTick(millisUntilFinished: Long) {
                 previewView.bitmap?.let { bm ->
@@ -90,7 +88,6 @@ class CameraManager(
                     )
                 }
             }
-
             override fun onFinish() {}
         }
     }
@@ -220,31 +217,35 @@ class CameraManager(
     private var poseStartTime: Long? = null
 
     fun startRecordingPose(outputFile: File) {
-        // Video Capture and Image Analysis are not combinable as use case
+        // Video Capture and Image Analysis use cases are not combinable
         if (shouldCaptureVideo()) {
-            timer = getTimerObject(Long.MAX_VALUE, 1000L / POSE_ESTIMATION_FREQUENCY)
+            timer = getTaskTimerObject(Long.MAX_VALUE, 1000L / ImageProcessor.POSE_ESTIMATION_FREQUENCY)
             timer!!.start()
         } else if (!isAnalyzerBound) {
             bindImageAnalyzer()
         }
 
         val poseEstimator = createPoseEstimator()
-        poseStorageManager = if (poseStorageManager == null)
+        poseStorageManager = if (poseStorageManager == null) {
             PoseEstimationStorageManager(outputFile)
-        else poseStorageManager!!.reset(outputFile)
+        } else {
+                poseStorageManager!!.reset(outputFile)
+        }
 
         val localDateTime = LocalDateTime.now()
-        // TODO use actual setting to get model type and dimensions
         poseStorageManager!!.writeHeader(localDateTime, "ThunderI8", 2)
         poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
 
-        imageProcessor = imageProcessor ?: ImageProcessor(context, poseEstimator, poseStorageManager!!)
+        imageProcessor =
+            imageProcessor ?: ImageProcessor(context, poseEstimator, poseStorageManager!!)
     }
 
     /** Stops the recording and returns the UNIX timestamp of
      * when the recording did actually start and the file where it's stored
-     * MEIN CODE IST SCHEIßE - ALEX! */
-    fun stopRecordingPose(onPoseRecordingFinalized: ((poseCaptureStartTime: Long, poseTempFile: File) -> Unit)? = null) {
+     * MEIN CODE IST IN ORDNUNG - ALEX! */
+    fun stopRecordingPose(
+        onPoseRecordingFinalized: ((poseCaptureStartTime: Long, poseTempFile: File) -> Unit)? = null
+    ) {
         timer?.let {
             it.cancel()
             timer = null

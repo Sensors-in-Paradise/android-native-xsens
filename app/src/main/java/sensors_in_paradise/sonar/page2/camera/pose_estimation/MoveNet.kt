@@ -20,7 +20,6 @@ import android.graphics.*
 import android.os.SystemClock
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.gpu.GpuDelegate
 import org.tensorflow.lite.nnapi.NnApiDelegate
 import org.tensorflow.lite.support.common.FileUtil
 import org.tensorflow.lite.support.image.ImageProcessor
@@ -58,20 +57,14 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: NnA
         private const val THUNDER_F16_FILENAME = "lite-model_movenet_singlepose_thunder_tflite_float16_4.tflite"
         private const val THUNDER_I8_FILENAME = "lite-model_movenet_singlepose_thunder_tflite_int8_4.tflite"
 
-
         // allow specifying model type.
         fun create(context: Context, device: Device, modelType: ModelType): MoveNet {
             val options = Interpreter.Options()
             var gpuDelegate: NnApiDelegate? = null
             options.setNumThreads(CPU_NUM_THREADS)
-            when (device) {
-                Device.CPU -> {
-                }
-                Device.GPU -> {
-                    gpuDelegate = NnApiDelegate()
-                    options.addDelegate(gpuDelegate)
-                }
-                // Device.NNAPI -> options.setUseNNAPI(true)
+            if (device == Device.GPU) {
+                gpuDelegate = NnApiDelegate()
+                options.addDelegate(gpuDelegate)
             }
             return MoveNet(
                 Interpreter(
@@ -87,8 +80,6 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: NnA
                 ),
                 gpuDelegate
             )
-
-
         }
 
         // default to lightning.
@@ -102,6 +93,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: NnA
     private val inputHeight = interpreter.getInputTensor(0).shape()[2]
     private var outputShape: IntArray = interpreter.getOutputTensor(0).shape()
 
+    @Suppress("LongMethod")
     override fun estimatePoses(bitmap: Bitmap): List<Person> {
         val inferenceStartTimeNanos = SystemClock.elapsedRealtimeNanos()
         if (cropRegion == null) {
