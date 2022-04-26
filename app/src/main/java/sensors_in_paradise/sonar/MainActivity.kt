@@ -160,13 +160,13 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         val baseDir = File(this.getExternalFilesDir(null) ?: this.dataDir, "useCases")
         val names = baseDir.listFiles()?.map { it.name }
 
-        val useCases: Array<String> = names?.toTypedArray() ?: Array(0) { "none" }
-// setup the alert builder
+        val useCases: Array<String> = names?.toTypedArray() ?: Array(1) { "none" }
+        // setup the alert builder
         // setup the alert builder
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Choose a use case")
-// add a radio button list
-// add a radio button list
+        // add a radio button list
+        // add a radio button list
         var checkedItem = useCases.indexOf(useCaseHandler.getTitle())
 
         builder.setSingleChoiceItems(
@@ -175,10 +175,11 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
             checkedItem = which
         }
         builder.setPositiveButton("OK") { _, _ ->
-            if(useCases[checkedItem] != "none"){
-                useCaseHandler.setUseCase(UseCase(this, useCases[checkedItem]))
+            if (checkedItem != -1) {
+                if (useCases[checkedItem] != "none") {
+                    useCaseHandler.setUseCase(UseCase(this, useCases[checkedItem]))
+                }
             }
-
         }
         builder.setNegativeButton("Cancel", null)
         val dialog = builder.create()
