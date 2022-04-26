@@ -66,7 +66,7 @@ class Page2Handler(
 
         loggingManager = LoggingManager(
             context,
-            useCaseHandler.useCase,
+            useCaseHandler.currentUseCase,
             devices,
             activity.findViewById(R.id.buttonRecord),
             timer,

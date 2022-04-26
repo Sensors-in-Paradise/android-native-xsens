@@ -12,7 +12,7 @@ class UseCaseHandler(
     val context: Context,
     val onUseCaseChanged: (useCase: UseCase) -> Unit
 ) {
-    lateinit var useCase: UseCase
+    lateinit var currentUseCase: UseCase
     private var useCaseStorage = UseCaseStorage(context)
 
     init {
@@ -23,23 +23,12 @@ class UseCaseHandler(
         }
     }
 
-    fun setUseCase(case: UseCase): Boolean {
+    fun setUseCase(case: UseCase) {
         if (useCaseAlreadyExists(case)) {
-            if (useCase.getModelFile().isFile) {
-                useCase = case
+                currentUseCase = case
                 onUseCaseChanged(case)
                 useCaseStorage.setSelectedUseCase(case.title)
-                return true
-            } else {
-                Toast.makeText(
-                    context,
-                    "No Model in use Case Folder!", Toast.LENGTH_LONG
-                ).show()
-            }
-        } else {
-
         }
-        return false
     }
 
     fun createUseCase() {
@@ -49,13 +38,14 @@ class UseCaseHandler(
 
     private fun loadUseCaseFromStorage() {
         val title = useCaseStorage.getSelectedUseCase()
-        useCase = UseCase(context, title)
+        currentUseCase = UseCase(context, title)
     }
 
     private fun createDefaultUseCase() {
-        useCase = UseCase(context, GlobalValues.DEFAULT_USE_CASE_TITLE)
+        currentUseCase = UseCase(context, GlobalValues.DEFAULT_USE_CASE_TITLE)
         useCaseStorage.setSelectedUseCase(GlobalValues.DEFAULT_USE_CASE_TITLE)
-        extractDefaultModel(useCase.getModelFile())
+        onUseCaseChanged(currentUseCase)
+        //extractDefaultModel(useCase.getModelFile())
     }
 
     private fun defaultUseCaseExists(context: Context): Boolean {
@@ -67,7 +57,7 @@ class UseCaseHandler(
 
     private fun extractDefaultModel(destination: File) {
         val inStream: FileInputStream =
-            context.assets.open("LSTMModel-1-18.tflite") as FileInputStream
+            context.assets.open("LSTMModel118") as FileInputStream
         val outStream = FileOutputStream(destination)
         val inChannel: FileChannel = inStream.channel
         val outChannel: FileChannel = outStream.channel
@@ -81,7 +71,11 @@ class UseCaseHandler(
     }
 
     fun getTitle(): String {
-        return useCase.title
+        return currentUseCase.title
+    }
+
+    fun getDir(): File {
+        return currentUseCase.baseDir
     }
 
 }

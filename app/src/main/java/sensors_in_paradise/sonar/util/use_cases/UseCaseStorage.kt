@@ -17,7 +17,6 @@ class UseCaseStorage(file: File) : JSONStorage(file) {
     }
 
     override fun onJSONInitialized() {
-        TODO("Not yet implemented")
     }
 
     fun setSelectedUseCase(title: String) {
