@@ -1,7 +1,6 @@
 package sensors_in_paradise.sonar.util.use_cases
 
 import android.content.Context
-import android.widget.Toast
 import sensors_in_paradise.sonar.GlobalValues
 import java.io.File
 import java.io.FileInputStream
@@ -25,9 +24,9 @@ class UseCaseHandler(
 
     fun setUseCase(case: UseCase) {
         if (useCaseAlreadyExists(case)) {
-                currentUseCase = case
-                onUseCaseChanged(case)
-                useCaseStorage.setSelectedUseCase(case.title)
+            currentUseCase = case
+            onUseCaseChanged(case)
+            useCaseStorage.setSelectedUseCase(case.title)
         }
     }
 
@@ -44,6 +43,7 @@ class UseCaseHandler(
     private fun createDefaultUseCase() {
         currentUseCase = UseCase(context, GlobalValues.DEFAULT_USE_CASE_TITLE)
         useCaseStorage.setSelectedUseCase(GlobalValues.DEFAULT_USE_CASE_TITLE)
+        getDir().mkdir()
         onUseCaseChanged(currentUseCase)
         //extractDefaultModel(useCase.getModelFile())
     }
