@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.EditText
 import android.widget.ViewAnimator
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -182,6 +183,11 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
             }
         }
         builder.setNegativeButton("Cancel", null)
+        builder.setNeutralButton("New Use Case") {
+            useCases, which ->
+            val editText = EditText(this)
+            useCaseHandler.createUseCase()
+        }
         val dialog = builder.create()
         dialog.show()
 
