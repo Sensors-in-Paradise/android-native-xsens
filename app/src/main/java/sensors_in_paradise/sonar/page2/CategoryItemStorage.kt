@@ -196,11 +196,9 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
         return labelsData.optJSONObject(category)
     }
     fun isCategoryDeletable(category: String): Boolean{
-        return true
+        return findJSONObjectOfCategory(category)?.getBoolean("deletable")?:false
     }
-    fun isActivityDeletable(activity: String): Boolean{
-        return true
-    }
+
     companion object{
         val DEFAULT_ACTIVITIES = linkedMapOf(
             GlobalValues.NULL_ACTIVITY to GlobalValues.OTHERS_CATEGORY,

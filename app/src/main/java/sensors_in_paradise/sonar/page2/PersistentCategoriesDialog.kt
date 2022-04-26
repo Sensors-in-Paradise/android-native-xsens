@@ -84,7 +84,7 @@ class PersistentCategoriesDialog(
             .setCancelable(true)
             .setPositiveButton("Submit") { _, _ ->
                 val category = spinner.selectedItem.toString()
-                storage.addEntry(searchEditText.text.toString().lowercase(Locale.getDefault()), category)
+                storage.addEntryIfNotAdded(searchEditText.text.toString().lowercase(Locale.getDefault()), category)
                 adapter.updateByCategory(category)
                 searchEditText.setText("")
             }

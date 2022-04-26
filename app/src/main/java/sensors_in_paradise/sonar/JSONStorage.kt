@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import org.json.JSONException
 import org.json.JSONObject
@@ -17,7 +18,9 @@ abstract class JSONStorage @Throws(
     lateinit var json: JSONObject
 
     init {
+
         if (!file.exists()) {
+            Log.d("JSONStorage", "Creating json file at ${file.absolutePath}")
             file.createNewFile()
             json = JSONObject()
             onFileNewlyCreated()
