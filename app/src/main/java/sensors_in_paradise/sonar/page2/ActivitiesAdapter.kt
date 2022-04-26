@@ -10,7 +10,7 @@ import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 
 class ActivitiesAdapter(
-    var activities: java.util.ArrayList<Pair<Long, String>>,
+    private var activities: java.util.ArrayList<RecordingMetadataStorage.LabelEntry>,
     private var loggingManager: LoggingManager
 ) :
     RecyclerView.Adapter<ActivitiesAdapter.ViewHolder>() {
@@ -21,7 +21,7 @@ class ActivitiesAdapter(
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setAllActivities(newList: ArrayList<Pair<Long, String>>) {
+    fun setAllActivities(newList: ArrayList<RecordingMetadataStorage.LabelEntry>) {
         activities = newList
         notifyDataSetChanged()
     }
@@ -39,7 +39,7 @@ class ActivitiesAdapter(
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val activity = activities[position]
-        viewHolder.activityTV.text = activity.second
+        viewHolder.activityTV.text = activity.activity
         viewHolder.startTimeTV.text = getStartTimeAsString(activity)
 
         viewHolder.activityTV.setOnClickListener {
@@ -49,10 +49,10 @@ class ActivitiesAdapter(
 
     override fun getItemCount() = activities.size
 
-    private fun getStartTimeAsString(activity: Pair<Long, String>): String {
+    private fun getStartTimeAsString(activity: RecordingMetadataStorage.LabelEntry): String {
         if (activities.size> 0) {
-            val recordingStartTime = activities[0].first
-            val activityStartTime = activity.first
+            val recordingStartTime = activities[0].timeStarted
+            val activityStartTime = activity.timeStarted
 
             return GlobalValues.getDurationAsString(activityStartTime - recordingStartTime)
         }

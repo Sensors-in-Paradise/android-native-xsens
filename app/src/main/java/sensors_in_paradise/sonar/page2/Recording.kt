@@ -19,7 +19,7 @@ enum class RecordingFileState {
     Valid
 }
 
-open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorage) {
+open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorage) {
     constructor(dir: File) : this(
         dir,
         RecordingMetadataStorage(dir.resolve(GlobalValues.METADATA_JSON_FILENAME))
@@ -28,6 +28,7 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
         recording.dir,
         recording.metadataStorage
     )
+
     val state = computeRecordingState()
     val isValid
         get() = state != RecordingFileState.Empty
@@ -215,6 +216,12 @@ open class Recording(val dir: File, val metadataStorage: RecordingMetadataStorag
         }
 
         metadataStorage.setRecordingState(recordingState)
+    }
+    fun getActivitiesSummary(): String {
+        return metadataStorage.getActivities().joinToString("\n") { (activityStartTime, activity) ->
+            GlobalValues.getDurationAsString(activityStartTime - metadataStorage.getTimeStarted()) + "   " +
+                    activity
+        }
     }
 
     companion object {
