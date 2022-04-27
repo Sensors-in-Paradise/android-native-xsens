@@ -28,11 +28,11 @@ class UseCaseDialog(context: Context, useCaseHandler: UseCaseHandler) {
             }
         }
         builder.setNegativeButton("Cancel", null)
-
+        builder.setNeutralButton("New Use Case", null)
         val dialog = builder.create()
         dialog.setOnShowListener {
-            dialog.setButton(Dialog.BUTTON_NEUTRAL, "New Use Case"){
-                _,_ ->
+            dialog.getButton(Dialog.BUTTON_NEUTRAL).setOnClickListener{
+                _ ->
                 TextInputDialog(context, "Create new use case",hint="Title of use case", promptInterface = {
                     useCaseHandler.createAndSetUseCase(it)
                     dialog.dismiss()
