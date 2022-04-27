@@ -3,13 +3,14 @@ package sensors_in_paradise.sonar.util.use_cases
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
+import android.util.Log
 import sensors_in_paradise.sonar.util.dialogs.TextInputDialog
 
 class UseCaseDialog(context: Context, useCaseHandler: UseCaseHandler) {
     init{
         val availableUseCases = useCaseHandler.availableUseCases
         val titles = availableUseCases.map { it.title }.toTypedArray()
-
+        Log.d("useCase", availableUseCases.toString())
 
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Choose a use case")

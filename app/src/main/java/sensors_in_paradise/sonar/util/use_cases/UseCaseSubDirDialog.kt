@@ -21,7 +21,7 @@ class UseCaseSubDirDialog(context: Context, currentUseCase: UseCase) {
         builder.setPositiveButton("OK") { _, _ ->
             if (checkedItem != -1) {
                 currentUseCase.setRecordingsSubDir(
-                    subDirs?.get(checkedItem) ?: UseCase.DEFAULT_RECORDINGS_SUBDIR_NAME
+                    subDirs?.get(checkedItem) ?: UseCase.DEFAULT_RECORDINGS_SUB_DIR_NAME
                 )
             }
         }

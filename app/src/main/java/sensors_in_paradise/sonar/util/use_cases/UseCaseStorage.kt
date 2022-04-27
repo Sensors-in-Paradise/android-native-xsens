@@ -1,6 +1,7 @@
 package sensors_in_paradise.sonar.util.use_cases
 
 import android.content.Context
+import android.util.Log
 import org.json.JSONObject
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.JSONStorage
@@ -40,24 +41,26 @@ class UseCaseStorage(file: File) : JSONStorage(file) {
                 }
             }
         */
-
+        Log.d("useCase", json.toString())
+        Log.d("useCase", useCases.toString())
         val useCase = useCases.getJSONObject(useCaseTitle)
         useCase.put(SELECTED_SUB_DIR_KEY, subDir)
-
         save()
     }
 
     fun getSelectedSubDir(useCaseTitle: String): String {
-        return if (useCases.has(useCaseTitle)) {
-            useCases.getJSONObject(useCaseTitle).optString(SELECTED_SUB_DIR_KEY)
-                ?: UseCase.DEFAULT_RECORDINGS_SUBDIR_NAME
+        Log.d("useCase", json.toString())
+        Log.d("useCase", useCases.toString())
+        if (useCases.has(useCaseTitle)) {
+            return useCases.getJSONObject(useCaseTitle).optString(SELECTED_SUB_DIR_KEY)
+                ?: UseCase.DEFAULT_RECORDINGS_SUB_DIR_NAME
         } else {
             useCases.put(
                 useCaseTitle, JSONObject().put(
-                    SELECTED_SUB_DIR_KEY, UseCase.DEFAULT_RECORDINGS_SUBDIR_NAME
+                    SELECTED_SUB_DIR_KEY, UseCase.DEFAULT_RECORDINGS_SUB_DIR_NAME
                 )
             )
-            UseCase.DEFAULT_RECORDINGS_SUBDIR_NAME
+            return UseCase.DEFAULT_RECORDINGS_SUB_DIR_NAME
         }
     }
 
