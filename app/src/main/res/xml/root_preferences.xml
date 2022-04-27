@@ -72,6 +72,10 @@
             app:key="storePoseEstimation"
             app:title="Store TensorFlow Poses"
             app:summary="Store pose data estimated by TensorFlow when recording. "/>
+        <SwitchPreferenceCompat
+            app:key="usePoseSequenceBackround"
+            app:title="Use Backround"
+            app:summary="Use predefined Backround for Pose Sequence in Label Editor. "/>
     </PreferenceCategory>
     <PreferenceCategory app:title="Advanced sensor options">
         <SwitchPreferenceCompat

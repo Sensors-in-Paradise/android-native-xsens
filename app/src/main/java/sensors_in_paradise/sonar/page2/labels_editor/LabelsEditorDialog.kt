@@ -18,6 +18,7 @@ import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.page2.PersistentCategoriesDialog
 import sensors_in_paradise.sonar.page2.Recording
+import sensors_in_paradise.sonar.util.PreferencesHelper
 import kotlin.math.abs
 
 @SuppressLint("ClickableViewAccessibility")
@@ -219,7 +220,8 @@ class LabelsEditorDialog(
         activeVisualizer?.stopLooping()
         if (visualizerSwitcher.displayedChild == 0 && viewIndex == 1) {
             visualizerSwitcher.showNext()
-            poseSequenceBackround.visibility = View.VISIBLE
+            poseSequenceBackround.visibility =
+                if (PreferencesHelper.shouldUsePoseBackroundForEditor(context)) View.VISIBLE else View.GONE
         } else if (visualizerSwitcher.displayedChild == 1 && viewIndex == 0) {
             visualizerSwitcher.showPrevious()
             poseSequenceBackround.visibility = View.GONE
