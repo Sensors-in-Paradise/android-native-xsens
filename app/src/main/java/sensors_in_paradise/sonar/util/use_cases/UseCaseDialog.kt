@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.widget.EditText
+import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.util.dialogs.TextInputDialog
 
 class UseCaseDialog(context: Context, useCaseHandler: UseCaseHandler) {
@@ -40,6 +41,5 @@ class UseCaseDialog(context: Context, useCaseHandler: UseCaseHandler) {
             }
         }
         dialog.show()
-
     }
 }
