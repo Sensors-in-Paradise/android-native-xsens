@@ -2,11 +2,11 @@ package sensors_in_paradise.sonar.page2.labels_editor
 
 import android.content.Context
 import android.view.TextureView
+import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.PoseEstimationStorageManager
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.VisualizationUtils
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.PoseSequence
-import sensors_in_paradise.sonar.util.UIHelper
 
 class PoseSequenceViewHolder(
     private val context: Context,
@@ -61,9 +61,9 @@ class PoseSequenceViewHolder(
             VisualizationUtils.drawBodyKeyPoints(
                 persons,
                 canvas,
-                clearColor = UIHelper.getSlightBackgroundContrast(context),
-                circleColor = UIHelper.getPrimaryColor(context),
-                lineColor = UIHelper.getBackroundContrast(context)
+                clearColor = context.getColor(R.color.slightBackgroundContrast),
+                circleColor = context.getColor(R.color.stickmanJoints),
+                lineColor = context.getColor(R.color.backgroundContrast)
             )
             textureView.unlockCanvasAndPost(canvas)
         }

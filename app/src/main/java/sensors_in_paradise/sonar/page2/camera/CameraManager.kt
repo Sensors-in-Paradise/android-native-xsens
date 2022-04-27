@@ -88,6 +88,7 @@ class CameraManager(
                     )
                 }
             }
+
             override fun onFinish() {}
         }
     }
@@ -170,7 +171,7 @@ class CameraManager(
     }
 
     fun shouldCaptureVideo(): Boolean {
-        return PreferencesHelper.shouldStoreRawCameraRecordings(context)
+        return shouldShowVideo() && PreferencesHelper.shouldStoreRawCameraRecordings(context)
     }
 
     override fun accept(t: VideoRecordEvent?) {
@@ -219,7 +220,8 @@ class CameraManager(
     fun startRecordingPose(outputFile: File) {
         // Video Capture and Image Analysis use cases are not combinable
         if (shouldCaptureVideo()) {
-            timer = getTaskTimerObject(Long.MAX_VALUE, 1000L / ImageProcessor.POSE_ESTIMATION_FREQUENCY)
+            timer =
+                getTaskTimerObject(Long.MAX_VALUE, 1000L / ImageProcessor.POSE_ESTIMATION_FREQUENCY)
             timer!!.start()
         } else if (!isAnalyzerBound) {
             bindImageAnalyzer()
@@ -229,7 +231,7 @@ class CameraManager(
         poseStorageManager = if (poseStorageManager == null) {
             PoseEstimationStorageManager(outputFile)
         } else {
-                poseStorageManager!!.reset(outputFile)
+            poseStorageManager!!.reset(outputFile)
         }
 
         val localDateTime = LocalDateTime.now()
@@ -262,7 +264,7 @@ class CameraManager(
     }
 
     fun shouldRecordPose(): Boolean {
-        return PreferencesHelper.shouldStorePoseEstimation(context)
+        return shouldShowVideo() && PreferencesHelper.shouldStorePoseEstimation(context)
     }
 
     private fun createPoseEstimator(): MoveNet {

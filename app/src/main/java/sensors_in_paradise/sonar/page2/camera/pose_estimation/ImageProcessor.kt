@@ -4,8 +4,8 @@ import android.content.Context
 import android.graphics.*
 import android.media.Image
 import android.view.TextureView
+import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
-import sensors_in_paradise.sonar.util.UIHelper
 
 class ImageProcessor(
     private val context: Context,
@@ -58,8 +58,8 @@ class ImageProcessor(
             VisualizationUtils.drawBodyKeyPoints(
                 persons,
                 canvas,
-                circleColor = UIHelper.getPrimaryColor(context),
-                lineColor = UIHelper.getBackroundContrast(context)
+                circleColor = context.getColor(R.color.stickmanJoints),
+                lineColor = context.getColor(R.color.slightBackgroundContrast)
             )
 
             overlayView.unlockCanvasAndPost(canvas)
