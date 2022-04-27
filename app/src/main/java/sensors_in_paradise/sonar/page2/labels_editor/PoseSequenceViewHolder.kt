@@ -7,6 +7,7 @@ import sensors_in_paradise.sonar.page2.camera.pose_estimation.PoseEstimationStor
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.VisualizationUtils
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.PoseSequence
+import sensors_in_paradise.sonar.util.PreferencesHelper
 
 class PoseSequenceViewHolder(
     private val context: Context,
@@ -61,7 +62,9 @@ class PoseSequenceViewHolder(
             VisualizationUtils.drawBodyKeyPoints(
                 persons,
                 canvas,
-                //clearColor = context.getColor(R.color.slightBackgroundContrast),
+                clearColor = if (PreferencesHelper.shouldUsePoseBackroundForEditor(context)) context.getColor(
+                    R.color.slightBackgroundContrast
+                ) else null,
                 circleColor = context.getColor(R.color.stickmanJoints),
                 lineColor = context.getColor(R.color.backgroundContrast)
             )
