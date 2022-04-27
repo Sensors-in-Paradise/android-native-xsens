@@ -25,6 +25,7 @@ class PreferencesHelper private constructor() {
         }
 
         fun getRecordingsSubDir(context: Context): String {
+            // TODO: adapt to use case concept
             return getSharedPreferences(context).getString(
                 "recordingsSubDir",
                 context.getString(R.string.default_recordings_subdir)

@@ -262,7 +262,6 @@ class LoggingManager(
                 context,
                 "Select an activity label",
                 useCase.getActivityLabelsJSONFile(),
-                defaultItems = GlobalValues.DEFINED_ACTIVITIES,
                 callback = { value -> onSelected(value, getCurrentOpenedTimestamp()) },
             )
         }
@@ -278,7 +277,6 @@ class LoggingManager(
                 context,
                 "Select an activity label",
                 useCase.getActivityLabelsJSONFile(),
-                defaultItems = GlobalValues.DEFINED_ACTIVITIES,
                 callback = { value -> onSelected(value, getCurrentOpenedTimestamp()) },
             )
         }
@@ -495,7 +493,8 @@ object LogIOHelper {
     fun createRecordingFileDir(context: Context, time: LocalDateTime, useCase: UseCase): File {
         val timeStr = time.toSonarString()
 
-        val dir = useCase.baseDir
+        // TODO: adapt to use case concept
+        val dir = useCase.getRecordingsDir()
             .resolve(PreferencesHelper.getRecordingsSubDir(context))
             .resolve(timeStr)
 

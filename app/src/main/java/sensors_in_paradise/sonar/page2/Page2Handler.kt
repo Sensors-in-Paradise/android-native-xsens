@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.page2
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.media.MediaPlayer
@@ -24,7 +25,7 @@ class Page2Handler(
     private val devices: XSENSArrayList,
     private val recordingsManager: RecordingDataManager,
     private val sensorOccupationInterface: SensorOccupationInterface?,
-    private val useCaseHandler: UseCaseHandler
+    private var currentUseCase: UseCase
 ) : PageInterface, ConnectionInterface,
     TabLayout.OnTabSelectedListener {
     private lateinit var context: Context
@@ -66,7 +67,7 @@ class Page2Handler(
 
         loggingManager = LoggingManager(
             context,
-            useCaseHandler.currentUseCase,
+           currentUseCase,
             devices,
             activity.findViewById(R.id.buttonRecord),
             timer,
@@ -167,9 +168,6 @@ class Page2Handler(
 
     override fun onTabReselected(tab: TabLayout.Tab?) {}
 
-    override fun onUseCaseChanged(useCase: UseCase) {
-        recordingsAdapter.notifyDataSetChanged()
-    }
 
     private fun setCameraTabVisible(visible: Boolean) {
         if (visible) {
@@ -181,6 +179,12 @@ class Page2Handler(
                 tabLayout.removeTab(cameraTab)
             }
         }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    override fun onUseCaseChanged(useCase: UseCase){
+        recordingsAdapter.notifyDataSetChanged()
+        loggingManager.useCase = useCase
     }
 
 }

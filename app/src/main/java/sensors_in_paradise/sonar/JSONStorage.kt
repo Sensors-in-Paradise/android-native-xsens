@@ -45,4 +45,8 @@ abstract class JSONStorage @Throws(
 
     /** */
     abstract fun onJSONInitialized()
+
+    fun getJsonString(indentSpaces: Int = 4):String{
+        return json.toString(indentSpaces)
+    }
 }

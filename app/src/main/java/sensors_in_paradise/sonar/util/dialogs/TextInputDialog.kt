@@ -18,12 +18,11 @@ class TextInputDialog(
     promptInterface: (text: String) -> Unit,
     hint: String = "",
     errorMessage: String? = null,
-    val acceptanceInterface: (text: String) -> Pair<Boolean, String?>
+    private val acceptanceInterface: ((text: String) -> Pair<Boolean, String?>)?=null
 ) {
     var dialog: AlertDialog
 
     init {
-
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         builder.setTitle(title)
 
@@ -51,15 +50,15 @@ class TextInputDialog(
         dialog.show()
         input.addTextChangedListener { text ->
             val positiveBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-            if (acceptanceInterface != null) {
-                val result = acceptanceInterface(text.toString())
+
+                val result = if(acceptanceInterface!=null) acceptanceInterface!!(text.toString()) else Pair(true, "")
                 positiveBtn.isEnabled = result.first
                 if (result.second != null) {
                     errorTV.text = result.second
                 }
                 errorTV.visibility =
                     if (result.second != null && !result.first) View.VISIBLE else View.INVISIBLE
-            }
+
         }
 
         // Trigger change listener once

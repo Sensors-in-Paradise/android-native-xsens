@@ -1,60 +1,52 @@
 package sensors_in_paradise.sonar.util.use_cases
 
 import android.content.Context
-import android.util.Log
-import sensors_in_paradise.sonar.GlobalValues
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.nio.channels.FileChannel
 
 class UseCaseHandler(
-    val context: Context,
-    val onUseCaseChanged: (useCase: UseCase) -> Unit
+    val context: Context
+
 ) {
-    lateinit var currentUseCase: UseCase
+    private val useCasesBaseDir = getUseCasesBaseDir(context)
+    private var defaultUseCase = UseCase(useCasesBaseDir, DEFAULT_USE_CASE_TITLE)
+    val availableUseCases = ArrayList<UseCase>()
+    private var currentUseCase: UseCase = defaultUseCase
     private var useCaseStorage = UseCaseStorage(context)
-
+    private var onUseCaseChanged: ((useCase: UseCase) -> Unit)? = null
     init {
-        if (!defaultUseCaseExists(context)) {
-            createDefaultUseCase()
-        } else {
-            loadUseCaseFromStorage()
+        loadUseCases()
+        setUseCase(useCaseStorage.getSelectedUseCase())
+    }
+    private fun loadUseCases(){
+        val useCaseDirs = useCasesBaseDir.listFiles { dir,name ->
+            dir.resolve(name).isDirectory }
+        if(useCaseDirs!=null) {
+            for (dir in useCaseDirs) {
+                availableUseCases.add(UseCase(useCasesBaseDir, dir.name))
+            }
         }
     }
-
-    fun setUseCase(case: UseCase) {
-        if (useCaseAlreadyExists(case)) {
-            currentUseCase = case
-            onUseCaseChanged(case)
-            useCaseStorage.setSelectedUseCase(case.title)
-        }
+    fun setUseCase(title: String): Boolean {
+        val useCase = availableUseCases.find { it.title == title }
+        setUseCase(useCase ?: defaultUseCase)
+        return useCase!=null
+    }
+    private fun setUseCase(useCase: UseCase) {
+        useCaseStorage.setSelectedUseCase(useCase.title)
+        currentUseCase=useCase
+        onUseCaseChanged?.invoke(useCase)
     }
 
-    fun createUseCase() {
-
+    fun createAndSetUseCase(title: String) {
+        val useCase = UseCase(useCasesBaseDir,title)
+        availableUseCases.add(useCase)
+        setUseCase(useCase)
     }
-
-
-    private fun loadUseCaseFromStorage() {
-        val title = useCaseStorage.getSelectedUseCase()
-        currentUseCase = UseCase(context, title)
-    }
-
-    private fun createDefaultUseCase() {
-        currentUseCase = UseCase(context, GlobalValues.DEFAULT_USE_CASE_TITLE)
-        useCaseStorage.setSelectedUseCase(GlobalValues.DEFAULT_USE_CASE_TITLE)
-        getDir().mkdirs()
-        Log.d("Use Cases", "${getDir().exists()}")
-        onUseCaseChanged(currentUseCase)
-        //extractDefaultModel(useCase.getModelFile())
-    }
-
-    private fun defaultUseCaseExists(context: Context): Boolean {
-        return File(
-            context.getExternalFilesDir(null) ?: context.dataDir,
-            "useCases"
-        ).resolve(GlobalValues.DEFAULT_USE_CASE_TITLE).isDirectory
+    fun getCurrentUseCase(): UseCase{
+        return currentUseCase
     }
 
     private fun extractDefaultModel(destination: File) {
@@ -68,16 +60,17 @@ class UseCaseHandler(
         outStream.close()
     }
 
-    private fun useCaseAlreadyExists(case: UseCase): Boolean {
-        return case.baseDir.isDirectory
+    private fun hasUseCase(title:String): Boolean {
+        return availableUseCases.find { it.title ==title } != null
+    }
+    fun setOnUseCaseChanged(onUseCaseChanged: (useCase: UseCase)->Unit){
+        this.onUseCaseChanged = onUseCaseChanged
     }
 
-    fun getTitle(): String {
-        return useCaseStorage.getSelectedUseCase()
+    companion object{
+       fun getUseCasesBaseDir(context: Context):File{
+           return File(context.getExternalFilesDir(null) ?: context.dataDir, "useCases")
+       }
+        const val DEFAULT_USE_CASE_TITLE = "default"
     }
-
-    fun getDir(): File {
-        return currentUseCase.baseDir
-    }
-
 }

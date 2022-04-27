@@ -1,9 +1,16 @@
 package sensors_in_paradise.sonar.page2
 
 import sensors_in_paradise.sonar.GlobalValues
+import sensors_in_paradise.sonar.util.use_cases.UseCase
 import java.io.File
 
-class RecordingDataManager(val recordingsDir: File, val recordingsList: ArrayList<Recording>) {
+class RecordingDataManager(recordingsDir: File, val recordingsList: ArrayList<Recording>) {
+    var recordingsDir: File = recordingsDir
+    set(value){
+        field= value
+        loadRecordingsFromStorage()
+    }
+
     constructor(recordingsDir: File) : this(recordingsDir, ArrayList<Recording>()) {
         loadRecordingsFromStorage()
     }

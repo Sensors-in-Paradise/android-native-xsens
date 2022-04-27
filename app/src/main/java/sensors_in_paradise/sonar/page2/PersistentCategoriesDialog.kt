@@ -17,7 +17,6 @@ class PersistentCategoriesDialog(
     val context: Context,
     title: String,
     storageFile: File,
-    defaultItems: LinkedHashMap<String, String>,
     callback: (value: String) -> Unit = {},
 ) {
     var dialog: AlertDialog

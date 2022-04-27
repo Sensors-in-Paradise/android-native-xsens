@@ -8,19 +8,29 @@ import java.nio.channels.FileChannel
 
 
 class UseCase(
-    val context: Context,
+    private val baseDir:File,
     val title: String
 ) {
-    val baseDir = File(context.getExternalFilesDir(null) ?: context.dataDir, "useCases").resolve(title)
+    val useCaseDir = baseDir.resolve(title)
+
+    init{
+        if(!useCaseDir.isDirectory){
+            useCaseDir.mkdir()
+        }
+    }
+
     fun getActivityLabelsJSONFile(): File {
-        return baseDir.resolve("labels.json")
+        return useCaseDir.resolve("labels.json")
     }
     fun getPeopleJSONFile(): File {
-        return baseDir.resolve("people.json")
+        return useCaseDir.resolve("people.json")
     }
 
     fun getModelFile(): File {
-        return baseDir.resolve("model.tflite")
+        return useCaseDir.resolve("model.tflite")
+    }
+    fun getRecordingsDir(): File{
+        return useCaseDir.resolve("recordings").apply { mkdir() }
     }
     /*fun extractModelFromFile(): Any {
             val modelFile = getUSeCaseBaseDir().resolve(title)

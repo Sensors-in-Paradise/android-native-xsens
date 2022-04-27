@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.page2
 
+import android.util.Log
 import org.json.JSONObject
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.JSONStorage
@@ -77,7 +78,6 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
     }
     private fun addDefaultActivities(){
         for((activity, category) in DEFAULT_ACTIVITIES){
-            addCategoryIfNotAdded(category)
             addEntryIfNotAdded(activity, category, false)
         }
     }
@@ -97,15 +97,17 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
             addCategory(category, deletable, save)
         }
     }
-
-    private fun addCategory(category: String, deletable: Boolean=true,  save: Boolean) {
-        labelsData.put(category, JSONObject().apply {
+    /**Returns the category json object*/
+    private fun addCategory(category: String, deletable: Boolean=true,  save: Boolean): JSONObject {
+        val obj = JSONObject().apply {
             put("entries", JSONObject())
             put("deletable", deletable)
-        })
+        }
+        labelsData.put(category,obj)
         if(save) {
             save()
         }
+        return obj
     }
     private fun hasCategory(category: String):Boolean{
         return labelsData.has(category)
@@ -139,15 +141,11 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
 
 
     fun addEntry(entry: String, category: String = DEFAULT_CATEGORY, deletable: Boolean=true, save: Boolean) {
-        val jsonObj = findJSONObjectOfCategory(category)
-        assert(jsonObj != null) { "ERROR: '$category' does not exist as category." }
-
-        if(jsonObj!=null){
-            val entries = jsonObj.getJSONObject("entries")
-            entries.put(entry, JSONObject().apply { put("deletable", deletable) })
-            if(save){
-                save()
-            }
+        val jsonObj = findJSONObjectOfCategory(category)?: addCategory(category, deletable, false)
+        val entries = jsonObj.getJSONObject("entries")
+        entries.put(entry, JSONObject().apply { put("deletable", deletable) })
+        if(save) {
+            save()
         }
     }
 
@@ -179,15 +177,17 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
     fun isEntryAdded(entry: String, category: String? = null): Boolean {
         if(category==null) {
             for (cat in labelsData.keys()) {
-                val entries = labelsData.getJSONObject(cat)
-                if (entries.has(entry)) {
+                val categoryObj = labelsData.optJSONObject(cat)
+                val entries = categoryObj?.getJSONObject("entries")
+                if (entries?.has(entry) == true) {
                     return true
                 }
             }
         }
         else{
-            val entries = labelsData.getJSONObject(category)
-            return entries.has(entry)
+            val categoryObj = labelsData.optJSONObject(category)
+            val entries = categoryObj?.getJSONObject("entries")
+            return entries?.has(entry)?:false
         }
         return false
     }
@@ -196,7 +196,7 @@ class CategoryItemStorage(file: File) : JSONStorage(file) {
         return labelsData.optJSONObject(category)
     }
     fun isCategoryDeletable(category: String): Boolean{
-        return findJSONObjectOfCategory(category)?.getBoolean("deletable")?:false
+        return findJSONObjectOfCategory(category)?.getBoolean("deletable")?:true
     }
 
     companion object{

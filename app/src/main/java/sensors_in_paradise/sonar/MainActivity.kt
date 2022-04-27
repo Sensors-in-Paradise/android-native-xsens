@@ -24,6 +24,7 @@ import sensors_in_paradise.sonar.uploader.DavCloudRecordingsUploader
 import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.use_cases.UseCase
+import sensors_in_paradise.sonar.util.use_cases.UseCaseDialog
 import sensors_in_paradise.sonar.util.use_cases.UseCaseHandler
 import java.io.File
 
@@ -48,16 +49,20 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
 
         switcher = findViewById(R.id.switcher_activity_main)
         tabLayout = findViewById(R.id.tab_layout_activity_main)
-        useCaseHandler = UseCaseHandler(this) { useCase: UseCase ->
+        useCaseHandler = UseCaseHandler(this)
+        recordingsManager = RecordingDataManager(
+            useCaseHandler.getCurrentUseCase().getRecordingsDir()
+        )
+        supportActionBar?.subtitle = useCaseHandler.getCurrentUseCase().title
+        useCaseHandler.setOnUseCaseChanged { useCase: UseCase ->
+            recordingsManager.recordingsDir = useCase.getRecordingsDir()
             pageHandlers.forEach {
                 it.onUseCaseChanged(
                     useCase
                 )
             }
+            supportActionBar?.subtitle = useCase.title
         }
-        recordingsManager = RecordingDataManager(
-            useCaseHandler.getDir()
-        )
         initClickListeners()
 
         page1Handler = Page1Handler(scannedDevices)
@@ -68,7 +73,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         }
         page1Handler.addConnectionInterface(headingResetHandler)
         pageHandlers.add(page1Handler)
-        val page2Handler = Page2Handler(scannedDevices, recordingsManager, this, useCaseHandler)
+        val page2Handler = Page2Handler(scannedDevices, recordingsManager, this, useCaseHandler.getCurrentUseCase())
         pageHandlers.add(page2Handler)
         val page3Handler = Page3Handler(scannedDevices, this)
         pageHandlers.add(page3Handler)
@@ -84,7 +89,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
             handler.activityCreated(this)
         }
         supportActionBar?.setBackgroundDrawable(ColorDrawable(getColor(R.color.colorPrimary)))
-        supportActionBar?.subtitle = useCaseHandler.getTitle()
+
         davCloudUploader = DavCloudRecordingsUploader(this, recordingsManager)
 
         // Force crashlytics to be enabled (we might want to disable it in debug mode / ...)
@@ -157,40 +162,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     }
 
     fun onUseCasesMenuItemClicked(ignored: MenuItem) {
-
-        val baseDir = File(this.getExternalFilesDir(null) ?: this.dataDir, "useCases")
-        val names = baseDir.listFiles()?.map { it.name }
-
-        val useCases: Array<String> = names?.toTypedArray() ?: Array(1) { "none" }
-        // setup the alert builder
-        // setup the alert builder
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Choose a use case")
-        // add a radio button list
-        // add a radio button list
-        var checkedItem = useCases.indexOf(useCaseHandler.getTitle())
-
-        builder.setSingleChoiceItems(
-            useCases, checkedItem
-        ) { _, which ->
-            checkedItem = which
-        }
-        builder.setPositiveButton("OK") { _, _ ->
-            if (checkedItem != -1) {
-                if (useCases[checkedItem] != "none") {
-                    useCaseHandler.setUseCase(UseCase(this, useCases[checkedItem]))
-                }
-            }
-        }
-        builder.setNegativeButton("Cancel", null)
-        builder.setNeutralButton("New Use Case") {
-            useCases, which ->
-            val editText = EditText(this)
-            useCaseHandler.createUseCase()
-        }
-        val dialog = builder.create()
-        dialog.show()
-
+        UseCaseDialog(this, useCaseHandler)
     }
 
     fun onStickmanMenuItemClicked(ignored: MenuItem) {

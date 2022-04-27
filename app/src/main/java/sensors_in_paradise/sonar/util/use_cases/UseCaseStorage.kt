@@ -6,11 +6,9 @@ import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
 
 class UseCaseStorage(file: File) : JSONStorage(file) {
-    constructor(context: Context) : this(GlobalValues.getUseCaseStorageFile(context))
+    constructor(context: Context) : this(getUseCaseStorageFile(context))
 
-    companion object {
-        private const val SELECTED_USE_CASE_KEY = "selectedUseCase"
-    }
+
 
     override fun onFileNewlyCreated() {
         json.put(SELECTED_USE_CASE_KEY, GlobalValues.DEFAULT_USE_CASE_TITLE)
@@ -25,6 +23,12 @@ class UseCaseStorage(file: File) : JSONStorage(file) {
     }
 
     fun getSelectedUseCase(): String {
-        return json.getString(SELECTED_USE_CASE_KEY)
+        return json.optString(SELECTED_USE_CASE_KEY)?: UseCaseHandler.DEFAULT_USE_CASE_TITLE
+    }
+    companion object {
+        private const val SELECTED_USE_CASE_KEY = "selectedUseCase"
+        fun getUseCaseStorageFile(context: Context): File {
+            return context.dataDir.resolve("currentUseCase.json")
+        }
     }
 }
