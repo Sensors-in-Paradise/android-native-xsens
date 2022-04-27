@@ -6,13 +6,13 @@ import android.content.Context
 import sensors_in_paradise.sonar.util.dialogs.TextInputDialog
 import java.io.File
 
-class UseCaseSubDirDialog(context: Context, useCaseHandler: UseCaseHandler) {
+class UseCaseSubDirDialog(context: Context, currentUseCase: UseCase) {
 
     init {
         val builder = AlertDialog.Builder(context)
 
         builder.setTitle("Choose a subdirectory")
-        val dir = useCaseHandler.getCurrentUseCase().useCaseDir
+        val dir = currentUseCase.useCaseDir
         val subDirs = (dir.list { d, name -> File(d, name).isDirectory })?.map { it.toString() }
             ?.toTypedArray()
         var checkedItem: Int = -1
@@ -20,7 +20,7 @@ class UseCaseSubDirDialog(context: Context, useCaseHandler: UseCaseHandler) {
 
         builder.setPositiveButton("OK") { _, _ ->
             if (checkedItem != -1) {
-                useCaseHandler.getCurrentUseCase().setRecordingsSubDir(
+                currentUseCase.setRecordingsSubDir(
                     subDirs?.get(checkedItem) ?: UseCase.DEFAULT_RECORDINGS_SUBDIR_NAME
                 )
             }
@@ -35,7 +35,7 @@ class UseCaseSubDirDialog(context: Context, useCaseHandler: UseCaseHandler) {
                     "Create new Subdirectory",
                     hint = "Title of subdirectory",
                     promptInterface = {
-                        useCaseHandler.getCurrentUseCase().setRecordingsSubDir(it)
+                        currentUseCase.setRecordingsSubDir(it)
                         dialog.dismiss()
                     })
             }

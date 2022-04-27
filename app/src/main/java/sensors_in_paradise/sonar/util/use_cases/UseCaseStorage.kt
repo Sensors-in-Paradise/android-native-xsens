@@ -1,6 +1,7 @@
 package sensors_in_paradise.sonar.util.use_cases
 
 import android.content.Context
+import org.json.JSONObject
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
@@ -8,8 +9,12 @@ import java.io.File
 class UseCaseStorage(file: File) : JSONStorage(file) {
     constructor(context: Context) : this(getUseCaseStorageFile(context))
 
+    private val useCases = json.getJSONObject(USE_CASES_KEY)
+
     override fun onFileNewlyCreated() {
         json.put(SELECTED_USE_CASE_KEY, GlobalValues.DEFAULT_USE_CASE_TITLE)
+        val useCases = JSONObject()
+        json.put(USE_CASES_KEY, useCases)
     }
 
     override fun onJSONInitialized() {
@@ -25,17 +30,40 @@ class UseCaseStorage(file: File) : JSONStorage(file) {
     }
 
     fun setSelectedSubDir(useCaseTitle: String, subDir: String) {
-        // TODO
-        //json.put(SELECTED_SUB_DIR_KEY, subDir)
+        /*
+            json: {
+                selectedUseCase: "",
+                useCases: {
+                    default:{
+                        selectedSubDir: "default",
+                    }
+                }
+            }
+        */
+
+        val useCase = useCases.getJSONObject(useCaseTitle)
+        useCase.put(SELECTED_SUB_DIR_KEY, subDir)
+
         save()
     }
 
     fun getSelectedSubDir(useCaseTitle: String): String {
-        return json.optString(SELECTED_SUB_DIR_KEY) ?: UseCase.DEFAULT_RECORDINGS_SUBDIR_NAME
+        return if (useCases.has(useCaseTitle)) {
+            useCases.getJSONObject(useCaseTitle).optString(SELECTED_SUB_DIR_KEY)
+                ?: UseCase.DEFAULT_RECORDINGS_SUBDIR_NAME
+        } else {
+            useCases.put(
+                useCaseTitle, JSONObject().put(
+                    SELECTED_SUB_DIR_KEY, UseCase.DEFAULT_RECORDINGS_SUBDIR_NAME
+                )
+            )
+            UseCase.DEFAULT_RECORDINGS_SUBDIR_NAME
+        }
     }
 
     companion object {
         private const val SELECTED_USE_CASE_KEY = "selectedUseCase"
+        private const val USE_CASES_KEY = "useCases"
         private const val SELECTED_SUB_DIR_KEY = "selectedSubDir"
         fun getUseCaseStorageFile(context: Context): File {
             return context.dataDir.resolve("currentUseCase.json")

@@ -88,9 +88,8 @@ class UseCaseHandler(
         this.onUseCaseChanged = onUseCaseChanged
     }
 
-    fun onRecordingsSubDirOfUseCaseChanged(useCase: UseCase, dir: File) {
-        //useCaseStorage.setSelectedSubDir()
-        // TODO save
+    private fun onRecordingsSubDirOfUseCaseChanged(useCase: UseCase, dir: File) {
+        useCaseStorage.setSelectedSubDir(useCase.title, dir.name)
     }
 
     companion object {

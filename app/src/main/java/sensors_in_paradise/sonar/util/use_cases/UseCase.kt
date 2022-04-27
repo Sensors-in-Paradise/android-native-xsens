@@ -3,7 +3,7 @@ package sensors_in_paradise.sonar.util.use_cases
 import java.io.File
 
 class UseCase(
-    private val baseDir: File,
+    baseDir: File,
     val title: String,
     recordingsSubDirName: String = DEFAULT_RECORDINGS_SUBDIR_NAME,
     private val onSubdirectoryChanged: (useCase: UseCase, dir: File) -> Unit
@@ -39,7 +39,7 @@ class UseCase(
         */
     fun setRecordingsSubDir(dir: String) {
         recordingsSubDir = getRecordingsDir().resolve(dir).apply { mkdir() }
-        onSubdirectoryChanged(this,recordingsSubDir)
+        onSubdirectoryChanged(this, recordingsSubDir)
     }
 
     fun getRecordingsSubDir(): File {
