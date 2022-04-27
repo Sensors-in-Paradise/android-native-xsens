@@ -70,8 +70,8 @@
         <SwitchPreferenceCompat
             app:dependency="recordWithCamera"
             app:key="storePoseEstimation"
-            app:title="Store TensorFlow Poses"
-            app:summary="Store pose data estimated by TensorFlow when recording. "/>
+            app:title="Store estimated poses as stickman"
+            app:summary="Store pose data estimated by TensorFlow-MoveNet when recording. "/>
         <SwitchPreferenceCompat
             app:key="usePoseSequenceBackround"
             app:title="Use Backround"
