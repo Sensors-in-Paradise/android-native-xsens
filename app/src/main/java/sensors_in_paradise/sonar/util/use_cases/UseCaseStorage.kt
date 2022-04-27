@@ -8,8 +8,6 @@ import java.io.File
 class UseCaseStorage(file: File) : JSONStorage(file) {
     constructor(context: Context) : this(getUseCaseStorageFile(context))
 
-
-
     override fun onFileNewlyCreated() {
         json.put(SELECTED_USE_CASE_KEY, GlobalValues.DEFAULT_USE_CASE_TITLE)
     }
@@ -23,7 +21,7 @@ class UseCaseStorage(file: File) : JSONStorage(file) {
     }
 
     fun getSelectedUseCase(): String {
-        return json.optString(SELECTED_USE_CASE_KEY)?: UseCaseHandler.DEFAULT_USE_CASE_TITLE
+        return json.optString(SELECTED_USE_CASE_KEY) ?: UseCaseHandler.DEFAULT_USE_CASE_TITLE
     }
 
     fun setSelectedSubDir(title: String) {
@@ -32,7 +30,7 @@ class UseCaseStorage(file: File) : JSONStorage(file) {
     }
 
     fun getSelectedSubDir(): String {
-        return json.optString(SELECTED_SUB_DIR_KEY)?: UseCaseHandler.DEFAULT_SUB_DIR_TITLE
+        return json.optString(SELECTED_SUB_DIR_KEY) ?: UseCaseHandler.DEFAULT_SUB_DIR_TITLE
     }
 
     companion object {

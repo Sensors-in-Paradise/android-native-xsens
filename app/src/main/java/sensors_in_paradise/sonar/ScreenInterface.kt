@@ -2,6 +2,7 @@ package sensors_in_paradise.sonar
 
 import android.app.Activity
 import androidx.annotation.UiThread
+import sensors_in_paradise.sonar.util.use_cases.UseCase
 
 interface ScreenInterface {
     @UiThread
@@ -16,4 +17,5 @@ interface ScreenInterface {
     fun onScreenOpened() {}
     @UiThread
     fun onScreenClosed() {}
+    fun onUseCaseChanged(useCase: UseCase) {}
 }

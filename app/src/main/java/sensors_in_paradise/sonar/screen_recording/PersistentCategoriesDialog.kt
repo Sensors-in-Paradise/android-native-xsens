@@ -25,7 +25,6 @@ class PersistentCategoriesDialog(
 
     init {
 
-
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         builder.setTitle(title)
 
@@ -63,12 +62,6 @@ class PersistentCategoriesDialog(
 
     private fun isItemAlreadyAdded(entry: String): Boolean {
         return storage.isEntryAdded(entry)
-    }
-
-    private fun addDefaultEntries(defaultItems: LinkedHashMap<String, String>) {
-        for ((entry, category) in defaultItems) {
-            storage.addEntryIfNotAdded(entry.lowercase(Locale.getDefault()), category, deletable = false)
-        }
     }
 
     private fun showCategorySelectionDialog(searchEditText: EditText) {

@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.util.Log
 import com.google.common.net.MediaType
-import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import sensors_in_paradise.sonar.screen_recording.RecordingDataManager
 import java.io.File

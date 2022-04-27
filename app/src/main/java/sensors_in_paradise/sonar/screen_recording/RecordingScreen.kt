@@ -16,8 +16,6 @@ import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.use_cases.UseCase
-import sensors_in_paradise.sonar.util.use_cases.UseCaseHandler
-import java.io.File
 import java.io.IOException
 
 class RecordingScreen(
@@ -180,9 +178,8 @@ class RecordingScreen(
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    override fun onUseCaseChanged(useCase: UseCase){
+    override fun onUseCaseChanged(useCase: UseCase) {
         recordingsAdapter.notifyDataSetChanged()
         loggingManager.useCase = useCase
     }
-
 }

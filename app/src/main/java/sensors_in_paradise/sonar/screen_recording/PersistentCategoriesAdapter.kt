@@ -17,7 +17,7 @@ import sensors_in_paradise.sonar.R
 class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage) :
     RecyclerView.Adapter<PersistentCategoriesAdapter.ViewHolder>() {
     private var dataSet: List<CategoryItem> = itemsStorage.getItems()
-    //private var nestedItems: List<Pair<>> = ArrayList()
+    // private var nestedItems: List<Pair<>> = ArrayList()
     private var filterText: String = ""
 
     // This is handed over to the nested recyclerviews

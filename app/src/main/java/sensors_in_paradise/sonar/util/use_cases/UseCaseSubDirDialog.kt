@@ -18,8 +18,7 @@ class UseCaseSubDirDialog(context: Context, useCaseHandler: UseCaseHandler) {
         var checkedItem: Int = -1
         builder.setSingleChoiceItems(subDirs, -1) { _, which -> checkedItem = which }
 
-        builder.setPositiveButton("OK")
-        { _, _ ->
+        builder.setPositiveButton("OK") { _, _ ->
             if (checkedItem != -1) {
                 useCaseHandler.setSubDir(
                     subDirs?.get(checkedItem) ?: UseCaseHandler.DEFAULT_SUB_DIR_TITLE
@@ -42,7 +41,5 @@ class UseCaseSubDirDialog(context: Context, useCaseHandler: UseCaseHandler) {
             }
         }
         dialog.show()
-
-
     }
 }

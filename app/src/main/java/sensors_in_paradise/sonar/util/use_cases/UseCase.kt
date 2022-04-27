@@ -1,20 +1,15 @@
 package sensors_in_paradise.sonar.util.use_cases
 
-import android.content.Context
-import sensors_in_paradise.sonar.GlobalValues
 import java.io.File
-import java.io.FileInputStream
-import java.nio.channels.FileChannel
-
 
 class UseCase(
-    private val baseDir:File,
+    private val baseDir: File,
     val title: String
 ) {
     val useCaseDir = baseDir.resolve(title)
 
-    init{
-        if(!useCaseDir.isDirectory){
+    init {
+        if (!useCaseDir.isDirectory) {
             useCaseDir.mkdir()
         }
     }
@@ -29,7 +24,7 @@ class UseCase(
     fun getModelFile(): File {
         return useCaseDir.resolve("model.tflite")
     }
-    fun getRecordingsDir(): File{
+    fun getRecordingsDir(): File {
         return useCaseDir.resolve("recordings").apply { mkdir() }
     }
     /*fun extractModelFromFile(): Any {

@@ -1,13 +1,11 @@
 package sensors_in_paradise.sonar
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.widget.EditText
 import android.widget.ViewAnimator
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -17,17 +15,16 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import sensors_in_paradise.sonar.custom_views.stickman.StickmanDialog
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
 import sensors_in_paradise.sonar.screen_connection.ConnectionScreen
-import sensors_in_paradise.sonar.screen_recording.RecordingScreen
-import sensors_in_paradise.sonar.screen_recording.RecordingDataManager
 import sensors_in_paradise.sonar.screen_prediction.PredictionScreen
+import sensors_in_paradise.sonar.screen_recording.RecordingDataManager
+import sensors_in_paradise.sonar.screen_recording.RecordingScreen
 import sensors_in_paradise.sonar.screen_train.TrainingScreen
-import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.uploader.DavCloudRecordingsUploader
+import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.use_cases.UseCase
 import sensors_in_paradise.sonar.util.use_cases.UseCaseDialog
 import sensors_in_paradise.sonar.util.use_cases.UseCaseHandler
-import java.io.File
 
 class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface,
     SensorOccupationInterface {
@@ -67,7 +64,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         supportActionBar?.subtitle = useCaseHandler.getCurrentUseCase().title
         useCaseHandler.setOnUseCaseChanged { useCase: UseCase ->
             recordingsManager.recordingsDir = useCase.getRecordingsDir()
-            pageHandlers.forEach {
+            screenHandlers.forEach {
                 it.onUseCaseChanged(
                     useCase
                 )
@@ -85,7 +82,12 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         connectionScreen.addConnectionInterface(headingResetHandler)
         screenHandlers.add(connectionScreen)
 
-        val recordingScreen = RecordingScreen(scannedDevices, recordingsManager, this)
+        val recordingScreen = RecordingScreen(
+            scannedDevices,
+            recordingsManager,
+            this,
+            useCaseHandler.getCurrentUseCase()
+        )
         screenHandlers.add(recordingScreen)
 
         val trainingScreen = TrainingScreen(recordingsManager)
@@ -132,6 +134,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
 
         super.onDestroy()
     }
+
     private fun setTrainingTabVisible(visible: Boolean) {
         if (visible) {
             tabIndexToScreenIndexMap[2] = 2
@@ -147,6 +150,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
             }
         }
     }
+
     private fun initClickListeners() {
         tabLayout.addOnTabSelectedListener(this)
     }

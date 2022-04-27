@@ -7,7 +7,6 @@ import junit.framework.TestCase.*
 import org.junit.Before
 import org.junit.Test
 import sensors_in_paradise.sonar.page2.CategoryItemStorage
-import sensors_in_paradise.sonar.uploader.LocalDavCloudMetadataStorage
 import java.io.File
 
 class CategoryLabelsStorageTest {

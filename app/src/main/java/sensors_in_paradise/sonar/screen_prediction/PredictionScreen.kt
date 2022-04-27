@@ -22,7 +22,6 @@ import sensors_in_paradise.sonar.util.PredictionHelper
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
-import sensors_in_paradise.sonar.ml.Lstmmodel118
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.UIHelper
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
@@ -55,7 +54,6 @@ class PredictionScreen(
     private var numConnectedDevices = 0
     private var isRunning = false
 
-    private lateinit var predictionModel: Lstmmodel118
     private lateinit var mainHandler: Handler
 
     private val predictionInterval = 4000L
@@ -193,10 +191,13 @@ class PredictionScreen(
         inputFeature0.loadBuffer(sensorDataByteBuffer)
 
         // Runs model inference and gets result
+        // TODO: make work with our new use case concept
+        /*
         val outputs = predictionModel.process(inputFeature0)
         val outputFeature0 = outputs.outputFeature0AsTensorBuffer
 
         addPredictionViews(outputFeature0.floatArray)
+         */
     }
 
     override fun onActivityCreated(activity: Activity) {
@@ -220,7 +221,11 @@ class PredictionScreen(
         predictionButton.setOnClickListener {
             // TODO: replace by our MessageDialog
             if (false) {
-                MessageDialog(context, context.resources.getString(R.string.missing_model_dialog_message))
+                MessageDialog(
+                    context,
+                    context.getString(R.string.missing_model_dialog_message),
+                    context.getString(R.string.missing_model_dialog_title)
+                )
             } else {
                 togglePrediction()
             }
@@ -261,6 +266,6 @@ class PredictionScreen(
     }
 
     override fun onUseCaseChanged(useCase: UseCase) {
-        //predictionModel = useCase.extractModelFromFile()
+        // predictionModel = useCase.extractModelFromFile()
     }
 }

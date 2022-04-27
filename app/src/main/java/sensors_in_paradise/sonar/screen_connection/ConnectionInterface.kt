@@ -11,5 +11,4 @@ interface ConnectionInterface {
     fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {}
     @AnyThread
     fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {}
-
 }

@@ -21,7 +21,6 @@ class GlobalValues private constructor() {
 
         var DEFAULT_USE_CASE_TITLE: String = "default"
 
-
         fun getSensorRecordingsTempDir(context: Context): File {
             return context.dataDir.resolve("temp")
         }
@@ -29,10 +28,6 @@ class GlobalValues private constructor() {
             return context.dataDir.resolve("videoTemp")
         }
 
-        fun getTrainingHistoryFile(context: Context): File {
-            // TODO: move to approproate place
-            return File(context.getExternalFilesDir(null) ?: context.dataDir, "trainHistory.json")
-        }
         fun getRequiredPermissions(): ArrayList<String> {
             val result = arrayListOf(
                 Manifest.permission.BLUETOOTH,

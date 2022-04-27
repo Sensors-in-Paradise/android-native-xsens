@@ -3,11 +3,11 @@ package sensors_in_paradise.sonar.screen_train
 import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
-import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.JSONStorage
+import java.io.File
 
 class TrainingHistoryStorage(context: Context) :
-    JSONStorage(GlobalValues.getTrainingHistoryFile(context)) {
+    JSONStorage(getTrainingHistoryFile(context)) {
     data class TrainingOccasion(
         val timestamp: Long,
         val peopleDurations: Map<String, Long>,
@@ -89,5 +89,10 @@ class TrainingHistoryStorage(context: Context) :
             result[key] = obj.getLong(key)
         }
         return result
+    }
+    companion object {
+        fun getTrainingHistoryFile(context: Context): File {
+            return File(context.getExternalFilesDir(null) ?: context.dataDir, "trainHistory.json")
+        }
     }
 }

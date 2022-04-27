@@ -19,10 +19,10 @@ class UseCaseHandler(
         loadUseCases()
         setUseCase(useCaseStorage.getSelectedUseCase())
     }
-    private fun loadUseCases(){
-        val useCaseDirs = useCasesBaseDir.listFiles { dir,name ->
+    private fun loadUseCases() {
+        val useCaseDirs = useCasesBaseDir.listFiles { dir, name ->
             dir.resolve(name).isDirectory }
-        if(useCaseDirs!=null) {
+        if (useCaseDirs != null) {
             for (dir in useCaseDirs) {
                 availableUseCases.add(UseCase(useCasesBaseDir, dir.name))
             }
@@ -31,20 +31,20 @@ class UseCaseHandler(
     fun setUseCase(title: String): Boolean {
         val useCase = availableUseCases.find { it.title == title }
         setUseCase(useCase ?: defaultUseCase)
-        return useCase!=null
+        return useCase != null
     }
     private fun setUseCase(useCase: UseCase) {
         useCaseStorage.setSelectedUseCase(useCase.title)
-        currentUseCase=useCase
+        currentUseCase = useCase
         onUseCaseChanged?.invoke(useCase)
     }
 
     fun createAndSetUseCase(title: String) {
-        val useCase = UseCase(useCasesBaseDir,title)
+        val useCase = UseCase(useCasesBaseDir, title)
         availableUseCases.add(useCase)
         setUseCase(useCase)
     }
-    fun getCurrentUseCase(): UseCase{
+    fun getCurrentUseCase(): UseCase {
         return currentUseCase
     }
 
@@ -59,11 +59,11 @@ class UseCaseHandler(
         outStream.close()
     }
 
-    private fun hasUseCase(title:String): Boolean {
-        return availableUseCases.find { it.title ==title } != null
+    fun hasUseCase(title: String): Boolean {
+        return availableUseCases.find { it.title == title } != null
     }
 
-    fun setOnUseCaseChanged(onUseCaseChanged: (useCase: UseCase)->Unit){
+    fun setOnUseCaseChanged(onUseCaseChanged: (useCase: UseCase) -> Unit) {
         this.onUseCaseChanged = onUseCaseChanged
     }
 
@@ -81,8 +81,8 @@ class UseCaseHandler(
         return useCaseStorage.getSelectedSubDir()
     }
 
-    companion object{
-       fun getUseCasesBaseDir(context: Context):File{
+    companion object {
+       fun getUseCasesBaseDir(context: Context): File {
            return File(context.getExternalFilesDir(null) ?: context.dataDir, "useCases")
        }
 

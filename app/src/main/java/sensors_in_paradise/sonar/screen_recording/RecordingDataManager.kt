@@ -3,10 +3,12 @@ package sensors_in_paradise.sonar.screen_recording
 import sensors_in_paradise.sonar.GlobalValues
 import java.io.File
 
-class RecordingDataManager(
-    private val recordingsDir: File,
-    val recordingsList: ArrayList<Recording>
-) {
+class RecordingDataManager(recordingsDir: File, val recordingsList: ArrayList<Recording>) {
+    var recordingsDir: File = recordingsDir
+        set(value) {
+            field = value
+            loadRecordingsFromStorage()
+        }
     constructor(recordingsDir: File) : this(recordingsDir, ArrayList<Recording>()) {
         loadRecordingsFromStorage()
     }
