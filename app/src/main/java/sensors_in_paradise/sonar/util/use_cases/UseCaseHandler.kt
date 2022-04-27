@@ -9,30 +9,46 @@ import java.nio.channels.FileChannel
 class UseCaseHandler(
     val context: Context
 ) {
+    private var useCaseStorage = UseCaseStorage(context)
     private val useCasesBaseDir = getUseCasesBaseDir(context)
-    private var defaultUseCase = UseCase(useCasesBaseDir, DEFAULT_USE_CASE_TITLE)
+    private var defaultUseCase = UseCase(
+        useCasesBaseDir, DEFAULT_USE_CASE_TITLE, useCaseStorage.getSelectedSubDir(
+            DEFAULT_USE_CASE_TITLE
+        ), this::onRecordingsSubDirOfUseCaseChanged
+    )
     val availableUseCases = ArrayList<UseCase>()
     private var currentUseCase: UseCase = defaultUseCase
-    private var useCaseStorage = UseCaseStorage(context)
+
     private var onUseCaseChanged: ((useCase: UseCase) -> Unit)? = null
+
     init {
         loadUseCases()
         setUseCase(useCaseStorage.getSelectedUseCase())
     }
+
     private fun loadUseCases() {
         val useCaseDirs = useCasesBaseDir.listFiles { dir, name ->
-            dir.resolve(name).isDirectory }
+            dir.resolve(name).isDirectory
+        }
         if (useCaseDirs != null) {
             for (dir in useCaseDirs) {
-                availableUseCases.add(UseCase(useCasesBaseDir, dir.name))
+                availableUseCases.add(
+                    UseCase(
+                        useCasesBaseDir, dir.name, useCaseStorage.getSelectedSubDir(
+                            dir.name
+                        ), this::onRecordingsSubDirOfUseCaseChanged
+                    )
+                )
             }
         }
     }
+
     fun setUseCase(title: String): Boolean {
         val useCase = availableUseCases.find { it.title == title }
         setUseCase(useCase ?: defaultUseCase)
         return useCase != null
     }
+
     private fun setUseCase(useCase: UseCase) {
         useCaseStorage.setSelectedUseCase(useCase.title)
         currentUseCase = useCase
@@ -40,10 +56,15 @@ class UseCaseHandler(
     }
 
     fun createAndSetUseCase(title: String) {
-        val useCase = UseCase(useCasesBaseDir, title)
+        val useCase = UseCase(
+            useCasesBaseDir,
+            title,
+            onSubdirectoryChanged = this::onRecordingsSubDirOfUseCaseChanged
+        )
         availableUseCases.add(useCase)
         setUseCase(useCase)
     }
+
     fun getCurrentUseCase(): UseCase {
         return currentUseCase
     }
@@ -67,26 +88,16 @@ class UseCaseHandler(
         this.onUseCaseChanged = onUseCaseChanged
     }
 
-    fun setSubDir(dir: String) {
-        useCaseStorage.setSelectedSubDir(dir)
-    }
-
-    fun createAndSetSubDir(title: String) {
-        val subDir = currentUseCase.useCaseDir.resolve(title)
-        subDir.mkdirs()
-        setSubDir(subDir.name)
-    }
-
-    fun getSubDir(): String {
-        return useCaseStorage.getSelectedSubDir()
+    fun onRecordingsSubDirOfUseCaseChanged(useCase: UseCase, dir: File) {
+        //useCaseStorage.setSelectedSubDir()
+        // TODO save
     }
 
     companion object {
-       fun getUseCasesBaseDir(context: Context): File {
-           return File(context.getExternalFilesDir(null) ?: context.dataDir, "useCases")
-       }
+        fun getUseCasesBaseDir(context: Context): File {
+            return File(context.getExternalFilesDir(null) ?: context.dataDir, "useCases")
+        }
 
-        const val DEFAULT_SUB_DIR_TITLE = "default"
         const val DEFAULT_USE_CASE_TITLE = "default"
     }
 }

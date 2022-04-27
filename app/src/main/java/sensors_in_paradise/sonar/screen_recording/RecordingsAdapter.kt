@@ -14,12 +14,14 @@ import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.page2.labels_editor.LabelsEditorDialog
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import sensors_in_paradise.sonar.util.dialogs.VideoDialog
+import sensors_in_paradise.sonar.util.use_cases.UseCase
 import java.text.DateFormat
 import java.util.*
 
 class RecordingsAdapter(
     private val recordingsManager: RecordingDataManager,
-    private val context: Context
+    private val context: Context,
+    var currentUseCase: UseCase
 ) :
 
     RecyclerView.Adapter<RecordingsAdapter.ViewHolder>() {
@@ -60,7 +62,7 @@ class RecordingsAdapter(
             itemView.setOnClickListener {
                 val onEditBtnClickListener =
                     DialogInterface.OnClickListener { _: DialogInterface, _: Int ->
-                        LabelsEditorDialog(context, recording) {
+                        LabelsEditorDialog(context, currentUseCase,recording) {
                             notifyItemChanged(position)
                         }
                     }

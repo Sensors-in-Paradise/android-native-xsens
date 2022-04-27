@@ -4,8 +4,11 @@ import java.io.File
 
 class UseCase(
     private val baseDir: File,
-    val title: String
+    val title: String,
+    recordingsSubDirName: String = DEFAULT_RECORDINGS_SUBDIR_NAME,
+    private val onSubdirectoryChanged: (useCase: UseCase, dir: File) -> Unit
 ) {
+    private var recordingsSubDir = getRecordingsSubDir().resolve(recordingsSubDirName).apply { mkdir() }
     val useCaseDir = baseDir.resolve(title)
 
     init {
@@ -34,4 +37,15 @@ class UseCase(
         }
 
         */
+    fun setRecordingsSubDir(dir: String) {
+        recordingsSubDir = getRecordingsDir().resolve(dir).apply { mkdir() }
+        onSubdirectoryChanged(this,recordingsSubDir)
+    }
+
+    fun getRecordingsSubDir(): File {
+        return recordingsSubDir
+    }
+    companion object{
+        const val DEFAULT_RECORDINGS_SUBDIR_NAME = "default"
+    }
 }

@@ -17,9 +17,11 @@ import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.screen_recording.PersistentCategoriesDialog
 import sensors_in_paradise.sonar.screen_recording.Recording
+import sensors_in_paradise.sonar.util.use_cases.UseCase
 
 class LabelsEditorDialog(
     val context: Context,
+    val useCase: UseCase,
     val recording: Recording,
     private val onRecordingChanged: () -> Unit
 ) : RangeSlider.OnSliderTouchListener {
@@ -222,8 +224,7 @@ class LabelsEditorDialog(
             activitiesDialog = PersistentCategoriesDialog(
                 context,
                 "Select an activity label",
-                GlobalValues.getActivityLabelsJSONFile(context),
-                defaultItems = GlobalValues.DEFINED_ACTIVITIES,
+                useCase.getActivityLabelsJSONFile(),
                 callback = { value ->
                     activities[selectedItemIndex].activity = value
                     carousel.refresh()

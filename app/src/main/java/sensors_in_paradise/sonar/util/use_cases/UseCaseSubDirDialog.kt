@@ -20,8 +20,8 @@ class UseCaseSubDirDialog(context: Context, useCaseHandler: UseCaseHandler) {
 
         builder.setPositiveButton("OK") { _, _ ->
             if (checkedItem != -1) {
-                useCaseHandler.setSubDir(
-                    subDirs?.get(checkedItem) ?: UseCaseHandler.DEFAULT_SUB_DIR_TITLE
+                useCaseHandler.getCurrentUseCase().setRecordingsSubDir(
+                    subDirs?.get(checkedItem) ?: UseCase.DEFAULT_RECORDINGS_SUBDIR_NAME
                 )
             }
         }
@@ -35,7 +35,7 @@ class UseCaseSubDirDialog(context: Context, useCaseHandler: UseCaseHandler) {
                     "Create new Subdirectory",
                     hint = "Title of subdirectory",
                     promptInterface = {
-                        useCaseHandler.createAndSetSubDir(it)
+                        useCaseHandler.getCurrentUseCase().setRecordingsSubDir(it)
                         dialog.dismiss()
                     })
             }

@@ -14,6 +14,7 @@ import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.util.UIHelper
+import sensors_in_paradise.sonar.util.use_cases.UseCase
 import sensors_in_paradise.sonar.util.use_cases.UseCaseHandler
 import java.io.File
 import java.io.FileOutputStream
@@ -26,7 +27,7 @@ const val VALID_SENSOR_NUM = 5
 @Suppress("LongParameterList")
 class LoggingManager(
     val context: Context,
-    var useCaseHandler: UseCaseHandler,
+    var currentUseCase: UseCase,
     private val devices: XSENSArrayList,
     private val recordButton: MaterialButton,
     private val timer: Chronometer,
@@ -40,7 +41,6 @@ class LoggingManager(
     private var onFinalizeRecording: ((dir: File, metadata: RecordingMetadataStorage) -> Unit)? =
         null
     private val activitiesAdapter = ActivitiesAdapter(arrayListOf(), this)
-    var useCase = useCaseHandler.getCurrentUseCase()
     private var activeRecording: ActiveRecording? = null
 
     private var categoriesDialog: PersistentCategoriesDialog? = null
@@ -163,7 +163,7 @@ class LoggingManager(
     private fun startLogging() {
         startUITimer()
 
-        activeRecording = ActiveRecording(context, devices, useCaseHandler)
+        activeRecording = ActiveRecording(context, devices, currentUseCase)
         activitiesAdapter.setAllActivities(activeRecording!!.labels)
         if (isLabelSelected()) {
             activeRecording!!.start(labelTV.text.toString())
@@ -262,7 +262,7 @@ class LoggingManager(
             categoriesDialog = PersistentCategoriesDialog(
                 context,
                 "Select an activity label",
-                useCase.getActivityLabelsJSONFile(),
+                currentUseCase.getActivityLabelsJSONFile(),
                 callback = { value -> onSelected(value, getCurrentOpenedTimestamp()) },
             )
         }
@@ -277,7 +277,7 @@ class LoggingManager(
             changeCategoriesDialog = PersistentCategoriesDialog(
                 context,
                 "Select an activity label",
-                useCase.getActivityLabelsJSONFile(),
+                currentUseCase.getActivityLabelsJSONFile(),
                 callback = { value -> onSelected(value, getCurrentOpenedTimestamp()) },
             )
         }
@@ -291,7 +291,7 @@ class LoggingManager(
         PersistentStringArrayDialog(
             context,
             "Select a Person",
-            useCase.getPeopleJSONFile(),
+            currentUseCase.getPeopleJSONFile(),
             defaultItem = GlobalValues.UNKNOWN_PERSON,
             callback = onSelected, cancelable = cancelable ?: true
         )
@@ -349,7 +349,7 @@ class LoggingManager(
 class ActiveRecording(
     val context: Context,
     private val devices: XSENSArrayList,
-    private val useCaseHandler: UseCaseHandler
+    private val currentUseCase: UseCase
 ) {
     private val xsLoggers: ArrayList<XsensDotLogger> = ArrayList()
     var labels = ArrayList<RecordingMetadataStorage.LabelEntry>()
@@ -466,7 +466,7 @@ class ActiveRecording(
         val recordingFiles = tempSensorFiles
 
         val destFileDir =
-            LogIOHelper.createRecordingFileDir(recordingStartTime, useCaseHandler)
+            LogIOHelper.createRecordingFileDir(recordingStartTime, currentUseCase)
         LogIOHelper.moveTempFilesToFinalDirectory(destFileDir, recordingFiles)
 
         val metadataStorage =
@@ -504,13 +504,11 @@ object LogIOHelper {
 
     fun createRecordingFileDir(
         time: LocalDateTime,
-        useCaseHandler: UseCaseHandler
+        currentUseCase: UseCase
     ): File {
         val timeStr = time.toSonarString()
 
-        // TODO: adapt to use case concept
-        val dir = useCaseHandler.getCurrentUseCase().getRecordingsDir()
-            .resolve(useCaseHandler.getSubDir())
+        val dir =currentUseCase.getRecordingsSubDir()
             .resolve(timeStr)
 
         // assume this completes successful or the app crashes (but recording is lost anyway)

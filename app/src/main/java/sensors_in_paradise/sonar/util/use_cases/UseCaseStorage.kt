@@ -24,13 +24,14 @@ class UseCaseStorage(file: File) : JSONStorage(file) {
         return json.optString(SELECTED_USE_CASE_KEY) ?: UseCaseHandler.DEFAULT_USE_CASE_TITLE
     }
 
-    fun setSelectedSubDir(title: String) {
-        json.put(SELECTED_SUB_DIR_KEY, title)
+    fun setSelectedSubDir(useCaseTitle: String, subDir: String) {
+        // TODO
+        //json.put(SELECTED_SUB_DIR_KEY, subDir)
         save()
     }
 
-    fun getSelectedSubDir(): String {
-        return json.optString(SELECTED_SUB_DIR_KEY) ?: UseCaseHandler.DEFAULT_SUB_DIR_TITLE
+    fun getSelectedSubDir(useCaseTitle: String): String {
+        return json.optString(SELECTED_SUB_DIR_KEY) ?: UseCase.DEFAULT_RECORDINGS_SUBDIR_NAME
     }
 
     companion object {

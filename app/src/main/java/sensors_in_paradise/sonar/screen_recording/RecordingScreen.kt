@@ -50,7 +50,7 @@ class RecordingScreen(
         recyclerViewRecordings = activity.findViewById(R.id.recyclerView_recordings_captureFragment)
         val linearLayoutManager = LinearLayoutManager(context)
         recyclerViewRecordings.layoutManager = linearLayoutManager
-        recordingsAdapter = RecordingsAdapter(recordingsManager, context)
+        recordingsAdapter = RecordingsAdapter(recordingsManager, context, currentUseCase)
         recyclerViewRecordings.adapter = recordingsAdapter
         viewAnimator = activity.findViewById(R.id.viewSwitcher_captureFragment)
         tabLayout = activity.findViewById(R.id.tabLayout_captureFragment)
@@ -180,6 +180,8 @@ class RecordingScreen(
     @SuppressLint("NotifyDataSetChanged")
     override fun onUseCaseChanged(useCase: UseCase) {
         recordingsAdapter.notifyDataSetChanged()
-        loggingManager.useCase = useCase
+        loggingManager.currentUseCase = useCase
+        currentUseCase = useCase
+        recordingsAdapter.currentUseCase = useCase
     }
 }
