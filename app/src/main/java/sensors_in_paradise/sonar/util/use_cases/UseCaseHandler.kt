@@ -8,7 +8,6 @@ import java.nio.channels.FileChannel
 
 class UseCaseHandler(
     val context: Context
-
 ) {
     private val useCasesBaseDir = getUseCasesBaseDir(context)
     private var defaultUseCase = UseCase(useCasesBaseDir, DEFAULT_USE_CASE_TITLE)
@@ -63,14 +62,31 @@ class UseCaseHandler(
     private fun hasUseCase(title:String): Boolean {
         return availableUseCases.find { it.title ==title } != null
     }
+
     fun setOnUseCaseChanged(onUseCaseChanged: (useCase: UseCase)->Unit){
         this.onUseCaseChanged = onUseCaseChanged
+    }
+
+    fun setSubDir(dir: String) {
+        useCaseStorage.setSelectedSubDir(dir)
+    }
+
+    fun createAndSetSubDir(title: String) {
+        val subDir = currentUseCase.useCaseDir.resolve(title)
+        subDir.mkdirs()
+        setSubDir(subDir.name)
+    }
+
+    fun getSubDir(): String {
+        return useCaseStorage.getSelectedSubDir()
     }
 
     companion object{
        fun getUseCasesBaseDir(context: Context):File{
            return File(context.getExternalFilesDir(null) ?: context.dataDir, "useCases")
        }
+
+        const val DEFAULT_SUB_DIR_TITLE = "default"
         const val DEFAULT_USE_CASE_TITLE = "default"
     }
 }

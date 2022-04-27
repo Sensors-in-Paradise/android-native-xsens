@@ -1,13 +1,11 @@
 package sensors_in_paradise.sonar
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.widget.EditText
 import android.widget.ViewAnimator
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -26,7 +24,6 @@ import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.use_cases.UseCase
 import sensors_in_paradise.sonar.util.use_cases.UseCaseDialog
 import sensors_in_paradise.sonar.util.use_cases.UseCaseHandler
-import java.io.File
 
 class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface,
     SensorOccupationInterface {
@@ -73,7 +70,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         }
         page1Handler.addConnectionInterface(headingResetHandler)
         pageHandlers.add(page1Handler)
-        val page2Handler = Page2Handler(scannedDevices, recordingsManager, this, useCaseHandler.getCurrentUseCase())
+        val page2Handler = Page2Handler(scannedDevices, recordingsManager, this, useCaseHandler)
         pageHandlers.add(page2Handler)
         val page3Handler = Page3Handler(scannedDevices, this)
         pageHandlers.add(page3Handler)

@@ -3,7 +3,6 @@ package sensors_in_paradise.sonar.util.use_cases
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
-import android.widget.EditText
 import sensors_in_paradise.sonar.util.dialogs.TextInputDialog
 
 class UseCaseDialog(context: Context, useCaseHandler: UseCaseHandler) {
@@ -25,6 +24,7 @@ class UseCaseDialog(context: Context, useCaseHandler: UseCaseHandler) {
         builder.setPositiveButton("OK") { _, _ ->
             if (itemIndex != -1) {
                 useCaseHandler.setUseCase(titles[itemIndex])
+                UseCaseSubDirDialog(context, useCaseHandler)
             }
         }
         builder.setNegativeButton("Cancel", null)

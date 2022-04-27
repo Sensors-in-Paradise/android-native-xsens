@@ -25,7 +25,7 @@ class Page2Handler(
     private val devices: XSENSArrayList,
     private val recordingsManager: RecordingDataManager,
     private val sensorOccupationInterface: SensorOccupationInterface?,
-    private var currentUseCase: UseCase
+    private var useCaseHandler: UseCaseHandler
 ) : PageInterface, ConnectionInterface,
     TabLayout.OnTabSelectedListener {
     private lateinit var context: Context
@@ -67,7 +67,7 @@ class Page2Handler(
 
         loggingManager = LoggingManager(
             context,
-           currentUseCase,
+            useCaseHandler,
             devices,
             activity.findViewById(R.id.buttonRecord),
             timer,

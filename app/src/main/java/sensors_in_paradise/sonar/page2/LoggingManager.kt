@@ -16,6 +16,7 @@ import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.UIHelper
 import sensors_in_paradise.sonar.util.use_cases.UseCase
+import sensors_in_paradise.sonar.util.use_cases.UseCaseHandler
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Files
@@ -27,7 +28,7 @@ const val VALID_SENSOR_NUM = 5
 @Suppress("LongParameterList")
 class LoggingManager(
     val context: Context,
-    var useCase: UseCase,
+    var useCaseHandler: UseCaseHandler,
     private val devices: XSENSArrayList,
     private val recordButton: MaterialButton,
     private val timer: Chronometer,
@@ -40,7 +41,7 @@ class LoggingManager(
     private var onRecordingStarted: (() -> Unit)? = null
     private var onFinalizeRecording: ((dir: File, metadata: RecordingMetadataStorage) -> Unit)? = null
     private val activitiesAdapter = ActivitiesAdapter(arrayListOf(), this)
-
+    var useCase = useCaseHandler.getCurrentUseCase()
     private var activeRecording: ActiveRecording? = null
 
     private var categoriesDialog: PersistentCategoriesDialog? = null
@@ -163,7 +164,7 @@ class LoggingManager(
     private fun startLogging() {
         startUITimer()
 
-        activeRecording = ActiveRecording(context, devices, useCase)
+        activeRecording = ActiveRecording(context, devices, useCaseHandler)
         activitiesAdapter.setAllActivities(activeRecording!!.labels)
         if (isLabelSelected()) {
             activeRecording!!.start(labelTV.text.toString())
@@ -343,7 +344,7 @@ class LoggingManager(
  *
  * The recording can be started, stopped and saved and labels can be added during the recording
  */
-class ActiveRecording(val context: Context, private val devices: XSENSArrayList, private val useCase: UseCase) {
+class ActiveRecording(val context: Context, private val devices: XSENSArrayList, private val useCaseHandler: UseCaseHandler) {
     private val xsLoggers: ArrayList<XsensDotLogger> = ArrayList()
     var labels = ArrayList<Pair<Long, String>>()
     private val sensorMacToTagMap = mutableMapOf<String, String>()
@@ -454,7 +455,7 @@ class ActiveRecording(val context: Context, private val devices: XSENSArrayList,
     private fun moveTempFiles(person: String, recordingEndTime: Long): Pair<File, RecordingMetadataStorage> {
         val recordingFiles = tempSensorFiles
 
-        val destFileDir = LogIOHelper.createRecordingFileDir(context, recordingStartTime, useCase)
+        val destFileDir = LogIOHelper.createRecordingFileDir(context, recordingStartTime, useCaseHandler)
         LogIOHelper.moveTempFilesToFinalDirectory(destFileDir, recordingFiles)
 
         val metadataStorage =
@@ -490,12 +491,12 @@ object LogIOHelper {
         }
     }
 
-    fun createRecordingFileDir(context: Context, time: LocalDateTime, useCase: UseCase): File {
+    fun createRecordingFileDir(context: Context, time: LocalDateTime, useCaseHandler: UseCaseHandler): File {
         val timeStr = time.toSonarString()
 
         // TODO: adapt to use case concept
-        val dir = useCase.getRecordingsDir()
-            .resolve(PreferencesHelper.getRecordingsSubDir(context))
+        val dir = useCaseHandler.getCurrentUseCase().getRecordingsDir()
+            .resolve(useCaseHandler.getSubDir())
             .resolve(timeStr)
 
         // assume this completes successful or the app crashes (but recording is lost anyway)

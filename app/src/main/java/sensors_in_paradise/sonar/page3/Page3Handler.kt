@@ -24,6 +24,7 @@ import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.util.PredictionHelper
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.UIHelper
+import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import sensors_in_paradise.sonar.util.use_cases.UseCase
 import java.nio.ByteBuffer
 import kotlin.math.round
@@ -220,12 +221,7 @@ class Page3Handler(
         //replace false with model available check
         predictionButton.setOnClickListener {
             if (false) {
-                val builder: AlertDialog.Builder = activity.let {
-                    AlertDialog.Builder(it)
-                }
-                builder.setMessage(R.string.missing_model_dialog_message)
-                    .setTitle(R.string.missing_model_dialog_title)
-                builder.create()?.show()
+                MessageDialog(context, context.resources.getString(R.string.missing_model_dialog_message))
             } else {
                 togglePrediction()
             }
