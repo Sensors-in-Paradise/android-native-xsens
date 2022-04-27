@@ -12,8 +12,14 @@ import java.text.DateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class TrainingHistoryAdapter(val trainingHistory: ArrayList<TrainingHistoryStorage.TrainingOccasion>) :
+class TrainingHistoryAdapter(trainingHistory: ArrayList<TrainingHistoryStorage.TrainingOccasion>) :
     RecyclerView.Adapter<TrainingHistoryAdapter.ViewHolder>() {
+    var trainingHistory = trainingHistory
+        @SuppressLint("NotifyDataSetChanged")
+        set(value){
+            field = value
+            notifyDataSetChanged()
+        }
     private val dateFormat = DateFormat.getDateTimeInstance()
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

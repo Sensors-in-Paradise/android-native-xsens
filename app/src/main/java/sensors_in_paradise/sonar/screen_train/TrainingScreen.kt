@@ -23,8 +23,9 @@ import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.ScreenInterface
 import sensors_in_paradise.sonar.screen_recording.RecordingDataManager
+import sensors_in_paradise.sonar.util.use_cases.UseCase
 
-class TrainingScreen(private val recordingsManager: RecordingDataManager) : ScreenInterface {
+class TrainingScreen(private val recordingsManager: RecordingDataManager, private var currentUseCase: UseCase) : ScreenInterface {
     private lateinit var activitiesPieChart: PieChart
     private lateinit var peoplePieChart: PieChart
     private lateinit var context: Context
@@ -39,7 +40,7 @@ class TrainingScreen(private val recordingsManager: RecordingDataManager) : Scre
         activitiesPieChart = activity.findViewById(R.id.pieChart_availableData_trainingFragment)
         peoplePieChart = activity.findViewById(R.id.pieChart_availableDataPeople_trainingFragment)
         historyRV = activity.findViewById(R.id.recyclerView_history_trainingFragment)
-        trainingHistoryStorage = TrainingHistoryStorage(context)
+        trainingHistoryStorage = TrainingHistoryStorage(currentUseCase)
         trainingHistoryAdapter = TrainingHistoryAdapter(trainingHistoryStorage.getTrainingHistory())
         trainBtn = activity.findViewById(R.id.button_trainModel_trainingFragment)
         historyRV.adapter = trainingHistoryAdapter
@@ -56,6 +57,9 @@ class TrainingScreen(private val recordingsManager: RecordingDataManager) : Scre
     }
 
     override fun onScreenOpened() {
+        populateAndAnimateCharts()
+    }
+    fun populateAndAnimateCharts(){
         populateDurationPieChart(
             activitiesPieChart,
             recordingsManager.getActivityDurationsOfTrainableRecordings()
@@ -126,6 +130,13 @@ class TrainingScreen(private val recordingsManager: RecordingDataManager) : Scre
             result[label] = duration + (result[label] ?: 0L)
         }
         return result
+    }
+
+    override fun onUseCaseChanged(useCase: UseCase) {
+        currentUseCase = useCase
+        trainingHistoryStorage = TrainingHistoryStorage(currentUseCase)
+        trainingHistoryAdapter.trainingHistory = trainingHistoryStorage.getTrainingHistory()
+        populateAndAnimateCharts()
     }
 }
 

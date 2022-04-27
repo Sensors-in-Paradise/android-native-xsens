@@ -3,7 +3,7 @@ package sensors_in_paradise.sonar.util.use_cases
 import java.io.File
 
 class UseCase(
-    private val baseDir: File,
+    baseDir: File,
     val title: String,
     recordingsSubDirName: String = DEFAULT_RECORDINGS_SUBDIR_NAME,
     private val onSubdirectoryChanged: (useCase: UseCase, dir: File) -> Unit
@@ -29,6 +29,9 @@ class UseCase(
     }
     fun getRecordingsDir(): File {
         return useCaseDir.resolve("recordings").apply { mkdir() }
+    }
+    fun getTrainingHistoryJSONFile(): File {
+        return useCaseDir.resolve("trainHistory.json")
     }
     /*fun extractModelFromFile(): Any {
             val modelFile = getUSeCaseBaseDir().resolve(title)

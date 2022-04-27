@@ -4,10 +4,11 @@ import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
 import sensors_in_paradise.sonar.JSONStorage
+import sensors_in_paradise.sonar.util.use_cases.UseCase
 import java.io.File
 
-class TrainingHistoryStorage(context: Context) :
-    JSONStorage(getTrainingHistoryFile(context)) {
+class TrainingHistoryStorage(useCase: UseCase) :
+    JSONStorage(useCase.getTrainingHistoryJSONFile()) {
     data class TrainingOccasion(
         val timestamp: Long,
         val peopleDurations: Map<String, Long>,
@@ -90,9 +91,5 @@ class TrainingHistoryStorage(context: Context) :
         }
         return result
     }
-    companion object {
-        fun getTrainingHistoryFile(context: Context): File {
-            return File(context.getExternalFilesDir(null) ?: context.dataDir, "trainHistory.json")
-        }
-    }
+
 }

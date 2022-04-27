@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         )
         screenHandlers.add(recordingScreen)
 
-        val trainingScreen = TrainingScreen(recordingsManager)
+        val trainingScreen = TrainingScreen(recordingsManager, useCaseHandler.getCurrentUseCase())
         screenHandlers.add(trainingScreen)
 
         val predictionScreen = PredictionScreen(scannedDevices, this)
