@@ -61,7 +61,7 @@ class PoseSequenceViewHolder(
             VisualizationUtils.drawBodyKeyPoints(
                 persons,
                 canvas,
-                clearColor = context.getColor(R.color.slightBackgroundContrast),
+                //clearColor = context.getColor(R.color.slightBackgroundContrast),
                 circleColor = context.getColor(R.color.stickmanJoints),
                 lineColor = context.getColor(R.color.backgroundContrast)
             )

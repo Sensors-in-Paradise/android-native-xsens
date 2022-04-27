@@ -52,6 +52,7 @@ class LabelsEditorDialog(
     private var visualizerFrameLayout: FrameLayout
     private var videoView: VideoView
     private var poseSequenceView: TextureView
+    private var poseSequenceBackround: ImageView
     private val activeVisualizer: VisualSequenceViewHolder?
         get() {
             return if (activeVisualizerIndex != null) {
@@ -67,6 +68,7 @@ class LabelsEditorDialog(
 
         videoView = root.findViewById(R.id.videoView_labelEditor)
         poseSequenceView = root.findViewById(R.id.textureView_labelEditor)
+        poseSequenceBackround = root.findViewById(R.id.imageView_labelEditor)
         previousItem = root.findViewById(R.id.tv_carouselItem1_labelEditor)
         currentItem = root.findViewById(R.id.tv_carouselItem2_labelEditor)
         nextItem = root.findViewById(R.id.tv_carouselItem3_labelEditor)
@@ -217,8 +219,10 @@ class LabelsEditorDialog(
         activeVisualizer?.stopLooping()
         if (visualizerSwitcher.displayedChild == 0 && viewIndex == 1) {
             visualizerSwitcher.showNext()
+            poseSequenceBackround.visibility = View.VISIBLE
         } else if (visualizerSwitcher.displayedChild == 1 && viewIndex == 0) {
             visualizerSwitcher.showPrevious()
+            poseSequenceBackround.visibility = View.GONE
         }
         activeVisualizerIndex = visualizerIndex
         if (!activeVisualizer!!.isSourceLoaded) {
