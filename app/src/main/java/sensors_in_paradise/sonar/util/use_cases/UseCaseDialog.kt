@@ -40,6 +40,5 @@ class UseCaseDialog(context: Context, useCaseHandler: UseCaseHandler) {
             }
         }
         dialog.show()
-
     }
 }
