@@ -1,11 +1,13 @@
 package sensors_in_paradise.sonar
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.EditText
 import android.widget.ViewAnimator
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -21,7 +23,6 @@ import sensors_in_paradise.sonar.screen_prediction.PredictionScreen
 import sensors_in_paradise.sonar.screen_train.TrainingScreen
 import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.uploader.DavCloudRecordingsUploader
-import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.use_cases.UseCase
 import sensors_in_paradise.sonar.util.use_cases.UseCaseDialog
@@ -38,7 +39,6 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
 
     private val screenHandlers = ArrayList<ScreenInterface>()
     private lateinit var useCaseHandler: UseCaseHandler
-    private val pageHandlers = ArrayList<PageInterface>()
     private val scannedDevices = XSENSArrayList()
     private lateinit var connectionScreen: ConnectionScreen
     private lateinit var sensorTrafficVisualizationHandler: SensorTrafficVisualizationHandler
