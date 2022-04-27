@@ -15,72 +15,12 @@ class GlobalValues private constructor() {
     companion object {
         const val NULL_ACTIVITY = "null - activity"
         const val OTHERS_CATEGORY = "Others"
-        val DEFINED_ACTIVITIES = linkedMapOf<String, String>(
-            NULL_ACTIVITY to OTHERS_CATEGORY,
-            "aufräumen" to OTHERS_CATEGORY,
-            "aufwischen (Staub)" to OTHERS_CATEGORY,
-            "Blumen gießen" to OTHERS_CATEGORY,
-            "Corona Test" to OTHERS_CATEGORY,
-            "Kaffee kochen" to OTHERS_CATEGORY,
-            "Schrank aufräumen" to OTHERS_CATEGORY,
-            "Wagen schieben" to OTHERS_CATEGORY,
-            "Wäsche umräumen" to OTHERS_CATEGORY,
-            "Wäsche zusammenlegen" to OTHERS_CATEGORY,
-            "Accessoires (Parfüm) anlegen" to "Morgenpflege",
-            "Bad vorbereiten" to "Morgenpflege",
-            "Bett machen" to "Morgenpflege",
-            "Bett beziehen" to "Morgenpflege",
-            "Haare kämmen" to "Morgenpflege",
-            "Hautpflege" to "Morgenpflege",
-            "IKP-Versorgung" to "Morgenpflege",
-            "Kateterleerung" to "Morgenpflege",
-            "Kateterwechsel" to "Morgenpflege",
-            "Medikamente geben" to "Morgenpflege",
-            "Mundpflege" to "Morgenpflege",
-            "Nägel schneiden" to "Morgenpflege",
-            "Rasieren" to "Morgenpflege",
-            "Umkleiden" to "Morgenpflege",
-            "Verband anlegen" to "Morgenpflege",
-            "duschen" to "Waschen",
-            "föhnen" to "Waschen",
-            "Gegenstand waschen" to "Waschen",
-            "Gesamtwaschen im Bett" to "Waschen",
-            "Haare waschen" to "Waschen",
-            "Rücken waschen" to "Waschen",
-            "Waschen am Waschbecken" to "Waschen",
-            "Wasser holen" to "Waschen",
-            "Essen auf Teller geben" to "Mahlzeiten",
-            "Essen austragen" to "Mahlzeiten",
-            "Essen reichen" to "Mahlzeiten",
-            "Geschirr austeilen" to "Mahlzeiten",
-            "Geschirr einsammeln" to "Mahlzeiten",
-            "Getränke ausschenken" to "Mahlzeiten",
-            "Getränk geben" to "Mahlzeiten",
-            "Küche aufräumen" to "Mahlzeiten",
-            "Küchenvorbereitungen" to "Mahlzeiten",
-            "Tablett tragen" to "Mahlzeiten",
-            "Arm halten" to "Assistieren",
-            "Assistieren - aufstehen" to "Assistieren",
-            "Assistieren - hinsetzen" to "Assistieren",
-            "Assistieren - laufen" to "Assistieren",
-            "Insulingabe" to "Assistieren",
-            "Patient umlagern (Lagerung)" to "Assistieren",
-            "Pflastern" to "Assistieren",
-            "Rollstuhl modifizieren" to "Assistieren",
-            "Rollstuhl schieben" to "Assistieren",
-            "Rollstuhl Transfer" to "Assistieren",
-            "Toilettengang" to "Assistieren",
-            "Arbeiten am Computer" to "Organisation",
-            "Dokumentation" to "Organisation",
-            "Medikamente stellen" to "Organisation",
-            "Telefonieren" to "Organisation",
-        )
         const val UNKNOWN_PERSON = "unknown"
         const val METADATA_JSON_FILENAME = "metadata.json"
         const val MEASUREMENT_MODE = XsensDotPayload.PAYLOAD_TYPE_CUSTOM_MODE_4
-        fun getSensorRecordingsBaseDir(context: Context): File {
-            return context.getExternalFilesDir(null) ?: context.dataDir
-        }
+
+        var DEFAULT_USE_CASE_TITLE: String = "default"
+
 
         fun getSensorRecordingsTempDir(context: Context): File {
             return context.dataDir.resolve("temp")
@@ -89,17 +29,10 @@ class GlobalValues private constructor() {
             return context.dataDir.resolve("videoTemp")
         }
 
-        fun getActivityLabelsJSONFile(context: Context): File {
-            return File(context.getExternalFilesDir(null) ?: context.dataDir, "labels.json")
-        }
-
-        fun getPeopleJSONFile(context: Context): File {
-            return File(context.getExternalFilesDir(null) ?: context.dataDir, "people.json")
-        }
         fun getTrainingHistoryFile(context: Context): File {
+            // TODO: move to approproate place
             return File(context.getExternalFilesDir(null) ?: context.dataDir, "trainHistory.json")
         }
-
         fun getRequiredPermissions(): ArrayList<String> {
             val result = arrayListOf(
                 Manifest.permission.BLUETOOTH,

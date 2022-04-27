@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import org.json.JSONException
 import org.json.JSONObject
@@ -57,4 +58,8 @@ abstract class JSONStorage @Throws(
 
     /** */
     abstract fun onJSONInitialized()
+
+    fun getJsonString(indentSpaces: Int = 4):String{
+        return json.toString(indentSpaces)
+    }
 }

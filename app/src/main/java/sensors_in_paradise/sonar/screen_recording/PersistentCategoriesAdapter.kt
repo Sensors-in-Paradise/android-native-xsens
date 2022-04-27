@@ -17,7 +17,7 @@ import sensors_in_paradise.sonar.R
 class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage) :
     RecyclerView.Adapter<PersistentCategoriesAdapter.ViewHolder>() {
     private var dataSet: List<CategoryItem> = itemsStorage.getItems()
-    private var nestedItems: List<String> = ArrayList()
+    //private var nestedItems: List<Pair<>> = ArrayList()
     private var filterText: String = ""
 
     // This is handed over to the nested recyclerviews
@@ -64,7 +64,7 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
             }
         }
 
-        val isDeletable = !itemsStorage.nonDeletableCategories.contains(model.itemText)
+        val isDeletable = itemsStorage.isCategoryDeletable(model.itemText)
         viewHolder.deleteButton.visibility = if (isDeletable) View.VISIBLE else View.INVISIBLE
 
         viewHolder.mTextView.text = model.itemText
@@ -78,8 +78,8 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
             viewHolder.mArrowImage.setImageResource(R.drawable.ic_baseline_keyboard_arrow_down_24)
         }
 
-        nestedItems = model.nestedList
-        val nestedAdapter = NestedAdapter(nestedItems, itemsStorage.nonDeletableItems)
+        val nestedItems = model.nestedList
+        val nestedAdapter = NestedAdapter(nestedItems)
         viewHolder.nestedRecyclerView.layoutManager = GridLayoutManager(viewHolder.itemView.context, 2)
         viewHolder.nestedRecyclerView.setHasFixedSize(true)
         viewHolder.nestedRecyclerView.adapter = nestedAdapter
@@ -136,7 +136,6 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
     private fun update(position: Int) {
         dataSet = itemsStorage.getItems()
         dataSet[position].isExpanded = true
-        nestedItems = dataSet[position].nestedList
         notifyItemChanged(position)
     }
 
@@ -185,14 +184,14 @@ class PersistentCategoriesAdapter(private val itemsStorage: CategoryItemStorage)
         if (filterText == "") return dataSet[index]
 
         val itemText = "Search results"
-        val nestedList = mutableListOf<String>()
+        val nestedList = mutableListOf<Pair<String, Boolean>>()
 
-        val categories = itemsStorage.getCategoriesAsArray()
+        val categories = itemsStorage.getCategories()
         for (category in categories) {
-            val entries = itemsStorage.getEntriesAsArray(category)
-            for (entry in entries) {
-                if (isItemMatchedByFilter(entry)) {
-                    nestedList.add(entry)
+            val entries = itemsStorage.getEntries(category)
+            for ((label, deletable) in entries) {
+                if (isItemMatchedByFilter(label)) {
+                    nestedList.add(Pair(label, deletable))
                 }
             }
         }

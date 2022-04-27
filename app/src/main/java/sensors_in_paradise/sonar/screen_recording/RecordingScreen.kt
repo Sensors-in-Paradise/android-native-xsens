@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.screen_recording
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.media.MediaPlayer
@@ -14,12 +15,16 @@ import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.util.PreferencesHelper
+import sensors_in_paradise.sonar.util.use_cases.UseCase
+import sensors_in_paradise.sonar.util.use_cases.UseCaseHandler
+import java.io.File
 import java.io.IOException
 
 class RecordingScreen(
     private val devices: XSENSArrayList,
     private val recordingsManager: RecordingDataManager,
-    private val sensorOccupationInterface: SensorOccupationInterface?
+    private val sensorOccupationInterface: SensorOccupationInterface?,
+    private var currentUseCase: UseCase
 ) : ScreenInterface, ConnectionInterface,
     TabLayout.OnTabSelectedListener {
     private lateinit var context: Context
@@ -61,6 +66,7 @@ class RecordingScreen(
 
         loggingManager = LoggingManager(
             context,
+           currentUseCase,
             devices,
             activity.findViewById(R.id.buttonRecord),
             timer,
@@ -172,4 +178,11 @@ class RecordingScreen(
             }
         }
     }
+
+    @SuppressLint("NotifyDataSetChanged")
+    override fun onUseCaseChanged(useCase: UseCase){
+        recordingsAdapter.notifyDataSetChanged()
+        loggingManager.useCase = useCase
+    }
+
 }

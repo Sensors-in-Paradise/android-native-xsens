@@ -21,7 +21,12 @@ import sensors_in_paradise.sonar.screen_prediction.PredictionScreen
 import sensors_in_paradise.sonar.screen_train.TrainingScreen
 import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.uploader.DavCloudRecordingsUploader
+import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.util.PreferencesHelper
+import sensors_in_paradise.sonar.util.use_cases.UseCase
+import sensors_in_paradise.sonar.util.use_cases.UseCaseDialog
+import sensors_in_paradise.sonar.util.use_cases.UseCaseHandler
+import java.io.File
 
 class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface,
     SensorOccupationInterface {
@@ -32,6 +37,8 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     private lateinit var recordingsManager: RecordingDataManager
 
     private val screenHandlers = ArrayList<ScreenInterface>()
+    private lateinit var useCaseHandler: UseCaseHandler
+    private val pageHandlers = ArrayList<PageInterface>()
     private val scannedDevices = XSENSArrayList()
     private lateinit var connectionScreen: ConnectionScreen
     private lateinit var sensorTrafficVisualizationHandler: SensorTrafficVisualizationHandler
@@ -51,11 +58,22 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
 
         switcher = findViewById(R.id.switcher_activity_main)
         tabLayout = findViewById(R.id.tab_layout_activity_main)
+        useCaseHandler = UseCaseHandler(this)
         recordingsManager = RecordingDataManager(
-            GlobalValues.getSensorRecordingsBaseDir(this)
+            useCaseHandler.getCurrentUseCase().getRecordingsDir()
         )
         trainingTab = tabLayout.getTabAt(2)!!
 
+        supportActionBar?.subtitle = useCaseHandler.getCurrentUseCase().title
+        useCaseHandler.setOnUseCaseChanged { useCase: UseCase ->
+            recordingsManager.recordingsDir = useCase.getRecordingsDir()
+            pageHandlers.forEach {
+                it.onUseCaseChanged(
+                    useCase
+                )
+            }
+            supportActionBar?.subtitle = useCase.title
+        }
         initClickListeners()
 
         connectionScreen = ConnectionScreen(scannedDevices)
@@ -177,6 +195,10 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     fun onSettingsMenuItemClicked(ignored: MenuItem) {
         val intent = Intent(this, SettingsActivity::class.java)
         startActivity(intent)
+    }
+
+    fun onUseCasesMenuItemClicked(ignored: MenuItem) {
+        UseCaseDialog(this, useCaseHandler)
     }
 
     fun onStickmanMenuItemClicked(ignored: MenuItem) {

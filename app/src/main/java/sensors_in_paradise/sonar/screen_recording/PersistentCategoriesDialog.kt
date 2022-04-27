@@ -17,7 +17,6 @@ class PersistentCategoriesDialog(
     val context: Context,
     title: String,
     storageFile: File,
-    defaultItems: LinkedHashMap<String, String>,
     callback: (value: String) -> Unit = {},
 ) {
     var dialog: AlertDialog
@@ -25,7 +24,7 @@ class PersistentCategoriesDialog(
     var adapter: PersistentCategoriesAdapter
 
     init {
-        addDefaultEntries(defaultItems)
+
 
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         builder.setTitle(title)
@@ -76,7 +75,7 @@ class PersistentCategoriesDialog(
         val builder = AlertDialog.Builder(context)
         val spinner = Spinner(context)
         val spinnerAdapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line,
-            storage.getCategoriesAsArray())
+            storage.getCategories())
         spinner.adapter = spinnerAdapter
 
         builder.setView(spinner)
@@ -84,7 +83,7 @@ class PersistentCategoriesDialog(
             .setCancelable(true)
             .setPositiveButton("Submit") { _, _ ->
                 val category = spinner.selectedItem.toString()
-                storage.addEntry(searchEditText.text.toString().lowercase(Locale.getDefault()), category)
+                storage.addEntryIfNotAdded(searchEditText.text.toString().lowercase(Locale.getDefault()), category)
                 adapter.updateByCategory(category)
                 searchEditText.setText("")
             }

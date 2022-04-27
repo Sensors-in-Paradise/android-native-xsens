@@ -9,7 +9,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 
-class NestedAdapter(private val entries: List<String>, private val nonDeletableEntries: ArrayList<String>) :
+class NestedAdapter(private val entries: List<Pair<String, Boolean>>) :
     RecyclerView.Adapter<NestedAdapter.NestedViewHolder>() {
     private var onItemClicked: ((value: String) -> Unit)? = null
     private var onItemLongClicked: ((value: String, position: Int) -> Unit)? = null
@@ -27,13 +27,16 @@ class NestedAdapter(private val entries: List<String>, private val nonDeletableE
     }
 
     override fun onBindViewHolder(viewHolder: NestedViewHolder, position: Int) {
-        val entryText = entries[position]
+        val item = entries[position]
+        val entryText = item.first
+        val isDeletable = item.second
+
         viewHolder.entry.text = entryText
         viewHolder.wrapper.setOnClickListener {
             onItemClicked?.let { it1 -> it1(entryText) }
         }
 
-        if (!nonDeletableEntries.contains(entryText)) {
+        if (isDeletable) {
             viewHolder.wrapper.strokeColor = ContextCompat.getColor(viewHolder.wrapper.context,
                 sensors_in_paradise.sonar.R.color.colorAccent)
             viewHolder.wrapper.setOnLongClickListener {
