@@ -19,6 +19,12 @@ import sensors_in_paradise.sonar.page2.camera.CameraManager
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.IOException
 
+enum class RecordingTab(val position: Int) {
+    RECORDINGS(0),
+    ACTIVITIES(1),
+    CAMERA(2)
+    }
+
 class Page2Handler(
     private val devices: XSENSArrayList,
     private val recordingsManager: RecordingDataManager,
@@ -85,24 +91,28 @@ class Page2Handler(
     @Suppress("LongMethod")
     private fun initializeLoggingManagerCallbacks() {
         loggingManager.setOnRecordingDone { recording ->
+            if (tabLayout.selectedTabPosition != RecordingTab.CAMERA.position) {
+                cameraManager.unbindPreview()
+            }
             tabLayout.selectTab(recordingsTab)
             addRecordingToUI(
                 recording
             )
             activitiesCenterTV.visibility = View.VISIBLE
         }
+
         loggingManager.setOnRecordingStarted {
             sensorOccupationInterface?.onSensorOccupationStatusChanged(true)
             if (PreferencesHelper.shouldPlaySoundOnRecordingStart(context)) {
                 mediaPlayerSound.start()
             }
-            if (tabLayout.selectedTabPosition != 2) {
-                tabLayout.selectTab(activitiesTab)
-            }
-            activitiesCenterTV.visibility = View.GONE
 
-            if (cameraManager.shouldShowVideo()) {
+            if (!cameraManager.shouldShowVideo()) {
+                tabLayout.selectTab(activitiesTab)
+                activitiesCenterTV.visibility = View.GONE
+            } else {
                 // In case Image Analysis isn't possible, bitmap needs to be extracted from preview
+                tabLayout.selectTab(cameraTab)
                 cameraManager.bindPreview()
             }
             if (cameraManager.shouldCaptureVideo()) {
