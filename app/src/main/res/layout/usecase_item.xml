@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:orientation="vertical">
+
+    <RadioButton
+        android:id="@+id/radioButton_useCaseItem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="RadioButton" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout_subdirs_useCaseItem"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginHorizontal="40dp"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📂 Recordings Subdirectories" />
+
+        <RadioGroup
+            android:id="@+id/radioGroup_subDirs_useCaseItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginHorizontal="4dp">
+
+
+            <ImageButton
+                android:id="@+id/imageButton_addNewSubdirectory_useCaseItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:background="@color/transparent"
+                android:contentDescription="Adds a new recordings subdirectory to current use case"
+                android:enabled="false"
+                android:src="@drawable/ic_baseline_add_circle_outline_24" />
+
+            <EditText
+                android:id="@+id/editText_addNewSubdirectory_useCaseItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:hint="Add new subdirectory"
+                android:importantForAutofill="no"
+                android:inputType="textPersonName"
+                android:singleLine="true"
+                android:textSize="14dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

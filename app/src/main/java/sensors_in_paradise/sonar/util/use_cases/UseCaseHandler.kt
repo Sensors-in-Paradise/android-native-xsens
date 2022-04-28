@@ -56,15 +56,17 @@ class UseCaseHandler(
         currentUseCase = useCase
         onUseCaseChanged?.invoke(useCase)
     }
-
+    fun createUseCase(title:String): UseCase{
+            val useCase = UseCase(
+                useCasesBaseDir,
+                title,
+                onSubdirectoryChanged = this::onRecordingsSubDirOfUseCaseChanged
+            )
+            availableUseCases.add(useCase)
+        return useCase
+    }
     fun createAndSetUseCase(title: String) {
-        val useCase = UseCase(
-            useCasesBaseDir,
-            title,
-            onSubdirectoryChanged = this::onRecordingsSubDirOfUseCaseChanged
-        )
-        availableUseCases.add(useCase)
-        setUseCase(useCase)
+        setUseCase(createUseCase(title))
     }
 
     fun getCurrentUseCase(): UseCase {
