@@ -10,7 +10,7 @@ import java.io.File
 class UseCaseStorage(file: File) : JSONStorage(file) {
     constructor(context: Context) : this(getUseCaseStorageFile(context))
 
-    private val useCases = json.getJSONObject(USE_CASES_KEY)
+    private lateinit var useCases: JSONObject
 
     override fun onFileNewlyCreated() {
         json.put(SELECTED_USE_CASE_KEY, GlobalValues.DEFAULT_USE_CASE_TITLE)
@@ -19,6 +19,7 @@ class UseCaseStorage(file: File) : JSONStorage(file) {
     }
 
     override fun onJSONInitialized() {
+        useCases = json.getJSONObject(USE_CASES_KEY)
     }
 
     fun setSelectedUseCase(title: String) {

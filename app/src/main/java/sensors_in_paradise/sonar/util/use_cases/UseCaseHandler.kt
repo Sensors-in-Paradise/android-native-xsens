@@ -17,7 +17,7 @@ class UseCaseHandler(
             DEFAULT_USE_CASE_TITLE
         ), this::onRecordingsSubDirOfUseCaseChanged
     )
-    val availableUseCases = arrayListOf(defaultUseCase)
+    val availableUseCases = arrayListOf<UseCase>()
     private var currentUseCase: UseCase = defaultUseCase
 
     private var onUseCaseChanged: ((useCase: UseCase) -> Unit)? = null
@@ -31,7 +31,7 @@ class UseCaseHandler(
         val useCaseDirs = useCasesBaseDir.listFiles { dir, name ->
             dir.resolve(name).isDirectory
         }
-        Log.d("useCase", "useCaseDirs: ${useCasesBaseDir.listFiles()?.map { it.name }}")
+        Log.d("UseCaseHandler-loadUseCases", "useCaseDirs: ${useCasesBaseDir.listFiles()?.map { it.name }}")
         if (useCaseDirs != null) {
             for (dir in useCaseDirs) {
                 availableUseCases.add(

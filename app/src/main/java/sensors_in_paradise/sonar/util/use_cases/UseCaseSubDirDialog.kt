@@ -12,16 +12,14 @@ class UseCaseSubDirDialog(context: Context, currentUseCase: UseCase) {
         val builder = AlertDialog.Builder(context)
 
         builder.setTitle("Choose a subdirectory")
-        val dir = currentUseCase.useCaseDir
-        val subDirs = (dir.list { d, name -> File(d, name).isDirectory })?.map { it.toString() }
-            ?.toTypedArray()
-        var checkedItem: Int = -1
+        val subDirs = currentUseCase.getAvailableRecordingSubDirs().toTypedArray()
+        var checkedItem = subDirs.indexOfFirst { it == UseCase.DEFAULT_RECORDINGS_SUB_DIR_NAME }
         builder.setSingleChoiceItems(subDirs, -1) { _, which -> checkedItem = which }
 
         builder.setPositiveButton("OK") { _, _ ->
             if (checkedItem != -1) {
                 currentUseCase.setRecordingsSubDir(
-                    subDirs?.get(checkedItem) ?: UseCase.DEFAULT_RECORDINGS_SUB_DIR_NAME
+                    subDirs[checkedItem]
                 )
             }
         }

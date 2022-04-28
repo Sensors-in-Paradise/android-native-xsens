@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         )
         trainingTab = tabLayout.getTabAt(2)!!
 
-        supportActionBar?.subtitle = useCaseHandler.getCurrentUseCase().title
+        supportActionBar?.subtitle = useCaseHandler.getCurrentUseCase().getDisplayInfo()
         useCaseHandler.setOnUseCaseChanged { useCase: UseCase ->
             recordingsManager.recordingsDir = useCase.getRecordingsDir()
             screenHandlers.forEach {
@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
                     useCase
                 )
             }
-            supportActionBar?.subtitle = useCase.title
+            supportActionBar?.subtitle = useCase.getDisplayInfo()
         }
         initClickListeners()
 
