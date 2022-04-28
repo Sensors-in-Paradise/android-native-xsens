@@ -1,6 +1,7 @@
 package sensors_in_paradise.sonar.util.use_cases
 
 import android.content.Context
+import android.util.Log
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -16,7 +17,7 @@ class UseCaseHandler(
             DEFAULT_USE_CASE_TITLE
         ), this::onRecordingsSubDirOfUseCaseChanged
     )
-    val availableUseCases = ArrayList<UseCase>()
+    val availableUseCases = arrayListOf(defaultUseCase)
     private var currentUseCase: UseCase = defaultUseCase
 
     private var onUseCaseChanged: ((useCase: UseCase) -> Unit)? = null
@@ -30,6 +31,7 @@ class UseCaseHandler(
         val useCaseDirs = useCasesBaseDir.listFiles { dir, name ->
             dir.resolve(name).isDirectory
         }
+        Log.d("useCase", "useCaseDirs: ${useCasesBaseDir.listFiles()?.map { it.name }}")
         if (useCaseDirs != null) {
             for (dir in useCaseDirs) {
                 availableUseCases.add(
@@ -88,9 +90,8 @@ class UseCaseHandler(
         this.onUseCaseChanged = onUseCaseChanged
     }
 
-    fun onRecordingsSubDirOfUseCaseChanged(useCase: UseCase, dir: File) {
-        //useCaseStorage.setSelectedSubDir()
-        // TODO save
+    private fun onRecordingsSubDirOfUseCaseChanged(useCase: UseCase, dir: File) {
+        useCaseStorage.setSelectedSubDir(useCase.title, dir.name)
     }
 
     companion object {

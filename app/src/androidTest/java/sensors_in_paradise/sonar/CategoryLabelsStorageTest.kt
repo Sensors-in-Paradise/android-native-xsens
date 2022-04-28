@@ -6,7 +6,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import junit.framework.TestCase.*
 import org.junit.Before
 import org.junit.Test
-import sensors_in_paradise.sonar.page2.CategoryItemStorage
+import sensors_in_paradise.sonar.screen_recording.CategoryItemStorage
 import java.io.File
 
 class CategoryLabelsStorageTest {

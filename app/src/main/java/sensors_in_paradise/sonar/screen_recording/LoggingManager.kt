@@ -508,7 +508,7 @@ object LogIOHelper {
     ): File {
         val timeStr = time.toSonarString()
 
-        val dir =currentUseCase.getRecordingsSubDir()
+        val dir = currentUseCase.getRecordingsSubDir()
             .resolve(timeStr)
 
         // assume this completes successful or the app crashes (but recording is lost anyway)

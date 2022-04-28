@@ -5,17 +5,12 @@ import java.io.File
 class UseCase(
     baseDir: File,
     val title: String,
-    recordingsSubDirName: String = DEFAULT_RECORDINGS_SUBDIR_NAME,
+    recordingsSubDirName: String = DEFAULT_RECORDINGS_SUB_DIR_NAME,
     private val onSubdirectoryChanged: (useCase: UseCase, dir: File) -> Unit
 ) {
-    private var recordingsSubDir = getRecordingsSubDir().resolve(recordingsSubDirName).apply { mkdir() }
-    val useCaseDir = baseDir.resolve(title)
+    val useCaseDir = baseDir.resolve(title). apply { mkdirs() }
+    private var recordingsSubDir = getRecordingsDir().resolve(recordingsSubDirName).apply { mkdir() }
 
-    init {
-        if (!useCaseDir.isDirectory) {
-            useCaseDir.mkdir()
-        }
-    }
 
     fun getActivityLabelsJSONFile(): File {
         return useCaseDir.resolve("labels.json")
@@ -42,13 +37,13 @@ class UseCase(
         */
     fun setRecordingsSubDir(dir: String) {
         recordingsSubDir = getRecordingsDir().resolve(dir).apply { mkdir() }
-        onSubdirectoryChanged(this,recordingsSubDir)
+        onSubdirectoryChanged(this, recordingsSubDir)
     }
 
     fun getRecordingsSubDir(): File {
         return recordingsSubDir
     }
     companion object{
-        const val DEFAULT_RECORDINGS_SUBDIR_NAME = "default"
+        const val DEFAULT_RECORDINGS_SUB_DIR_NAME = "default"
     }
 }
