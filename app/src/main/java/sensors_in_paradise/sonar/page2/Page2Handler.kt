@@ -2,10 +2,11 @@ package sensors_in_paradise.sonar.page2
 
 import android.app.Activity
 import android.content.Context
+import android.view.TextureView
 import android.media.MediaPlayer
 import android.view.View
 import android.widget.*
-import androidx.core.view.size
+import androidx.camera.view.PreviewView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
@@ -14,8 +15,15 @@ import com.xsens.dot.android.sdk.events.XsensDotData
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.page1.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
+import sensors_in_paradise.sonar.page2.camera.CameraManager
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.IOException
+
+enum class RecordingTab(val position: Int) {
+    RECORDINGS(0),
+    ACTIVITIES(1),
+    CAMERA(2)
+    }
 
 class Page2Handler(
     private val devices: XSENSArrayList,
@@ -72,42 +80,78 @@ class Page2Handler(
         initializeLoggingManagerCallbacks()
 
         tabLayout.addOnTabSelectedListener(this)
+        val previewView =
+            activity.findViewById<PreviewView>(R.id.previewView_camera_captureFragment)
+        val overlayView =
+            activity.findViewById<TextureView>(R.id.surfaceView_camera_captureFragment)
         cameraManager =
-            CameraManager(context, activity.findViewById(R.id.previewView_camera_captureFragment))
+            CameraManager(context, previewView, overlayView)
     }
 
+    @Suppress("LongMethod")
     private fun initializeLoggingManagerCallbacks() {
         loggingManager.setOnRecordingDone { recording ->
+            if (tabLayout.selectedTabPosition != RecordingTab.CAMERA.position) {
+                cameraManager.unbindPreview()
+            }
             tabLayout.selectTab(recordingsTab)
             addRecordingToUI(
                 recording
             )
             activitiesCenterTV.visibility = View.VISIBLE
         }
+
         loggingManager.setOnRecordingStarted {
             sensorOccupationInterface?.onSensorOccupationStatusChanged(true)
             if (PreferencesHelper.shouldPlaySoundOnRecordingStart(context)) {
                 mediaPlayerSound.start()
             }
-            if (tabLayout.selectedTabPosition != 2) {
+
+            if (!cameraManager.shouldShowVideo()) {
                 tabLayout.selectTab(activitiesTab)
+                activitiesCenterTV.visibility = View.GONE
+            } else {
+                // In case Image Analysis isn't possible, bitmap needs to be extracted from preview
+                tabLayout.selectTab(cameraTab)
+                cameraManager.bindPreview()
             }
-            activitiesCenterTV.visibility = View.GONE
-            if (cameraManager.shouldRecordVideo()) {
+            if (cameraManager.shouldCaptureVideo()) {
                 val dir = GlobalValues.getVideoRecordingsTempDir(context)
                 dir.mkdir()
-                cameraManager.startRecording(
+                cameraManager.startRecordingVideo(
                     dir.resolve(
                         "before_" + System.currentTimeMillis().toString() + ".mp4"
                     )
                 )
             }
+            if (cameraManager.shouldRecordPose()) {
+                val dir = GlobalValues.getPoseRecordingsTempDir(context)
+                dir.mkdir()
+                cameraManager.startRecordingPose(
+                    dir.resolve(
+                        "poseEstimation_" + System.currentTimeMillis().toString() + ".csv"
+                    )
+                )
+            }
         }
         loggingManager.setOnFinalizingRecording { dir, metadata ->
-            cameraManager.stopRecording { videoCaptureStartTime, videoTempFile ->
+            cameraManager.stopRecordingVideo { videoCaptureStartTime, videoTempFile ->
                 metadata.setVideoCaptureStartedTime(videoCaptureStartTime, true)
                 try {
                     Files.move(videoTempFile, dir.resolve(Recording.VIDEO_CAPTURE_FILENAME))
+                    val recordingIndex =
+                        recordingsManager.recordingsList.indexOfFirst { r -> r.dir == dir }
+                    recordingsAdapter.notifyItemChanged(recordingIndex)
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                } catch (e: IllegalArgumentException) {
+                    e.printStackTrace()
+                }
+            }
+            cameraManager.stopRecordingPose { poseCaptureStartTime, poseTempFile ->
+                metadata.setPoseCaptureStartedTime(poseCaptureStartTime, true)
+                try {
+                    Files.move(poseTempFile, dir.resolve(Recording.POSE_CAPTURE_FILENAME))
                     val recordingIndex =
                         recordingsManager.recordingsList.indexOfFirst { r -> r.dir == dir }
                     recordingsAdapter.notifyItemChanged(recordingIndex)
@@ -155,7 +199,7 @@ class Page2Handler(
     }
 
     override fun onTabUnselected(tab: TabLayout.Tab?) {
-        if (tab == cameraTab) {
+        if (tab == cameraTab && !loggingManager.isRecording()) {
             cameraManager.unbindPreview()
         }
     }
