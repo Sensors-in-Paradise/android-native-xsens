@@ -44,8 +44,16 @@ class UseCaseStorage(file: File) : JSONStorage(file) {
         */
         Log.d("useCase", json.toString())
         Log.d("useCase", useCases.toString())
-        val useCase = useCases.getJSONObject(useCaseTitle)
-        useCase.put(SELECTED_SUB_DIR_KEY, subDir)
+        val useCase = useCases.optJSONObject(useCaseTitle)
+        if (useCase == null) {
+            useCases.put(
+                useCaseTitle, JSONObject().put(
+                    SELECTED_SUB_DIR_KEY, subDir
+                )
+            )
+        } else {
+            useCase.put(SELECTED_SUB_DIR_KEY, subDir)
+        }
         save()
     }
 

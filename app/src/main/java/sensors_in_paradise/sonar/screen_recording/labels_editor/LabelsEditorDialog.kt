@@ -17,6 +17,8 @@ import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.screen_recording.PersistentCategoriesDialog
 import sensors_in_paradise.sonar.screen_recording.Recording
+import sensors_in_paradise.sonar.screen_recording.labels_editor.VideoViewHolder
+import sensors_in_paradise.sonar.screen_recording.labels_editor.VisualSequenceViewHolder
 import sensors_in_paradise.sonar.util.use_cases.UseCase
 
 class LabelsEditorDialog(

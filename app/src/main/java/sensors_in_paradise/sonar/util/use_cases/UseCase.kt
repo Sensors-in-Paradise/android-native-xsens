@@ -1,15 +1,20 @@
 package sensors_in_paradise.sonar.util.use_cases
 
+import android.content.Context
 import java.io.File
-import java.lang.IllegalStateException
+import java.io.FileInputStream
+import java.nio.MappedByteBuffer
+import java.nio.channels.FileChannel
+
 
 class UseCase(
+    val context: Context,
     baseDir: File,
     val title: String,
     recordingsSubDirName: String = DEFAULT_RECORDINGS_SUB_DIR_NAME,
     private val onSubdirectoryChanged: (useCase: UseCase, dir: File) -> Unit
 ) {
-    val useCaseDir = baseDir.resolve(title).apply { mkdirs() }
+    private val useCaseDir = baseDir.resolve(title).apply { mkdirs() }
     private var recordingsSubDir =
         getRecordingsDir().resolve(recordingsSubDirName).apply { mkdir() }
 
@@ -23,6 +28,9 @@ class UseCase(
     }
 
     fun getModelFile(): File {
+        if (!useCaseDir.resolve("model.tflite").isFile) {
+            extractModelFromFile()?.let { saveModelFromFile(it) }
+        }
         return useCaseDir.resolve("model.tflite")
     }
 
@@ -43,13 +51,32 @@ class UseCase(
         return subDirs
     }
 
-    /*fun extractModelFromFile(): Any {
-            val modelFile = getUSeCaseBaseDir().resolve(title)
-            val inputStream = FileInputStream(modelFile)
-            return inputStream.channel.map(FileChannel.MapMode.READ_ONLY, 0, modelFile.length())
+    fun extractModelFromFile(filename: String = "LSTMModel-1-18.tflite"): MappedByteBuffer? {
+        val iStream = context.assets.open(filename)
+        val file = createTempFile()
+        iStream.use { input ->
+            file.outputStream().use { output ->
+                input.copyTo(output)
+            }
         }
 
-        */
+        val inputStream = FileInputStream(file)
+
+        val mappedByteBuffer =  inputStream.channel.map(
+            FileChannel.MapMode.READ_ONLY, 0,
+            file.length()
+        )
+        file.delete()
+        return mappedByteBuffer
+    }
+
+    private fun saveModelFromFile(buffer: MappedByteBuffer) {
+        val modelPath = useCaseDir.resolve("model.tflite")
+        val modelByteArray = ByteArray(buffer.remaining())
+        buffer.get(modelByteArray, 0, modelByteArray.size)
+        modelPath.writeBytes(modelByteArray)
+    }
+
     fun setRecordingsSubDir(dir: String) {
         recordingsSubDir = getRecordingsDir().resolve(dir).apply { mkdir() }
         onSubdirectoryChanged(this, recordingsSubDir)

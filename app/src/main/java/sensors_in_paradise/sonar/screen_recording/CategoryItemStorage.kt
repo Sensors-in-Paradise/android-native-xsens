@@ -7,35 +7,35 @@ import java.io.File
 
 /**
 Example Structure:
-{ "labels": {
-"Mittag": {
-"deletable": false
-"entries": {
-"Essen bringen": {"deletable": false},
-"Füttern": {"deletable": false}
-}
-},
-"Körperpflege": {
-"deletable": true
-"entries": {
-"Gesamtwäsche am Bett": {"deletable": false },
-"Haare kämmen": {"deletable": false }
-}
-},
-},
-"version": 2
-}
+    { "labels": {
+        "Mittag": {
+                "deletable": false
+                "entries": {
+                "Essen bringen": {"deletable": false},
+                "Füttern": {"deletable": false}
+            }
+        },
+        "Körperpflege": {
+                "deletable": true
+                "entries": {
+                "Gesamtwäsche am Bett": {"deletable": false },
+                "Haare kämmen": {"deletable": false }
+            }
+        },
+    },
+    "version": 2
+    }
 
 Legacy:
-{"items": [
-{
-"category": "Mittag",
-"entries": ["Essen bringen", "Füttern"]
-},
-{
-"category": "Waschen",
-"entries": ["OK waschen", "Haare kämmen"]
-},
+    {"items": [
+        {
+            "category": "Mittag",
+            "entries": ["Essen bringen", "Füttern"]
+        },
+        {
+            "category": "Waschen",
+            "entries": ["OK waschen", "Haare kämmen"]
+        },
 ]}
  */
 

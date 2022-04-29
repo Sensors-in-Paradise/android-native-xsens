@@ -19,6 +19,6 @@
     <string name="default_recordings_subdir">ML Prototype Recordings</string>
     <string name="default_webdav_cloud_url">https://magentacloud.de/remote.php/webdav/</string>
     <string name="default_webdav_username">120049010000000332523454</string>
-    <string name="missing_model_dialog_message">You are missing a model file in the currently selcted use case directory. For using training and prediction with this use case, you need to properly import a model for this use case. For now you can only use the collection of data with this use case.</string>
+    <string name="missing_model_dialog_message">You are missing a model file in the currently selected use case directory. For using training and prediction with this use case, you need to properly import a model for this use case. For now you can only use the collection of data with this use case. If you want you can use the default model for recognizing human activities. If so, click YES.</string>
     <string name="missing_model_dialog_title">Model missing for this use case!</string>
 </resources>

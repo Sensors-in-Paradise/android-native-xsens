@@ -2,6 +2,7 @@ package sensors_in_paradise.sonar.page2.labels_editor
 
 import android.os.Handler
 import android.os.Looper
+import sensors_in_paradise.sonar.screen_recording.labels_editor.VideoViewHolder
 import java.util.*
 
 abstract class IntervalLooper {

@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
        >
-        <sensors_in_paradise.sonar.page2.labels_editor.ItemClickableMotionLayout
+        <sensors_in_paradise.sonar.screen_recording.labels_editor.ItemClickableMotionLayout
             android:id="@+id/motionLayout_carouselParent_labelEditor"
             android:layout_width="match_parent"
             android:layout_height="70dp"
@@ -135,7 +135,7 @@
                 app:carousel_previousState="@+id/previous"
                 app:constraint_referenced_ids="tv_carouselItem0_labelEditor,tv_carouselItem1_labelEditor,tv_carouselItem2_labelEditor,tv_carouselItem3_labelEditor,tv_carouselItem4_labelEditor" />
 
-        </sensors_in_paradise.sonar.page2.labels_editor.ItemClickableMotionLayout>
+        </sensors_in_paradise.sonar.screen_recording.labels_editor.ItemClickableMotionLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

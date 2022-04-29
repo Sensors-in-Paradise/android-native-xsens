@@ -1,6 +1,6 @@
-package sensors_in_paradise.sonar.page2.labels_editor
+package sensors_in_paradise.sonar.screen_recording.labels_editor
 
-import java.util.*
+import sensors_in_paradise.sonar.page2.labels_editor.IntervalLooper
 
 abstract class VisualSequenceViewHolder(protected val onPreparedListener: () -> Unit) : IntervalLooper() {
     var sourcePath: String? = null

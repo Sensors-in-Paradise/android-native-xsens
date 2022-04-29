@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.util.Log
 import android.view.View
 import android.widget.Chronometer
 import android.widget.ProgressBar
@@ -16,23 +17,25 @@ import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import org.tensorflow.lite.DataType
+import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import sensors_in_paradise.sonar.*
-import sensors_in_paradise.sonar.util.PredictionHelper
-import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
-import sensors_in_paradise.sonar.XSENSArrayList
+import sensors_in_paradise.sonar.util.PredictionHelper
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.UIHelper
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import sensors_in_paradise.sonar.util.use_cases.UseCase
 import java.nio.ByteBuffer
+import java.nio.MappedByteBuffer
 import kotlin.math.round
 
 class PredictionScreen(
+    private var currentUseCase: UseCase,
     private val devices: XSENSArrayList,
     private val sensorOccupationInterface: SensorOccupationInterface?
 ) : ScreenInterface, ConnectionInterface {
+
     private lateinit var activity: Activity
     private lateinit var context: Context
     private lateinit var recyclerView: RecyclerView
@@ -46,7 +49,9 @@ class PredictionScreen(
     private lateinit var predictionHelper: PredictionHelper
     private val predictions = ArrayList<Prediction>()
     private val rawSensorDataMap = mutableMapOf<String, MutableList<Pair<Long, FloatArray>>>()
-    // private var sensorDataByteBuffer: ByteBuffer? = null
+    private var sensorDataByteBuffer: ByteBuffer? = null
+    private lateinit var predictionModel: MappedByteBuffer
+    private lateinit var interpreter: Interpreter
 
     private var lastPrediction = 0L
 
@@ -190,14 +195,15 @@ class PredictionScreen(
         )
         inputFeature0.loadBuffer(sensorDataByteBuffer)
 
+
         // Runs model inference and gets result
         // TODO: make work with our new use case concept
-        /*
-        val outputs = predictionModel.process(inputFeature0)
-        val outputFeature0 = outputs.outputFeature0AsTensorBuffer
 
-        addPredictionViews(outputFeature0.floatArray)
-         */
+        //val outputs = interpreter.
+        //val outputFeature0 = outputs.outputFeature0AsTensorBuffer
+
+        //addPredictionViews(outputFeature0.floatArray)
+
     }
 
     override fun onActivityCreated(activity: Activity) {
@@ -219,15 +225,25 @@ class PredictionScreen(
         predictionButton = activity.findViewById(R.id.button_start_predict)
         progressBar = activity.findViewById(R.id.progressBar_nextPrediction_predictionFragment)
         predictionButton.setOnClickListener {
-            // TODO: replace by our MessageDialog
-            if (false) {
+            if (currentUseCase.getModelFile().isFile) {
+                predictionModel =
+                    currentUseCase.extractModelFromFile(currentUseCase.getModelFile().name)!!
+                interpreter = Interpreter(predictionModel)
+                val signatures = interpreter.signatureKeys
+                Log.d("PredictionScreen-onActivityCreated", signatures.toString())
+                togglePrediction()
+            } else {
                 MessageDialog(
                     context,
-                    context.getString(R.string.missing_model_dialog_message),
-                    context.getString(R.string.missing_model_dialog_title)
+                    message = context.getString(R.string.missing_model_dialog_message),
+                    title = context.getString(R.string.missing_model_dialog_title),
+                    onPositiveButtonClickListener = { _, _ ->
+                        predictionModel =
+                            currentUseCase.extractModelFromFile()!!
+                        interpreter = Interpreter(predictionModel)
+                        togglePrediction()
+                    }
                 )
-            } else {
-                togglePrediction()
             }
         }
 
@@ -266,6 +282,6 @@ class PredictionScreen(
     }
 
     override fun onUseCaseChanged(useCase: UseCase) {
-        // predictionModel = useCase.extractModelFromFile()
+        currentUseCase = useCase
     }
 }

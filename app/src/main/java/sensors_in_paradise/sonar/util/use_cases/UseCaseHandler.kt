@@ -12,7 +12,7 @@ class UseCaseHandler(
 ) {
     private var useCaseStorage = UseCaseStorage(context)
     private val useCasesBaseDir = getUseCasesBaseDir(context)
-    private var defaultUseCase = UseCase(
+    private var defaultUseCase = UseCase(context,
         useCasesBaseDir, DEFAULT_USE_CASE_TITLE, useCaseStorage.getSelectedSubDir(
             DEFAULT_USE_CASE_TITLE
         ), this::onRecordingsSubDirOfUseCaseChanged
@@ -36,7 +36,10 @@ class UseCaseHandler(
             for (dir in useCaseDirs) {
                 availableUseCases.add(
                     UseCase(
-                        useCasesBaseDir, dir.name, useCaseStorage.getSelectedSubDir(
+                        context,
+                        useCasesBaseDir,
+                        dir.name,
+                        useCaseStorage.getSelectedSubDir(
                             dir.name
                         ), this::onRecordingsSubDirOfUseCaseChanged
                     )
@@ -59,6 +62,7 @@ class UseCaseHandler(
 
     fun createAndSetUseCase(title: String) {
         val useCase = UseCase(
+            context,
             useCasesBaseDir,
             title,
             onSubdirectoryChanged = this::onRecordingsSubDirOfUseCaseChanged

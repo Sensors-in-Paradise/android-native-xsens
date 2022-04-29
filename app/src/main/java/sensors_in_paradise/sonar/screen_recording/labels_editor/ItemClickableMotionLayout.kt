@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.page2.labels_editor
+package sensors_in_paradise.sonar.screen_recording.labels_editor
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -8,6 +8,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import androidx.constraintlayout.motion.widget.MotionLayout
+import sensors_in_paradise.sonar.page2.labels_editor.ClickableCarouselTextView
 import kotlin.math.abs
 
 class ItemClickableMotionLayout(context: Context, attributeSet: AttributeSet) :
