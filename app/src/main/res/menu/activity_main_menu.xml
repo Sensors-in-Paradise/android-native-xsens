@@ -19,7 +19,7 @@
         android:id="@+id/menuItem_stickman_activityMain"
         android:onClick="onStickmanMenuItemClicked"
         android:title="Stickman"
-        android:visible="true"/>
+        android:visible="false"/>
     <item
         android:id="@+id/menuItem_headingReset_activityMain"
         android:onClick="onHeadingResetMenuItemClicked"
@@ -33,7 +33,7 @@
     <item
         android:id="@+id/menuItem_useCases_activityMain"
         android:onClick="onUseCasesMenuItemClicked"
-        android:title="Use Cases" />
+        android:title="💼 Use Cases" />
     <item
         android:id="@+id/menuItem_settings_activityMain"
         android:onClick="onSettingsMenuItemClicked"
