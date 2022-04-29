@@ -44,7 +44,10 @@ class UseCase(
         val subDirs =
             (getRecordingsDir().listFiles { d, name -> File(d, name).isDirectory })?.map { it.name }
         if (subDirs == null) {
-            throw IllegalStateException("A use case must at least have the default $DEFAULT_RECORDINGS_SUB_DIR_NAME subdirectory but it has none.")
+            throw IllegalStateException(
+                "A use case must at least have the default $DEFAULT_RECORDINGS_SUB_DIR_NAME" +
+                        " subdirectory but it has none."
+            )
         }
         return subDirs
     }

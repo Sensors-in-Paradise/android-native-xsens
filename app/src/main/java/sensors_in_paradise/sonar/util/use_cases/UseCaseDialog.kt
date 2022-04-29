@@ -68,7 +68,9 @@ class UseCaseDialog(context: Context, useCaseHandler: UseCaseHandler) {
                 })
             }
             dialog.window
-                ?.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+                ?.clearFlags(
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                )
         }
         dialog.show()
     }

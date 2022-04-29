@@ -12,9 +12,12 @@ import android.widget.*
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.R
-import kotlin.collections.ArrayList
 
-class UseCasesAdapter(val context: Context, val useCases: ArrayList<UseCase>, val onSelectedUseCaseChanged: (useCase: UseCase) -> Unit) :
+class UseCasesAdapter(
+    val context: Context,
+    val useCases: ArrayList<UseCase>,
+    val onSelectedUseCaseChanged: (useCase: UseCase) -> Unit
+) :
     RecyclerView.Adapter<UseCasesAdapter.ViewHolder>() {
     private val uiHandler = Handler(Looper.getMainLooper())
     private var lastMeasuredSize = 0

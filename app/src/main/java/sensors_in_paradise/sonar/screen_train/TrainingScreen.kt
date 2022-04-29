@@ -25,7 +25,10 @@ import sensors_in_paradise.sonar.ScreenInterface
 import sensors_in_paradise.sonar.screen_recording.RecordingDataManager
 import sensors_in_paradise.sonar.util.use_cases.UseCase
 
-class TrainingScreen(private val recordingsManager: RecordingDataManager, private var currentUseCase: UseCase) : ScreenInterface {
+class TrainingScreen(
+    private val recordingsManager: RecordingDataManager,
+    private var currentUseCase: UseCase
+) : ScreenInterface {
     private lateinit var activitiesPieChart: PieChart
     private lateinit var peoplePieChart: PieChart
     private lateinit var context: Context
