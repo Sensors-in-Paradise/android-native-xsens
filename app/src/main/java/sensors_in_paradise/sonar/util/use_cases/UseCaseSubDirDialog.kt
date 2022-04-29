@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import sensors_in_paradise.sonar.util.dialogs.TextInputDialog
-import java.io.File
 
 class UseCaseSubDirDialog(context: Context, currentUseCase: UseCase) {
 

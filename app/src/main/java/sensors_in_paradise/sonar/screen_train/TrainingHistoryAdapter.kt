@@ -16,7 +16,7 @@ class TrainingHistoryAdapter(trainingHistory: ArrayList<TrainingHistoryStorage.T
     RecyclerView.Adapter<TrainingHistoryAdapter.ViewHolder>() {
     var trainingHistory = trainingHistory
         @SuppressLint("NotifyDataSetChanged")
-        set(value){
+        set(value) {
             field = value
             notifyDataSetChanged()
         }

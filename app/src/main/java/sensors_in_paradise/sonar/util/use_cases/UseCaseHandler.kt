@@ -3,9 +3,6 @@ package sensors_in_paradise.sonar.util.use_cases
 import android.content.Context
 import android.util.Log
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.nio.channels.FileChannel
 
 class UseCaseHandler(
     val context: Context
@@ -59,7 +56,7 @@ class UseCaseHandler(
         currentUseCase = useCase
         onUseCaseChanged?.invoke(useCase)
     }
-    fun createUseCase(title:String): UseCase{
+    fun createUseCase(title: String): UseCase {
             val useCase = UseCase(
                 context,
                 useCasesBaseDir,
@@ -75,17 +72,6 @@ class UseCaseHandler(
 
     fun getCurrentUseCase(): UseCase {
         return currentUseCase
-    }
-
-    private fun extractDefaultModel(destination: File) {
-        val inStream: FileInputStream =
-            context.assets.open("LSTMModel118") as FileInputStream
-        val outStream = FileOutputStream(destination)
-        val inChannel: FileChannel = inStream.channel
-        val outChannel: FileChannel = outStream.channel
-        inChannel.transferTo(0, inChannel.size(), outChannel)
-        inStream.close()
-        outStream.close()
     }
 
     fun hasUseCase(title: String): Boolean {

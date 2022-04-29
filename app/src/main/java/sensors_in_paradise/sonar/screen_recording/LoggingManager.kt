@@ -15,7 +15,6 @@ import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.util.UIHelper
 import sensors_in_paradise.sonar.util.use_cases.UseCase
-import sensors_in_paradise.sonar.util.use_cases.UseCaseHandler
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Files

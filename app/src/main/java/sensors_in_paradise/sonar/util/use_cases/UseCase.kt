@@ -6,7 +6,6 @@ import java.io.FileInputStream
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 
-
 class UseCase(
     val context: Context,
     baseDir: File,
@@ -17,7 +16,6 @@ class UseCase(
     private val useCaseDir = baseDir.resolve(title).apply { mkdirs() }
     private var recordingsSubDir =
         getRecordingsDir().resolve(recordingsSubDirName).apply { mkdir() }
-
 
     fun getActivityLabelsJSONFile(): File {
         return useCaseDir.resolve("labels.json")
@@ -62,7 +60,7 @@ class UseCase(
 
         val inputStream = FileInputStream(file)
 
-        val mappedByteBuffer =  inputStream.channel.map(
+        val mappedByteBuffer = inputStream.channel.map(
             FileChannel.MapMode.READ_ONLY, 0,
             file.length()
         )

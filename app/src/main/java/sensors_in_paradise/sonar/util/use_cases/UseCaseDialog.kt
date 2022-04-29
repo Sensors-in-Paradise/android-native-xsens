@@ -13,20 +13,17 @@ import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.util.dialogs.TextInputDialog
 
-
 class UseCaseDialog(context: Context, useCaseHandler: UseCaseHandler) {
     private var selectedUseCase = useCaseHandler.getCurrentUseCase()
-    init{
+    init {
         val availableUseCases = useCaseHandler.availableUseCases
-
-
 
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Choose a use case")
         builder.setMessage("Each use case stores its own tflite model, labels, people and recordings.")
         val root = LayoutInflater.from(context).inflate(R.layout.usecase_dialog, null)
         val recyclerView = root.findViewById<RecyclerView>(R.id.recyclerView_useCases_useCaseDialog)
-        val useCasesAdapter = UseCasesAdapter(context, availableUseCases){
+        val useCasesAdapter = UseCasesAdapter(context, availableUseCases) {
             selectedUseCase = it
         }
         val addUseCaseButton = root.findViewById<ImageButton>(R.id.imageButton_addUseCase_useCaseDialog)
@@ -36,8 +33,8 @@ class UseCaseDialog(context: Context, useCaseHandler: UseCaseHandler) {
             addTextChangedListener {
                 val value = text.toString()
                 val len = value.length
-                addUseCaseButton.apply{
-                    isEnabled = availableUseCases.find { it.title == value } == null && len>0
+                addUseCaseButton.apply {
+                    isEnabled = availableUseCases.find { it.title == value } == null && len> 0
                 }
         }
         }
@@ -63,9 +60,9 @@ class UseCaseDialog(context: Context, useCaseHandler: UseCaseHandler) {
         builder.setNeutralButton("New Use Case", null)
         val dialog = builder.create()
         dialog.setOnShowListener {
-            dialog.getButton(Dialog.BUTTON_NEUTRAL).setOnClickListener{
+            dialog.getButton(Dialog.BUTTON_NEUTRAL).setOnClickListener {
                 _ ->
-                TextInputDialog(context, "Create new use case",hint="Title of use case", promptInterface = {
+                TextInputDialog(context, "Create new use case", hint = "Title of use case", promptInterface = {
                     useCaseHandler.createAndSetUseCase(it)
                     dialog.dismiss()
                 })

@@ -62,7 +62,7 @@ class RecordingsAdapter(
             itemView.setOnClickListener {
                 val onEditBtnClickListener =
                     DialogInterface.OnClickListener { _: DialogInterface, _: Int ->
-                        LabelsEditorDialog(context, currentUseCase,recording) {
+                        LabelsEditorDialog(context, currentUseCase, recording) {
                             notifyItemChanged(position)
                         }
                     }

@@ -59,7 +59,7 @@ class TrainingScreen(private val recordingsManager: RecordingDataManager, privat
     override fun onScreenOpened() {
         populateAndAnimateCharts()
     }
-    fun populateAndAnimateCharts(){
+    fun populateAndAnimateCharts() {
         populateDurationPieChart(
             activitiesPieChart,
             recordingsManager.getActivityDurationsOfTrainableRecordings()

@@ -1,11 +1,9 @@
 package sensors_in_paradise.sonar.screen_train
 
-import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
 import sensors_in_paradise.sonar.JSONStorage
 import sensors_in_paradise.sonar.util.use_cases.UseCase
-import java.io.File
 
 class TrainingHistoryStorage(useCase: UseCase) :
     JSONStorage(useCase.getTrainingHistoryJSONFile()) {
@@ -91,5 +89,4 @@ class TrainingHistoryStorage(useCase: UseCase) :
         }
         return result
     }
-
 }

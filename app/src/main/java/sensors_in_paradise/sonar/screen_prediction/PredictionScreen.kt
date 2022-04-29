@@ -195,15 +195,13 @@ class PredictionScreen(
         )
         inputFeature0.loadBuffer(sensorDataByteBuffer)
 
-
         // Runs model inference and gets result
         // TODO: make work with our new use case concept
 
-        //val outputs = interpreter.
-        //val outputFeature0 = outputs.outputFeature0AsTensorBuffer
+        // val outputs = interpreter.
+        // val outputFeature0 = outputs.outputFeature0AsTensorBuffer
 
-        //addPredictionViews(outputFeature0.floatArray)
-
+        // addPredictionViews(outputFeature0.floatArray)
     }
 
     override fun onActivityCreated(activity: Activity) {

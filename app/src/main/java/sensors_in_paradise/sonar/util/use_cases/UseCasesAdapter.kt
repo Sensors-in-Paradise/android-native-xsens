@@ -14,14 +14,14 @@ import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.R
 import kotlin.collections.ArrayList
 
-class UseCasesAdapter(val context: Context, val useCases: ArrayList<UseCase>, val onSelectedUseCaseChanged: (useCase: UseCase)-> Unit) :
+class UseCasesAdapter(val context: Context, val useCases: ArrayList<UseCase>, val onSelectedUseCaseChanged: (useCase: UseCase) -> Unit) :
     RecyclerView.Adapter<UseCasesAdapter.ViewHolder>() {
     private val uiHandler = Handler(Looper.getMainLooper())
     private var lastMeasuredSize = 0
     var selectedIndex = 0
-        set(value){
+        set(value) {
             val before = field
-            if(field!=value) {
+            if (field != value) {
                 field = value
 
                 uiHandler.run {
@@ -60,7 +60,7 @@ class UseCasesAdapter(val context: Context, val useCases: ArrayList<UseCase>, va
         val subDirs = useCase.getAvailableRecordingSubDirs()
         val isSelected = selectedIndex == position
 
-        val addRadioButtonToSubDirs: (name:String, id: Int, selected:Boolean)-> Unit = {name,id, selected ->
+        val addRadioButtonToSubDirs: (name: String, id: Int, selected: Boolean) -> Unit = { name, id, selected ->
             val rb = RadioButton(context)
             rb.id = id
             rb.text = name
@@ -74,21 +74,21 @@ class UseCasesAdapter(val context: Context, val useCases: ArrayList<UseCase>, va
             setOnCheckedChangeListener { _, checked ->
                 Log.d("UseCaseAdapter", "onCheckedChangeListener now at index $position")
                 // remove on checked change listener to prevent illegal state
-                if(checked) {
+                if (checked) {
                     setOnCheckedChangeListener(null)
                     selectedIndex = position
                 }
             }
         }
-        holder.subDirsLL.visibility = if(isSelected) View.VISIBLE else View.GONE
+        holder.subDirsLL.visibility = if (isSelected) View.VISIBLE else View.GONE
         holder.subDirsRadioGroup.apply {
             removeAllViews()
-            setOnCheckedChangeListener{
-                _,index->
+            setOnCheckedChangeListener {
+                _, index ->
                 useCase.setRecordingsSubDir(subDirs[index])
             }
-            for((i, subDir) in subDirs.withIndex()){
-                addRadioButtonToSubDirs(subDir, i,  useCase.getRecordingsSubDir().name == subDir)
+            for ((i, subDir) in subDirs.withIndex()) {
+                addRadioButtonToSubDirs(subDir, i, useCase.getRecordingsSubDir().name == subDir)
             }
         }
         holder.addSubDirEditText.apply {
@@ -96,8 +96,8 @@ class UseCasesAdapter(val context: Context, val useCases: ArrayList<UseCase>, va
             addTextChangedListener {
                 val value = text.toString()
                 val len = value.length
-                holder.addSubDirButton.apply{
-                    isEnabled = value !in subDirs && len>0
+                holder.addSubDirButton.apply {
+                    isEnabled = value !in subDirs && len> 0
                     Log.d("UseCaseAdapter", "addSubDirButton isEnabled: $isEnabled")
                 }
             }
@@ -110,14 +110,13 @@ class UseCasesAdapter(val context: Context, val useCases: ArrayList<UseCase>, va
                     val value = text.toString()
                     useCase.setRecordingsSubDir(value)
 
-                    uiHandler.run{
+                    uiHandler.run {
                         notifyItemChanged(position)
                     }
                 }
             }
         }
     }
-
 
     override fun getItemCount(): Int {
         lastMeasuredSize = useCases.size

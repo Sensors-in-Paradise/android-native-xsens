@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         val trainingScreen = TrainingScreen(recordingsManager, useCaseHandler.getCurrentUseCase())
         screenHandlers.add(trainingScreen)
 
-        val predictionScreen = PredictionScreen(useCaseHandler.getCurrentUseCase() ,scannedDevices, this)
+        val predictionScreen = PredictionScreen(useCaseHandler.getCurrentUseCase(), scannedDevices, this)
         screenHandlers.add(predictionScreen)
 
         connectionScreen.addConnectionInterface(recordingScreen)
