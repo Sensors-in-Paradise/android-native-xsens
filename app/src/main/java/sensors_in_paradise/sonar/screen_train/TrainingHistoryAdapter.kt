@@ -43,6 +43,7 @@ class TrainingHistoryAdapter(trainingHistory: ArrayList<TrainingHistoryStorage.T
         val occasion = trainingHistory[position]
         holder.titleTV.text = dateFormat.format(Date(occasion.timestamp))
         var subtitle = "Duration ${GlobalValues.getDurationAsString(occasion.getTotalDuration())}"
+        subtitle += "\n\uD83D\uDCC2 ${occasion.subdirectory}"
         subtitle += "\n${occasion.getNumActivities()} activities"
         subtitle += "\n${occasion.getNumPeople()} people"
         holder.subTitleTV.text = subtitle

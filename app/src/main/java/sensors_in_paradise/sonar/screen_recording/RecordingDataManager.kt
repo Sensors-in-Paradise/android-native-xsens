@@ -1,29 +1,35 @@
 package sensors_in_paradise.sonar.screen_recording
 
 import sensors_in_paradise.sonar.GlobalValues
+import sensors_in_paradise.sonar.ObservableArrayList
 import java.io.File
 
-class RecordingDataManager(recordingsDir: File, val recordingsList: ArrayList<Recording>) {
+class RecordingDataManager(recordingsDir: File):
+    ObservableArrayList<Recording>() {
     var recordingsDir: File = recordingsDir
         set(value) {
             field = value
             loadRecordingsFromStorage()
         }
-    constructor(recordingsDir: File) : this(recordingsDir, ArrayList<Recording>()) {
+
+    init{
+        loadRecordingsFromStorage()
+    }
+    fun reloadRecordingsFromStorage(){
         loadRecordingsFromStorage()
     }
 
     private fun loadRecordingsFromStorage() {
-        recordingsList.clear()
+        clear()
 
         recordingsDir.walk().forEach {
             if (it.isDirectory) {
                 if (isRecordingDir(it)) {
-                    recordingsList.add(Recording(it))
+                    add(Recording(it))
                 }
             }
         }
-        recordingsList.sortByDescending { recording -> recording.metadataStorage.getTimeStarted() }
+        sortByDescending { recording -> recording.metadataStorage.getTimeStarted() }
     }
 
     private fun isRecordingDir(file: File): Boolean {
@@ -37,7 +43,7 @@ class RecordingDataManager(recordingsDir: File, val recordingsList: ArrayList<Re
 
     fun getNumberOfRecordingsPerActivity(): Map<String, Int> {
         val activities = ArrayList<String>()
-        for (rec in recordingsList) {
+        for (rec in this) {
             val storage = rec.metadataStorage
             activities.addAll(storage.getActivities().map { (_, label) -> label })
         }
@@ -46,12 +52,12 @@ class RecordingDataManager(recordingsDir: File, val recordingsList: ArrayList<Re
 
     fun deleteRecording(recording: Recording) {
         recording.delete()
-        recordingsList.remove(recording)
+        remove(recording)
     }
 
     fun getActivityDurationsOfTrainableRecordings(): Map<String, Long> {
         val result = mutableMapOf<String, Long>()
-        for (recording in recordingsList) {
+        for (recording in this) {
 
             val metadata = recording.metadataStorage
             if (!metadata.hasBeenUsedForOnDeviceTraining()) {
@@ -69,7 +75,7 @@ class RecordingDataManager(recordingsDir: File, val recordingsList: ArrayList<Re
     }
     fun getPeopleDurationsOfTrainableRecordings(): Map<String, Long> {
         val result = mutableMapOf<String, Long>()
-        for (recording in recordingsList) {
+        for (recording in this) {
             val metadata = recording.metadataStorage
             val person = metadata.getPerson()
             result[person] = metadata.getDuration() + (result[person] ?: 0L)

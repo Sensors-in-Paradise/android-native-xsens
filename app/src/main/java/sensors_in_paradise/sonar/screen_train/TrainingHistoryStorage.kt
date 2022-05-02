@@ -9,6 +9,7 @@ class TrainingHistoryStorage(useCase: UseCase) :
     JSONStorage(useCase.getTrainingHistoryJSONFile()) {
     data class TrainingOccasion(
         val timestamp: Long,
+        val subdirectory: String,
         val peopleDurations: Map<String, Long>,
         val activityDurations: Map<String, Long>
     ) {
@@ -39,6 +40,7 @@ class TrainingHistoryStorage(useCase: UseCase) :
     }
 
     fun addTrainingOccasion(
+        subdirectory: String,
         trainingDataPeopleDistribution: Map<String, Long>,
         trainingDataActivityDistribution: Map<String, Long>
     ): TrainingOccasion {
@@ -47,12 +49,14 @@ class TrainingHistoryStorage(useCase: UseCase) :
         val activityDurationObj = storeMapInJsonObj(trainingDataActivityDistribution)
         occasionObj.put("peopleDurations", peopleDurationObj)
         occasionObj.put("activityDurations", activityDurationObj)
+        occasionObj.put("subdirectory", subdirectory)
         val time = System.currentTimeMillis()
         occasionObj.put("timestamp", time)
         history.put(occasionObj)
         save()
         return TrainingOccasion(
             time,
+            subdirectory,
             trainingDataPeopleDistribution,
             trainingDataActivityDistribution
         )
@@ -62,10 +66,11 @@ class TrainingHistoryStorage(useCase: UseCase) :
         val result = arrayListOf<TrainingOccasion>()
         for (i in 0 until history.length()) {
             val obj = history.getJSONObject(i)
+            val subdirectory = if(obj.has("subdirectory")) obj.getString("subdirectory") else UseCase.DEFAULT_RECORDINGS_SUB_DIR_NAME
             val timestamp = obj.getLong("timestamp")
             val activityDurations = getMapFromJsonObj(obj.getJSONObject("activityDurations"))
             val peopleDurations = getMapFromJsonObj(obj.getJSONObject("peopleDurations"))
-            result.add(TrainingOccasion(timestamp, peopleDurations, activityDurations))
+            result.add(TrainingOccasion(timestamp,subdirectory, peopleDurations, activityDurations))
         }
         if (sortLatestFirst) {
             result.sortByDescending { it.timestamp }

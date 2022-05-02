@@ -23,7 +23,7 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
     }
     fun reloadRecordings() {
         recordingUiItems.clear()
-        for (recording in recordingsManager.recordingsList) {
+        for (recording in recordingsManager) {
             val recording = RecordingUIItem(recording, davCloudMetadata.localUploadedFilesBaseDir)
 
             for (file in recording.filesAndDirsToBeUploaded) {

@@ -49,6 +49,7 @@ class TrainingScreen(
         historyRV.adapter = trainingHistoryAdapter
         trainBtn.setOnClickListener {
             val item = trainingHistoryStorage.addTrainingOccasion(
+                currentUseCase.getRecordingsSubDir().name,
                 recordingsManager.getPeopleDurationsOfTrainableRecordings(),
                 recordingsManager.getActivityDurationsOfTrainableRecordings()
             )

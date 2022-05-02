@@ -57,13 +57,13 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         tabLayout = findViewById(R.id.tab_layout_activity_main)
         useCaseHandler = UseCaseHandler(this)
         recordingsManager = RecordingDataManager(
-            useCaseHandler.getCurrentUseCase().getRecordingsDir()
+            useCaseHandler.getCurrentUseCase().getRecordingsSubDir()
         )
         trainingTab = tabLayout.getTabAt(2)!!
 
         supportActionBar?.subtitle = useCaseHandler.getCurrentUseCase().getDisplayInfo()
         useCaseHandler.setOnUseCaseChanged { useCase: UseCase ->
-            recordingsManager.recordingsDir = useCase.getRecordingsDir()
+            recordingsManager.recordingsDir = useCase.getRecordingsSubDir()
             screenHandlers.forEach {
                 it.onUseCaseChanged(
                     useCase
@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         }
         supportActionBar?.setBackgroundDrawable(ColorDrawable(getColor(R.color.colorPrimary)))
 
-        davCloudUploader = DavCloudRecordingsUploader(this, recordingsManager)
+        davCloudUploader = DavCloudRecordingsUploader(this, RecordingDataManager(useCaseHandler.useCasesBaseDir))
 
         // Force crashlytics to be enabled (we might want to disable it in debug mode / ...)
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)

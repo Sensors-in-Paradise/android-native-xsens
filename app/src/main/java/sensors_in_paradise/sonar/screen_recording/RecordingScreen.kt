@@ -33,6 +33,7 @@ class RecordingScreen(
     private lateinit var recordingsAdapter: RecordingsAdapter
     private lateinit var tabLayout: TabLayout
     private lateinit var activitiesCenterTV: TextView
+    private lateinit var noRecordingsCenterTV: TextView
     private var activitiesTab: TabLayout.Tab? = null
     private var recordingsTab: TabLayout.Tab? = null
     private lateinit var cameraTab: TabLayout.Tab
@@ -51,13 +52,14 @@ class RecordingScreen(
         val linearLayoutManager = LinearLayoutManager(context)
         recyclerViewRecordings.layoutManager = linearLayoutManager
         recordingsAdapter = RecordingsAdapter(recordingsManager, context, currentUseCase)
+        recordingsManager.addOnSizeChangedListener { updateNoRecordingsTVVisibility() }
         recyclerViewRecordings.adapter = recordingsAdapter
         viewAnimator = activity.findViewById(R.id.viewSwitcher_captureFragment)
         tabLayout = activity.findViewById(R.id.tabLayout_captureFragment)
         activitiesCenterTV = activity.findViewById(R.id.textView_no_activities_captureFragment)
         activitiesTab = tabLayout.getTabAt(1)
         recordingsTab = tabLayout.getTabAt(0)
-
+        noRecordingsCenterTV = activity.findViewById(R.id.textView_noRecordings_captureFragment)
         cameraTab = tabLayout.newTab().apply {
             text = "Camera"
         }
@@ -77,6 +79,7 @@ class RecordingScreen(
         tabLayout.addOnTabSelectedListener(this)
         cameraManager =
             CameraManager(context, activity.findViewById(R.id.previewView_camera_captureFragment))
+        updateNoRecordingsTVVisibility()
     }
 
     private fun initializeLoggingManagerCallbacks() {
@@ -112,7 +115,7 @@ class RecordingScreen(
                 try {
                     Files.move(videoTempFile, dir.resolve(Recording.VIDEO_CAPTURE_FILENAME))
                     val recordingIndex =
-                        recordingsManager.recordingsList.indexOfFirst { r -> r.dir == dir }
+                        recordingsManager.indexOfFirst { r -> r.dir == dir }
                     recordingsAdapter.notifyItemChanged(recordingIndex)
                 } catch (e: IOException) {
                     e.printStackTrace()
@@ -125,7 +128,7 @@ class RecordingScreen(
     }
 
     private fun addRecordingToUI(recording: Recording) {
-        recordingsManager.recordingsList.add(0, recording)
+        recordingsManager.add(0, recording)
         recordingsAdapter.notifyItemInserted(0)
     }
 
@@ -175,6 +178,9 @@ class RecordingScreen(
                 tabLayout.removeTab(cameraTab)
             }
         }
+    }
+    private fun updateNoRecordingsTVVisibility(){
+        noRecordingsCenterTV.visibility = if(recordingsManager.isEmpty()) View.VISIBLE else View.INVISIBLE
     }
 
     @SuppressLint("NotifyDataSetChanged")

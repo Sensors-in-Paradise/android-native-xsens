@@ -11,37 +11,41 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.selects.select
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import sensors_in_paradise.sonar.util.dialogs.TextInputDialog
 
 class UseCasesAdapter(
     val context: Context,
-    val useCases: ArrayList<UseCase>,
-    val onSelectedUseCaseChanged: (useCase: UseCase) -> Unit
+    private val useCases: ArrayList<UseCase>,
+    selectedUseCase: UseCase,
+    val onSelectedUseCaseChanged: (useCase: UseCase?) -> Unit
 ) :
     RecyclerView.Adapter<UseCasesAdapter.ViewHolder>() {
     private val uiHandler = Handler(Looper.getMainLooper())
     private var lastMeasuredSize = 0
-    var selectedIndex = 0
-        set(value) {
-            val before = field
-            if (field != value) {
-                field = value
 
-                uiHandler.run {
-                    Log.d("UseCasesAdapter", "setting selected Index $value")
-                    notifyItemChanged(before)
-                    if (value >= lastMeasuredSize) {
-                        notifyItemInserted(value)
-                    } else {
-                        notifyItemChanged(value)
-                    }
-                    onSelectedUseCaseChanged(useCases[value])
+    private var selectedIndex = useCases.indexOf(selectedUseCase)
+        set(value){
+            field = value
+            onSelectedUseCaseChanged(if(field!=-1) useCases[selectedIndex] else null)
+        }
+
+    fun selectItem(index: Int){
+        uiHandler.run {
+            val before = selectedIndex
+            if(before!=index) {
+                selectedIndex = index
+                notifyItemChanged(before)
+                if (index >= lastMeasuredSize) {
+                    notifyItemInserted(index)
+                } else {
+                    notifyItemChanged(index)
                 }
             }
         }
-
+    }
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val radioButton: RadioButton = view.findViewById(R.id.radioButton_useCaseItem)
         val subDirsRadioGroup: RadioGroup = view.findViewById(R.id.radioGroup_subDirs_useCaseItem)
@@ -86,7 +90,7 @@ class UseCasesAdapter(
                 // remove on checked change listener to prevent illegal state
                 if (checked) {
                     setOnCheckedChangeListener(null)
-                    selectedIndex = indexOf(useCase)
+                    selectItem(indexOf(useCase))
                 }
             }
         }
@@ -118,7 +122,7 @@ class UseCasesAdapter(
                 holder.addSubDirEditText.apply {
                     val value = text.toString()
                     useCase.setRecordingsSubDir(value)
-
+                    setText("")
                     uiHandler.run {
                         notifyItemChanged(indexOf(useCase))
                     }
@@ -129,25 +133,22 @@ class UseCasesAdapter(
             visibility = if(isSelected) View.VISIBLE else View.INVISIBLE
             isEnabled = useCase.title != UseCaseHandler.DEFAULT_USE_CASE_TITLE
             setOnClickListener {
+
                 MessageDialog(
                     context,
                     "Do you really want to delete the use case \"${useCase.title}\"?",
                     onPositiveButtonClickListener = { _, _ ->
                         val useCaseIndex = indexOf(useCase)
-                        Log.d("UseCasesAdapter", "Removing use case at index $selectedIndex")
-                        if (selectedIndex == useCaseIndex) {
-                            val defaultIndex = indexOfDefault()
-                            Log.d("UseCasesAdapter", "Setting selected index to default $defaultIndex")
-                            selectedIndex = defaultIndex
-                        }
-                        val sizeBefore = useCases.size
-                        useCase.delete()
-                        useCases.remove(useCase)
-                        Log.d("UseCasesAdapter", "Size before: $sizeBefore , After: ${useCases.size}")
                         uiHandler.post {
+                            if (selectedIndex == useCaseIndex) {
+                                selectedIndex = -1
+                            }
+                            useCase.delete()
+                            useCases.remove(useCase)
                             notifyItemRemoved(useCaseIndex)
                         }
                     })
+
             }
         }
         holder.duplicateButton.apply {
@@ -158,7 +159,8 @@ class UseCasesAdapter(
                     "Set title of use case",
                     { s ->
                         val copy = useCase.duplicate(s)
-                        val index = indexOf(useCase)+1
+                        val index = indexOf(useCase) + 1
+                        Log.d("UseCasesAdapter", "Placing duplicated item at $index")
                         useCases.add(index, copy)
                         uiHandler.run { notifyItemInserted(index) }
                     },
@@ -182,6 +184,7 @@ class UseCasesAdapter(
     }
 
     override fun getItemCount(): Int {
+        Log.d("UseCasesAdapter", "Measuring size of usecases ${useCases.size}")
         lastMeasuredSize = useCases.size
         return useCases.size
     }

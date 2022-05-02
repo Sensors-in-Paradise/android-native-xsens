@@ -43,6 +43,7 @@
                 android:ems="10"
                 android:gravity="center_horizontal"
                 android:hint="Label"
+                android:textAlignment="center"
                 android:inputType="textPersonName"
                 android:paddingVertical="16dp"
                 android:textSize="24sp" />
@@ -70,6 +71,7 @@
                 android:ems="10"
                 android:gravity="center_horizontal"
                 android:hint="Person"
+                android:textAlignment="center"
                 android:inputType="textPersonName"
                 android:paddingVertical="16dp"
                 android:textSize="24sp" />
@@ -134,11 +136,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
-
+           >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:id="@+id/textView_noRecordings_captureFragment"
+                android:lines="2"
+                android:textAlignment="center"
+                android:text="There are no recordings in the selected subdirectory 📂\n of the current use case 💼"/>
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView_recordings_captureFragment"
                 android:layout_width="match_parent"
@@ -146,7 +155,7 @@
                 android:clipToPadding="false"
                 android:paddingHorizontal="16dp"
                 app:layoutManager="LinearLayoutManager"/>
-        </LinearLayout>
+        </FrameLayout>
 
         <FrameLayout
             android:layout_width="match_parent"

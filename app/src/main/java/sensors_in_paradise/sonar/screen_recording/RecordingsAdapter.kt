@@ -19,14 +19,14 @@ import java.text.DateFormat
 import java.util.*
 
 class RecordingsAdapter(
-    private val recordingsManager: RecordingDataManager,
+    private val recordings: RecordingDataManager,
     private val context: Context,
     var currentUseCase: UseCase
 ) :
 
     RecyclerView.Adapter<RecordingsAdapter.ViewHolder>() {
     private val dateFormat = DateFormat.getDateTimeInstance()
-    private var dataSet: ArrayList<Recording> = recordingsManager.recordingsList
+
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val activityTextView: TextView = view.findViewById(R.id.tv_activity)
@@ -46,7 +46,7 @@ class RecordingsAdapter(
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        val recording = dataSet[position]
+        val recording = recordings[position]
         val metadata = recording.metadataStorage
 
         val personName = metadata.getPerson()
@@ -55,8 +55,8 @@ class RecordingsAdapter(
 
         viewHolder.apply {
             deleteButton.setOnClickListener {
-                val index = dataSet.indexOf(recording)
-                recordingsManager.deleteRecording(recording)
+                val index = recordings.indexOf(recording)
+                recordings.deleteRecording(recording)
                 notifyItemRemoved(index)
             }
             itemView.setOnClickListener {
@@ -117,5 +117,5 @@ class RecordingsAdapter(
         )
     }
 
-    override fun getItemCount() = dataSet.size
+    override fun getItemCount() = recordings.size
 }
