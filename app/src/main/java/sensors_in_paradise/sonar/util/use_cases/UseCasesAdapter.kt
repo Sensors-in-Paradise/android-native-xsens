@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.selects.select
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import sensors_in_paradise.sonar.util.dialogs.TextInputDialog
@@ -27,15 +26,15 @@ class UseCasesAdapter(
     private var lastMeasuredSize = 0
 
     private var selectedIndex = useCases.indexOf(selectedUseCase)
-        set(value){
+        set(value) {
             field = value
-            onSelectedUseCaseChanged(if(field!=-1) useCases[selectedIndex] else null)
+            onSelectedUseCaseChanged(if (field != -1) useCases[selectedIndex] else null)
         }
 
-    fun selectItem(index: Int){
+    fun selectItem(index: Int) {
         uiHandler.run {
             val before = selectedIndex
-            if(before!=index) {
+            if (before != index) {
                 selectedIndex = index
                 notifyItemChanged(before)
                 if (index >= lastMeasuredSize) {
@@ -130,7 +129,7 @@ class UseCasesAdapter(
             }
         }
         holder.deleteButton.apply {
-            visibility = if(isSelected) View.VISIBLE else View.INVISIBLE
+            visibility = if (isSelected) View.VISIBLE else View.INVISIBLE
             isEnabled = useCase.title != UseCaseHandler.DEFAULT_USE_CASE_TITLE
             setOnClickListener {
 
@@ -148,11 +147,10 @@ class UseCasesAdapter(
                             notifyItemRemoved(useCaseIndex)
                         }
                     })
-
             }
         }
         holder.duplicateButton.apply {
-            visibility = if(isSelected) View.VISIBLE else View.INVISIBLE
+            visibility = if (isSelected) View.VISIBLE else View.INVISIBLE
             setOnClickListener {
                 TextInputDialog(
                     context,

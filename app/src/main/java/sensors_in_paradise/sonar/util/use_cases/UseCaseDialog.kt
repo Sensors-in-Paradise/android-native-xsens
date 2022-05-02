@@ -1,7 +1,6 @@
 package sensors_in_paradise.sonar.util.use_cases
 
 import android.app.AlertDialog
-import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.util.Log
@@ -13,7 +12,6 @@ import android.widget.ImageButton
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.R
-import sensors_in_paradise.sonar.util.dialogs.TextInputDialog
 
 class UseCaseDialog(context: Context, useCaseHandler: UseCaseHandler) {
     private var selectedUseCase: UseCase? = useCaseHandler.getCurrentUseCase()

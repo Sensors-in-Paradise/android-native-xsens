@@ -27,7 +27,6 @@ class RecordingsAdapter(
     RecyclerView.Adapter<RecordingsAdapter.ViewHolder>() {
     private val dateFormat = DateFormat.getDateTimeInstance()
 
-
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val activityTextView: TextView = view.findViewById(R.id.tv_activity)
         val personTextView: TextView = view.findViewById(R.id.tv_person)

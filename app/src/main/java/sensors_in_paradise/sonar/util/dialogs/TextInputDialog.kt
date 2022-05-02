@@ -17,7 +17,7 @@ class TextInputDialog(
     title: String,
     promptInterface: (text: String) -> Unit,
     hint: String = "",
-    inputLabel:String = "Input your text here",
+    inputLabel: String = "Input your text here",
     startValue: String = "",
     errorMessage: String? = null,
     private val acceptanceInterface: ((text: String) -> Pair<Boolean, String?>)? = null

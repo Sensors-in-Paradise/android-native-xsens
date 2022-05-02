@@ -17,7 +17,7 @@ class UseCase(
     recordingsSubDirName: String = DEFAULT_RECORDINGS_SUB_DIR_NAME,
     private val onSubdirectoryChanged: (useCase: UseCase, dir: File) -> Unit,
     private val onUseCaseDeleted: (useCase: UseCase) -> Unit,
-    private val onUseCaseDuplicated: (originalUseCase:UseCase, duplicateTitle: String)-> UseCase
+    private val onUseCaseDuplicated: (originalUseCase: UseCase, duplicateTitle: String) -> UseCase
 ) {
     private val useCaseDir = baseDir.resolve(title).apply { mkdirs() }
     private var recordingsSubDir =
@@ -93,15 +93,15 @@ class UseCase(
     fun getDisplayInfo(): String {
         return "\uD83D\uDCBC " + title + "    \uD83D\uDCC2 " + recordingsSubDir.name
     }
-    fun delete(){
+    fun delete() {
         try {
             delete(useCaseDir)
-        } catch (e: IOException){
+        } catch (e: IOException) {
             Toast.makeText(context, "Deleting file failed: ${e.message}", Toast.LENGTH_LONG).show()
         }
         onUseCaseDeleted(this)
     }
-    fun duplicate(titleOfDuplicate: String): UseCase{
+    fun duplicate(titleOfDuplicate: String): UseCase {
         val targetDir = useCaseDir.parentFile!!.resolve(titleOfDuplicate)
         copyFolder(useCaseDir.toPath(), targetDir.toPath(), StandardCopyOption.REPLACE_EXISTING)
         return onUseCaseDuplicated(this, titleOfDuplicate)
@@ -118,8 +118,8 @@ class UseCase(
 
             @Throws(IOException::class)
             override fun visitFile(file: Path?, attrs: BasicFileAttributes?): FileVisitResult {
-                if(file!=null) {
-                    Files.copy(file, target.resolve(source.relativize(file)),*options)
+                if (file != null) {
+                    Files.copy(file, target.resolve(source.relativize(file)), *options)
                 }
                 return FileVisitResult.CONTINUE
             }
@@ -129,7 +129,7 @@ class UseCase(
     private fun delete(f: File) {
         if (f.isDirectory) {
             val list = f.listFiles()
-            if(list!=null) {
+            if (list != null) {
                 for (c in list) delete(c)
             }
         }

@@ -2,14 +2,14 @@ package sensors_in_paradise.sonar
 
 import java.util.function.Predicate
 
-open class ObservableArrayList<T>: ArrayList<T>() {
+open class ObservableArrayList<T> : ArrayList<T>() {
     private val onSizeChangedListeners = ArrayList<(size: Int)-> Unit>()
-    fun addOnSizeChangedListener(listener: (size: Int)-> Unit){
+    fun addOnSizeChangedListener(listener: (size: Int) -> Unit) {
         onSizeChangedListeners.add(listener)
     }
 
-    private fun notifyObserversOfSizeChanged(){
-        for(listener in onSizeChangedListeners){
+    private fun notifyObserversOfSizeChanged() {
+        for (listener in onSizeChangedListeners) {
             listener(size)
         }
     }
@@ -43,13 +43,13 @@ open class ObservableArrayList<T>: ArrayList<T>() {
     }
 
     override fun removeAt(index: Int): T {
-        val result =super.removeAt(index)
+        val result = super.removeAt(index)
         notifyObserversOfSizeChanged()
         return result
     }
 
     override fun removeAll(elements: Collection<T>): Boolean {
-        val result =super.removeAll(elements)
+        val result = super.removeAll(elements)
         notifyObserversOfSizeChanged()
         return result
     }

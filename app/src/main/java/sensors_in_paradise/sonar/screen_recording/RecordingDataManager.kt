@@ -4,7 +4,7 @@ import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.ObservableArrayList
 import java.io.File
 
-class RecordingDataManager(recordingsDir: File):
+class RecordingDataManager(recordingsDir: File) :
     ObservableArrayList<Recording>() {
     var recordingsDir: File = recordingsDir
         set(value) {
@@ -12,10 +12,10 @@ class RecordingDataManager(recordingsDir: File):
             loadRecordingsFromStorage()
         }
 
-    init{
+    init {
         loadRecordingsFromStorage()
     }
-    fun reloadRecordingsFromStorage(){
+    fun reloadRecordingsFromStorage() {
         loadRecordingsFromStorage()
     }
 

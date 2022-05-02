@@ -78,7 +78,7 @@ class UseCaseHandler(
             onUseCaseDeleted = this::onUseCaseDeleted,
             onUseCaseDuplicated = this::onUseCaseDuplicated
         )
-        if(addToAvailableUseCases) {
+        if (addToAvailableUseCases) {
             availableUseCases.add(useCase)
         }
         return useCase
