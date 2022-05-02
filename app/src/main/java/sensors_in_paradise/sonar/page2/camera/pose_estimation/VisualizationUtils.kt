@@ -118,9 +118,9 @@ object VisualizationUtils {
         timeStamp: Long,
         timeMargin: Long = 800
     ): List<Person> {
-        val lowerTimeStamp = poseSequence.timeStamps[floorIndex]
+        val lowerTimeStamp = poseSequence.timeStamps.getOrNull(floorIndex) ?: Long.MAX_VALUE
         val upperTimeStamp = poseSequence.timeStamps.getOrNull(floorIndex + 1)
-        val lowerPerson = poseSequence.personsArray[floorIndex].getOrNull(0)
+        val lowerPerson = poseSequence.personsArray.getOrNull(floorIndex)?.getOrNull(0)
         val upperPerson = poseSequence.personsArray.getOrNull(floorIndex + 1)?.getOrNull(0)
         if (lowerPerson == null ||
             timeStamp < lowerTimeStamp ||
