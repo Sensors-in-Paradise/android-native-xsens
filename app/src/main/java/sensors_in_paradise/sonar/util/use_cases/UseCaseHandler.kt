@@ -104,6 +104,7 @@ class UseCaseHandler(
 
     private fun onUseCaseDeleted(useCase: UseCase) {
         useCaseStorage.removeUseCase(useCase.title)
+        availableUseCases.remove(useCase)
     }
 
     private fun onUseCaseDuplicated(originalUseCase: UseCase, duplicateTitle: String): UseCase {

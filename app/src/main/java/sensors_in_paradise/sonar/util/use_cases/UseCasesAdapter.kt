@@ -126,7 +126,7 @@ class UseCasesAdapter(
             }
         }
         holder.deleteButton.apply {
-            visibility = if(position == selectedIndex) View.VISIBLE else View.INVISIBLE
+            visibility = if(isSelected) View.VISIBLE else View.INVISIBLE
             isEnabled = useCase.title != UseCaseHandler.DEFAULT_USE_CASE_TITLE
             setOnClickListener {
                 MessageDialog(
@@ -134,12 +134,16 @@ class UseCasesAdapter(
                     "Do you really want to delete the use case \"${useCase.title}\"?",
                     onPositiveButtonClickListener = { _, _ ->
                         val useCaseIndex = indexOf(useCase)
-                        Log.d("UseCaseAdapter", "Removing use case at index $selectedIndex")
+                        Log.d("UseCasesAdapter", "Removing use case at index $selectedIndex")
                         if (selectedIndex == useCaseIndex) {
-                            selectedIndex = indexOfDefault()
+                            val defaultIndex = indexOfDefault()
+                            Log.d("UseCasesAdapter", "Setting selected index to default $defaultIndex")
+                            selectedIndex = defaultIndex
                         }
-                        useCases.remove(useCase)
+                        val sizeBefore = useCases.size
                         useCase.delete()
+                        useCases.remove(useCase)
+                        Log.d("UseCasesAdapter", "Size before: $sizeBefore , After: ${useCases.size}")
                         uiHandler.post {
                             notifyItemRemoved(useCaseIndex)
                         }
@@ -147,7 +151,7 @@ class UseCasesAdapter(
             }
         }
         holder.duplicateButton.apply {
-            visibility = if(position == selectedIndex) View.VISIBLE else View.INVISIBLE
+            visibility = if(isSelected) View.VISIBLE else View.INVISIBLE
             setOnClickListener {
                 TextInputDialog(
                     context,
