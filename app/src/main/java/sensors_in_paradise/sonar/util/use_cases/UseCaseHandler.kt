@@ -9,10 +9,16 @@ class UseCaseHandler(
 ) {
     private var useCaseStorage = UseCaseStorage(context)
     private val useCasesBaseDir = getUseCasesBaseDir(context)
-    private var defaultUseCase = UseCase(context,
-        useCasesBaseDir, DEFAULT_USE_CASE_TITLE, useCaseStorage.getSelectedSubDir(
+    private var defaultUseCase = UseCase(
+        context,
+        useCasesBaseDir,
+        DEFAULT_USE_CASE_TITLE,
+        useCaseStorage.getSelectedSubDir(
             DEFAULT_USE_CASE_TITLE
-        ), this::onRecordingsSubDirOfUseCaseChanged
+        ),
+        this::onRecordingsSubDirOfUseCaseChanged,
+        this::onUseCaseDeleted,
+        this::onUseCaseDuplicated
     )
     val availableUseCases = arrayListOf<UseCase>()
     private var currentUseCase: UseCase = defaultUseCase
@@ -28,7 +34,10 @@ class UseCaseHandler(
         val useCaseDirs = useCasesBaseDir.listFiles { dir, name ->
             dir.resolve(name).isDirectory
         }
-        Log.d("UseCaseHandler-loadUseCases", "useCaseDirs: ${useCasesBaseDir.listFiles()?.map { it.name }}")
+        Log.d(
+            "UseCaseHandler-loadUseCases",
+            "useCaseDirs: ${useCasesBaseDir.listFiles()?.map { it.name }}"
+        )
         if (useCaseDirs != null) {
             for (dir in useCaseDirs) {
                 availableUseCases.add(
@@ -38,7 +47,10 @@ class UseCaseHandler(
                         dir.name,
                         useCaseStorage.getSelectedSubDir(
                             dir.name
-                        ), this::onRecordingsSubDirOfUseCaseChanged
+                        ),
+                        this::onRecordingsSubDirOfUseCaseChanged,
+                        this::onUseCaseDeleted,
+                        this::onUseCaseDuplicated
                     )
                 )
             }
@@ -56,16 +68,20 @@ class UseCaseHandler(
         currentUseCase = useCase
         onUseCaseChanged?.invoke(useCase)
     }
+
     fun createUseCase(title: String): UseCase {
-            val useCase = UseCase(
-                context,
-                useCasesBaseDir,
-                title,
-                onSubdirectoryChanged = this::onRecordingsSubDirOfUseCaseChanged
-            )
-            availableUseCases.add(useCase)
+        val useCase = UseCase(
+            context,
+            useCasesBaseDir,
+            title,
+            onSubdirectoryChanged = this::onRecordingsSubDirOfUseCaseChanged,
+            onUseCaseDeleted = this::onUseCaseDeleted,
+            onUseCaseDuplicated = this::onUseCaseDuplicated
+        )
+        availableUseCases.add(useCase)
         return useCase
     }
+
     fun createAndSetUseCase(title: String) {
         setUseCase(createUseCase(title))
     }
@@ -84,6 +100,15 @@ class UseCaseHandler(
 
     private fun onRecordingsSubDirOfUseCaseChanged(useCase: UseCase, dir: File) {
         useCaseStorage.setSelectedSubDir(useCase.title, dir.name)
+    }
+
+    private fun onUseCaseDeleted(useCase: UseCase) {
+        useCaseStorage.removeUseCase(useCase.title)
+    }
+
+    private fun onUseCaseDuplicated(originalUseCase: UseCase, duplicateTitle: String): UseCase {
+        useCaseStorage.duplicateUseCaseData(originalUseCase.title, duplicateTitle)
+        return createUseCase(duplicateTitle)
     }
 
     companion object {

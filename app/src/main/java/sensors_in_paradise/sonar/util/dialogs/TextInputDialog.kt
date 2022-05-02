@@ -17,6 +17,8 @@ class TextInputDialog(
     title: String,
     promptInterface: (text: String) -> Unit,
     hint: String = "",
+    inputLabel:String = "Input your text here",
+    startValue: String = "",
     errorMessage: String? = null,
     private val acceptanceInterface: ((text: String) -> Pair<Boolean, String?>)? = null
 ) {
@@ -29,12 +31,14 @@ class TextInputDialog(
         val root = LayoutInflater.from(context).inflate(R.layout.prompt_dialog, null)
         val input = root.findViewById<EditText>(R.id.editText_promptDialog)
         val errorTV = root.findViewById<TextView>(R.id.tv_error_promptDialog)
-
+        val inputLabelTV = root.findViewById<TextView>(R.id.tv_input_Label)
         if (errorMessage != null) {
             errorTV.text = errorMessage
         }
+        inputLabelTV.text = inputLabel
         errorTV.visibility = if (errorMessage == null) View.GONE else View.VISIBLE
         input.hint = hint
+
         builder.setView(root)
 
         builder.setNegativeButton(
@@ -61,7 +65,7 @@ class TextInputDialog(
         }
 
         // Trigger change listener once
-        input.setText("")
+        input.setText(startValue)
     }
 
     fun setCancelListener(listener: DialogInterface.OnCancelListener) {

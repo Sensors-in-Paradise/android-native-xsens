@@ -26,6 +26,15 @@ class UseCaseStorage(file: File) : JSONStorage(file) {
         json.put(SELECTED_USE_CASE_KEY, title)
         save()
     }
+    fun removeUseCase(title: String){
+        useCases.remove(title)
+        save()
+    }
+    fun duplicateUseCaseData(originalTitle: String, duplicateTitle: String){
+        val data = useCases.getJSONObject(originalTitle)
+        useCases.put(duplicateTitle, data)
+        save()
+    }
 
     fun getSelectedUseCase(): String {
         return json.optString(SELECTED_USE_CASE_KEY) ?: UseCaseHandler.DEFAULT_USE_CASE_TITLE
