@@ -21,7 +21,13 @@ class UseCase(
     private val useCaseDir = baseDir.resolve(title).apply { mkdirs() }
     private var recordingsSubDir =
         getRecordingsDir().resolve(recordingsSubDirName).apply { mkdir() }
-    private val useCaseStorage = UseCaseStorage(useCaseDir)
+    private val useCaseStorage = UseCaseStorage(useCaseDir.resolve(STORAGE_SUB_DIR_NAME))
+
+    init {
+        useCaseStorage.setSelectedSubDir(recordingsSubDirName)
+    }
+
+
 
     fun getActivityLabelsJSONFile(): File {
         return useCaseDir.resolve("labels.json")
@@ -137,5 +143,6 @@ class UseCase(
     }
     companion object {
         const val DEFAULT_RECORDINGS_SUB_DIR_NAME = "default"
+        const val STORAGE_SUB_DIR_NAME = "storage.json"
     }
 }

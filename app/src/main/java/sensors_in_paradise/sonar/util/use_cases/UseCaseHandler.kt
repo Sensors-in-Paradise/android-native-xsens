@@ -8,7 +8,7 @@ class UseCaseHandler(
     val context: Context
 ) {
     private var useCasesStorage = UseCasesStorage(context)
-    private val useCasesBaseDir = getUseCasesBaseDir(context)
+    val useCasesBaseDir = getUseCasesBaseDir(context)
     private var defaultUseCase = UseCase(
         context,
         useCasesBaseDir,
@@ -97,8 +97,9 @@ class UseCaseHandler(
     }
 
     private fun onUseCaseDuplicated(originalUseCase: UseCase, duplicateTitle: String): UseCase {
-        //useCasesStorage.duplicateUseCaseData(originalUseCase.title, duplicateTitle)
-        return createUseCase(duplicateTitle, false)
+        val duplicatedUseCase = createUseCase(duplicateTitle, false)
+        duplicatedUseCase.setRecordingsSubDir(originalUseCase.getRecordingsSubDir().name)
+        return duplicatedUseCase
     }
 
     companion object {
