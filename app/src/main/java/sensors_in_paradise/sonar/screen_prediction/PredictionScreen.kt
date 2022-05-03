@@ -147,6 +147,7 @@ class PredictionScreen(
         mainHandler.removeCallbacks(updateProgressBarTask)
         progressBar.visibility = View.INVISIBLE
         predictionButton.setIconResource(R.drawable.ic_baseline_play_arrow_24)
+        interpreter.close()
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -195,13 +196,18 @@ class PredictionScreen(
         )
         inputFeature0.loadBuffer(sensorDataByteBuffer)
 
+
         // Runs model inference and gets result
         // TODO: make work with our new use case concept
 
-        // val outputs = interpreter.
-        // val outputFeature0 = outputs.outputFeature0AsTensorBuffer
+        val outputs = arrayOf(FloatArray(6))
 
-        // addPredictionViews(outputFeature0.floatArray)
+        interpreter.run(
+            sensorDataByteBuffer,
+            outputs
+        )
+
+        addPredictionViews(outputs[0])
     }
 
     override fun onActivityCreated(activity: Activity) {
@@ -225,8 +231,16 @@ class PredictionScreen(
         predictionButton.setOnClickListener {
             if (currentUseCase.getModelFile().isFile) {
                 predictionModel =
-                    currentUseCase.extractModelFromFile(currentUseCase.getModelFile().name)!!
+                    currentUseCase.extractModelFromUseCase()!!
                 interpreter = Interpreter(predictionModel)
+                interpreter.resizeInput(
+                    0,
+                    intArrayOf(
+                        1,
+                        predictionHelper.dataVectorSize,
+                        predictionHelper.dataLineFloatSize
+                    )
+                )
                 val signatures = interpreter.signatureKeys
                 Log.d("PredictionScreen-onActivityCreated", signatures.toString())
                 togglePrediction()
@@ -235,9 +249,12 @@ class PredictionScreen(
                     context,
                     message = context.getString(R.string.missing_model_dialog_message),
                     title = context.getString(R.string.missing_model_dialog_title),
-                    onPositiveButtonClickListener = { _, _ ->
+                    positiveButtonText = "Okay",
+                    neutralButtonText = "Load default Model",
+                    onNeutralButtonClickListener = { _, _ ->
                         predictionModel =
-                            currentUseCase.extractModelFromFile()!!
+                            currentUseCase.extractModelFromAssetsFile()!!
+                        currentUseCase.saveModelFromBuffer(predictionModel)
                         interpreter = Interpreter(predictionModel)
                         togglePrediction()
                     }

@@ -1,6 +1,7 @@
 package sensors_in_paradise.sonar.util
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import sensors_in_paradise.sonar.XSensDotDeviceWithOfflineMetadata
 import java.nio.ByteBuffer
@@ -111,6 +112,8 @@ class PredictionHelper(
     @Suppress("MaxLineLength", "TooGenericExceptionCaught", "SwallowedException", "ReturnCount")
     fun processSensorData(rawSensorDataMap: MutableMap<String, MutableList<Pair<Long, FloatArray>>>): ByteBuffer? {
         // check for sensors without data
+
+        Log.d("PredictionHelper-processRawSensorData", rawSensorDataMap.map{ "${it.key}: ${it.value.size}" }.joinToString())
         rawSensorDataMap.forEach {
             val tag = it.key
             val listLen = it.value.size

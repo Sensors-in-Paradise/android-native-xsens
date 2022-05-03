@@ -36,10 +36,7 @@ class UseCase(
     }
 
     fun getModelFile(): File {
-        if (!useCaseDir.resolve("model.tflite").isFile) {
-            extractModelFromFile()?.let { saveModelFromFile(it) }
-        }
-        return useCaseDir.resolve("model.tflite")
+        return useCaseDir.resolve(MODEL_FILE_NAME)
     }
 
     fun getRecordingsDir(): File {
@@ -59,7 +56,8 @@ class UseCase(
         return subDirs
     }
 
-    fun extractModelFromFile(filename: String = "LSTMModel-1-18.tflite"): MappedByteBuffer? {
+    fun extractModelFromAssetsFile(filename: String = "LSTMModel-1-18.tflite"): MappedByteBuffer? {
+        // TODO()
         val iStream = context.assets.open(filename)
         val file = createTempFile()
         iStream.use { input ->
@@ -77,9 +75,27 @@ class UseCase(
         file.delete()
         return mappedByteBuffer
     }
+    fun extractModelFromUseCase(): MappedByteBuffer? {
+        val iStream = getModelFile().inputStream()
+        val file = createTempFile()
+        iStream.use { input ->
+            file.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
 
-    private fun saveModelFromFile(buffer: MappedByteBuffer) {
-        val modelPath = useCaseDir.resolve("model.tflite")
+        val inputStream = FileInputStream(file)
+
+        val mappedByteBuffer = inputStream.channel.map(
+            FileChannel.MapMode.READ_ONLY, 0,
+            file.length()
+        )
+        file.delete()
+        return mappedByteBuffer
+    }
+
+    fun saveModelFromBuffer(buffer: MappedByteBuffer) {
+        val modelPath = useCaseDir.resolve(MODEL_FILE_NAME)
         val modelByteArray = ByteArray(buffer.remaining())
         buffer.get(modelByteArray, 0, modelByteArray.size)
         modelPath.writeBytes(modelByteArray)
@@ -142,5 +158,6 @@ class UseCase(
     companion object {
         const val DEFAULT_RECORDINGS_SUB_DIR_NAME = "default"
         const val STORAGE_SUB_DIR_NAME = "storage.json"
+        const val MODEL_FILE_NAME = "model.tflite"
     }
 }
