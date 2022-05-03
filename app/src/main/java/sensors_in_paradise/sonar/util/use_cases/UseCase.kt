@@ -39,7 +39,7 @@ class UseCase(
         return useCaseDir.resolve(MODEL_FILE_NAME)
     }
 
-    fun getRecordingsDir(): File {
+    private fun getRecordingsDir(): File {
         return useCaseDir.resolve("recordings").apply { mkdir() }
     }
 
@@ -56,44 +56,6 @@ class UseCase(
         return subDirs
     }
 
-    fun extractModelFromAssetsFile(filename: String = "LSTMModel-1-18.tflite"): MappedByteBuffer? {
-        // TODO()
-        val iStream = context.assets.open(filename)
-        val file = createTempFile()
-        iStream.use { input ->
-            file.outputStream().use { output ->
-                input.copyTo(output)
-            }
-        }
-
-        val inputStream = FileInputStream(file)
-
-        val mappedByteBuffer = inputStream.channel.map(
-            FileChannel.MapMode.READ_ONLY, 0,
-            file.length()
-        )
-        file.delete()
-        return mappedByteBuffer
-    }
-    fun extractModelFromUseCase(): MappedByteBuffer? {
-        val iStream = getModelFile().inputStream()
-        val file = createTempFile()
-        iStream.use { input ->
-            file.outputStream().use { output ->
-                input.copyTo(output)
-            }
-        }
-
-        val inputStream = FileInputStream(file)
-
-        val mappedByteBuffer = inputStream.channel.map(
-            FileChannel.MapMode.READ_ONLY, 0,
-            file.length()
-        )
-        file.delete()
-        return mappedByteBuffer
-    }
-
     fun saveModelFromBuffer(buffer: MappedByteBuffer) {
         val modelPath = useCaseDir.resolve(MODEL_FILE_NAME)
         val modelByteArray = ByteArray(buffer.remaining())
@@ -108,6 +70,9 @@ class UseCase(
 
     fun getRecordingsSubDir(): File {
         return recordingsSubDir
+    }
+    fun importDefaultModel(){
+        extractFileFromAssets(context,  "LSTMModel-1-18.tflite", getModelFile())
     }
 
     fun getDisplayInfo(): String {
@@ -159,5 +124,13 @@ class UseCase(
         const val DEFAULT_RECORDINGS_SUB_DIR_NAME = "default"
         const val STORAGE_SUB_DIR_NAME = "storage.json"
         const val MODEL_FILE_NAME = "model.tflite"
+        fun extractFileFromAssets(context: Context,assetFileName: String, targetFile: File) {
+            val iStream = context.assets.open(assetFileName)
+            iStream.use { input ->
+                targetFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+        }
     }
 }

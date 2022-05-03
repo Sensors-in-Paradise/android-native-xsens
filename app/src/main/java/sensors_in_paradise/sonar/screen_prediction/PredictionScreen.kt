@@ -50,7 +50,6 @@ class PredictionScreen(
     private val predictions = ArrayList<Prediction>()
     private val rawSensorDataMap = mutableMapOf<String, MutableList<Pair<Long, FloatArray>>>()
     private var sensorDataByteBuffer: ByteBuffer? = null
-    private lateinit var predictionModel: MappedByteBuffer
     private lateinit var interpreter: Interpreter
 
     private var lastPrediction = 0L
@@ -229,10 +228,8 @@ class PredictionScreen(
         predictionButton = activity.findViewById(R.id.button_start_predict)
         progressBar = activity.findViewById(R.id.progressBar_nextPrediction_predictionFragment)
         predictionButton.setOnClickListener {
-            if (currentUseCase.getModelFile().isFile) {
-                predictionModel =
-                    currentUseCase.extractModelFromUseCase()!!
-                interpreter = Interpreter(predictionModel)
+            if (currentUseCase.getModelFile().exists()) {
+                interpreter = Interpreter(currentUseCase.getModelFile())
                 interpreter.resizeInput(
                     0,
                     intArrayOf(
@@ -247,15 +244,13 @@ class PredictionScreen(
             } else {
                 MessageDialog(
                     context,
-                    message = context.getString(R.string.missing_model_dialog_message),
+                    message = "The current use case does not have a tflite model. \nYou can either manually place a tflite model under ${currentUseCase.getModelFile().absolutePath} via PC or import the default model.",
                     title = context.getString(R.string.missing_model_dialog_title),
                     positiveButtonText = "Okay",
                     neutralButtonText = "Load default Model",
                     onNeutralButtonClickListener = { _, _ ->
-                        predictionModel =
-                            currentUseCase.extractModelFromAssetsFile()!!
-                        currentUseCase.saveModelFromBuffer(predictionModel)
-                        interpreter = Interpreter(predictionModel)
+                        currentUseCase.importDefaultModel()
+                        interpreter = Interpreter(currentUseCase.getModelFile())
                         togglePrediction()
                     }
                 )
