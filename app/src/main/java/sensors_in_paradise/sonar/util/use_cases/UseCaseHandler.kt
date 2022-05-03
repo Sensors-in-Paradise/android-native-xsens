@@ -7,16 +7,12 @@ import java.io.File
 class UseCaseHandler(
     val context: Context
 ) {
-    private var useCaseStorage = UseCaseStorage(context)
-    val useCasesBaseDir = getUseCasesBaseDir(context)
+    private var useCasesStorage = UseCasesStorage(context)
+    private val useCasesBaseDir = getUseCasesBaseDir(context)
     private var defaultUseCase = UseCase(
         context,
         useCasesBaseDir,
         DEFAULT_USE_CASE_TITLE,
-        useCaseStorage.getSelectedSubDir(
-            DEFAULT_USE_CASE_TITLE
-        ),
-        this::onRecordingsSubDirOfUseCaseChanged,
         this::onUseCaseDeleted,
         this::onUseCaseDuplicated
     )
@@ -27,7 +23,7 @@ class UseCaseHandler(
 
     init {
         loadUseCases()
-        setUseCase(useCaseStorage.getSelectedUseCase())
+        setUseCase(useCasesStorage.getSelectedUseCase())
     }
 
     private fun loadUseCases() {
@@ -45,10 +41,6 @@ class UseCaseHandler(
                         context,
                         useCasesBaseDir,
                         dir.name,
-                        useCaseStorage.getSelectedSubDir(
-                            dir.name
-                        ),
-                        this::onRecordingsSubDirOfUseCaseChanged,
                         this::onUseCaseDeleted,
                         this::onUseCaseDuplicated
                     )
@@ -64,7 +56,7 @@ class UseCaseHandler(
     }
 
     private fun setUseCase(useCase: UseCase) {
-        useCaseStorage.setSelectedUseCase(useCase.title)
+        useCasesStorage.setSelectedUseCase(useCase.title)
         currentUseCase = useCase
         onUseCaseChanged?.invoke(useCase)
     }
@@ -74,7 +66,6 @@ class UseCaseHandler(
             context,
             useCasesBaseDir,
             title,
-            onSubdirectoryChanged = this::onRecordingsSubDirOfUseCaseChanged,
             onUseCaseDeleted = this::onUseCaseDeleted,
             onUseCaseDuplicated = this::onUseCaseDuplicated
         )
@@ -100,18 +91,13 @@ class UseCaseHandler(
         this.onUseCaseChanged = onUseCaseChanged
     }
 
-    private fun onRecordingsSubDirOfUseCaseChanged(useCase: UseCase, dir: File) {
-        useCaseStorage.setSelectedSubDir(useCase.title, dir.name)
-        onUseCaseChanged?.invoke(useCase)
-    }
 
     private fun onUseCaseDeleted(useCase: UseCase) {
-        useCaseStorage.removeUseCase(useCase.title)
         availableUseCases.remove(useCase)
     }
 
     private fun onUseCaseDuplicated(originalUseCase: UseCase, duplicateTitle: String): UseCase {
-        useCaseStorage.duplicateUseCaseData(originalUseCase.title, duplicateTitle)
+        //useCasesStorage.duplicateUseCaseData(originalUseCase.title, duplicateTitle)
         return createUseCase(duplicateTitle, false)
     }
 

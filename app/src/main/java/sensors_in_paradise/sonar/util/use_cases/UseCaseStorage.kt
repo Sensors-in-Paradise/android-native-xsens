@@ -2,92 +2,47 @@ package sensors_in_paradise.sonar.util.use_cases
 
 import android.content.Context
 import android.util.Log
-import org.json.JSONObject
-import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
 
 class UseCaseStorage(file: File) : JSONStorage(file) {
-    constructor(context: Context) : this(getUseCaseStorageFile(context))
 
-    private lateinit var useCases: JSONObject
 
     override fun onFileNewlyCreated() {
-        json.put(SELECTED_USE_CASE_KEY, GlobalValues.DEFAULT_USE_CASE_TITLE)
-        val useCases = JSONObject()
-        json.put(USE_CASES_KEY, useCases)
+        json.put(SELECTED_SUB_DIR_KEY, UseCase.DEFAULT_RECORDINGS_SUB_DIR_NAME)
     }
 
     override fun onJSONInitialized() {
-        useCases = json.getJSONObject(USE_CASES_KEY)
     }
 
-    fun setSelectedUseCase(title: String) {
-        json.put(SELECTED_USE_CASE_KEY, title)
-        save()
-    }
-    fun removeUseCase(title: String) {
-        useCases.remove(title)
-        save()
-    }
-    fun duplicateUseCaseData(originalTitle: String, duplicateTitle: String) {
+    /*fun duplicateUseCaseData(originalTitle: String, duplicateTitle: String){
         val data = useCases.getJSONObject(originalTitle)
         useCases.put(duplicateTitle, data)
         save()
-    }
+    }*/
 
-    fun getSelectedUseCase(): String {
-        return json.optString(SELECTED_USE_CASE_KEY) ?: UseCaseHandler.DEFAULT_USE_CASE_TITLE
-    }
-
-    fun setSelectedSubDir(useCaseTitle: String, subDir: String) {
+    fun setSelectedSubDir(subDir: String) {
         /*
             json: {
-                selectedUseCase: "",
-                useCases: {
-                    default:{
+                    useCase:{
                         selectedSubDir: "default",
                     }
                 }
             }
         */
         Log.d("useCase", json.toString())
-        Log.d("useCase", useCases.toString())
-        val useCase = useCases.optJSONObject(useCaseTitle)
-        if (useCase == null) {
-            useCases.put(
-                useCaseTitle, JSONObject().put(
-                    SELECTED_SUB_DIR_KEY, subDir
-                )
-            )
-        } else {
-            useCase.put(SELECTED_SUB_DIR_KEY, subDir)
-        }
+        json.put(SELECTED_SUB_DIR_KEY, subDir)
         save()
     }
 
-    fun getSelectedSubDir(useCaseTitle: String): String {
+    fun getSelectedSubDir(): String {
         Log.d("useCase", json.toString())
-        Log.d("useCase", useCases.toString())
-        if (useCases.has(useCaseTitle)) {
-            return useCases.getJSONObject(useCaseTitle).optString(SELECTED_SUB_DIR_KEY)
+
+        return json.optString(SELECTED_SUB_DIR_KEY)
                 ?: UseCase.DEFAULT_RECORDINGS_SUB_DIR_NAME
-        } else {
-            useCases.put(
-                useCaseTitle, JSONObject().put(
-                    SELECTED_SUB_DIR_KEY, UseCase.DEFAULT_RECORDINGS_SUB_DIR_NAME
-                )
-            )
-            return UseCase.DEFAULT_RECORDINGS_SUB_DIR_NAME
-        }
     }
 
     companion object {
-        private const val SELECTED_USE_CASE_KEY = "selectedUseCase"
-        private const val USE_CASES_KEY = "useCases"
         private const val SELECTED_SUB_DIR_KEY = "selectedSubDir"
-        fun getUseCaseStorageFile(context: Context): File {
-            return context.dataDir.resolve("currentUseCase.json")
-        }
     }
 }
