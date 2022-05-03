@@ -134,8 +134,9 @@ class Page2Handler(
                 )
             }
         }
-        loggingManager.setOnFinalizingRecording { dir, metadata ->
-            cameraManager.stopRecordingVideo { videoCaptureStartTime, videoTempFile ->
+
+        loggingManager.setAfterRecordingStarted { dir, metadata ->
+            cameraManager.setOnVideoRecordingFinalized { videoCaptureStartTime, videoTempFile ->
                 metadata.setVideoCaptureStartedTime(videoCaptureStartTime, true)
                 try {
                     Files.move(videoTempFile, dir.resolve(Recording.VIDEO_CAPTURE_FILENAME))
@@ -148,7 +149,8 @@ class Page2Handler(
                     e.printStackTrace()
                 }
             }
-            cameraManager.stopRecordingPose { poseCaptureStartTime, poseTempFile ->
+
+            cameraManager.setOnPoseRecordingFinalized { poseCaptureStartTime, poseTempFile ->
                 metadata.setPoseCaptureStartedTime(poseCaptureStartTime, true)
                 try {
                     Files.move(poseTempFile, dir.resolve(Recording.POSE_CAPTURE_FILENAME))
@@ -161,6 +163,11 @@ class Page2Handler(
                     e.printStackTrace()
                 }
             }
+        }
+
+        loggingManager.setOnFinalizingRecording {
+            cameraManager.stopRecordingVideo()
+            cameraManager.stopRecordingPose()
             sensorOccupationInterface?.onSensorOccupationStatusChanged(false)
         }
     }
