@@ -15,7 +15,7 @@ class UseCase(
     baseDir: File,
     val title: String,
     private val onUseCaseDeleted: (useCase: UseCase) -> Unit,
-    private val onUseCaseDuplicated: (originalUseCase:UseCase, duplicateTitle: String)-> UseCase,
+    private val onUseCaseDuplicated: (originalUseCase: UseCase, duplicateTitle: String) -> UseCase,
     recordingsSubDirName: String = DEFAULT_RECORDINGS_SUB_DIR_NAME,
 ) {
     private val useCaseDir = baseDir.resolve(title).apply { mkdirs() }
@@ -26,8 +26,6 @@ class UseCase(
     init {
         useCaseStorage.setSelectedSubDir(recordingsSubDirName)
     }
-
-
 
     fun getActivityLabelsJSONFile(): File {
         return useCaseDir.resolve("labels.json")

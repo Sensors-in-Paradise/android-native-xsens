@@ -173,10 +173,6 @@ class UseCasesAdapter(
         }
     }
 
-    private fun indexOfDefault(): Int {
-        return useCases.indexOfFirst { it.title == UseCaseHandler.DEFAULT_USE_CASE_TITLE }
-    }
-
     private fun indexOf(useCase: UseCase): Int {
         return useCases.indexOf(useCase)
     }

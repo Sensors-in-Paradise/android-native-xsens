@@ -91,7 +91,6 @@ class UseCaseHandler(
         this.onUseCaseChanged = onUseCaseChanged
     }
 
-
     private fun onUseCaseDeleted(useCase: UseCase) {
         availableUseCases.remove(useCase)
     }

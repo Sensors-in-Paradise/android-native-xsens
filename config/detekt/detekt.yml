@@ -801,3 +801,4 @@ style:
       - 'androidx.appcompat.app.AppCompatDelegate.*'
       - 'android.graphics.*'
       - 'androidx.camera.video.*'
+      - 'java.nio.file.*'

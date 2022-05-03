@@ -1,12 +1,10 @@
 package sensors_in_paradise.sonar.util.use_cases
 
-import android.content.Context
 import android.util.Log
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
 
 class UseCaseStorage(file: File) : JSONStorage(file) {
-
 
     override fun onFileNewlyCreated() {
         json.put(SELECTED_SUB_DIR_KEY, UseCase.DEFAULT_RECORDINGS_SUB_DIR_NAME)
