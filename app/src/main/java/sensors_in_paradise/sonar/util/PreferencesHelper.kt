@@ -64,8 +64,8 @@ class PreferencesHelper private constructor() {
         fun shouldUsePoseBackroundForEditor(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("usePoseSequenceBackround", false)
         }
-        fun shouldPlaySoundOnRecordingStart(context: Context): Boolean {
-            return getSharedPreferences(context).getBoolean("playSoundOnRecordingStart", false)
+        fun shouldPlaySoundOnRecordingStartAndStop(context: Context): Boolean {
+            return getSharedPreferences(context).getBoolean("playSoundOnRecordingStartAndStop", false)
         }
         fun shouldViewSensorHeadingMenuItems(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("viewHeadingMenuItems", false)

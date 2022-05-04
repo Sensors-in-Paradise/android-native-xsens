@@ -36,7 +36,9 @@ class LoggingManager(
 
     private var onRecordingDone: ((Recording) -> Unit)? = null
     private var onRecordingStarted: (() -> Unit)? = null
-    private var onFinalizeRecording: ((dir: File, metadata: RecordingMetadataStorage) -> Unit)? = null
+    private var afterRecordingStarted: ((dir: File, metadata: RecordingMetadataStorage) -> Unit)? =
+        null
+    private var onFinalizeRecording: (() -> Unit)? = null
     private val activitiesAdapter = ActivitiesAdapter(arrayListOf(), this)
 
     private var activeRecording: ActiveRecording? = null
@@ -101,15 +103,15 @@ class LoggingManager(
      */
     fun handleConnectionStateChange(address: String, connected: Boolean) {
         if (activeRecording?.hasLoggerForAddress(address) == true && !connected) {
-           devices.get(address)?.let {
-               if (it.connectionState == XsensDotDevice.CONN_STATE_DISCONNECTED) {
-                   UIHelper.showAlert(
-                       context,
-                       "The Device ${it.name} was disconnected!"
-                   )
-                   stopLogging()
-               }
-           }
+            devices.get(address)?.let {
+                if (it.connectionState == XsensDotDevice.CONN_STATE_DISCONNECTED) {
+                    UIHelper.showAlert(
+                        context,
+                        "The Device ${it.name} was disconnected!"
+                    )
+                    stopLogging()
+                }
+            }
         }
     }
 
@@ -133,7 +135,8 @@ class LoggingManager(
             stopLogging()
         } else if (isReadyToRecord()) {
             onRecordingStarted?.let { it1 -> it1() }
-            startLogging()
+            val recording = startLogging()
+            afterRecordingStarted?.let { it(recording.dir, recording.metadataStorage) }
         }
     }
 
@@ -158,7 +161,7 @@ class LoggingManager(
      *
      * If no label is selected, the activity dialog is opened
      */
-    private fun startLogging() {
+    private fun startLogging(): Recording {
         startUITimer()
 
         activeRecording = ActiveRecording(context, devices)
@@ -172,8 +175,9 @@ class LoggingManager(
                 onSelected = this::updateSelectedLabel
             )
         }
-
         updateRecordButton()
+
+        return activeRecording!!.createRecording()
     }
 
     /**
@@ -195,12 +199,11 @@ class LoggingManager(
         updateRecordButton()
 
         resolveMissingFields {
-            val result = activeRecording.save(personTV.text.toString())
-            val dir = result.first
-            val metadata = result.second
+            activeRecording.save(personTV.text.toString())
             activeRecording.recording?.let {
-                onFinalizeRecording?.let { it(dir, metadata) }
-                onRecordingDone?.invoke(it) }
+                onFinalizeRecording?.invoke()
+                onRecordingDone?.invoke(it)
+            }
             activitiesAdapter.unlinkActivitiesList()
             this.activeRecording = null
             labelTV.text = ""
@@ -316,7 +319,12 @@ class LoggingManager(
     fun setOnRecordingStarted(onRecordingStarted: () -> Unit) {
         this.onRecordingStarted = onRecordingStarted
     }
-    fun setOnFinalizingRecording(onFinalizeRecording: (dir: File, metadata: RecordingMetadataStorage) -> Unit) {
+
+    fun setAfterRecordingStarted(afterRecordingStarted: (dir: File, metadata: RecordingMetadataStorage) -> Unit) {
+        this.afterRecordingStarted = afterRecordingStarted
+    }
+
+    fun setOnFinalizingRecording(onFinalizeRecording: () -> Unit) {
         this.onFinalizeRecording = onFinalizeRecording
     }
 
@@ -330,6 +338,7 @@ class LoggingManager(
             }
         )
     }
+
     companion object {
         fun normalizeTimeStamp(time: LocalDateTime): Long {
             return time.toSonarLong()
@@ -369,11 +378,13 @@ class ActiveRecording(val context: Context, private val devices: XSENSArrayList)
         recordingEndTime = LocalDateTime.now()
         stopXSensLoggers()
     }
+
     /** Saves recording and returns dir in which files were saved
      * */
-    fun save(person: String): Pair<File, RecordingMetadataStorage> {
+    fun save(person: String) {
         assert(recordingEndTime != null)
-        return moveTempFiles(person, recordingEndTime!!.toSonarLong())
+        assert(recording != null)
+        moveTempFiles(person, recordingEndTime!!.toSonarLong())
     }
 
     fun getLoggerForAddress(address: String): XsensDotLogger? {
@@ -447,28 +458,37 @@ class ActiveRecording(val context: Context, private val devices: XSENSArrayList)
         }
     }
 
+    fun createRecording(): Recording {
+        val destFileDir = LogIOHelper.getOrCreateRecordingFileDir(context, recordingStartTime)
+        val metadataStorage =
+            RecordingMetadataStorage(destFileDir.resolve(GlobalValues.METADATA_JSON_FILENAME))
+        recording = Recording(destFileDir, metadataStorage)
+        return recording!!
+    }
+
     /**
      * Stores all temporary recording files and writes the metadata file.
      * Return the destination dir and metadata object
      */
-    private fun moveTempFiles(person: String, recordingEndTime: Long): Pair<File, RecordingMetadataStorage> {
-        val recordingFiles = tempSensorFiles
+    private fun moveTempFiles(
+        person: String,
+        recordingEndTime: Long
+    ) {
+        recording?.let { recording ->
+            val recordingFiles = tempSensorFiles
 
-        val destFileDir = LogIOHelper.createRecordingFileDir(context, recordingStartTime)
-        LogIOHelper.moveTempFilesToFinalDirectory(destFileDir, recordingFiles)
+            val destFileDir = recording.dir
+            LogIOHelper.moveTempFilesToFinalDirectory(destFileDir, recordingFiles)
 
-        val metadataStorage =
-            RecordingMetadataStorage(destFileDir.resolve(GlobalValues.METADATA_JSON_FILENAME))
-        metadataStorage.setData(
-            labels,
-            recordingStartTime.toSonarLong(),
-            recordingEndTime,
-            person,
-            sensorMacToTagMap
-        )
-
-        recording = Recording(destFileDir, metadataStorage)
-        return Pair(destFileDir, metadataStorage)
+            val metadataStorage = recording.metadataStorage
+            metadataStorage.setData(
+                labels,
+                recordingStartTime.toSonarLong(),
+                recordingEndTime,
+                person,
+                sensorMacToTagMap
+            )
+        }
     }
 
     fun changeLabel(position: Int, value: String) {
@@ -490,15 +510,17 @@ object LogIOHelper {
         }
     }
 
-    fun createRecordingFileDir(context: Context, time: LocalDateTime): File {
+    fun getOrCreateRecordingFileDir(context: Context, time: LocalDateTime): File {
         val timeStr = time.toSonarString()
 
         val dir = GlobalValues.getSensorRecordingsBaseDir(context)
             .resolve(PreferencesHelper.getRecordingsSubDir(context))
             .resolve(timeStr)
 
-        // assume this completes successful or the app crashes (but recording is lost anyway)
-        dir.mkdirs()
+        if (!dir.exists()) {
+            // assume this completes successful or the app crashes (but recording is lost anyway)
+            dir.mkdirs()
+        }
 
         return dir
     }

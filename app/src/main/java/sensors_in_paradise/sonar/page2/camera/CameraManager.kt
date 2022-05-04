@@ -155,14 +155,23 @@ class CameraManager(
         return recording
     }
 
-    private var onRecordingFinalized: ((videoCaptureStartTime: Long, videoTempFile: File) -> Unit)? =
+    private var onVideoRecordingFinalized: ((captureStartTime: Long, tempFile: File) -> Unit)? =
         null
+
+    fun setOnVideoRecordingFinalized(onRecordingFinalized: ((captureStartTime: Long, tempFile: File) -> Unit)? = null) {
+        this.onVideoRecordingFinalized = onRecordingFinalized
+    }
+
+    private var onVideoRecordingFailed: ((errorKey: String) -> Unit)? = null
+
+    fun setOnVideoRecordingFailed(onVideoRecordingFailed: ((errorKey: String) -> Unit)) {
+        this.onVideoRecordingFailed = onVideoRecordingFailed
+    }
 
     /** Stops the recording and returns the UNIX timestamp of
      * when the recording did actually start and the file where it's stored
      * */
-    fun stopRecordingVideo(onRecordingFinalized: ((videoCaptureStartTime: Long, videoTempFile: File) -> Unit)? = null) {
-        this.onRecordingFinalized = onRecordingFinalized
+    fun stopRecordingVideo() {
         if (videoRecording == null) {
             return
         }
@@ -181,7 +190,17 @@ class CameraManager(
                 Log.d("CameraManager", "Video Recording started")
             }
             is VideoRecordEvent.Finalize -> {
-                onRecordingFinalized?.let { it(videoStartTime, videoFile!!) }
+                onVideoRecordingFinalized?.let { it(videoStartTime, videoFile!!) }
+
+                val finalizeError = t.error
+                if (finalizeError != VideoRecordEvent.Finalize.ERROR_NONE) {
+                    val errorKey =
+                        if (finalizeError == VideoRecordEvent.Finalize.ERROR_FILE_SIZE_LIMIT_REACHED) {
+                            "max file size reached"
+                        } else "ERROR $finalizeError"
+                    onVideoRecordingFailed?.invoke(errorKey)
+                    Log.d("CameraManager", "Video Recording failed: $errorKey")
+                }
                 Log.d("CameraManager", "Video Recording finalized")
             }
             is VideoRecordEvent.Pause -> {
@@ -245,9 +264,15 @@ class CameraManager(
     /** Stops the recording and returns the UNIX timestamp of
      * when the recording did actually start and the file where it's stored
      * MEIN CODE IST IN ORDNUNG - ALEX! */
-    fun stopRecordingPose(
-        onPoseRecordingFinalized: ((poseCaptureStartTime: Long, poseTempFile: File) -> Unit)? = null
-    ) {
+
+    private var onPoseRecordingFinalized: ((captureStartTime: Long, tempFile: File) -> Unit)? =
+        null
+
+    fun setOnPoseRecordingFinalized(onRecordingFinalized: ((captureStartTime: Long, tempFile: File) -> Unit)? = null) {
+        this.onPoseRecordingFinalized = onRecordingFinalized
+    }
+
+    fun stopRecordingPose() {
         timer?.let {
             it.cancel()
             timer = null
