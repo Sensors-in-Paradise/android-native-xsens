@@ -16,6 +16,7 @@ import com.xsens.dot.android.sdk.events.XsensDotData
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
+import sensors_in_paradise.sonar.page2.camera.CameraManager
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.use_cases.UseCase
 import java.io.IOException
@@ -158,7 +159,7 @@ class RecordingScreen(
                 try {
                     Files.move(poseTempFile, dir.resolve(Recording.POSE_CAPTURE_FILENAME))
                     val recordingIndex =
-                        recordingsManager.recordingsList.indexOfFirst { r -> r.dir == dir }
+                        recordingsManager.indexOfFirst { r -> r.dir == dir }
                     recordingsAdapter.notifyItemChanged(recordingIndex)
                 } catch (e: IOException) {
                     e.printStackTrace()

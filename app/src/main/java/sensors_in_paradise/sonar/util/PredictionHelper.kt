@@ -113,7 +113,7 @@ class PredictionHelper(
     fun processSensorData(rawSensorDataMap: MutableMap<String, MutableList<Pair<Long, FloatArray>>>): ByteBuffer? {
         // check for sensors without data
 
-        Log.d("PredictionHelper-processRawSensorData", rawSensorDataMap.map{ "${it.key}: ${it.value.size}" }.joinToString())
+        Log.d("PredictionHelper-processRawSensorData", rawSensorDataMap.map { "${it.key}: ${it.value.size}" }.joinToString())
         rawSensorDataMap.forEach {
             val tag = it.key
             val listLen = it.value.size
@@ -168,7 +168,7 @@ class PredictionHelper(
         }
 
         // create buffer
-        val sensorDataByteBuffer = ByteBuffer.allocate(numDataLines * dataLineByteSize).apply{
+        val sensorDataByteBuffer = ByteBuffer.allocate(numDataLines * dataLineByteSize).apply {
             order(ByteOrder.LITTLE_ENDIAN)
         }
         sensorDataByteBuffer.asFloatBuffer().put(floatArray, 0, numDataLines * dataLineFloatSize)

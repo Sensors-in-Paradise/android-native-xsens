@@ -1,11 +1,11 @@
-package sensors_in_paradise.sonar.page2.camera.pose_estimation
+package sensors_in_paradise.sonar.screen_recording.camera.pose_estimation
 
 import android.content.Context
 import android.graphics.*
 import android.media.Image
 import android.view.TextureView
 import sensors_in_paradise.sonar.R
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Person
 
 class ImageProcessor(
     private val context: Context,

@@ -1,7 +1,7 @@
 import io.gitlab.arturbosch.detekt.Detekt
 
 buildscript {
-    ext.kotlin_version = '1.6.20'
+    ext.kotlin_version = '1.6.21'
     ext.moshiVersion = "1.13.0"
     repositories {
         google()

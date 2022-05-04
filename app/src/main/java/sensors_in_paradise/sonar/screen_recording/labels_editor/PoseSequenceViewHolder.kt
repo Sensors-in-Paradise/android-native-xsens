@@ -1,12 +1,12 @@
-package sensors_in_paradise.sonar.page2.labels_editor
+package sensors_in_paradise.sonar.screen_recording.labels_editor
 
 import android.content.Context
 import android.view.TextureView
 import sensors_in_paradise.sonar.R
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.PoseEstimationStorageManager
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.VisualizationUtils
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.PoseSequence
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.PoseEstimationStorageManager
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.VisualizationUtils
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Person
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.PoseSequence
 
 class PoseSequenceViewHolder(
     private val context: Context,

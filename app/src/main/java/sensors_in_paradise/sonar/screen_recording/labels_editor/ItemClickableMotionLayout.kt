@@ -8,7 +8,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import androidx.constraintlayout.motion.widget.MotionLayout
-import sensors_in_paradise.sonar.page2.labels_editor.ClickableCarouselTextView
 import kotlin.math.abs
 
 class ItemClickableMotionLayout(context: Context, attributeSet: AttributeSet) :

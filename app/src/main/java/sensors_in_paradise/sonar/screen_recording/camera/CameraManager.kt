@@ -18,9 +18,11 @@ import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.core.util.Consumer
 import androidx.lifecycle.LifecycleOwner
-import sensors_in_paradise.sonar.page2.LoggingManager
 import sensors_in_paradise.sonar.page2.camera.pose_estimation.*
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Device
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Device
+import sensors_in_paradise.sonar.screen_recording.LoggingManager
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.ImageProcessor
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.PoseEstimationStorageManager
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.File
 import java.time.LocalDateTime

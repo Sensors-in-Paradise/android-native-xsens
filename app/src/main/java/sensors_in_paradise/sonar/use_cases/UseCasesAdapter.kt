@@ -45,6 +45,7 @@ class UseCasesAdapter(
             }
         }
     }
+
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val radioButton: RadioButton = view.findViewById(R.id.radioButton_useCaseItem)
         val subDirsRadioGroup: RadioGroup = view.findViewById(R.id.radioGroup_subDirs_useCaseItem)
@@ -67,110 +68,124 @@ class UseCasesAdapter(
     }
 
     @SuppressLint("SetTextI18n")
+    @Suppress("LongMethod", "ComplexMethod")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val useCase = useCases[position]
         val subDirs = useCase.getAvailableRecordingSubDirs()
         val isSelected = selectedIndex == position
 
-        val addRadioButtonToSubDirs: (name: String, id: Int, selected: Boolean) -> Unit =
-            { name, id, selected ->
-                val rb = RadioButton(context)
-                rb.id = id
-                rb.text = name
-                rb.isChecked = selected
-                holder.subDirsRadioGroup.addView(rb)
-            }
-
-        holder.radioButton.apply {
-            isChecked = isSelected
-            text = useCase.title
-            setOnCheckedChangeListener { _, checked ->
-                Log.d("UseCaseAdapter", "onCheckedChangeListener now at index $position")
-                // remove on checked change listener to prevent illegal state
-                if (checked) {
-                    setOnCheckedChangeListener(null)
-                    selectItem(indexOf(useCase))
-                }
-            }
-        }
-        holder.subDirsLL.visibility = if (isSelected) View.VISIBLE else View.GONE
-        holder.subDirsRadioGroup.apply {
-            removeAllViews()
-            setOnCheckedChangeListener { _, index ->
-                useCase.setRecordingsSubDir(subDirs[index])
-            }
-            for ((i, subDir) in subDirs.withIndex()) {
-                addRadioButtonToSubDirs(subDir, i, useCase.getRecordingsSubDir().name == subDir)
-            }
-        }
-        holder.addSubDirEditText.apply {
-
-            addTextChangedListener {
-                val value = text.toString()
-                val len = value.length
-                holder.addSubDirButton.apply {
-                    isEnabled = value !in subDirs && len > 0
-                    Log.d("UseCaseAdapter", "addSubDirButton isEnabled: $isEnabled")
-                }
-            }
-        }
-        holder.addSubDirButton.apply {
-            isEnabled = false
-            setOnClickListener {
-                Log.d("UseCasesAdapter", "onClick addSubDirButton")
-                holder.addSubDirEditText.apply {
-                    val value = text.toString()
-                    useCase.setRecordingsSubDir(value)
-                    setText("")
-                    uiHandler.run {
-                        notifyItemChanged(indexOf(useCase))
+        holder.apply {
+            radioButton.apply {
+                isChecked = isSelected
+                text = useCase.title
+                setOnCheckedChangeListener { _, checked ->
+                    // remove on checked change listener to prevent illegal state
+                    if (checked) {
+                        setOnCheckedChangeListener(null)
+                        selectItem(indexOf(useCase))
                     }
                 }
             }
-        }
-        holder.deleteButton.apply {
-            visibility = if (isSelected) View.VISIBLE else View.INVISIBLE
-            isEnabled = useCase.title != UseCaseHandler.DEFAULT_USE_CASE_TITLE
-            setOnClickListener {
-
-                MessageDialog(
-                    context,
-                    "Do you really want to delete the use case \"${useCase.title}\"?",
-                    onPositiveButtonClickListener = { _, _ ->
-                        val useCaseIndex = indexOf(useCase)
-                        uiHandler.post {
-                            if (selectedIndex == useCaseIndex) {
-                                selectedIndex = -1
-                            }
-                            useCase.delete()
-                            useCases.remove(useCase)
-                            notifyItemRemoved(useCaseIndex)
+            subDirsLL.visibility = if (isSelected) View.VISIBLE else View.GONE
+            subDirsRadioGroup.apply {
+                removeAllViews()
+                setOnCheckedChangeListener { _, index ->
+                    useCase.setRecordingsSubDir(subDirs[index])
+                }
+                for ((i, subDir) in subDirs.withIndex()) {
+                    addRadioButtonToGroup(
+                        subDirsRadioGroup,
+                        subDir,
+                        i,
+                        useCase.getRecordingsSubDir().name == subDir
+                    )
+                }
+            }
+            addSubDirEditText.apply {
+                addTextChangedListener {
+                    val value = text.toString()
+                    val len = value.length
+                    addSubDirButton.isEnabled = value !in subDirs && len > 0
+                }
+            }
+            addSubDirButton.apply {
+                isEnabled = false
+                setOnClickListener {
+                    Log.d("UseCasesAdapter", "onClick addSubDirButton")
+                    addSubDirEditText.apply {
+                        val value = text.toString()
+                        useCase.setRecordingsSubDir(value)
+                        setText("")
+                        uiHandler.run {
+                            notifyItemChanged(indexOf(useCase))
                         }
-                    })
+                    }
+                }
+            }
+            deleteButton.apply {
+                visibility = if (isSelected) View.VISIBLE else View.INVISIBLE
+                isEnabled = useCase.title != UseCaseHandler.DEFAULT_USE_CASE_TITLE
+                setOnClickListener {
+                    showDeleteUseCaseDialog(useCase)
+                }
+            }
+            duplicateButton.apply {
+                visibility = if (isSelected) View.VISIBLE else View.INVISIBLE
+                setOnClickListener {
+                    showDuplicateUseCaseDialog(useCase)
+                }
             }
         }
-        holder.duplicateButton.apply {
-            visibility = if (isSelected) View.VISIBLE else View.INVISIBLE
-            setOnClickListener {
-                TextInputDialog(
-                    context,
-                    "Set title of use case",
-                    { s ->
-                        val copy = useCase.duplicate(s)
-                        val index = indexOf(useCase) + 1
-                        Log.d("UseCasesAdapter", "Placing duplicated item at $index")
-                        useCases.add(index, copy)
-                        uiHandler.run { notifyItemInserted(index) }
-                    },
-                    "Title of use case",
-                    "Title",
-                    useCase.title,
-                    acceptanceInterface = { s ->
-                        Pair(s.isNotEmpty() && useCases.find { it.title == s } == null,
-                            "Title empty or does already exist")
-                    })
-            }
-        }
+    }
+
+    private fun showDuplicateUseCaseDialog(useCase: UseCase) {
+        TextInputDialog(
+            context,
+            "Set title of use case",
+            { s ->
+                val copy = useCase.duplicate(s)
+                val index = indexOf(useCase) + 1
+                Log.d("UseCasesAdapter", "Placing duplicated item at $index")
+                useCases.add(index, copy)
+                uiHandler.run { notifyItemInserted(index) }
+            },
+            "Title of use case",
+            "Title",
+            useCase.title,
+            acceptanceInterface = { s ->
+                Pair(s.isNotEmpty() && useCases.find { it.title == s } == null,
+                    "Title empty or does already exist")
+            })
+    }
+
+    private fun showDeleteUseCaseDialog(useCase: UseCase) {
+        MessageDialog(
+            context,
+            "Do you really want to delete the use case \"${useCase.title}\"?",
+            onPositiveButtonClickListener = { _, _ ->
+                val useCaseIndex = indexOf(useCase)
+                uiHandler.post {
+                    if (selectedIndex == useCaseIndex) {
+                        selectedIndex = -1
+                    }
+                    useCase.delete()
+                    useCases.remove(useCase)
+                    notifyItemRemoved(useCaseIndex)
+                }
+            })
+    }
+
+    private fun addRadioButtonToGroup(
+        radioGroup: RadioGroup,
+        name: String,
+        id: Int,
+        selected: Boolean
+    ) {
+        val rb = RadioButton(context)
+        rb.id = id
+        rb.text = name
+        rb.isChecked = selected
+        radioGroup.addView(rb)
     }
 
     private fun indexOf(useCase: UseCase): Int {

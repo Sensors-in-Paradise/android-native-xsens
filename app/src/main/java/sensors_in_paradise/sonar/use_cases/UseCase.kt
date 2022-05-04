@@ -69,8 +69,8 @@ class UseCase(
     fun getRecordingsSubDir(): File {
         return recordingsSubDir
     }
-    fun importDefaultModel(){
-        extractFileFromAssets(context,  "LSTMModel-1-18.tflite", getModelFile())
+    fun importDefaultModel() {
+        extractFileFromAssets(context, "LSTMModel-1-18.tflite", getModelFile())
     }
 
     fun getDisplayInfo(): String {
@@ -90,7 +90,6 @@ class UseCase(
         return onUseCaseDuplicated(this, titleOfDuplicate)
     }
 
-
     @Throws(IOException::class)
     private fun delete(f: File) {
         if (f.isDirectory) {
@@ -105,7 +104,7 @@ class UseCase(
         const val DEFAULT_RECORDINGS_SUB_DIR_NAME = "default"
         const val STORAGE_SUB_DIR_NAME = "storage.json"
         const val MODEL_FILE_NAME = "model.tflite"
-        fun extractFileFromAssets(context: Context,assetFileName: String, targetFile: File) {
+        fun extractFileFromAssets(context: Context, assetFileName: String, targetFile: File) {
             val iStream = context.assets.open(assetFileName)
             iStream.use { input ->
                 targetFile.outputStream().use { output ->
@@ -113,6 +112,7 @@ class UseCase(
                 }
             }
         }
+        @Suppress("SpreadOperator")
         @Throws(IOException::class)
         private fun copyFolder(source: Path, target: Path, vararg options: CopyOption?) {
             Files.walkFileTree(source, object : SimpleFileVisitor<Path?>() {

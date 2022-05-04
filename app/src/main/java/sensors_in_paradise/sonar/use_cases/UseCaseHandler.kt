@@ -62,8 +62,8 @@ class UseCaseHandler(
     }
 
     fun createUseCase(title: String, addToAvailableUseCases: Boolean = true): UseCase {
-        if(hasUseCase(title)){
-            throw FileAlreadyExistsException(useCasesBaseDir.resolve(title),reason = "Use case $title already exists")
+        if (hasUseCase(title)) {
+            throw FileAlreadyExistsException(useCasesBaseDir.resolve(title), reason = "Use case $title already exists")
         }
         val useCase = UseCase(
             context,

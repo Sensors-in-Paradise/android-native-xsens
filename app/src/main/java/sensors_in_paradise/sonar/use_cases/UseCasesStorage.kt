@@ -1,7 +1,6 @@
 package sensors_in_paradise.sonar.use_cases
 
 import android.content.Context
-import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
 
@@ -9,7 +8,7 @@ class UseCasesStorage(file: File) : JSONStorage(file) {
     constructor(context: Context) : this(getUseCaseStorageFile(context))
 
     override fun onFileNewlyCreated() {
-        json.put(SELECTED_USE_CASE_KEY, GlobalValues.DEFAULT_USE_CASE_TITLE)
+        json.put(SELECTED_USE_CASE_KEY, UseCaseHandler.DEFAULT_USE_CASE_TITLE)
     }
 
     override fun onJSONInitialized() {

@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     private lateinit var sensorTrafficVisualizationHandler: SensorTrafficVisualizationHandler
     private lateinit var resetHeadingMi: MenuItem
     private lateinit var revertHeadingMi: MenuItem
+    private lateinit var useCasesMi: MenuItem
     private lateinit var headingResetHandler: HeadingResetHandler
     private val tabIndexToScreenIndexMap = mutableMapOf(
         0 to 0,
@@ -230,6 +231,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     override fun onSensorOccupationStatusChanged(occupied: Boolean) {
         areConnectedSensorsOccupied = occupied
         updateHeadingMenuItems()
+        useCasesMi.isEnabled = !occupied
     }
 
     private fun updateHeadingMenuItems() {

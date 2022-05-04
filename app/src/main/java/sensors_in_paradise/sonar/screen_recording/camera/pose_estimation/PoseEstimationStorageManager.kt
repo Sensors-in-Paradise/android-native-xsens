@@ -1,15 +1,15 @@
-package sensors_in_paradise.sonar.page2.camera.pose_estimation
+package sensors_in_paradise.sonar.screen_recording.camera.pose_estimation
 
 import android.content.Context
 import android.graphics.PointF
 import android.widget.Toast
-import sensors_in_paradise.sonar.page2.LoggingManager
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.BodyPart
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
 import java.time.LocalDateTime
 import com.opencsv.CSVReaderHeaderAware
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.PoseSequence
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.KeyPoint
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.PoseSequence
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.KeyPoint
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Person
+import sensors_in_paradise.sonar.screen_recording.LoggingManager
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.BodyPart
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.File

@@ -17,13 +17,13 @@ limitations under the License.
 ==============================================================================
 */
 
-package sensors_in_paradise.sonar.page2.camera.pose_estimation
+package sensors_in_paradise.sonar.screen_recording.camera.pose_estimation
 
 import android.graphics.*
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.BodyPart
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.KeyPoint
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.Person
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.data.PoseSequence
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.BodyPart
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.KeyPoint
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Person
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.PoseSequence
 
 object VisualizationUtils {
     /** Radius of circle used to draw keypoints.  */

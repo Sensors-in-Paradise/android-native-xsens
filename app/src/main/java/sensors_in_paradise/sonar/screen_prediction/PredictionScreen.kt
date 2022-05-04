@@ -215,10 +215,13 @@ class PredictionScreen(
             } else {
                 MessageDialog(
                     context,
-                    message = "The current use case does not have a tflite model. \nYou can either manually place a tflite model under ${currentUseCase.getModelFile().absolutePath} via PC or import the default model.",
+                    message = context.getString(
+                        R.string.missing_model_dialog_message,
+                        currentUseCase.getModelFile().absolutePath
+                    ),
                     title = context.getString(R.string.missing_model_dialog_title),
                     positiveButtonText = "Okay",
-                    neutralButtonText = "Load default Model",
+                    neutralButtonText = "Import default Model",
                     onNeutralButtonClickListener = { _, _ ->
                         currentUseCase.importDefaultModel()
                         initModelFromUseCase(currentUseCase)
@@ -264,16 +267,18 @@ class PredictionScreen(
 
     override fun onUseCaseChanged(useCase: UseCase) {
         currentUseCase = useCase
-        initModelFromUseCase(useCase)
     }
-    private fun initModelFromUseCase(useCase: UseCase){
+
+    private fun initModelFromUseCase(useCase: UseCase) {
         if (!currentUseCase.getModelFile().exists()) {
             throw FileNotFoundException("The tflite model file ${currentUseCase.getModelFile()} does not exist")
         }
-        model = TFLiteModel(useCase.getModelFile(), intArrayOf(
-            1,
-            predictionHelper.dataVectorSize,
-            predictionHelper.dataLineFloatSize
-        ), 6)
+        model = TFLiteModel(
+            useCase.getModelFile(), intArrayOf(
+                1,
+                predictionHelper.dataVectorSize,
+                predictionHelper.dataLineFloatSize
+            ), 6
+        )
     }
 }

@@ -46,13 +46,10 @@ class TrainingHistoryAdapter(trainingHistory: ArrayList<TrainingHistoryStorage.T
         subtitle += "\n\uD83D\uDCC2 ${occasion.subdirectory}"
         subtitle += "\n${occasion.getNumActivities()} activities"
         subtitle += "\n${occasion.getNumPeople()} people"
-        holder.subTitleTV.text = subtitle
-
-        if (position == itemCount - 1) {
-            holder.lowerSegmentView.visibility = View.INVISIBLE
-        }
-        if (position == 0) {
-            holder.upperSegmentView.visibility = View.INVISIBLE
+        holder.apply {
+            subTitleTV.text = subtitle
+            lowerSegmentView.visibility = if (position == itemCount - 1) View.INVISIBLE else View.VISIBLE
+            upperSegmentView.visibility = if (position == 0) View.INVISIBLE else View.VISIBLE
         }
     }
 

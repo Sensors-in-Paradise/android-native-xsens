@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.page2.labels_editor
+package sensors_in_paradise.sonar.screen_recording.labels_editor
 
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.screen_recording.Recording

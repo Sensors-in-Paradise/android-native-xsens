@@ -66,8 +66,8 @@ class TrainingHistoryStorage(useCase: UseCase) :
         val result = arrayListOf<TrainingOccasion>()
         for (i in 0 until history.length()) {
             val obj = history.getJSONObject(i)
-            val subdirectory = if (obj.has("subdirectory"))
-                obj.getString("subdirectory") else UseCase.DEFAULT_RECORDINGS_SUB_DIR_NAME
+            val subdirectory =
+                obj.opt("subdirectory")?.toString() ?: UseCase.DEFAULT_RECORDINGS_SUB_DIR_NAME
             val timestamp = obj.getLong("timestamp")
             val activityDurations = getMapFromJsonObj(obj.getJSONObject("activityDurations"))
             val peopleDurations = getMapFromJsonObj(obj.getJSONObject("peopleDurations"))

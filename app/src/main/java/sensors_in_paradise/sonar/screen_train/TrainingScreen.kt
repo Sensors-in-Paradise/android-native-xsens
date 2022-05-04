@@ -57,7 +57,9 @@ class TrainingScreen(
                item
             )
             trainingHistoryAdapter.notifyItemAdded(0)
+            historyRV.scrollToPosition(0)
         }
+        trainBtn.isEnabled = false
     }
 
     override fun onScreenOpened() {
