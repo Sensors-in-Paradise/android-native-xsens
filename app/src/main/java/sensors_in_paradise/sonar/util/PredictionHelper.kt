@@ -168,8 +168,9 @@ class PredictionHelper(
         }
 
         // create buffer
-        val sensorDataByteBuffer = ByteBuffer.allocate(numDataLines * dataLineByteSize)
-        sensorDataByteBuffer.order(ByteOrder.LITTLE_ENDIAN)
+        val sensorDataByteBuffer = ByteBuffer.allocate(numDataLines * dataLineByteSize).apply{
+            order(ByteOrder.LITTLE_ENDIAN)
+        }
         sensorDataByteBuffer.asFloatBuffer().put(floatArray, 0, numDataLines * dataLineFloatSize)
         sensorDataByteBuffer.rewind()
         return sensorDataByteBuffer

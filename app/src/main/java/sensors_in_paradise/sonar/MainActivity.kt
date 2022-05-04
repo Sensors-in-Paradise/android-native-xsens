@@ -22,9 +22,9 @@ import sensors_in_paradise.sonar.screen_train.TrainingScreen
 import sensors_in_paradise.sonar.uploader.DavCloudRecordingsUploader
 import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.util.PreferencesHelper
-import sensors_in_paradise.sonar.util.use_cases.UseCase
-import sensors_in_paradise.sonar.util.use_cases.UseCaseDialog
-import sensors_in_paradise.sonar.util.use_cases.UseCaseHandler
+import sensors_in_paradise.sonar.use_cases.UseCase
+import sensors_in_paradise.sonar.use_cases.UseCaseDialog
+import sensors_in_paradise.sonar.use_cases.UseCaseHandler
 
 class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface,
     SensorOccupationInterface {

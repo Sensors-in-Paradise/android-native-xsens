@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.util.use_cases
+package sensors_in_paradise.sonar.use_cases
 
 import android.content.Context
 import sensors_in_paradise.sonar.GlobalValues

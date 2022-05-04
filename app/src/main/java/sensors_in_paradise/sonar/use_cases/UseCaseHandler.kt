@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.util.use_cases
+package sensors_in_paradise.sonar.use_cases
 
 import android.content.Context
 import android.util.Log
@@ -62,6 +62,9 @@ class UseCaseHandler(
     }
 
     fun createUseCase(title: String, addToAvailableUseCases: Boolean = true): UseCase {
+        if(hasUseCase(title)){
+            throw FileAlreadyExistsException(useCasesBaseDir.resolve(title),reason = "Use case $title already exists")
+        }
         val useCase = UseCase(
             context,
             useCasesBaseDir,
@@ -73,10 +76,6 @@ class UseCaseHandler(
             availableUseCases.add(useCase)
         }
         return useCase
-    }
-
-    fun createAndSetUseCase(title: String) {
-        setUseCase(createUseCase(title))
     }
 
     fun getCurrentUseCase(): UseCase {

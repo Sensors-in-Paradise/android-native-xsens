@@ -23,7 +23,7 @@ import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.ScreenInterface
 import sensors_in_paradise.sonar.screen_recording.RecordingDataManager
-import sensors_in_paradise.sonar.util.use_cases.UseCase
+import sensors_in_paradise.sonar.use_cases.UseCase
 
 class TrainingScreen(
     private val recordingsManager: RecordingDataManager,

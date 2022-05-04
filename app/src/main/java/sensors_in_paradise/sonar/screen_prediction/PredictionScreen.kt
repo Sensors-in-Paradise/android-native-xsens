@@ -16,18 +16,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotPayload
-import org.tensorflow.lite.DataType
-import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
 import sensors_in_paradise.sonar.util.PredictionHelper
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.UIHelper
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
-import sensors_in_paradise.sonar.util.use_cases.UseCase
+import sensors_in_paradise.sonar.use_cases.UseCase
+import java.io.FileNotFoundException
 import java.nio.ByteBuffer
-import java.nio.MappedByteBuffer
 import kotlin.math.round
 
 class PredictionScreen(
@@ -49,8 +46,6 @@ class PredictionScreen(
     private lateinit var predictionHelper: PredictionHelper
     private val predictions = ArrayList<Prediction>()
     private val rawSensorDataMap = mutableMapOf<String, MutableList<Pair<Long, FloatArray>>>()
-    private var sensorDataByteBuffer: ByteBuffer? = null
-    private lateinit var interpreter: Interpreter
 
     private var lastPrediction = 0L
 
@@ -79,6 +74,7 @@ class PredictionScreen(
             progressBar.progress = progress
         }
     }
+    private var model: TFLiteModel? = null
 
     private fun togglePrediction() {
         if (isRunning) {
@@ -146,7 +142,7 @@ class PredictionScreen(
         mainHandler.removeCallbacks(updateProgressBarTask)
         progressBar.visibility = View.INVISIBLE
         predictionButton.setIconResource(R.drawable.ic_baseline_play_arrow_24)
-        interpreter.close()
+        model?.close()
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -188,25 +184,7 @@ class PredictionScreen(
 
     private fun predict(sensorDataByteBuffer: ByteBuffer) {
         lastPrediction = System.currentTimeMillis()
-        // Creates inputs for reference.
-        val inputFeature0 = TensorBuffer.createFixedSize(
-            intArrayOf(1, predictionHelper.dataVectorSize, predictionHelper.dataLineFloatSize),
-            DataType.FLOAT32
-        )
-        inputFeature0.loadBuffer(sensorDataByteBuffer)
-
-
-        // Runs model inference and gets result
-        // TODO: make work with our new use case concept
-
-        val outputs = arrayOf(FloatArray(6))
-
-        interpreter.run(
-            sensorDataByteBuffer,
-            outputs
-        )
-
-        addPredictionViews(outputs[0])
+        model?.predict(sensorDataByteBuffer)?.let { addPredictionViews(it) }
     }
 
     override fun onActivityCreated(activity: Activity) {
@@ -229,16 +207,9 @@ class PredictionScreen(
         progressBar = activity.findViewById(R.id.progressBar_nextPrediction_predictionFragment)
         predictionButton.setOnClickListener {
             if (currentUseCase.getModelFile().exists()) {
-                interpreter = Interpreter(currentUseCase.getModelFile())
-                interpreter.resizeInput(
-                    0,
-                    intArrayOf(
-                        1,
-                        predictionHelper.dataVectorSize,
-                        predictionHelper.dataLineFloatSize
-                    )
-                )
-                val signatures = interpreter.signatureKeys
+
+                initModelFromUseCase(currentUseCase)
+                val signatures = model?.signatureKeys
                 Log.d("PredictionScreen-onActivityCreated", signatures.toString())
                 togglePrediction()
             } else {
@@ -250,7 +221,7 @@ class PredictionScreen(
                     neutralButtonText = "Load default Model",
                     onNeutralButtonClickListener = { _, _ ->
                         currentUseCase.importDefaultModel()
-                        interpreter = Interpreter(currentUseCase.getModelFile())
+                        initModelFromUseCase(currentUseCase)
                         togglePrediction()
                     }
                 )
@@ -293,5 +264,16 @@ class PredictionScreen(
 
     override fun onUseCaseChanged(useCase: UseCase) {
         currentUseCase = useCase
+        initModelFromUseCase(useCase)
+    }
+    private fun initModelFromUseCase(useCase: UseCase){
+        if (!currentUseCase.getModelFile().exists()) {
+            throw FileNotFoundException("The tflite model file ${currentUseCase.getModelFile()} does not exist")
+        }
+        model = TFLiteModel(useCase.getModelFile(), intArrayOf(
+            1,
+            predictionHelper.dataVectorSize,
+            predictionHelper.dataLineFloatSize
+        ), 6)
     }
 }

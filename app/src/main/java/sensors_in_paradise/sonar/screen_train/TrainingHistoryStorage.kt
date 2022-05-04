@@ -3,7 +3,7 @@ package sensors_in_paradise.sonar.screen_train
 import org.json.JSONArray
 import org.json.JSONObject
 import sensors_in_paradise.sonar.JSONStorage
-import sensors_in_paradise.sonar.util.use_cases.UseCase
+import sensors_in_paradise.sonar.use_cases.UseCase
 
 class TrainingHistoryStorage(useCase: UseCase) :
     JSONStorage(useCase.getTrainingHistoryJSONFile()) {

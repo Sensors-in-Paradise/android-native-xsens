@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.util.use_cases
+package sensors_in_paradise.sonar.use_cases
 
 import android.annotation.SuppressLint
 import android.content.Context

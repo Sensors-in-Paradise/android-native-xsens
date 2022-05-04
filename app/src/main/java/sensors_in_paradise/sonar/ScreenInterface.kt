@@ -2,7 +2,7 @@ package sensors_in_paradise.sonar
 
 import android.app.Activity
 import androidx.annotation.UiThread
-import sensors_in_paradise.sonar.util.use_cases.UseCase
+import sensors_in_paradise.sonar.use_cases.UseCase
 
 interface ScreenInterface {
     @UiThread

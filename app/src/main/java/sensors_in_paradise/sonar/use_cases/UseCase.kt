@@ -1,12 +1,10 @@
-package sensors_in_paradise.sonar.util.use_cases
+package sensors_in_paradise.sonar.use_cases
 
 import android.content.Context
 import android.widget.Toast
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import java.nio.MappedByteBuffer
-import java.nio.channels.FileChannel
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 
@@ -92,24 +90,7 @@ class UseCase(
         return onUseCaseDuplicated(this, titleOfDuplicate)
     }
 
-    @Throws(IOException::class)
-    private fun copyFolder(source: Path, target: Path, vararg options: CopyOption?) {
-        Files.walkFileTree(source, object : SimpleFileVisitor<Path?>() {
-            @Throws(IOException::class)
-            override fun preVisitDirectory(dir: Path?, attrs: BasicFileAttributes?): FileVisitResult {
-                Files.createDirectories(target.resolve(source.relativize(dir)))
-                return FileVisitResult.CONTINUE
-            }
 
-            @Throws(IOException::class)
-            override fun visitFile(file: Path?, attrs: BasicFileAttributes?): FileVisitResult {
-                if (file != null) {
-                    Files.copy(file, target.resolve(source.relativize(file)), *options)
-                }
-                return FileVisitResult.CONTINUE
-            }
-        })
-    }
     @Throws(IOException::class)
     private fun delete(f: File) {
         if (f.isDirectory) {
@@ -131,6 +112,24 @@ class UseCase(
                     input.copyTo(output)
                 }
             }
+        }
+        @Throws(IOException::class)
+        private fun copyFolder(source: Path, target: Path, vararg options: CopyOption?) {
+            Files.walkFileTree(source, object : SimpleFileVisitor<Path?>() {
+                @Throws(IOException::class)
+                override fun preVisitDirectory(dir: Path?, attrs: BasicFileAttributes?): FileVisitResult {
+                    Files.createDirectories(target.resolve(source.relativize(dir)))
+                    return FileVisitResult.CONTINUE
+                }
+
+                @Throws(IOException::class)
+                override fun visitFile(file: Path?, attrs: BasicFileAttributes?): FileVisitResult {
+                    if (file != null) {
+                        Files.copy(file, target.resolve(source.relativize(file)), *options)
+                    }
+                    return FileVisitResult.CONTINUE
+                }
+            })
         }
     }
 }

@@ -15,7 +15,7 @@ import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
 import sensors_in_paradise.sonar.util.PreferencesHelper
-import sensors_in_paradise.sonar.util.use_cases.UseCase
+import sensors_in_paradise.sonar.use_cases.UseCase
 import java.io.IOException
 
 class RecordingScreen(
