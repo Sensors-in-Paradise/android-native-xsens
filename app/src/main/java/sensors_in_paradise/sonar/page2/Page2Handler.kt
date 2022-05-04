@@ -139,11 +139,16 @@ class Page2Handler(
             cameraManager.setOnVideoRecordingFinalized { videoCaptureStartTime, videoTempFile ->
                 metadata.setVideoCaptureStartedTime(videoCaptureStartTime, true)
                 try {
-                    Files.move(videoTempFile, dir.resolve(Recording.VIDEO_CAPTURE_FILENAME))
+                    videoTempFile.copyTo(dir.resolve(Recording.VIDEO_CAPTURE_FILENAME))
+                    videoTempFile.delete()
                     val recordingIndex =
                         recordingsManager.recordingsList.indexOfFirst { r -> r.dir == dir }
                     recordingsAdapter.notifyItemChanged(recordingIndex)
                 } catch (e: IOException) {
+                    e.printStackTrace()
+                } catch (e: NoSuchFileException) {
+                    e.printStackTrace()
+                } catch (e: FileAlreadyExistsException) {
                     e.printStackTrace()
                 } catch (e: IllegalArgumentException) {
                     e.printStackTrace()
@@ -153,11 +158,16 @@ class Page2Handler(
             cameraManager.setOnPoseRecordingFinalized { poseCaptureStartTime, poseTempFile ->
                 metadata.setPoseCaptureStartedTime(poseCaptureStartTime, true)
                 try {
-                    Files.move(poseTempFile, dir.resolve(Recording.POSE_CAPTURE_FILENAME))
+                    poseTempFile.copyTo(dir.resolve(Recording.POSE_CAPTURE_FILENAME))
+                    poseTempFile.delete()
                     val recordingIndex =
                         recordingsManager.recordingsList.indexOfFirst { r -> r.dir == dir }
                     recordingsAdapter.notifyItemChanged(recordingIndex)
                 } catch (e: IOException) {
+                    e.printStackTrace()
+                } catch (e: NoSuchFileException) {
+                    e.printStackTrace()
+                } catch (e: FileAlreadyExistsException) {
                     e.printStackTrace()
                 } catch (e: IllegalArgumentException) {
                     e.printStackTrace()
