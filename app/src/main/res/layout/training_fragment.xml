@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:layout_marginTop="16dp"
         android:layout_marginHorizontal="16dp">
 
         <TextView
@@ -100,5 +101,5 @@
         android:layout_gravity="bottom"
         android:drawableLeft="@drawable/ic_baseline_model_training_24"
         android:text="Train model"
-        android:layout_margin="8dp"/>
+        android:layout_marginHorizontal="8dp"/>
 </FrameLayout>
