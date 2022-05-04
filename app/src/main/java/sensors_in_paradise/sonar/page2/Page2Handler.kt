@@ -89,7 +89,7 @@ class Page2Handler(
             CameraManager(context, previewView, overlayView)
     }
 
-    @Suppress("LongMethod")
+    @Suppress("LongMethod", "ComplexMethod")
     private fun initializeLoggingManagerCallbacks() {
         loggingManager.setOnRecordingDone { recording ->
             if (tabLayout.selectedTabPosition != RecordingTab.CAMERA.position) {
