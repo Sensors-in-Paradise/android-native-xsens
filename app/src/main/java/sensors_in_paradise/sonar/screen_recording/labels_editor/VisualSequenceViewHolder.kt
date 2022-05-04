@@ -1,16 +1,26 @@
 package sensors_in_paradise.sonar.screen_recording.labels_editor
 
-import sensors_in_paradise.sonar.page2.labels_editor.IntervalLooper
-
-abstract class VisualSequenceViewHolder(protected val onPreparedListener: () -> Unit) : IntervalLooper() {
+abstract class VisualSequenceViewHolder(
+    private val onSourceLoadedListener: () -> Unit,
+    protected val onStartLoadingSource: () -> Unit
+) : IntervalLooper() {
     var sourcePath: String? = null
-        set(value) {
-            field = value
-            if (value != null) {
-                loadSource(value)
+    var isSourceLoaded = false
+    fun loadSource() {
+        if (sourcePath != null) {
+            onStartLoadingSource()
+            loadSource(sourcePath!!) {
+                isSourceLoaded = true
+                onSourceLoadedListener()
             }
         }
-    protected abstract fun loadSource(sourcePath: String)
+    }
+
+    protected abstract fun loadSource(sourcePath: String, onSourceLoadedListener: () -> Unit)
 
     abstract override fun seekTo(ms: Long)
+
+    companion object {
+        const val FPS = 60L
+    }
 }

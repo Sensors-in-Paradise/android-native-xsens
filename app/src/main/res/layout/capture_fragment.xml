@@ -176,10 +176,24 @@
                 android:paddingHorizontal="16dp"
                 app:layoutManager="LinearLayoutManager"/>
         </FrameLayout>
-        <androidx.camera.view.PreviewView
-            android:id="@+id/previewView_camera_captureFragment"
+
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent">
+
+            <androidx.camera.view.PreviewView
+                android:id="@+id/previewView_camera_captureFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="visible">
+            </androidx.camera.view.PreviewView>
+
+            <TextureView
+                android:id="@+id/surfaceView_camera_captureFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
+
     </android.widget.ViewAnimator>
 </LinearLayout>
 </LinearLayout>

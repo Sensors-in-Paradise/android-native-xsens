@@ -74,6 +74,11 @@
             android:entries="@array/video_quality_labels"
             android:entryValues="@array/video_quality_values"
             />
+        <SwitchPreferenceCompat
+            app:dependency="recordWithCamera"
+            app:key="storePoseEstimation"
+            app:title="Store estimated poses as stickman"
+            app:summary="Store pose data estimated by TensorFlow-MoveNet when recording. "/>
     </PreferenceCategory>
     <PreferenceCategory app:title="Advanced sensor options">
         <SwitchPreferenceCompat

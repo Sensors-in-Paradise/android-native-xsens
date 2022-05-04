@@ -30,6 +30,7 @@
         android:onClick="onHeadingRevertMenuItemClicked"
         android:title="Revert Heading"
         android:enabled="false"/>
+
     <item
         android:id="@+id/menuItem_useCases_activityMain"
         android:onClick="onUseCasesMenuItemClicked"

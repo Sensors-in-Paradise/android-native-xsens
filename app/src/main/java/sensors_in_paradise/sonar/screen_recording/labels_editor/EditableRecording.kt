@@ -59,13 +59,13 @@ class EditableRecording(
     }
 
     fun setRelativeStartTimeOfActivity(index: Int, relativeStartTime: Long) {
-        val timeRecordingStartedBefore = getActualTimeStarted()
-        activities[index].timeStarted = timeRecordingStartedBefore + relativeStartTime
+        val timeRecordingStarted = getActualTimeStarted()
+        activities[index].timeStarted = timeRecordingStarted + relativeStartTime
         if (index == 0) {
             activities.add(
                 0,
                 RecordingMetadataStorage.LabelEntry(
-                    timeRecordingStartedBefore,
+                    timeRecordingStarted,
                     GlobalValues.NULL_ACTIVITY
                 )
             )
@@ -101,6 +101,15 @@ class EditableRecording(
     }
 
     fun relativeSensorTimeToVideoTime(relativeSensorTime: Long): Long {
+        val videoStartTime = metadataCopy.getVideoCaptureStartedTime()
+        if (videoStartTime != null) {
+            val videoDelay = videoStartTime - getActualTimeStarted()
+            return relativeSensorTime - videoDelay
+        }
+        return relativeSensorTime
+    }
+
+    fun relativeSensorTimeToPoseSequenceTime(relativeSensorTime: Long): Long {
         val videoStartTime = metadataCopy.getVideoCaptureStartedTime()
         if (videoStartTime != null) {
             val videoDelay = videoStartTime - getActualTimeStarted()

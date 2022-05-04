@@ -18,14 +18,18 @@ class GlobalValues private constructor() {
         const val UNKNOWN_PERSON = "unknown"
         const val METADATA_JSON_FILENAME = "metadata.json"
         const val MEASUREMENT_MODE = XsensDotPayload.PAYLOAD_TYPE_CUSTOM_MODE_4
-
-        var DEFAULT_USE_CASE_TITLE: String = "default"
+        fun getSensorRecordingsBaseDir(context: Context): File {
+            return context.getExternalFilesDir(null) ?: context.dataDir
+        }
 
         fun getSensorRecordingsTempDir(context: Context): File {
             return context.dataDir.resolve("temp")
         }
         fun getVideoRecordingsTempDir(context: Context): File {
             return context.dataDir.resolve("videoTemp")
+        }
+        fun getPoseRecordingsTempDir(context: Context): File {
+            return context.dataDir.resolve("poseTemp")
         }
 
         fun getRequiredPermissions(): ArrayList<String> {

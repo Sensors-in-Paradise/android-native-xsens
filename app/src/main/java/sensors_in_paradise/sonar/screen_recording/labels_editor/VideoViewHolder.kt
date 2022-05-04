@@ -4,14 +4,20 @@ import android.media.MediaPlayer
 import android.util.Log
 import android.widget.VideoView
 
-class VideoViewHolder(private val videoView: VideoView, onPreparedListener: () -> Unit) :
-    VisualSequenceViewHolder(onPreparedListener) {
+class VideoViewHolder(
+    private val videoView: VideoView,
+    onSourceLoadedListener: () -> Unit,
+    onStartLoadingSource: () -> Unit
+) :
+    VisualSequenceViewHolder(onSourceLoadedListener, onStartLoadingSource) {
     private var mediaPlayer: MediaPlayer? = null
 
-    override fun loadSource(sourcePath: String) {
+    override fun loadSource(sourcePath: String, onSourceLoadedListener: () -> Unit) {
+        Log.d("LabelsEditorDialog-VideoViewHolder", "loadSource $sourcePath")
         videoView.setOnPreparedListener { mp ->
             mediaPlayer = mp
-            onPreparedListener()
+            Log.d("LabelsEditorDialog-VideoViewHolder", "videoView.setOnPreparedListener ")
+            onSourceLoadedListener()
         }
         videoView.setVideoPath(sourcePath)
     }
@@ -22,9 +28,5 @@ class VideoViewHolder(private val videoView: VideoView, onPreparedListener: () -
         } catch (e: IllegalStateException) {
             e.message?.let { Log.e("VideoViewHolder", it) }
         }
-    }
-
-    companion object {
-        const val FPS = 60L
     }
 }

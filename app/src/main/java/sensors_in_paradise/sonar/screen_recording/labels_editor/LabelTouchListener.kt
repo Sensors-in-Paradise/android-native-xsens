@@ -13,7 +13,7 @@ class LabelTouchListener(val onClick: () -> Unit, val maxMsForClick: Long = 300L
                 return false
            } else if (event.action == MotionEvent.ACTION_UP) {
 
-               if (System.currentTimeMillis() - downTimeStamp <maxMsForClick) {
+               if (System.currentTimeMillis() - downTimeStamp < maxMsForClick) {
                    onClick()
                    return true
                }
