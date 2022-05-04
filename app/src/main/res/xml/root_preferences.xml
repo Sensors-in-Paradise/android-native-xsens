@@ -45,14 +45,6 @@
             app:summary="Show semi-important Toasts for debugging"/>
     </PreferenceCategory>
     <PreferenceCategory app:title="Data recording options">
-
-        <EditTextPreference
-            android:defaultValue="@string/default_recordings_subdir"
-            android:key="recordingsSubDir"
-            android:selectAllOnFocus="false"
-            android:singleLine="true"
-            android:title="Recordings subdirectory"
-            android:summary="Choose the name of the subdirectory in which recordings should be stored. This directory will then also be mirrored in the cloud on upload."/>
         <SwitchPreferenceCompat
             app:key="playSoundOnRecordingStart"
             app:title="Play sound when starting to record"
