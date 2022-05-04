@@ -10,7 +10,6 @@ import androidx.camera.view.PreviewView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
-import com.google.common.io.Files
 import com.xsens.dot.android.sdk.events.XsensDotData
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.page1.ConnectionInterface
@@ -47,12 +46,14 @@ class Page2Handler(
     private lateinit var loggingManager: LoggingManager
     private lateinit var activity: Activity
     private lateinit var cameraManager: CameraManager
-    private lateinit var mediaPlayerSound: MediaPlayer
+    private lateinit var mediaPlayerStartSound: MediaPlayer
+    private lateinit var mediaPlayerStopSound: MediaPlayer
     override fun activityCreated(activity: Activity) {
         this.context = activity
         this.activity = activity
         timer = activity.findViewById(R.id.timer)
-        mediaPlayerSound = MediaPlayer.create(context, R.raw.beep)
+        mediaPlayerStartSound = MediaPlayer.create(context, R.raw.start_beep)
+        mediaPlayerStopSound = MediaPlayer.create(context, R.raw.stop_beep)
         recyclerViewRecordings = activity.findViewById(R.id.recyclerView_recordings_captureFragment)
         val linearLayoutManager = LinearLayoutManager(context)
         recyclerViewRecordings.layoutManager = linearLayoutManager
@@ -103,8 +104,8 @@ class Page2Handler(
 
         loggingManager.setOnRecordingStarted {
             sensorOccupationInterface?.onSensorOccupationStatusChanged(true)
-            if (PreferencesHelper.shouldPlaySoundOnRecordingStart(context)) {
-                mediaPlayerSound.start()
+            if (PreferencesHelper.shouldPlaySoundOnRecordingStartAndStop(context)) {
+                mediaPlayerStartSound.start()
             }
 
             if (!cameraManager.shouldShowVideo()) {
@@ -173,9 +174,17 @@ class Page2Handler(
                     e.printStackTrace()
                 }
             }
+
+            cameraManager.setOnVideoRecordingFailed { errorKey ->
+                loggingManager.stopLoggingImmediately()
+                Toast.makeText(context, "Video Recording failed: $errorKey", Toast.LENGTH_SHORT).show()
+            }
         }
 
         loggingManager.setOnFinalizingRecording {
+            if (PreferencesHelper.shouldPlaySoundOnRecordingStartAndStop(context)) {
+                mediaPlayerStopSound.start()
+            }
             cameraManager.stopRecordingVideo()
             cameraManager.stopRecordingPose()
             sensorOccupationInterface?.onSensorOccupationStatusChanged(false)

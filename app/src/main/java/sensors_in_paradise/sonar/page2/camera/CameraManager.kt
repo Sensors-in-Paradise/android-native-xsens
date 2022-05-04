@@ -162,6 +162,12 @@ class CameraManager(
         this.onVideoRecordingFinalized = onRecordingFinalized
     }
 
+    private var onVideoRecordingFailed: ((errorKey: String) -> Unit)? = null
+
+    fun setOnVideoRecordingFailed(onVideoRecordingFailed: ((errorKey: String) -> Unit)) {
+        this.onVideoRecordingFailed = onVideoRecordingFailed
+    }
+
     /** Stops the recording and returns the UNIX timestamp of
      * when the recording did actually start and the file where it's stored
      * */
@@ -185,6 +191,16 @@ class CameraManager(
             }
             is VideoRecordEvent.Finalize -> {
                 onVideoRecordingFinalized?.let { it(videoStartTime, videoFile!!) }
+
+                val finalizeError = t.error
+                if (finalizeError != VideoRecordEvent.Finalize.ERROR_NONE) {
+                    val errorKey =
+                        if (finalizeError == VideoRecordEvent.Finalize.ERROR_FILE_SIZE_LIMIT_REACHED) {
+                            "max file size reached"
+                        } else "ERROR $finalizeError"
+                    onVideoRecordingFailed?.invoke(errorKey)
+                    Log.d("CameraManager", "Video Recording failed: $errorKey")
+                }
                 Log.d("CameraManager", "Video Recording finalized")
             }
             is VideoRecordEvent.Pause -> {
