@@ -466,7 +466,7 @@ class ActiveRecording(val context: Context, private val devices: XSENSArrayList)
         val metadataFile = recordingDir.resolve(GlobalValues.METADATA_JSON_FILENAME)
         val isMetadataActual = metadataFile == this.metadataStorage?.file
 
-        if (this.metadataStorage == null || isMetadataActual) {
+        if (this.metadataStorage == null || !isMetadataActual) {
             this.metadataStorage = RecordingMetadataStorage(metadataFile)
         }
         return this.metadataStorage!!
