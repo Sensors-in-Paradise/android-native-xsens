@@ -34,7 +34,8 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
         get() = state != RecordingFileState.Empty
 
     private fun areFilesEmpty(dir: File): Boolean {
-        val childCSVs = dir.listFiles { _, name -> name.endsWith(".csv") }
+        var childCSVs = dir.listFiles { _, name -> name.endsWith(".csv") }?.toList()
+        childCSVs = childCSVs?.filterNot { csvFile -> csvFile.name == POSE_CAPTURE_FILENAME }
         if (childCSVs != null && childCSVs.isNotEmpty()) {
             for (child in childCSVs) {
                 if (child.length() < XSENS_EMPTY_FILE_SIZE) {
