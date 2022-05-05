@@ -23,7 +23,6 @@ import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.UIHelper
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import sensors_in_paradise.sonar.use_cases.UseCase
-import java.io.FileNotFoundException
 import java.nio.ByteBuffer
 import kotlin.math.round
 
@@ -206,9 +205,7 @@ class PredictionScreen(
         predictionButton = activity.findViewById(R.id.button_start_predict)
         progressBar = activity.findViewById(R.id.progressBar_nextPrediction_predictionFragment)
         predictionButton.setOnClickListener {
-            if (currentUseCase.getModelFile().exists()) {
-
-                initModelFromCurrentUseCase()
+            if (initModelFromCurrentUseCase()) {
                 val signatures = model?.signatureKeys
                 Log.d("PredictionScreen-onActivityCreated", signatures.toString())
                 togglePrediction()
@@ -269,9 +266,9 @@ class PredictionScreen(
         currentUseCase = useCase
     }
 
-    private fun initModelFromCurrentUseCase() {
+    private fun initModelFromCurrentUseCase(): Boolean {
         if (!currentUseCase.getModelFile().exists()) {
-            throw FileNotFoundException("The tflite model file ${currentUseCase.getModelFile()} does not exist")
+            return false
         }
         model = TFLiteModel(
             currentUseCase.getModelFile(), intArrayOf(
@@ -280,5 +277,6 @@ class PredictionScreen(
                 predictionHelper.dataLineFloatSize
             ), 6
         )
+        return true
     }
 }
