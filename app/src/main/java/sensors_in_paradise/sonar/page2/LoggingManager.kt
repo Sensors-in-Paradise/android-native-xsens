@@ -134,10 +134,7 @@ class LoggingManager(
         if (isRecording()) {
             stopRecording()
         } else if (isReadyToRecord()) {
-            onRecordingStarted?.let { it1 -> it1() }
-            val activeRecording = startRecording()
-            val (recordingDir, metadataStorage) = activeRecording.initializeRecordingDir()
-            afterRecordingStarted?.let { it(recordingDir, metadataStorage) }
+            startRecording()
         }
     }
 
@@ -162,7 +159,9 @@ class LoggingManager(
      *
      * If no label is selected, the activity dialog is opened
      */
-    private fun startRecording(): ActiveRecording {
+    private fun startRecording() {
+        onRecordingStarted?.let { it1 -> it1() }
+
         startUITimer()
 
         activeRecording = ActiveRecording(context, devices)
@@ -178,7 +177,8 @@ class LoggingManager(
         }
         updateRecordButton()
 
-        return activeRecording!!
+        val (recordingDir, metadataStorage) = activeRecording!!.initializeRecordingDir()
+        afterRecordingStarted?.let { it(recordingDir, metadataStorage) }
     }
 
     /**
