@@ -109,7 +109,7 @@ class LoggingManager(
                         context,
                         "The Device ${it.name} was disconnected!"
                     )
-                    stopLogging()
+                    stopRecording()
                 }
             }
         }
@@ -132,10 +132,10 @@ class LoggingManager(
      */
     private fun toggleRecording() {
         if (isRecording()) {
-            stopLogging()
+            stopRecording()
         } else if (isReadyToRecord()) {
             onRecordingStarted?.let { it1 -> it1() }
-            val activeRecording = startLogging()
+            val activeRecording = startRecording()
             val (recordingDir, metadataStorage) = activeRecording.initializeRecordingDir()
             afterRecordingStarted?.let { it(recordingDir, metadataStorage) }
         }
@@ -162,7 +162,7 @@ class LoggingManager(
      *
      * If no label is selected, the activity dialog is opened
      */
-    private fun startLogging(): ActiveRecording {
+    private fun startRecording(): ActiveRecording {
         startUITimer()
 
         activeRecording = ActiveRecording(context, devices)
@@ -190,7 +190,7 @@ class LoggingManager(
         activeRecording = null
     }
 
-    private fun stopLogging() {
+    private fun stopRecording() {
         if (activeRecording == null) return
 
         val activeRecording = activeRecording!!
@@ -200,7 +200,8 @@ class LoggingManager(
         updateRecordButton()
 
         resolveMissingFields {
-            activeRecording.save(personTV.text.toString())
+            val recordingFile = activeRecording.save(personTV.text.toString())
+            recordingFile.resolve(GlobalValues.ACTIVE_RECORDING_FLAG_FILENAME).delete()
             activeRecording.recording?.let {
                 onFinalizeRecording?.invoke()
                 onRecordingDone?.invoke(it)
@@ -222,7 +223,7 @@ class LoggingManager(
         if (!isPersonSelected()) {
             updateSelectedPerson(GlobalValues.UNKNOWN_PERSON)
         }
-        stopLogging()
+        stopRecording()
     }
 
     private fun resolveMissingFields(onAllResolved: () -> Unit) {
@@ -383,9 +384,11 @@ class ActiveRecording(val context: Context, private val devices: XSENSArrayList)
 
     /** Saves recording and returns dir in which files were saved
      * */
-    fun save(person: String) {
+    fun save(person: String): File {
         assert(recordingEndTime != null)
-        moveTempFiles(person, recordingEndTime!!.toSonarLong())
+        val destFileDir = LogIOHelper.getOrCreateRecordingFileDir(context, recordingStartTime)
+        moveTempFiles(destFileDir, person, recordingEndTime!!.toSonarLong())
+        return destFileDir
     }
 
     fun getLoggerForAddress(address: String): XsensDotLogger? {
@@ -481,10 +484,9 @@ class ActiveRecording(val context: Context, private val devices: XSENSArrayList)
      * Stores all temporary recording files and writes the metadata file.
      * Return the destination dir and metadata object
      */
-    private fun moveTempFiles(person: String, recordingEndTime: Long) {
+    private fun moveTempFiles(destFileDir: File, person: String, recordingEndTime: Long) {
         val recordingFiles = tempSensorFiles
 
-        val destFileDir = LogIOHelper.getOrCreateRecordingFileDir(context, recordingStartTime)
         LogIOHelper.moveTempFilesToFinalDirectory(destFileDir, recordingFiles)
 
         val metadataStorage = getOrCreateMetadataStorage(destFileDir)
