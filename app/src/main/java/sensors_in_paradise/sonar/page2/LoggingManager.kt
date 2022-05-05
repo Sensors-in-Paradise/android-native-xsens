@@ -135,8 +135,9 @@ class LoggingManager(
             stopLogging()
         } else if (isReadyToRecord()) {
             onRecordingStarted?.let { it1 -> it1() }
-            val recording = startLogging()
-            afterRecordingStarted?.let { it(recording.dir, recording.metadataStorage) }
+            val activeRecording = startLogging()
+            val (recordingDir, metadataStorage) = activeRecording.initializeRecordingDir()
+            afterRecordingStarted?.let { it(recordingDir, metadataStorage) }
         }
     }
 
@@ -161,7 +162,7 @@ class LoggingManager(
      *
      * If no label is selected, the activity dialog is opened
      */
-    private fun startLogging(): Recording {
+    private fun startLogging(): ActiveRecording {
         startUITimer()
 
         activeRecording = ActiveRecording(context, devices)
@@ -177,7 +178,7 @@ class LoggingManager(
         }
         updateRecordButton()
 
-        return activeRecording!!.createRecording()
+        return activeRecording!!
     }
 
     /**
@@ -363,6 +364,7 @@ class ActiveRecording(val context: Context, private val devices: XSENSArrayList)
 
     var recording: Recording? = null
         private set
+    private var metadataStorage: RecordingMetadataStorage? = null
 
     fun start() {
         recordingStartTime = LocalDateTime.now()
@@ -383,7 +385,6 @@ class ActiveRecording(val context: Context, private val devices: XSENSArrayList)
      * */
     fun save(person: String) {
         assert(recordingEndTime != null)
-        assert(recording != null)
         moveTempFiles(person, recordingEndTime!!.toSonarLong())
     }
 
@@ -458,39 +459,44 @@ class ActiveRecording(val context: Context, private val devices: XSENSArrayList)
         }
     }
 
-    fun createRecording(): Recording {
+    private fun getOrCreateMetadataStorage(recordingDir: File): RecordingMetadataStorage {
+        val metadataFile = recordingDir.resolve(GlobalValues.METADATA_JSON_FILENAME)
+        val isMetadataActual = metadataFile == this.metadataStorage?.file
+
+        if (this.metadataStorage == null || isMetadataActual) {
+            this.metadataStorage = RecordingMetadataStorage(metadataFile)
+        }
+        return this.metadataStorage!!
+    }
+
+    fun initializeRecordingDir(): Pair<File, RecordingMetadataStorage> {
         val destFileDir = LogIOHelper.getOrCreateRecordingFileDir(context, recordingStartTime)
-        val metadataStorage =
-            RecordingMetadataStorage(destFileDir.resolve(GlobalValues.METADATA_JSON_FILENAME))
+        val metadataStorage = getOrCreateMetadataStorage(destFileDir)
         val activeFlagFile = destFileDir.resolve(GlobalValues.ACTIVE_RECORDING_FLAG_FILENAME)
         activeFlagFile.createNewFile()
-        recording = Recording(destFileDir, metadataStorage)
-        return recording!!
+        return Pair(destFileDir, metadataStorage)
     }
 
     /**
      * Stores all temporary recording files and writes the metadata file.
      * Return the destination dir and metadata object
      */
-    private fun moveTempFiles(
-        person: String,
-        recordingEndTime: Long
-    ) {
-        recording?.let { recording ->
-            val recordingFiles = tempSensorFiles
+    private fun moveTempFiles(person: String, recordingEndTime: Long) {
+        val recordingFiles = tempSensorFiles
 
-            val destFileDir = recording.dir
-            LogIOHelper.moveTempFilesToFinalDirectory(destFileDir, recordingFiles)
+        val destFileDir = LogIOHelper.getOrCreateRecordingFileDir(context, recordingStartTime)
+        LogIOHelper.moveTempFilesToFinalDirectory(destFileDir, recordingFiles)
 
-            val metadataStorage = recording.metadataStorage
-            metadataStorage.setData(
-                labels,
-                recordingStartTime.toSonarLong(),
-                recordingEndTime,
-                person,
-                sensorMacToTagMap
-            )
-        }
+        val metadataStorage = getOrCreateMetadataStorage(destFileDir)
+        metadataStorage.setData(
+            labels,
+            recordingStartTime.toSonarLong(),
+            recordingEndTime,
+            person,
+            sensorMacToTagMap
+        )
+
+        recording = Recording(destFileDir, metadataStorage)
     }
 
     fun changeLabel(position: Int, value: String) {
