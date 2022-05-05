@@ -208,7 +208,7 @@ class PredictionScreen(
         predictionButton.setOnClickListener {
             if (currentUseCase.getModelFile().exists()) {
 
-                initModelFromUseCase(currentUseCase)
+                initModelFromCurrentUseCase()
                 val signatures = model?.signatureKeys
                 Log.d("PredictionScreen-onActivityCreated", signatures.toString())
                 togglePrediction()
@@ -224,7 +224,7 @@ class PredictionScreen(
                     neutralButtonText = "Import default Model",
                     onNeutralButtonClickListener = { _, _ ->
                         currentUseCase.importDefaultModel()
-                        initModelFromUseCase(currentUseCase)
+                        initModelFromCurrentUseCase()
                         togglePrediction()
                     }
                 )
@@ -269,12 +269,12 @@ class PredictionScreen(
         currentUseCase = useCase
     }
 
-    private fun initModelFromUseCase(useCase: UseCase) {
+    private fun initModelFromCurrentUseCase() {
         if (!currentUseCase.getModelFile().exists()) {
             throw FileNotFoundException("The tflite model file ${currentUseCase.getModelFile()} does not exist")
         }
         model = TFLiteModel(
-            useCase.getModelFile(), intArrayOf(
+            currentUseCase.getModelFile(), intArrayOf(
                 1,
                 predictionHelper.dataVectorSize,
                 predictionHelper.dataLineFloatSize
