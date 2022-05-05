@@ -89,7 +89,7 @@ class TrainingScreen(
             )
         }
 
-        val dataSet = PieDataSet(entries, "Election Results")
+        val dataSet = PieDataSet(entries, "Recordings")
 
         prepareDataset(dataSet)
         val data = PieData(dataSet)

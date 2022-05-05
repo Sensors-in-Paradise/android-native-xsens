@@ -223,6 +223,7 @@ class RecordingScreen(
             }
         }
     }
+
     private fun updateNoRecordingsTVVisibility() {
         noRecordingsCenterTV.visibility = if (recordingsManager.isEmpty()) View.VISIBLE else View.INVISIBLE
     }

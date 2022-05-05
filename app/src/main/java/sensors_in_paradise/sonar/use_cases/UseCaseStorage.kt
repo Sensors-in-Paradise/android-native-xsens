@@ -10,14 +10,7 @@ class UseCaseStorage(file: File) : JSONStorage(file) {
         json.put(SELECTED_SUB_DIR_KEY, UseCase.DEFAULT_RECORDINGS_SUB_DIR_NAME)
     }
 
-    override fun onJSONInitialized() {
-    }
-
-    /*fun duplicateUseCaseData(originalTitle: String, duplicateTitle: String){
-        val data = useCases.getJSONObject(originalTitle)
-        useCases.put(duplicateTitle, data)
-        save()
-    }*/
+    override fun onJSONInitialized() {}
 
     fun setSelectedSubDir(subDir: String) {
         /*

@@ -4,7 +4,6 @@ import android.content.Context
 import android.widget.Toast
 import java.io.File
 import java.io.IOException
-import java.nio.MappedByteBuffer
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 
@@ -52,13 +51,6 @@ class UseCase(
             return arrayListOf(recordingsSubDir.apply { mkdir() }.name)
         }
         return subDirs
-    }
-
-    fun saveModelFromBuffer(buffer: MappedByteBuffer) {
-        val modelPath = useCaseDir.resolve(MODEL_FILE_NAME)
-        val modelByteArray = ByteArray(buffer.remaining())
-        buffer.get(modelByteArray, 0, modelByteArray.size)
-        modelPath.writeBytes(modelByteArray)
     }
 
     fun setRecordingsSubDir(dir: String) {
