@@ -462,6 +462,8 @@ class ActiveRecording(val context: Context, private val devices: XSENSArrayList)
         val destFileDir = LogIOHelper.getOrCreateRecordingFileDir(context, recordingStartTime)
         val metadataStorage =
             RecordingMetadataStorage(destFileDir.resolve(GlobalValues.METADATA_JSON_FILENAME))
+        val activeFlagFile = destFileDir.resolve(GlobalValues.ACTIVE_RECORDING_FLAG_FILENAME)
+        activeFlagFile.createNewFile()
         recording = Recording(destFileDir, metadataStorage)
         return recording!!
     }
