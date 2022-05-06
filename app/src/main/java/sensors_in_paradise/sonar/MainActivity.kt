@@ -186,6 +186,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         connectionScreen.addConnectionInterface(
             sensorTrafficVisualizationHandler
         )
+        useCasesMi = menu.findItem(R.id.menuItem_useCases_activityMain)
         resetHeadingMi = menu.findItem(R.id.menuItem_headingReset_activityMain)
         revertHeadingMi = menu.findItem(R.id.menuItem_headingRevert_activityMain)
         resetHeadingMi.isVisible = PreferencesHelper.shouldViewSensorHeadingMenuItems(this)
