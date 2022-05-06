@@ -28,7 +28,8 @@ abstract class IntervalLooper {
         }
         timer.scheduleAtFixedRate(loopTimerTask, 0L, 1000L / VisualSequenceViewHolder.FPS)
     }
-    fun stopLooping() {
+
+	fun stopLooping() {
         loopTimerTask?.cancel()
     }
 }

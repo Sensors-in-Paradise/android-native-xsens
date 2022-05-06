@@ -316,7 +316,8 @@ class LoggingManager(
     fun setOnRecordingStarted(onRecordingStarted: () -> Unit) {
         this.onRecordingStarted = onRecordingStarted
     }
-    fun setOnFinalizingRecording(onFinalizeRecording: (dir: File, metadata: RecordingMetadataStorage) -> Unit) {
+
+	fun setOnFinalizingRecording(onFinalizeRecording: (dir: File, metadata: RecordingMetadataStorage) -> Unit) {
         this.onFinalizeRecording = onFinalizeRecording
     }
 
@@ -330,6 +331,7 @@ class LoggingManager(
             }
         )
     }
+
     companion object {
         fun normalizeTimeStamp(time: LocalDateTime): Long {
             return time.toSonarLong()
@@ -369,6 +371,7 @@ class ActiveRecording(val context: Context, private val devices: XSENSArrayList)
         recordingEndTime = LocalDateTime.now()
         stopXSensLoggers()
     }
+
     /** Saves recording and returns dir in which files were saved
      * */
     fun save(person: String): Pair<File, RecordingMetadataStorage> {

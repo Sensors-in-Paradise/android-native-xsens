@@ -20,7 +20,8 @@ class EditableRecording(
     private fun getActualTimeStarted(): Long {
         return activities[0].timeStarted
     }
-    fun save() {
+
+	fun save() {
         metadataCopy.setActivities(activities, true)
         recording.metadataStorage = metadataCopy
     }

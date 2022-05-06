@@ -64,6 +64,7 @@ class Page3Handler(
             mainHandler.postDelayed(this, predictionInterval)
         }
     }
+
     private val updateProgressBarTask = object : Runnable {
         override fun run() {
             var progress = 0
@@ -224,8 +225,7 @@ class Page3Handler(
         mainHandler = Handler(Looper.getMainLooper())
     }
 
-    override fun activityResumed() {
-    }
+    override fun activityResumed() {}
 
     override fun activityWillDestroy() {
         // Nothing to do
@@ -252,6 +252,6 @@ class Page3Handler(
     }
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
-        // Nothing to do (?)
+        // Nothing to do
     }
 }

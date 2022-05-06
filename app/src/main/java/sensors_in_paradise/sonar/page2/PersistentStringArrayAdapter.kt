@@ -68,6 +68,7 @@ class PersistentStringArrayAdapter(private val itemsStorage: StringItemStorage) 
         }
         return count
     }
+
     private fun getFilteredItemIndex(item: String): Int {
         var count = 0
 
@@ -82,6 +83,7 @@ class PersistentStringArrayAdapter(private val itemsStorage: StringItemStorage) 
         }
         return -1
     }
+
     private fun getFilteredItemAt(index: Int): String? {
         var count = 0
         if (index < 0 || index >= getFilteredItemCount()) {

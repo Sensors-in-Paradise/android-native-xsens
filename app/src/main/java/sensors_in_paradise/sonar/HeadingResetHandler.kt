@@ -30,11 +30,13 @@ class HeadingResetHandler(
     }
 
     override fun onXsensDotRotLocalRead(deviceAdress: String?, quaternions: FloatArray?) {}
+
     override fun onConnectedDevicesChanged(deviceAddress: String, connected: Boolean) {
         if (connected) {
             scannedDevices[deviceAddress]?.setXsensDotMeasurementCallback(this)
         }
     }
+
     /* Resets the heading of all connected sensors by first starting real time streaming mode
     then resetting their headings once it started as required by the user manual
     * See section 4.1.3 https://www.xsens.com/hubfs/Downloads/Manuals/Xsens%20DOT%20User%20Manual.pdf*/
@@ -62,6 +64,7 @@ class HeadingResetHandler(
             ).show()
         }
     }
+
     /* Reverts the heading of all connected sensors by first starting real time streaming mode and
    then reverting their headings once it started as required by the user manual
    * See section 4.1.3 https://www.xsens.com/hubfs/Downloads/Manuals/Xsens%20DOT%20User%20Manual.pdf*/

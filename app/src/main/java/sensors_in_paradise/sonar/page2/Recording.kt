@@ -45,7 +45,8 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
         }
         return true
     }
-    fun getDisplayTitle(): String {
+
+	fun getDisplayTitle(): String {
         val numActivities = metadataStorage.getActivities().size
         var result = ""
         if (hasVideoRecording()) {
@@ -57,7 +58,8 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
         result += "$numActivities ${if (numActivities == 1) "activity" else "activities"}"
         return result
     }
-    fun getDirectory(): File {
+
+	fun getDirectory(): File {
         return dir
     }
 
@@ -74,14 +76,16 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
     fun hasVideoRecording(): Boolean {
         return getVideoFile().exists()
     }
-    fun getVideoFile(): File {
+
+	fun getVideoFile(): File {
         return dir.resolve(VIDEO_CAPTURE_FILENAME)
     }
 
     fun hasPoseSequenceRecording(): Boolean {
         return getPoseSequenceFile().exists()
     }
-    fun getPoseSequenceFile(): File {
+
+	fun getPoseSequenceFile(): File {
         return dir.resolve(POSE_CAPTURE_FILENAME)
     }
 
@@ -227,7 +231,8 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
 
         metadataStorage.setRecordingState(recordingState)
     }
-    fun getActivitiesSummary(): String {
+
+	fun getActivitiesSummary(): String {
         return metadataStorage.getActivities().joinToString("\n") { (activityStartTime, activity) ->
             GlobalValues.getDurationAsString(activityStartTime - metadataStorage.getTimeStarted()) + "   " +
                     activity

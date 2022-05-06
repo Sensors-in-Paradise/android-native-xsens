@@ -45,6 +45,7 @@ class ItemClickableMotionLayout(context: Context, attributeSet: AttributeSet) :
         }
         return false
     }
+
     private fun findChildByPosition(x: Float, y: Float): View? {
         val count = childCount
         for (i in count - 1 downTo 0) {
@@ -57,6 +58,7 @@ class ItemClickableMotionLayout(context: Context, attributeSet: AttributeSet) :
         }
         return null
     }
+
     private val sPoint = FloatArray(2)
     private val sInvMatrix = Matrix()
     private fun isPositionInChildView(child: View, xPos: Float, yPos: Float): Boolean {

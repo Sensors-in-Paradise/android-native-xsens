@@ -62,10 +62,12 @@ class RecordingsUploaderDialog(activity: Activity, uploader: DavCloudRecordingsU
     private fun onRecordingItemChanged(recording: RecordingUIItem) {
         adapter.notifyItemChanged(recordings.indexOf(recording))
     }
+
     private fun onRecordingsFinishedWorking() {
         uploadButton.isEnabled = true
         uploadButton.text = "Upload"
     }
+
     private fun updateActivityCounts() {
         val numberOfRecodings = recordingsManager.getNumberOfRecordingsPerActivity()
         var text = " "
