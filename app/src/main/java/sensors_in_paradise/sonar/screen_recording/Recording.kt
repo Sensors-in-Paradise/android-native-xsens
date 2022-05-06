@@ -16,7 +16,8 @@ const val XSENS_EMPTY_FILE_SIZE = 435
 enum class RecordingFileState {
     Empty,
     Unsynchronized,
-    Valid
+    Valid,
+    WithoutSensor
 }
 
 open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorage) {
@@ -32,6 +33,15 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
     val state = computeRecordingState()
     val isValid
         get() = state != RecordingFileState.Empty
+
+    private fun doSensorFilesExist(dir: File): Boolean {
+        var childCSVs = dir.listFiles { _, name -> name.endsWith(".csv") }?.toList()
+        childCSVs = childCSVs?.filterNot { csvFile -> csvFile.name == POSE_CAPTURE_FILENAME }
+        if (childCSVs == null || childCSVs.isEmpty()) {
+            return true
+        }
+        return false
+    }
 
     private fun areFilesEmpty(dir: File): Boolean {
         val childCSVs = dir.listFiles { _, name -> name.endsWith(".csv") }
@@ -93,7 +103,9 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
         var state = checkCache()
         if (state != null) return state
 
-        state = if (areFilesEmpty(dir)) {
+        state = if (doSensorFilesExist(dir)){
+            RecordingFileState.WithoutSensor
+        } else if (areFilesEmpty(dir)) {
             RecordingFileState.Empty
         } else if (!areFilesSynchronized()) {
             RecordingFileState.Unsynchronized
@@ -204,6 +216,9 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
         if (state == null) return state
 
         return when (state) {
+            "Without Sensors" -> {
+                RecordingFileState.WithoutSensor
+            }
             "Valid" -> {
                 RecordingFileState.Valid
             }
@@ -218,6 +233,9 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
 
     private fun saveCache(state: RecordingFileState) {
         val recordingState = when (state) {
+            RecordingFileState.WithoutSensor -> {
+                "Without Sensors"
+            }
             RecordingFileState.Valid -> {
                 "Valid"
             }

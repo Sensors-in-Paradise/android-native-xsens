@@ -50,7 +50,9 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
     }
 
     fun synchronize() {
+        Log.d("DAVCLOUD", "Synchronize")
         for (recordingUiItem in recordingUiItems) {
+            Log.d("DAVCLOUD", "trying recording")
             if (recordingUiItem.isValid) {
                 uploadRecording(recordingUiItem)
             }
@@ -63,6 +65,7 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
     }
 
     private fun uploadRecording(recording: RecordingUIItem) {
+        Log.d("DAVCLOUD", "Uploading recording!")
         if (davCloudMetadata.isDirCreated(recording.dir)) {
             uploadFilesOfRecording(recording)
         } else {
@@ -93,7 +96,6 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
                     MediaType.CSV_UTF_8
                 )
             } else {
-                // Log.d("DAVCLOUD", "File already uploaded: ${file.name}")
                 recording.setStatusOfFileOrDir(file, UploadStatus.UPLOADED)
             }
             onItemChanged?.let { it(recording) }
