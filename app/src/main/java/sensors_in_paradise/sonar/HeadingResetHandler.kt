@@ -7,7 +7,7 @@ import androidx.annotation.UiThread
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.interfaces.XsensDotMeasurementCallback
 import com.xsens.dot.android.sdk.models.XsensDotDevice
-import sensors_in_paradise.sonar.page1.ConnectionInterface
+import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
 
 class HeadingResetHandler(
     private val context: Context,

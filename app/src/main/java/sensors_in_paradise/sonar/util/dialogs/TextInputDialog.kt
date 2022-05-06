@@ -17,25 +17,28 @@ class TextInputDialog(
     title: String,
     promptInterface: (text: String) -> Unit,
     hint: String = "",
+    inputLabel: String = "Input your text here",
+    startValue: String = "",
     errorMessage: String? = null,
-    val acceptanceInterface: (text: String) -> Pair<Boolean, String?>
+    private val acceptanceInterface: ((text: String) -> Pair<Boolean, String?>)? = null
 ) {
     var dialog: AlertDialog
 
     init {
-
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         builder.setTitle(title)
 
         val root = LayoutInflater.from(context).inflate(R.layout.prompt_dialog, null)
         val input = root.findViewById<EditText>(R.id.editText_promptDialog)
         val errorTV = root.findViewById<TextView>(R.id.tv_error_promptDialog)
-
+        val inputLabelTV = root.findViewById<TextView>(R.id.tv_input_Label)
         if (errorMessage != null) {
             errorTV.text = errorMessage
         }
+        inputLabelTV.text = inputLabel
         errorTV.visibility = if (errorMessage == null) View.GONE else View.VISIBLE
         input.hint = hint
+
         builder.setView(root)
 
         builder.setNegativeButton(
@@ -51,19 +54,18 @@ class TextInputDialog(
         dialog.show()
         input.addTextChangedListener { text ->
             val positiveBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-            if (acceptanceInterface != null) {
-                val result = acceptanceInterface(text.toString())
+
+                val result = if (acceptanceInterface != null) acceptanceInterface!!(text.toString()) else Pair(true, "")
                 positiveBtn.isEnabled = result.first
                 if (result.second != null) {
                     errorTV.text = result.second
                 }
                 errorTV.visibility =
                     if (result.second != null && !result.first) View.VISIBLE else View.INVISIBLE
-            }
         }
 
         // Trigger change listener once
-        input.setText("")
+        input.setText(startValue)
     }
 
     fun setCancelListener(listener: DialogInterface.OnCancelListener) {

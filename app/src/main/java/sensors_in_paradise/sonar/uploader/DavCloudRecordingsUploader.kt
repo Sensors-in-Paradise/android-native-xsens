@@ -4,9 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.util.Log
 import com.google.common.net.MediaType
-import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
-import sensors_in_paradise.sonar.page2.RecordingDataManager
+import sensors_in_paradise.sonar.screen_recording.RecordingDataManager
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.File
 import java.net.URLConnection
@@ -17,7 +16,7 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
     var onItemChanged: ((recording: RecordingUIItem) -> Unit)? = null
     var onAllItemsFinishedWork: (() -> Unit)? = null
     private val davCloudMetadata =
-        LocalDavCloudMetadataStorage(activity, GlobalValues.getSensorRecordingsBaseDir(context))
+        LocalDavCloudMetadataStorage(activity, recordingsManager.recordingsDir)
     private val davCloud = DavCloudClient(activity, this)
     val recordingUiItems = RecordingUIItemArrayList()
     private val dirCreationRequests = mutableSetOf<File>()
@@ -29,7 +28,7 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
 
     fun reloadRecordings() {
         recordingUiItems.clear()
-        for (recording in recordingsManager.recordingsList) {
+        for (recording in recordingsManager) {
             val recording = RecordingUIItem(recording, davCloudMetadata.localUploadedFilesBaseDir)
 
             for (file in recording.filesAndDirsToBeUploaded) {

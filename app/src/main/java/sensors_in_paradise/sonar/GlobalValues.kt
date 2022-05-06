@@ -3,36 +3,18 @@ package sensors_in_paradise.sonar
 import android.Manifest
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import java.io.File
+import java.net.NetworkInterface
+import java.net.SocketException
+import java.util.*
+import kotlin.collections.ArrayList
 
 class GlobalValues private constructor() {
     companion object {
         const val NULL_ACTIVITY = "null - activity"
         const val OTHERS_CATEGORY = "Others"
-        val DEFINED_ACTIVITIES = linkedMapOf<String, String>(
-            NULL_ACTIVITY to OTHERS_CATEGORY,
-            "aufräumen" to OTHERS_CATEGORY,
-            "aufwischen (Staub)" to OTHERS_CATEGORY,
-            "Accessoires (Parfüm) anlegen" to "Morgenpflege",
-            "Bett machen" to "Morgenpflege",
-            "Bett beziehen" to "Morgenpflege",
-            "Haare kämmen" to "Morgenpflege",
-            "Hautpflege" to "Morgenpflege",
-            "Medikamente geben" to "Morgenpflege",
-            "Mundpflege" to "Morgenpflege",
-            "Umkleiden" to "Morgenpflege",
-            "Gesamtwaschen im Bett" to "Morgenpflege",
-            "Essen auf Teller geben" to "Mahlzeiten",
-            "Essen reichen" to "Mahlzeiten",
-            "Getränke ausschenken" to "Mahlzeiten",
-            "Getränk geben" to "Mahlzeiten",
-            "Assistieren - aufstehen" to "Assistieren",
-            "Patient umlagern (Lagerung)" to "Assistieren",
-            "Rollstuhl Transfer" to "Assistieren",
-            "Dokumentation" to "Organisation",
-            "Medikamente stellen" to "Organisation",
-        )
         const val UNKNOWN_PERSON = "unknown"
         const val METADATA_JSON_FILENAME = "metadata.json"
         const val MEASUREMENT_MODE = XsensDotPayload.PAYLOAD_TYPE_CUSTOM_MODE_4
@@ -48,14 +30,6 @@ class GlobalValues private constructor() {
         }
         fun getPoseRecordingsTempDir(context: Context): File {
             return context.dataDir.resolve("poseTemp")
-        }
-
-        fun getActivityLabelsJSONFile(context: Context): File {
-            return File(context.getExternalFilesDir(null) ?: context.dataDir, "labels.json")
-        }
-
-        fun getPeopleJSONFile(context: Context): File {
-            return File(context.getExternalFilesDir(null) ?: context.dataDir, "people.json")
         }
 
         fun getRequiredPermissions(): ArrayList<String> {
@@ -89,6 +63,30 @@ class GlobalValues private constructor() {
             val seconds = diffSecs - (diffSecs / 60) * 60
 
             return minutes.toString().padStart(2, '0') + ":" + seconds.toString().padStart(2, '0')
+        }
+        fun getMacAddress(): String {
+            try {
+                val all = Collections.list(NetworkInterface.getNetworkInterfaces())
+                for (nif in all) {
+                    if (!nif.name.equals("wlan0", ignoreCase=true)) continue
+
+                    val macBytes = nif.hardwareAddress ?: return ""
+
+                    val res1 = StringBuilder()
+                    for (b in macBytes) {
+                        res1.append(String.format(Locale.US, "%02X:", b))
+                    }
+
+                    if (res1.isNotEmpty()) {
+                        res1.deleteCharAt(res1.length - 1)
+                    }
+                    return res1.toString()
+                }
+            } catch (ex: SocketException) {
+                ex.message?.let { Log.e("GlobalValues", it) }
+            }
+
+            return "02:00:00:00:00:00"
         }
     }
 }
