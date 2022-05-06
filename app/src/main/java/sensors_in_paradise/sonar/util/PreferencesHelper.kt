@@ -58,6 +58,9 @@ class PreferencesHelper private constructor() {
         fun shouldStoreRawCameraRecordings(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("storeRawCameraVideo", false)
         }
+        fun shouldUploadCameraRecordings(context: Context): Boolean {
+            return getSharedPreferences(context).getBoolean("uploadCameraVideo", false)
+        }
         fun shouldStorePoseEstimation(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("storePoseEstimation", false)
         }

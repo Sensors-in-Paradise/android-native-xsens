@@ -7,7 +7,9 @@ import com.google.common.net.MediaType
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import sensors_in_paradise.sonar.page2.RecordingDataManager
+import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.File
+import java.net.URLConnection
 
 class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: RecordingDataManager) :
     DavCloudClientInterface {
@@ -19,9 +21,12 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
     private val davCloud = DavCloudClient(activity, this)
     val recordingUiItems = RecordingUIItemArrayList()
     private val dirCreationRequests = mutableSetOf<File>()
+    private val videoUpload = PreferencesHelper.shouldUploadCameraRecordings(context)
+
     init {
         reloadRecordings()
     }
+
     fun reloadRecordings() {
         recordingUiItems.clear()
         for (recording in recordingsManager.recordingsList) {
@@ -78,6 +83,9 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
 
     private fun uploadFilesOfRecording(recording: RecordingUIItem) {
         for (file in recording.filesToBeUploaded) {
+            val fileType = URLConnection.guessContentTypeFromName(file.toString());
+            if (fileType != null && fileType.startsWith("video") && !videoUpload)
+                continue
             if (!davCloudMetadata.isFileUploaded(file)) {
                 Log.d("DAVCLOUD", "Uploading file: ${file.name}")
                 recording.setStatusOfFileOrDir(file, UploadStatus.UPLOADING)
@@ -101,7 +109,6 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
         for (recording in recordings) {
             recording.setStatusOfFileOrDir(localReferenceDir, UploadStatus.UPLOADED)
             uploadRecording(recording)
-
             onRecordingStatusChanged(recording)
         }
     }
@@ -147,6 +154,7 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
             }
         }
     }
+
     private fun areAllRecordingsFinished(): Boolean {
        return recordingUiItems.areAllUploadedOrFailed()
     }
