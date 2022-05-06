@@ -191,7 +191,8 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
 	fun clone(): RecordingMetadataStorage {
         return RecordingMetadataStorage(file, json)
     }
-        companion object {
-            private const val ON_DEVICE_TRAINING_METADATA_KEY = "onDeviceTraining"
-        }
+
+    companion object {
+        private const val ON_DEVICE_TRAINING_METADATA_KEY = "onDeviceTraining"
+    }
 }

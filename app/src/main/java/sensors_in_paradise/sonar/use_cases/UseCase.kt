@@ -61,6 +61,7 @@ class UseCase(
     fun getRecordingsSubDir(): File {
         return recordingsSubDir
     }
+
     fun importDefaultModel() {
         extractFileFromAssets(context, "LSTMModel-1-18.tflite", getModelFile())
     }
@@ -68,6 +69,7 @@ class UseCase(
     fun getDisplayInfo(): String {
         return "\uD83D\uDCBC " + title + "    \uD83D\uDCC2 " + recordingsSubDir.name
     }
+
     fun delete() {
         try {
             delete(useCaseDir)
@@ -76,6 +78,7 @@ class UseCase(
         }
         onUseCaseDeleted(this)
     }
+
     fun duplicate(titleOfDuplicate: String): UseCase {
         val targetDir = useCaseDir.parentFile!!.resolve(titleOfDuplicate)
         copyFolder(useCaseDir.toPath(), targetDir.toPath(), StandardCopyOption.REPLACE_EXISTING)
@@ -92,6 +95,7 @@ class UseCase(
         }
         if (!f.delete()) throw IOException("Failed to delete file: $f")
     }
+
     companion object {
         const val DEFAULT_RECORDINGS_SUB_DIR_NAME = "default"
         const val STORAGE_SUB_DIR_NAME = "storage.json"
