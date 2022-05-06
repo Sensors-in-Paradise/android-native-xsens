@@ -24,12 +24,6 @@ class PreferencesHelper private constructor() {
             return getSharedPreferences(context).getBoolean("verboseToasts", false)
         }
 
-        fun getRecordingsSubDir(context: Context): String {
-            return getSharedPreferences(context).getString(
-                "recordingsSubDir",
-                context.getString(R.string.default_recordings_subdir)
-            )!!
-        }
         fun getWebDAVUrl(context: Context): String {
             val url = getSharedPreferences(context).getString(
                 "cloudBaseURL",
@@ -66,6 +60,9 @@ class PreferencesHelper private constructor() {
         }
         fun shouldViewSensorHeadingMenuItems(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("viewHeadingMenuItems", false)
+        }
+        fun isOnDeviceTrainingScreenEnabled(context: Context): Boolean {
+            return getSharedPreferences(context).getBoolean("onDeviceTraining", false)
         }
         fun getCameraRecordingQuality(context: Context): Quality {
             return when (getSharedPreferences(context).getString("videoRecordingQuality", "LOWEST")) {

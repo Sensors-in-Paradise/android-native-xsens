@@ -14,7 +14,7 @@ import com.xsens.dot.android.sdk.utils.XsensDotParser
 import sensors_in_paradise.sonar.custom_views.SensorDataTrafficIndicatorView
 import sensors_in_paradise.sonar.custom_views.stickman.Render3DView
 import sensors_in_paradise.sonar.custom_views.stickman.object3d.Sensor3D
-import sensors_in_paradise.sonar.page1.ConnectionInterface
+import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
 
 class SensorTrafficVisualizationHandler(
     val activity: Activity,

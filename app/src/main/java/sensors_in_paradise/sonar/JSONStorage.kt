@@ -16,7 +16,7 @@ abstract class JSONStorage @Throws(
     constructor(file: File) : this(file, null)
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    lateinit var json: JSONObject
+    var json: JSONObject
 
     init {
         if (initialJson == null) {
@@ -57,4 +57,8 @@ abstract class JSONStorage @Throws(
 
     /** */
     abstract fun onJSONInitialized()
+
+    fun getJsonString(indentSpaces: Int = 4): String {
+        return json.toString(indentSpaces)
+    }
 }
