@@ -83,9 +83,8 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
 
     private fun uploadFilesOfRecording(recording: RecordingUIItem) {
         for (file in recording.filesToBeUploaded) {
-            val fileType = URLConnection.guessContentTypeFromName(file.toString());
-            if (fileType != null && fileType.startsWith("video") && !videoUpload)
-                continue
+            val fileType = URLConnection.guessContentTypeFromName(file.toString())
+            if (fileType != null && fileType.startsWith("video") && !videoUpload) continue
             if (!davCloudMetadata.isFileUploaded(file)) {
                 Log.d("DAVCLOUD", "Uploading file: ${file.name}")
                 recording.setStatusOfFileOrDir(file, UploadStatus.UPLOADING)
