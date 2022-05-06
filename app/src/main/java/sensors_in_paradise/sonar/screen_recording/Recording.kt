@@ -103,7 +103,7 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
         var state = checkCache()
         if (state != null) return state
 
-        state = if (doSensorFilesExist(dir)){
+        state = if (doSensorFilesExist(dir)) {
             RecordingFileState.WithoutSensor
         } else if (areFilesEmpty(dir)) {
             RecordingFileState.Empty
