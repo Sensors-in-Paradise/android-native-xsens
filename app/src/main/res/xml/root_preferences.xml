@@ -113,7 +113,7 @@ the object they are connected to. \nMore detailed information can be found in th
             app:dependency="storeRawCameraVideo"
             app:key="uploadCameraVideo"
             app:summary="Upload the raw Videos that were shot by the camera during recordings"
-            app:title="Uplaod camera video " />
+            app:title="Upload camera video " />
     </PreferenceCategory>
 
 </PreferenceScreen>
