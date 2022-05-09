@@ -22,7 +22,7 @@ class TrainingHistoryAdapter(trainingHistory: ArrayList<TrainingHistoryStorage.T
         return dateFormat.format(Date(occasion.timestamp))
     }
 
-    override fun getSubtitleOfItem(position: Int) : String {
+    override fun getSubtitleOfItem(position: Int): String {
         val occasion = trainingHistory[position]
         var subtitle = "Duration ${GlobalValues.getDurationAsString(occasion.getTotalDuration())}"
         subtitle += "\n\uD83D\uDCC2 ${occasion.subdirectory}"

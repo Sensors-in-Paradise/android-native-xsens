@@ -35,7 +35,7 @@ class PredictionScreen(
     private lateinit var activity: Activity
     private lateinit var context: Context
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: PredictionsAdapter
+    private lateinit var adapter: PredictionHistoryAdapter
     private lateinit var predictionButton: MaterialButton
     private lateinit var viewSwitcher: ViewSwitcher
     private lateinit var progressBar: ProgressBar
@@ -197,7 +197,7 @@ class PredictionScreen(
 
         // Initializing prediction RV
         recyclerView = activity.findViewById(R.id.rv_prediction)
-        adapter = PredictionsAdapter(predictions, activity.getColor(R.color.colorPrimary))
+        adapter = PredictionHistoryAdapter(predictions)
         recyclerView.adapter = adapter
         viewSwitcher = activity.findViewById(R.id.viewSwitcher_predictionFragment)
         // Buttons and Timer
