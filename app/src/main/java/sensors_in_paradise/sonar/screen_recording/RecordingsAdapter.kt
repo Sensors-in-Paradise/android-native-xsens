@@ -54,9 +54,7 @@ class RecordingsAdapter(
 
         viewHolder.apply {
             deleteButton.setOnClickListener {
-                val index = recordings.indexOf(recording)
-                recordings.deleteRecording(recording)
-                notifyItemRemoved(index)
+                showDeleteRecordingDialog(recording)
             }
             itemView.setOnClickListener {
                 val onEditBtnClickListener =
@@ -116,6 +114,17 @@ class RecordingsAdapter(
                 RecordingFileState.Valid -> R.color.green
             }
         )
+    }
+
+    private fun showDeleteRecordingDialog(recording: Recording) {
+        MessageDialog(
+            context,
+            "Do you really want to delete this recording?",
+            onPositiveButtonClickListener = { _, _ ->
+                val index = recordings.indexOf(recording)
+                recordings.deleteRecording(recording)
+                notifyItemRemoved(index)
+            })
     }
 
     override fun getItemCount() = recordings.size
