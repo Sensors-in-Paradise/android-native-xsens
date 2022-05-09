@@ -8,11 +8,13 @@ abstract class VecX<T : VecBase>(values: FloatArray, size: Int = values.size) : 
         res += a
         return res
     }
+
     operator fun plus(a: VecBase): T {
         val res = clone()
         res += a
         return res
     }
+
     operator fun unaryMinus(): T {
         val res = clone()
         for (i in 0 until res.size) {
@@ -26,32 +28,38 @@ abstract class VecX<T : VecBase>(values: FloatArray, size: Int = values.size) : 
         res -= a
         return res
     }
+
     operator fun minus(a: Float): T {
         val res = clone()
         res -= a
         return res
     }
+
     operator fun times(a: Float): T {
         val res = clone()
         res *= a
         return res
     }
+
     operator fun times(a: VecBase): T {
         val res = clone()
         res *= a
         return res
     }
+
     operator fun div(a: VecBase): T {
         val res = clone()
         res /= a
         return res
     }
+
     operator fun div(a: Float): T {
         val res = clone()
         res /= a
         return res
     }
-    fun assign(a: VecBase) {
+
+	fun assign(a: VecBase) {
         for (i in 0 until a.size.coerceAtMost(size)) {
              this[i] = a[i]
         }

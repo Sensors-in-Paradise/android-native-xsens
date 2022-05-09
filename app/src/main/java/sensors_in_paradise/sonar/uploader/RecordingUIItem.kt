@@ -86,6 +86,7 @@ class RecordingUIItem(recording: Recording, private val recordingsBaseDir: File)
         }
         return result
     }
+
     fun getEmojiStatusOfFileOrDir(file: File): String {
         return statusEmoji(getStatusOfFileOrDir(file))
     }
@@ -104,6 +105,7 @@ class RecordingUIItem(recording: Recording, private val recordingsBaseDir: File)
     fun getStatusLabelOfFileOrDir(file: File): String {
         return statusLabel(getStatusOfFileOrDir(file))
     }
+
     fun isUploaded(): Boolean {
 
         for (file in getRecordingFiles()) {

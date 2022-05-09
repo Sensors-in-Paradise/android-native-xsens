@@ -35,6 +35,7 @@ class SensorDataTrafficIndicatorView(context: Context, attrs: AttributeSet) : Vi
             return@let PointF(centerX - textBounds.width() / 2, centerY + textBounds.height() / 2)
         }
     }
+
     var numSensors = 0
         set(value) {
             field = value
@@ -64,6 +65,7 @@ class SensorDataTrafficIndicatorView(context: Context, attrs: AttributeSet) : Vi
         color = idleColor
         alpha = 255
     }
+
     private val trafficIndicators: ArrayList<TrafficIndicator> = ArrayList()
     private var animationRunning = false
     private var fadeOutDuration = 1000

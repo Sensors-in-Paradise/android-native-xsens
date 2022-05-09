@@ -22,10 +22,12 @@ class XSensDotDeviceWithOfflineMetadata(
             ((super.getTag() == "" || super.getTag() == defaultTag) && _tag != null)
         return if (shouldUseOfflineTag) _tag!! else super.getTag()
     }
-    fun getSet(): String? {
+
+	fun getSet(): String? {
         return extractDeviceSetKeyFromTag(tag)
     }
-    fun getSetColor(): Int {
+
+	fun getSetColor(): Int {
         return Color.parseColor(
             when (getSet()) {
                 "1" -> "#ff9e80"
@@ -42,6 +44,7 @@ class XSensDotDeviceWithOfflineMetadata(
             else -> false
         }
     }
+
     companion object {
         fun extractDeviceSetKeyFromTag(tag: String): String? {
             return if (doesTagMatchPattern(tag)) tag.last().toString() else null

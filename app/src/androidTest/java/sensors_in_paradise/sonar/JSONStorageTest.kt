@@ -24,6 +24,7 @@ class JSONStorageTest {
         assertTrue(file.exists())
         file.delete()
     }
+
     @Test
     fun changeDataStorageTest() {
         assertFalse(file.exists())

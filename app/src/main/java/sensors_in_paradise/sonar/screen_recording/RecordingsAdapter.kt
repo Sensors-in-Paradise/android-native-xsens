@@ -99,6 +99,7 @@ class RecordingsAdapter(
 
     private fun getCheckFileText(recording: Recording): String {
         return when (recording.state) {
+            RecordingFileState.WithoutSensor -> "No Sensor Data was collected"
             RecordingFileState.Empty -> "Some files are empty"
             RecordingFileState.Unsynchronized -> "Files are not synchronized"
             RecordingFileState.Valid -> "Files checked and synchronized"
@@ -109,6 +110,7 @@ class RecordingsAdapter(
         return ContextCompat.getColor(
             context,
             when (recording.state) {
+                RecordingFileState.WithoutSensor -> R.color.orange
                 RecordingFileState.Empty -> R.color.red
                 RecordingFileState.Unsynchronized -> R.color.yellow
                 RecordingFileState.Valid -> R.color.green

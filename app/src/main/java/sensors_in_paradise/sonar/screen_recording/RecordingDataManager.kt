@@ -15,6 +15,7 @@ class RecordingDataManager(recordingsDir: File) :
     init {
         loadRecordingsFromStorage()
     }
+
     fun reloadRecordingsFromStorage() {
         loadRecordingsFromStorage()
     }
@@ -73,6 +74,7 @@ class RecordingDataManager(recordingsDir: File) :
 
         return result
     }
+
     fun getPeopleDurationsOfTrainableRecordings(): Map<String, Long> {
         val result = mutableMapOf<String, Long>()
         for (recording in this) {
