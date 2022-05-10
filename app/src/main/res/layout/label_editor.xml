@@ -17,8 +17,7 @@
             android:layout_height="match_parent"
             android:drawingCacheQuality="high"
             android:scaleType="centerCrop"
-            android:visibility="gone"
-            app:srcCompat="@drawable/ic_pose_sequence_backround" />
+            android:visibility="gone"/>
 
         <ViewSwitcher
             android:id="@+id/viewSwitcher_visualizer_labelEditor"
