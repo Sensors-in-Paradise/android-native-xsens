@@ -61,8 +61,14 @@ class PreferencesHelper private constructor() {
         fun shouldStorePoseEstimation(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("storePoseEstimation", false)
         }
-        fun shouldUsePoseBackroundForEditor(context: Context): Boolean {
-            return getSharedPreferences(context).getBoolean("usePoseSequenceBackround", false)
+        fun shouldShowPoseBackground(context: Context): Boolean {
+            return getSharedPreferences(context).getBoolean("showPoseBackground", false)
+        }
+        fun getPoseSequenceBackground(context: Context): String {
+            return getSharedPreferences(context).getString(
+                "poseSequenceBackground",
+                ""
+            )!!
         }
         fun shouldPlaySoundOnRecordingStartAndStop(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("playSoundOnRecordingStartAndStop", false)

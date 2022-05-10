@@ -3,6 +3,7 @@ package sensors_in_paradise.sonar.page2.labels_editor
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import android.view.View
 import android.view.TextureView
@@ -220,8 +221,12 @@ class LabelsEditorDialog(
         activeVisualizer?.stopLooping()
         if (visualizerSwitcher.displayedChild == 0 && viewIndex == 1) {
             visualizerSwitcher.showNext()
-            poseSequenceBackround.visibility =
-                if (PreferencesHelper.shouldUsePoseBackroundForEditor(context)) View.VISIBLE else View.GONE
+            if (PreferencesHelper.shouldShowPoseBackground(context)) {
+                poseSequenceBackround.setImageURI(Uri.parse(PreferencesHelper.getPoseSequenceBackground(context)))
+                poseSequenceBackround.visibility = View.VISIBLE
+            } else {
+                poseSequenceBackround.visibility = View.GONE
+            }
         } else if (visualizerSwitcher.displayedChild == 1 && viewIndex == 0) {
             visualizerSwitcher.showPrevious()
             poseSequenceBackround.visibility = View.GONE

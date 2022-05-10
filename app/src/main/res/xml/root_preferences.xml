@@ -71,11 +71,11 @@
             app:dependency="recordWithCamera"
             app:key="storePoseEstimation"
             app:title="Store estimated poses as stickman"
-            app:summary="Store pose data estimated by TensorFlow-MoveNet when recording. "/>
+            app:summary="Store pose data estimated by TensorFlow-MoveNet when recording."/>
         <SwitchPreferenceCompat
-            app:key="usePoseSequenceBackround"
-            app:title="Use Backround"
-            app:summary="Use predefined Backround for Pose Sequence in Label Editor. "/>
+            app:key="showPoseBackground"
+            app:title="StickmanBackground"
+            app:summary="Show selected background image for Pose Sequence in Label Editor. Please note that you can only select png files."/>
     </PreferenceCategory>
     <PreferenceCategory app:title="Advanced sensor options">
         <SwitchPreferenceCompat
