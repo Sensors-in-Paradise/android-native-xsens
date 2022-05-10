@@ -41,6 +41,7 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
         setSensorMacMap(sensorMacMap)
         save()
     }
+
     fun setVideoCaptureStartedTime(timeStarted: Long, save: Boolean = false) {
         json.put("videoCaptureStartTime", timeStarted)
         if (save) {
@@ -174,7 +175,7 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
         return result
     }
     fun clone(): RecordingMetadataStorage {
-        return RecordingMetadataStorage(file, json)
+        return RecordingMetadataStorage(file!!, json)
     }
         companion object {
             private const val ON_DEVICE_TRAINING_METADATA_KEY = "onDeviceTraining"

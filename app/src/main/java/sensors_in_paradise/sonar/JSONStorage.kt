@@ -12,16 +12,16 @@ abstract class JSONStorage @Throws(
     IOException::class,
     SecurityException::class,
     JSONException::class
-) constructor(val file: File, initialJson: JSONObject? = null) {
-    constructor(file: File) : this(file, null)
+) constructor(val file: File?, initialJson: JSONObject? = null) {
+    constructor(file: File?) : this(file, null)
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     var json: JSONObject
 
     init {
         if (initialJson == null) {
-            if (!file.exists()) {
-                file.createNewFile()
+            if (file?.exists() != true) {
+                file?.createNewFile()
                 json = JSONObject()
                 onFileNewlyCreated()
                 save()
@@ -32,8 +32,8 @@ abstract class JSONStorage @Throws(
             }
         } else {
             val jsonCopy = JSONObject(initialJson.toString())
-            if (!file.exists()) {
-                file.createNewFile()
+            if (file?.exists() != true) {
+                file?.createNewFile()
                 json = jsonCopy
                 onFileNewlyCreated()
                 save()
@@ -48,7 +48,7 @@ abstract class JSONStorage @Throws(
     @Throws(IOException::class)
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     fun save() {
-        Files.write(file.toPath(), json.toString().encodeToByteArray())
+        file?.let { Files.write(file.toPath(), json.toString().encodeToByteArray()) }
     }
 
     /** Initialize the json object with all its members here.

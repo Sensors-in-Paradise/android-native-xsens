@@ -8,14 +8,15 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.R
 
-abstract class HistoryAdapter :
+abstract class HistoryAdapter() :
     RecyclerView.Adapter<HistoryAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val titleTV: TextView = view.findViewById(R.id.tv_title_trainingOccasion)
-        val subTitleTV: TextView = view.findViewById(R.id.tv_subtitle_trainingOccasion)
-        val upperSegmentView: View = view.findViewById(R.id.view_upperSegment_trainingOccasion)
-        val lowerSegmentView: View = view.findViewById(R.id.view_lowerSegment_trainingOccasion)
+        val prefixTV: TextView = view.findViewById(R.id.tv_prefix_historyItem)
+        val titleTV: TextView = view.findViewById(R.id.tv_title_historyItem)
+        val subTitleTV: TextView = view.findViewById(R.id.tv_subtitle_historyItem)
+        val upperSegmentView: View = view.findViewById(R.id.view_upperSegment_historyItem)
+        val lowerSegmentView: View = view.findViewById(R.id.view_lowerSegment_historyItem)
     }
 
     override fun onCreateViewHolder(
@@ -27,14 +28,23 @@ abstract class HistoryAdapter :
         return ViewHolder(view)
     }
 
+    protected open fun getPrefixOfItem(position: Int): String? {
+        return null
+    }
+
     abstract fun getTitleOfItem(position: Int): String
 
     abstract fun getSubtitleOfItem(position: Int): String
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.titleTV.text = getTitleOfItem(position)
+
         holder.apply {
+            getPrefixOfItem(position)?.let { prefix ->
+            prefixTV.visibility = View.VISIBLE
+            prefixTV.text = prefix
+            }
+            titleTV.text = getTitleOfItem(position)
             subTitleTV.text = getSubtitleOfItem(position)
             lowerSegmentView.visibility = if (position == itemCount - 1) View.INVISIBLE else View.VISIBLE
             upperSegmentView.visibility = if (position == 0) View.INVISIBLE else View.VISIBLE

@@ -75,5 +75,9 @@ class PreferencesHelper private constructor() {
                 else -> Quality.LOWEST
             }
         }
+
+        fun shouldStorePrediction(context: Context): Boolean {
+            return getSharedPreferences(context).getBoolean("storePrediction", false)
+        }
     }
 }

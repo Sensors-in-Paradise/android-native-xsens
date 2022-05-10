@@ -40,33 +40,63 @@
             app:iconSize="64dp"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle" />
 
-        <Chronometer
-            android:id="@+id/timer_predict_predict"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="12dp"
-            android:textSize="48dp"
-            android:textColor="?android:textColorHint"/>
+            android:layout_gravity="center"
+            android:layout_marginLeft="20dp"
+            android:orientation="vertical">
+
+            <Chronometer
+                android:id="@+id/timer_predict_predict"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="?android:textColorHint"
+                android:textSize="48dp" />
+
+            <TextView
+                android:id="@+id/tv_predict_prediction"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textSize="25sp"
+                android:textStyle="bold"
+                tools:visibility="gone" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-    <ViewSwitcher
-        android:id="@+id/viewSwitcher_predictionFragment"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_prediction"
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="8dp"
-            android:clipToPadding="false"
-            android:paddingBottom="8dp"
-            app:layoutManager="LinearLayoutManager" />
+            android:layout_height="wrap_content"
+            android:text="Prediction history"
+            android:textSize="20sp" />
 
-        <FrameLayout
+        <ViewSwitcher
+            android:id="@+id/viewSwitcher_predictionFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_prediction"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="8dp"
+                android:clipToPadding="false"
+                android:paddingBottom="8dp"
+                app:layoutManager="LinearLayoutManager" />
+
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -88,7 +118,9 @@
                     android:layout_weight="1"
                     android:text="Waiting for prediction..." />
             </LinearLayout>
-        </FrameLayout>
-    </ViewSwitcher>
+
+        </ViewSwitcher>
+
+    </LinearLayout>
 
 </LinearLayout>
