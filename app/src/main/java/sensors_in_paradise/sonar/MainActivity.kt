@@ -13,14 +13,18 @@ import androidx.appcompat.app.AppCompatDelegate.*
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import sensors_in_paradise.sonar.custom_views.stickman.StickmanDialog
-import sensors_in_paradise.sonar.page1.ConnectionInterface
-import sensors_in_paradise.sonar.page1.Page1Handler
-import sensors_in_paradise.sonar.page2.Page2Handler
-import sensors_in_paradise.sonar.page2.RecordingDataManager
-import sensors_in_paradise.sonar.page3.Page3Handler
-import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
+import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
+import sensors_in_paradise.sonar.screen_connection.ConnectionScreen
+import sensors_in_paradise.sonar.screen_prediction.PredictionScreen
+import sensors_in_paradise.sonar.screen_recording.RecordingDataManager
+import sensors_in_paradise.sonar.screen_recording.RecordingScreen
+import sensors_in_paradise.sonar.screen_train.TrainingScreen
 import sensors_in_paradise.sonar.uploader.DavCloudRecordingsUploader
+import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.util.PreferencesHelper
+import sensors_in_paradise.sonar.use_cases.UseCase
+import sensors_in_paradise.sonar.use_cases.UseCaseDialog
+import sensors_in_paradise.sonar.use_cases.UseCaseHandler
 
 class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, ConnectionInterface,
     SensorOccupationInterface {
@@ -30,51 +34,84 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     private lateinit var davCloudUploader: DavCloudRecordingsUploader
     private lateinit var recordingsManager: RecordingDataManager
 
-    private val pageHandlers = ArrayList<PageInterface>()
+    private val screenHandlers = ArrayList<ScreenInterface>()
+    private lateinit var useCaseHandler: UseCaseHandler
     private val scannedDevices = XSENSArrayList()
-    private lateinit var page1Handler: Page1Handler
+    private lateinit var connectionScreen: ConnectionScreen
     private lateinit var sensorTrafficVisualizationHandler: SensorTrafficVisualizationHandler
     private lateinit var resetHeadingMi: MenuItem
     private lateinit var revertHeadingMi: MenuItem
+    private lateinit var useCasesMi: MenuItem
     private lateinit var headingResetHandler: HeadingResetHandler
+    private val tabIndexToScreenIndexMap = mutableMapOf(
+        0 to 0,
+        1 to 1,
+        2 to 3
+    )
+    private lateinit var trainingTab: TabLayout.Tab
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         switcher = findViewById(R.id.switcher_activity_main)
         tabLayout = findViewById(R.id.tab_layout_activity_main)
+        useCaseHandler = UseCaseHandler(this)
         recordingsManager = RecordingDataManager(
-            GlobalValues.getSensorRecordingsBaseDir(this)
+            useCaseHandler.getCurrentUseCase().getRecordingsSubDir()
         )
+        trainingTab = tabLayout.getTabAt(2)!!
 
+        supportActionBar?.subtitle = useCaseHandler.getCurrentUseCase().getDisplayInfo()
+        useCaseHandler.setOnUseCaseChanged { useCase: UseCase ->
+            recordingsManager.recordingsDir = useCase.getRecordingsSubDir()
+            screenHandlers.forEach {
+                it.onUseCaseChanged(
+                    useCase
+                )
+            }
+            supportActionBar?.subtitle = useCase.getDisplayInfo()
+        }
         initClickListeners()
 
-        page1Handler = Page1Handler(scannedDevices)
+        connectionScreen = ConnectionScreen(scannedDevices)
         headingResetHandler = HeadingResetHandler(this, scannedDevices) { address ->
             runOnUiThread {
-                page1Handler.notifyItemChanged(address)
+                connectionScreen.notifyItemChanged(address)
             }
         }
-        page1Handler.addConnectionInterface(headingResetHandler)
-        pageHandlers.add(page1Handler)
-        val page2Handler = Page2Handler(scannedDevices, recordingsManager, this)
-        pageHandlers.add(page2Handler)
-        val page3Handler = Page3Handler(scannedDevices, this)
-        pageHandlers.add(page3Handler)
-        page1Handler.addConnectionInterface(page2Handler)
-        page1Handler.addConnectionInterface(page3Handler)
-        page1Handler.addConnectionInterface(this)
+        connectionScreen.addConnectionInterface(headingResetHandler)
+        screenHandlers.add(connectionScreen)
+
+        val recordingScreen = RecordingScreen(
+            scannedDevices,
+            recordingsManager,
+            this,
+            useCaseHandler.getCurrentUseCase()
+        )
+        screenHandlers.add(recordingScreen)
+
+        val trainingScreen = TrainingScreen(recordingsManager, useCaseHandler.getCurrentUseCase())
+        screenHandlers.add(trainingScreen)
+
+        val predictionScreen = PredictionScreen(useCaseHandler.getCurrentUseCase(), scannedDevices, this)
+        screenHandlers.add(predictionScreen)
+
+        connectionScreen.addConnectionInterface(recordingScreen)
+        connectionScreen.addConnectionInterface(predictionScreen)
+        connectionScreen.addConnectionInterface(this)
+
         val permissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) {}
-        pageHandlers.add(PermissionsHandler(permissionLauncher))
+        screenHandlers.add(PermissionsHandler(permissionLauncher))
 
-        for (handler in pageHandlers) {
-            handler.activityCreated(this)
+        for (handler in screenHandlers) {
+            handler.onActivityCreated(this)
         }
         supportActionBar?.setBackgroundDrawable(ColorDrawable(getColor(R.color.colorPrimary)))
 
-        davCloudUploader = DavCloudRecordingsUploader(this, recordingsManager)
+        davCloudUploader = DavCloudRecordingsUploader(this, RecordingDataManager(useCaseHandler.useCasesBaseDir))
 
         // Force crashlytics to be enabled (we might want to disable it in debug mode / ...)
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
@@ -87,15 +124,32 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
             mode = if (PreferencesHelper.shouldUseDarkMode(this)) MODE_NIGHT_YES else MODE_NIGHT_NO
         }
         setDefaultNightMode(mode)
-        for (handler in pageHandlers) {
-            handler.activityResumed()
+        for (handler in screenHandlers) {
+            handler.onActivityResumed()
         }
+        setTrainingTabVisible(PreferencesHelper.isOnDeviceTrainingScreenEnabled(this))
     }
 
     override fun onDestroy() {
-        pageHandlers.forEach { handler -> handler.activityWillDestroy() }
+        screenHandlers.forEach { handler -> handler.onActivityWillDestroy() }
 
         super.onDestroy()
+    }
+
+    private fun setTrainingTabVisible(visible: Boolean) {
+        if (visible) {
+            tabIndexToScreenIndexMap[2] = 2
+            tabIndexToScreenIndexMap[3] = 3
+            if (tabLayout.tabCount < 4) {
+                tabLayout.addTab(trainingTab, 2)
+            }
+        } else {
+            tabIndexToScreenIndexMap[2] = 3
+            tabIndexToScreenIndexMap.remove(3)
+            if (tabLayout.tabCount > 3) {
+                tabLayout.removeTab(trainingTab)
+            }
+        }
     }
 
     private fun initClickListeners() {
@@ -104,11 +158,18 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
 
     override fun onTabSelected(tab: TabLayout.Tab?) {
         if (tab != null) {
-            switcher.displayedChild = tab.position
+            val screenIndex = tabIndexToScreenIndexMap[tab.position]!!
+            switcher.displayedChild = screenIndex
+            screenHandlers[screenIndex].onScreenOpened()
         }
     }
 
-    override fun onTabUnselected(tab: TabLayout.Tab?) {}
+    override fun onTabUnselected(tab: TabLayout.Tab?) {
+        if (tab != null) {
+            val screenIndex = tabIndexToScreenIndexMap[tab.position]!!
+            screenHandlers[screenIndex].onScreenClosed()
+        }
+    }
 
     override fun onTabReselected(tab: TabLayout.Tab?) {}
 
@@ -122,9 +183,10 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
             findViewById(R.id.linearLayout_sensorOrientation_activityMain),
             menu.findItem(R.id.menuItem_orientation_activityMain)
         )
-        page1Handler.addConnectionInterface(
+        connectionScreen.addConnectionInterface(
             sensorTrafficVisualizationHandler
         )
+        useCasesMi = menu.findItem(R.id.menuItem_useCases_activityMain)
         resetHeadingMi = menu.findItem(R.id.menuItem_headingReset_activityMain)
         revertHeadingMi = menu.findItem(R.id.menuItem_headingRevert_activityMain)
         resetHeadingMi.isVisible = PreferencesHelper.shouldViewSensorHeadingMenuItems(this)
@@ -139,6 +201,10 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     fun onSettingsMenuItemClicked(ignored: MenuItem) {
         val intent = Intent(this, SettingsActivity::class.java)
         startActivity(intent)
+    }
+
+    fun onUseCasesMenuItemClicked(ignored: MenuItem) {
+        UseCaseDialog(this, useCaseHandler)
     }
 
     fun onStickmanMenuItemClicked(ignored: MenuItem) {
@@ -166,6 +232,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     override fun onSensorOccupationStatusChanged(occupied: Boolean) {
         areConnectedSensorsOccupied = occupied
         updateHeadingMenuItems()
+        useCasesMi.isEnabled = !occupied
     }
 
     private fun updateHeadingMenuItems() {

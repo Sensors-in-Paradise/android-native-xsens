@@ -26,11 +26,13 @@ class FileUploaderTest {
         dirB.resolve("dirB_f0.csv").createNewFile()
         dirA.resolve("dirB_f0.csv").createNewFile()
     }
+
     @Test
     fun resolveSuffixFromFile() {
         val testFile = rootDir.resolve("dirC0").resolve("dirC00").resolve("dirC000").resolve("dirC_f0.csv")
         assertEquals(uploader.getURLSuffixForFile(testFile), "dirC0/dirC00/dirC000/dirC_f0.csv")
     }
+
     @Test
     fun detectFilesToBeUploaded() {
         val detectedFiles = uploader.getFilesToBeUploaded(rootDir)

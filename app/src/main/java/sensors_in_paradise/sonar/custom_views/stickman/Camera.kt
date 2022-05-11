@@ -14,7 +14,8 @@ class Camera(val center: Vec3, eye: Vec3, val up: Vec3, private val onCameraChan
             notifyCameraChanged()
         }
     }
-    fun notifyCameraChanged() {
+
+	fun notifyCameraChanged() {
         Matrix4x4.lookAt(eye.xyz, center, up, lookAtMatrix)
         onCameraChanged?.let { it() }
     }

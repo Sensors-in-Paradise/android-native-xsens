@@ -17,21 +17,27 @@ class LocalDavCloudMetadataStorage(context: Context, val localUploadedFilesBaseD
     override fun onJSONInitialized() {
         uploadedFilesAndDirsObj = json.getJSONObject("uploadedFilesAndDirs")
     }
+
     fun setFileUploaded(file: File) {
         setFileUploaded(getRelativePath(file.parentFile ?: localUploadedFilesBaseDir), file.name)
     }
-    fun isFileUploaded(file: File): Boolean {
+
+	fun isFileUploaded(file: File): Boolean {
         return isFileUploaded(getRelativePath(file.parentFile ?: localUploadedFilesBaseDir), file.name)
     }
+
     fun setDirCreated(dir: File) {
         setDirCreated(getRelativePath(dir))
     }
+
     fun isDirCreated(dir: File): Boolean {
         return isDirUploaded(getRelativePath(dir))
     }
+
     fun getRelativePath(dirOrFile: File): String {
         return dirOrFile.absolutePath.removePrefix(localUploadedFilesBaseDir.absolutePath)
     }
+
     private fun setDirCreated(dirPath: String) {
         val path = DavCloudClient.normalizePath(dirPath).removeSuffix("/")
         val dirs = path.split("/")
@@ -90,6 +96,7 @@ class LocalDavCloudMetadataStorage(context: Context, val localUploadedFilesBaseD
         val array = dirObj.optJSONArray("files")
         return doesJSONArrayContain(array, fileName)
     }
+
     private fun isDirUploaded(dirPath: String): Boolean {
         val path = DavCloudClient.normalizePath(dirPath).removeSuffix("/")
         val dirs = path.split("/")
@@ -105,6 +112,7 @@ class LocalDavCloudMetadataStorage(context: Context, val localUploadedFilesBaseD
         }
         return true
     }
+
     private fun doesJSONArrayContain(array: JSONArray?, item: String): Boolean {
         if (array != null) {
             for (i in 0 until array.length()) {

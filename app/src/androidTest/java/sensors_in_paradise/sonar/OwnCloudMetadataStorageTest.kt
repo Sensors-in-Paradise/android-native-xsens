@@ -24,6 +24,7 @@ class OwnCloudMetadataStorageTest {
         assertTrue(storage.isFileUploaded(testFile))
         storage.file.delete()
     }
+
     @Test
     fun deepFileSettersTest() {
         val storage = LocalDavCloudMetadataStorage(appContext, baseDir)
@@ -33,6 +34,7 @@ class OwnCloudMetadataStorageTest {
         assertTrue(storage.isFileUploaded(testFile))
         storage.file.delete()
     }
+
     @Test
     fun simpleDirSettersTest() {
         val storage = LocalDavCloudMetadataStorage(appContext, baseDir)
@@ -43,6 +45,7 @@ class OwnCloudMetadataStorageTest {
         assertTrue(storage.isDirCreated(testDir))
         storage.file.delete()
     }
+
     @Test
     fun deepDirSettersTest() {
         val storage = LocalDavCloudMetadataStorage(appContext, baseDir)
@@ -53,6 +56,7 @@ class OwnCloudMetadataStorageTest {
         assertTrue(storage.isDirCreated(testDir))
         storage.file.delete()
     }
+
     @Test
     fun storageTest() {
         val storageA = LocalDavCloudMetadataStorage(appContext, baseDir)

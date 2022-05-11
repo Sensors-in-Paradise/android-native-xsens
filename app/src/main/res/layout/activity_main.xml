@@ -39,10 +39,13 @@
         <include
             android:id="@+id/second_activity_main"
             layout="@layout/capture_fragment" />
-
         <include
-            android:id="@+id/second_activity_main"
+            android:id="@+id/third_activity_main"
+            layout="@layout/training_fragment" />
+        <include
+            android:id="@+id/fourth_activity_main"
             layout="@layout/prediction_fragment" />
+
     </android.widget.ViewAnimator>
     <!--        android:background="@drawable/tablayout_background"-->
     <com.google.android.material.tabs.TabLayout
@@ -59,18 +62,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:icon="@drawable/ic_baseline_bluetooth_connected_24"
-            android:text="Connection" />
+            android:text="Connect" />
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:icon="@drawable/ic_baseline_label_24"
-            android:text="Recording" />
+            android:text="Record" />
+
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:icon="@drawable/ic_baseline_model_training_24"
+            android:text="Train" />
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:icon="@drawable/ic_baseline_local_fire_department_24"
-            android:text="Prediction" />
+            android:text="Predict" />
     </com.google.android.material.tabs.TabLayout>
 </LinearLayout>

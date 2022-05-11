@@ -1,7 +1,7 @@
 package sensors_in_paradise.sonar.uploader
 
 import sensors_in_paradise.sonar.GlobalValues
-import sensors_in_paradise.sonar.page2.Recording
+import sensors_in_paradise.sonar.screen_recording.Recording
 import java.io.File
 import java.lang.Exception
 
@@ -86,6 +86,7 @@ class RecordingUIItem(recording: Recording, private val recordingsBaseDir: File)
         }
         return result
     }
+
     fun getEmojiStatusOfFileOrDir(file: File): String {
         return statusEmoji(getStatusOfFileOrDir(file))
     }
@@ -104,6 +105,7 @@ class RecordingUIItem(recording: Recording, private val recordingsBaseDir: File)
     fun getStatusLabelOfFileOrDir(file: File): String {
         return statusLabel(getStatusOfFileOrDir(file))
     }
+
     fun isUploaded(): Boolean {
 
         for (file in getRecordingFiles()) {

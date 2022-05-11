@@ -7,11 +7,9 @@ import java.io.File
 class XSensDotMetadataStorage(private val context: Context) :
     JSONStorage(File(context.dataDir, "xsensDotMetadata.json")) {
 
-    override fun onFileNewlyCreated() {
-    }
+    override fun onFileNewlyCreated() {}
 
-    override fun onJSONInitialized() {
-    }
+    override fun onJSONInitialized() {}
 
     fun setTagForAddress(address: String, name: String) {
         json.put(address, name)
