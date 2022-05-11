@@ -10,18 +10,18 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
+import com.github.mikephil.charting.charts.BarChart
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
-import com.xsens.dot.android.sdk.models.XsensDotPayload
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
 import sensors_in_paradise.sonar.screen_train.PredictionHistoryStorage
 import sensors_in_paradise.sonar.screen_train.PredictionHistoryStorage.Prediction
+import sensors_in_paradise.sonar.use_cases.UseCase
 import sensors_in_paradise.sonar.util.PredictionHelper
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.UIHelper
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
-import sensors_in_paradise.sonar.use_cases.UseCase
 import java.nio.ByteBuffer
 import kotlin.math.round
 import kotlin.random.Random
@@ -41,6 +41,7 @@ class PredictionScreen(
     private lateinit var progressBar: ProgressBar
     private lateinit var timer: Chronometer
     private lateinit var textView: TextView
+    private lateinit var barChart: BarChart
 
     private lateinit var metadataStorage: XSensDotMetadataStorage
     private var predictionHistoryStorage: PredictionHistoryStorage? = null
@@ -185,6 +186,8 @@ class PredictionScreen(
         }
         predictions.sortWith(Prediction.PredictionsComparator)
 
+        setBarChartData(predictions)
+
         val prediction = predictions[0]
         textView.text = prediction.label
 
@@ -265,8 +268,36 @@ class PredictionScreen(
                 )
             }
         }
+        initializeBarChart()
 
         mainHandler = Handler(Looper.getMainLooper())
+    }
+
+    private fun initializeBarChart() {
+        barChart = activity.findViewById(R.id.barChart_predict_predictions)
+
+        barChart.setDrawBarShadow(false)
+        barChart.setDrawValueAboveBar(true)
+
+        barChart.description.isEnabled = false
+
+        // if more than 60 entries are displayed in the chart, no values will be
+        // drawn
+
+        // if more than 60 entries are displayed in the chart, no values will be
+        // drawn
+        barChart.setMaxVisibleValueCount(60)
+
+        // scaling can now only be done on x- and y-axis separately
+
+        // scaling can now only be done on x- and y-axis separately
+        barChart.setPinchZoom(false)
+
+        barChart.setDrawGridBackground(false)
+    }
+
+    setBarChartData(predictions: ArrayList<Prediction>) {
+
     }
 
     override fun onActivityResumed() {

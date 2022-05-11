@@ -76,6 +76,12 @@
         android:layout_marginTop="16dp"
         android:orientation="vertical">
 
+        <com.github.mikephil.charting.charts.HorizontalBarChart
+            android:id="@+id/barChart_predict_predictions"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/white" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
