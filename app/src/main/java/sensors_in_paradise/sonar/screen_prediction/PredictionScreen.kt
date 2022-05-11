@@ -12,6 +12,7 @@ import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
+import com.xsens.dot.android.sdk.models.XsensDotPayload
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
 import sensors_in_paradise.sonar.screen_train.PredictionHistoryStorage
@@ -23,6 +24,7 @@ import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import sensors_in_paradise.sonar.use_cases.UseCase
 import java.nio.ByteBuffer
 import kotlin.math.round
+import kotlin.random.Random
 
 class PredictionScreen(
     private var currentUseCase: UseCase,
@@ -56,7 +58,8 @@ class PredictionScreen(
     private val predictionInterval = 4000L
     private val updatePredictionTask = object : Runnable {
         override fun run() {
-            processAndPredict()
+            addPredictionToHistory(getDummyPrediction())
+            //processAndPredict()
             mainHandler.postDelayed(this, predictionInterval)
         }
     }
@@ -92,15 +95,24 @@ class PredictionScreen(
         }
     }
 
+    private fun getDummyPrediction(): FloatArray {
+        val size = 6
+        val randoms = FloatArray(size)
+        for (i in 0 until size) {
+            randoms[i] = Random.nextFloat() * i.toFloat()
+        }
+        return randoms.map { it / randoms.sum() }.toFloatArray()
+    }
+
     private fun startDataCollection() {
         sensorOccupationInterface?.onSensorOccupationStatusChanged(true)
         clearBuffers()
         lastPredictionTime = 0L
-        if (tryInitializeSensorDataMap()) {
-            for (device in devices.getConnected()) {
-                device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
-                device.startMeasuring()
-            }
+//        if (tryInitializeSensorDataMap()) {
+//            for (device in devices.getConnected()) {
+//                device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
+//                device.startMeasuring()
+//            }
         timer.base = SystemClock.elapsedRealtime()
         timer.start()
         textView.visibility = View.VISIBLE
@@ -119,7 +131,7 @@ class PredictionScreen(
         progressBar.visibility = View.VISIBLE
         predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
         viewSwitcher.displayedChild = 1
-        }
+//        }
     }
 
     private fun tryInitializeSensorDataMap(): Boolean {
