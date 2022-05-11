@@ -14,6 +14,7 @@ class Vec2(values: FloatArray) : VecX<Vec2>(values, 2) {
         set(value) {
             this[1] = value
         }
+
     override fun clone(): Vec2 {
         return Vec2(this)
     }

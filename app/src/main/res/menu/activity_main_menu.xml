@@ -32,6 +32,10 @@
         android:enabled="false"/>
 
     <item
+        android:id="@+id/menuItem_useCases_activityMain"
+        android:onClick="onUseCasesMenuItemClicked"
+        android:title="💼 Use Cases" />
+    <item
         android:id="@+id/menuItem_settings_activityMain"
         android:onClick="onSettingsMenuItemClicked"
         android:title="Settings" />

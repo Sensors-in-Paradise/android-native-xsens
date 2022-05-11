@@ -23,7 +23,7 @@ class RecordingsUploaderDialog(activity: Activity, uploader: DavCloudRecordingsU
     private var activityCountTextView: TextView
     private val recordingsManager = uploader.recordingsManager
     init {
-
+        recordingsManager.reloadRecordingsFromStorage()
         val inflater = activity.layoutInflater
         val rootView = inflater.inflate(R.layout.upload_dialog, null)
         setView(rootView)
@@ -62,10 +62,12 @@ class RecordingsUploaderDialog(activity: Activity, uploader: DavCloudRecordingsU
     private fun onRecordingItemChanged(recording: RecordingUIItem) {
         adapter.notifyItemChanged(recordings.indexOf(recording))
     }
+
     private fun onRecordingsFinishedWorking() {
         uploadButton.isEnabled = true
         uploadButton.text = "Upload"
     }
+
     private fun updateActivityCounts() {
         val numberOfRecodings = recordingsManager.getNumberOfRecordingsPerActivity()
         var text = " "
