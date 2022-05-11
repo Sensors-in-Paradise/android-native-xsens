@@ -72,7 +72,7 @@
             app:key="storePoseEstimation"
             app:title="Store estimated poses as stickman"
             app:summary="Store pose data estimated by TensorFlow-MoveNet when recording."/>
-        <SwitchPreferenceCompat
+        <SwitchPreference
             app:key="showPoseBackground"
             app:title="StickmanBackground"
             app:summary="Show selected background image for Pose Sequence in Label Editor. Please note that you can only select png files."/>
