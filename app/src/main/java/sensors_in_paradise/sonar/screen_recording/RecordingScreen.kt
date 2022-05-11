@@ -11,7 +11,6 @@ import androidx.camera.view.PreviewView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
-import com.google.common.io.Files
 import com.xsens.dot.android.sdk.events.XsensDotData
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
@@ -51,12 +50,14 @@ class RecordingScreen(
     private lateinit var loggingManager: LoggingManager
     private lateinit var activity: Activity
     private lateinit var cameraManager: CameraManager
-    private lateinit var mediaPlayerSound: MediaPlayer
+    private lateinit var mediaPlayerStartSound: MediaPlayer
+    private lateinit var mediaPlayerStopSound: MediaPlayer
     override fun onActivityCreated(activity: Activity) {
         this.context = activity
         this.activity = activity
         timer = activity.findViewById(R.id.timer)
-        mediaPlayerSound = MediaPlayer.create(context, R.raw.beep)
+        mediaPlayerStartSound = MediaPlayer.create(context, R.raw.start_beep)
+        mediaPlayerStopSound = MediaPlayer.create(context, R.raw.stop_beep)
         recyclerViewRecordings = activity.findViewById(R.id.recyclerView_recordings_captureFragment)
         val linearLayoutManager = LinearLayoutManager(context)
         recyclerViewRecordings.layoutManager = linearLayoutManager
@@ -94,7 +95,7 @@ class RecordingScreen(
             CameraManager(context, previewView, overlayView)
     }
 
-    @Suppress("LongMethod")
+    @Suppress("LongMethod", "ComplexMethod")
     private fun initializeLoggingManagerCallbacks() {
         loggingManager.setOnRecordingDone { recording ->
             if (tabLayout.selectedTabPosition != RecordingTab.CAMERA.position) {
@@ -109,8 +110,8 @@ class RecordingScreen(
 
         loggingManager.setOnRecordingStarted {
             sensorOccupationInterface?.onSensorOccupationStatusChanged(true)
-            if (PreferencesHelper.shouldPlaySoundOnRecordingStart(context)) {
-                mediaPlayerSound.start()
+            if (PreferencesHelper.shouldPlaySoundOnRecordingStartAndStop(context)) {
+                mediaPlayerStartSound.start()
             }
 
             if (!cameraManager.shouldShowVideo()) {
@@ -140,33 +141,58 @@ class RecordingScreen(
                 )
             }
         }
-        loggingManager.setOnFinalizingRecording { dir, metadata ->
-            cameraManager.stopRecordingVideo { videoCaptureStartTime, videoTempFile ->
+
+        loggingManager.setAfterRecordingStarted { dir, metadata ->
+            cameraManager.setOnVideoRecordingFinalized { videoCaptureStartTime, videoTempFile ->
                 metadata.setVideoCaptureStartedTime(videoCaptureStartTime, true)
                 try {
-                    Files.move(videoTempFile, dir.resolve(Recording.VIDEO_CAPTURE_FILENAME))
+                    videoTempFile.copyTo(dir.resolve(Recording.VIDEO_CAPTURE_FILENAME))
+                    videoTempFile.delete()
                     val recordingIndex =
                         recordingsManager.indexOfFirst { r -> r.dir == dir }
                     recordingsAdapter.notifyItemChanged(recordingIndex)
                 } catch (e: IOException) {
                     e.printStackTrace()
+                } catch (e: NoSuchFileException) {
+                    e.printStackTrace()
+                } catch (e: FileAlreadyExistsException) {
+                    e.printStackTrace()
                 } catch (e: IllegalArgumentException) {
                     e.printStackTrace()
                 }
             }
-            cameraManager.stopRecordingPose { poseCaptureStartTime, poseTempFile ->
+
+            cameraManager.setOnPoseRecordingFinalized { poseCaptureStartTime, poseTempFile ->
                 metadata.setPoseCaptureStartedTime(poseCaptureStartTime, true)
                 try {
-                    Files.move(poseTempFile, dir.resolve(Recording.POSE_CAPTURE_FILENAME))
+                    poseTempFile.copyTo(dir.resolve(Recording.POSE_CAPTURE_FILENAME))
+                    poseTempFile.delete()
                     val recordingIndex =
                         recordingsManager.indexOfFirst { r -> r.dir == dir }
                     recordingsAdapter.notifyItemChanged(recordingIndex)
                 } catch (e: IOException) {
                     e.printStackTrace()
+                } catch (e: NoSuchFileException) {
+                    e.printStackTrace()
+                } catch (e: FileAlreadyExistsException) {
+                    e.printStackTrace()
                 } catch (e: IllegalArgumentException) {
                     e.printStackTrace()
                 }
             }
+
+            cameraManager.setOnVideoRecordingFailed { errorKey ->
+                loggingManager.stopLoggingImmediately()
+                Toast.makeText(context, "Video Recording failed: $errorKey", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        loggingManager.setOnFinalizingRecording {
+            if (PreferencesHelper.shouldPlaySoundOnRecordingStartAndStop(context)) {
+                mediaPlayerStopSound.start()
+            }
+            cameraManager.stopRecordingVideo()
+            cameraManager.stopRecordingPose()
             sensorOccupationInterface?.onSensorOccupationStatusChanged(false)
         }
     }

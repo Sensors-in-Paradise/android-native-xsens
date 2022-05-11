@@ -16,6 +16,7 @@ class GlobalValues private constructor() {
         const val NULL_ACTIVITY = "null - activity"
         const val OTHERS_CATEGORY = "Others"
         const val UNKNOWN_PERSON = "unknown"
+        const val ACTIVE_RECORDING_FLAG_FILENAME = "active"
         const val METADATA_JSON_FILENAME = "metadata.json"
         const val MEASUREMENT_MODE = XsensDotPayload.PAYLOAD_TYPE_CUSTOM_MODE_4
         fun getSensorRecordingsBaseDir(context: Context): File {

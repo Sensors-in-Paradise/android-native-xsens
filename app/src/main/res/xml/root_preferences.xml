@@ -46,8 +46,8 @@
     </PreferenceCategory>
     <PreferenceCategory app:title="Data recording options">
         <SwitchPreferenceCompat
-            app:key="playSoundOnRecordingStart"
-            app:title="Play sound when starting to record"
+            app:key="playSoundOnRecordingStartAndStop"
+            app:title="Play start/stop sound"
             app:summary="This can be useful to synchronize the sensor recordings with recordings from external cameras etc."
             />
         <SwitchPreferenceCompat
