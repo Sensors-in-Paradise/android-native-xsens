@@ -37,7 +37,8 @@ class RecordingDataManager(recordingsDir: File) :
         val childDirs = file.listFiles { dir, filename -> dir.resolve(filename).isDirectory }
         if (childDirs == null || childDirs.isEmpty()) {
             val metadataFile = file.resolve(GlobalValues.METADATA_JSON_FILENAME)
-            return metadataFile.exists()
+            val activeFlagFile = file.resolve(GlobalValues.ACTIVE_RECORDING_FLAG_FILENAME)
+            return metadataFile.exists() && !activeFlagFile.exists()
         }
         return false
     }

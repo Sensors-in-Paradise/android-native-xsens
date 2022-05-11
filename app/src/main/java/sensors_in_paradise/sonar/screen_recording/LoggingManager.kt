@@ -13,7 +13,6 @@ import com.xsens.dot.android.sdk.utils.XsensDotLogger
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.XSENSArrayList
-import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.UIHelper
 import sensors_in_paradise.sonar.use_cases.UseCase
 import java.io.File
@@ -386,11 +385,9 @@ class ActiveRecording(
 
     /** Saves recording and returns dir in which files were saved
      * */
-    fun save(person: String): File {
+    fun save(person: String): Pair<File, RecordingMetadataStorage> {
         assert(recordingEndTime != null)
-        val destFileDir = LogIOHelper.getOrCreateRecordingFileDir(context, recordingStartTime)
-        moveTempFiles(destFileDir, person, recordingEndTime!!.toSonarLong())
-        return destFileDir
+        return moveTempFiles(person, recordingEndTime!!.toSonarLong())
     }
 
     fun getLoggerForAddress(address: String): XsensDotLogger? {
@@ -487,12 +484,13 @@ class ActiveRecording(
      * Return the destination dir and metadata object
      */
     private fun moveTempFiles(
-        destFileDir: File,
         person: String,
         recordingEndTime: Long
     ): Pair<File, RecordingMetadataStorage> {
         val recordingFiles = tempSensorFiles
 
+        val destFileDir =
+            LogIOHelper.createRecordingFileDir(recordingStartTime, currentUseCase)
         LogIOHelper.moveTempFilesToFinalDirectory(destFileDir, recordingFiles)
 
         val metadataStorage = getOrCreateMetadataStorage(destFileDir)
@@ -505,6 +503,7 @@ class ActiveRecording(
         )
 
         recording = Recording(destFileDir, metadataStorage)
+        return Pair(destFileDir, metadataStorage)
     }
 
     fun changeLabel(position: Int, value: String) {
@@ -526,7 +525,7 @@ object LogIOHelper {
         }
     }
 
-    fun getOrCreateRecordingFileDir(
+    fun createRecordingFileDir(
         time: LocalDateTime,
         currentUseCase: UseCase
     ): File {
