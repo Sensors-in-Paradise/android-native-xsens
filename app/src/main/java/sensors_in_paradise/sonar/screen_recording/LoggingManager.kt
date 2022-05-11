@@ -388,7 +388,8 @@ class ActiveRecording(
      * */
     fun save(person: String): File {
         assert(recordingEndTime != null)
-        val destFileDir = LogIOHelper.getOrCreateRecordingFileDir(recordingStartTime, currentUseCase)
+        val destFileDir =
+            LogIOHelper.getOrCreateRecordingFileDir(recordingStartTime, currentUseCase)
         moveTempFiles(destFileDir, person, recordingEndTime!!.toSonarLong())
         return destFileDir
     }
@@ -475,7 +476,8 @@ class ActiveRecording(
     }
 
     fun initializeRecordingDir(): Pair<File, RecordingMetadataStorage> {
-        val destFileDir = LogIOHelper.getOrCreateRecordingFileDir(recordingStartTime, currentUseCase)
+        val destFileDir =
+            LogIOHelper.getOrCreateRecordingFileDir(recordingStartTime, currentUseCase)
         val metadataStorage = getOrCreateMetadataStorage(destFileDir)
         val activeFlagFile = destFileDir.resolve(GlobalValues.ACTIVE_RECORDING_FLAG_FILENAME)
         activeFlagFile.createNewFile()
@@ -486,8 +488,7 @@ class ActiveRecording(
      * Stores all temporary recording files and writes the metadata file.
      * Return the destination dir and metadata object
      */
-    private fun moveTempFiles(
-        destFileDir: File, person: String, recordingEndTime: Long) {
+    private fun moveTempFiles(destFileDir: File, person: String, recordingEndTime: Long) {
         val recordingFiles = tempSensorFiles
 
         LogIOHelper.moveTempFilesToFinalDirectory(destFileDir, recordingFiles)
