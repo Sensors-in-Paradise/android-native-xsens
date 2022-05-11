@@ -475,7 +475,7 @@ class ActiveRecording(
     }
 
     fun initializeRecordingDir(): Pair<File, RecordingMetadataStorage> {
-        val destFileDir = LogIOHelper.getOrCreateRecordingFileDir(context, recordingStartTime)
+        val destFileDir = LogIOHelper.getOrCreateRecordingFileDir(recordingStartTime, currentUseCase)
         val metadataStorage = getOrCreateMetadataStorage(destFileDir)
         val activeFlagFile = destFileDir.resolve(GlobalValues.ACTIVE_RECORDING_FLAG_FILENAME)
         activeFlagFile.createNewFile()
