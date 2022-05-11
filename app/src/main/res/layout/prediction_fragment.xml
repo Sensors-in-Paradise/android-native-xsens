@@ -13,7 +13,56 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="invisible" />
+    <androidx.constraintlayout.motion.widget.MotionLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layoutDescription="@xml/prediction_fragment_scene">
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_start_predict2"
+            style="@style/Widget.MaterialComponents.Button.Icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:icon="@drawable/ic_baseline_play_arrow_24"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="64dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ll_timeInfo_predictionFragment"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle" />
+        <LinearLayout
+            android:id="@+id/ll_timeInfo_predictionFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/button_start_predict2">
+
+            <Chronometer
+                android:id="@+id/timer_predict_predict2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="?android:textColorHint"
+                android:textSize="48dp"
+                />
+
+            <TextView
+                android:id="@+id/tv_predict_prediction2"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textSize="25sp"
+                android:textStyle="bold"
+                tools:visibility="visible"
+                />
+        </LinearLayout>
+
+    </androidx.constraintlayout.motion.widget.MotionLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

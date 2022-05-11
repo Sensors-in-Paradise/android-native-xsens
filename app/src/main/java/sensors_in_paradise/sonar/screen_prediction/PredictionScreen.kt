@@ -12,7 +12,6 @@ import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
-import com.xsens.dot.android.sdk.models.XsensDotPayload
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
 import sensors_in_paradise.sonar.screen_train.PredictionHistoryStorage
@@ -59,7 +58,7 @@ class PredictionScreen(
     private val updatePredictionTask = object : Runnable {
         override fun run() {
             addPredictionToHistory(getDummyPrediction())
-            //processAndPredict()
+            // processAndPredict()
             mainHandler.postDelayed(this, predictionInterval)
         }
     }
