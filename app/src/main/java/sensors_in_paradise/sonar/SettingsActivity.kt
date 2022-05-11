@@ -8,6 +8,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreference
+import androidx.preference.SwitchPreferenceCompat
 import sensors_in_paradise.sonar.util.PreferencesHelper
 
 class SettingsActivity : AppCompatActivity() {
@@ -26,10 +28,11 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {
+        private var bgPrefs: SwitchPreference? = null
+
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
-
-            val bgPrefs: Preference? = findPreference("showPoseBackground")
+            bgPrefs = findPreference("showPoseBackground") as SwitchPreference?
             bgPrefs?.onPreferenceChangeListener =
                 Preference.OnPreferenceChangeListener { _, newValue ->
                     if (newValue as Boolean) {
@@ -63,12 +66,13 @@ class SettingsActivity : AppCompatActivity() {
                         } catch (e: SecurityException) {
                             e.printStackTrace()
                             editor.putBoolean("showPoseBackground", false)
+                            bgPrefs?.isChecked = false
                         }
                     } else {
                         editor.putBoolean("showPoseBackground", false)
+                        bgPrefs?.isChecked = false
                     }
                     editor.apply()
-                    this.activity?.recreate()
                 }
             }
     }
