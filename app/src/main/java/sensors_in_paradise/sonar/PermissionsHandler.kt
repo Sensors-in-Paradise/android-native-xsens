@@ -7,17 +7,18 @@ import androidx.activity.result.ActivityResultLauncher
 import sensors_in_paradise.sonar.util.PermissionsHelper
 import sensors_in_paradise.sonar.util.UIHelper
 
-class PermissionsHandler(private val requestPermissionLauncher: ActivityResultLauncher<Array<String>>) : PageInterface {
+class PermissionsHandler(private val requestPermissionLauncher: ActivityResultLauncher<Array<String>>) :
+    ScreenInterface {
     lateinit var context: Context
     private var dialog: AlertDialog? = null
 
-    override fun activityCreated(activity: Activity) {
+    override fun onActivityCreated(activity: Activity) {
         context = activity
         val missingPermissions = PermissionsHelper.getRequiredButUngrantedPermissions(context)
         requestPermissionLauncher.launch(missingPermissions.toArray(arrayOf<String>()))
     }
 
-    override fun activityResumed() {
+    override fun onActivityResumed() {
         dialog?.dismiss()
         if (!PermissionsHelper.areAllPermissionsGranted(context)) {
             val missingPermissions = PermissionsHelper.getRequiredButUngrantedPermissions(context)
@@ -30,7 +31,7 @@ class PermissionsHandler(private val requestPermissionLauncher: ActivityResultLa
         }
     }
 
-    override fun activityWillDestroy() {
+    override fun onActivityWillDestroy() {
         // Nothing to do
     }
 }

@@ -7,6 +7,7 @@
     <color name="slightBackgroundContrast">#263238</color>
     <color name="stickmanJoints">#c97b63</color>
 
+    <color name="transparent">#00FF5722</color>
     <color name="orange">#FF5722</color>
     <color name="lightGrey">#e0e0e0</color>
     <color name="grey">#a0a0a0</color>

@@ -13,7 +13,8 @@ class RecordingUIItemArrayList : ArrayList<RecordingUIItem>() {
         }
         return recordings
     }
-    fun getByRecordingDir(dir: File): RecordingUIItem? {
+
+	fun getByRecordingDir(dir: File): RecordingUIItem? {
         for (fileUIItem in this) {
             if (fileUIItem.dir == dir) {
                 return fileUIItem
@@ -21,7 +22,8 @@ class RecordingUIItemArrayList : ArrayList<RecordingUIItem>() {
         }
         return null
     }
-    fun areAllUploadedOrFailed(): Boolean {
+
+	fun areAllUploadedOrFailed(): Boolean {
         for (recording in this) {
             if (!recording.isUploaded() && !recording.isFailed()) {
                 return false
@@ -29,7 +31,8 @@ class RecordingUIItemArrayList : ArrayList<RecordingUIItem>() {
         }
         return true
     }
-    fun areAllUploaded(): Boolean {
+
+	fun areAllUploaded(): Boolean {
         for (item in this) {
             if (!item.isUploaded()) {
                 return false

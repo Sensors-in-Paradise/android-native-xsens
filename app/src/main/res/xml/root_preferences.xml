@@ -30,6 +30,13 @@
             app:key="darkMode"
             app:title="Dark mode" />
     </PreferenceCategory>
+    <PreferenceCategory app:title="Advances Features">
+        <SwitchPreferenceCompat
+            app:key="onDeviceTraining"
+            app:summary="Shows a tab on which transfer learning of the model of the current use case can be triggered"
+            app:title="On-device training "
+            app:defaultValue="false"/>
+    </PreferenceCategory>
     <PreferenceCategory app:title="Developer options">
         <SwitchPreferenceCompat
             app:key="verboseToasts"
@@ -38,14 +45,6 @@
             app:summary="Show semi-important Toasts for debugging"/>
     </PreferenceCategory>
     <PreferenceCategory app:title="Data recording options">
-
-        <EditTextPreference
-            android:defaultValue="@string/default_recordings_subdir"
-            android:key="recordingsSubDir"
-            android:selectAllOnFocus="false"
-            android:singleLine="true"
-            android:title="Recordings subdirectory"
-            android:summary="Choose the name of the subdirectory in which recordings should be stored. This directory will then also be mirrored in the cloud on upload."/>
         <SwitchPreferenceCompat
             app:key="playSoundOnRecordingStartAndStop"
             app:title="Play start/stop sound"
@@ -111,6 +110,14 @@ the object they are connected to. \nMore detailed information can be found in th
             android:singleLine="true"
             android:title="WebDAV token"
             android:summary="The token for logging into your WebDAV cloud account"/>
+        <SwitchPreferenceCompat
+            android:id="@+id/switchPreferenceCompat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:dependency="storeRawCameraVideo"
+            app:key="uploadCameraVideo"
+            app:summary="Upload the raw Videos that were shot by the camera during recordings"
+            app:title="Upload camera video " />
     </PreferenceCategory>
 
 </PreferenceScreen>
