@@ -76,17 +76,16 @@
         android:layout_marginTop="16dp"
         android:orientation="vertical">
 
-        <com.github.mikephil.charting.charts.HorizontalBarChart
+        <com.github.mikephil.charting.charts.BarChart
             android:id="@+id/barChart_predict_predictions"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/white" />
+            android:layout_height="100dp" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Prediction history"
-            android:textSize="20sp" />
+<!--        <TextView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Prediction history"-->
+<!--            android:textSize="20sp" />-->
 
         <ViewSwitcher
             android:id="@+id/viewSwitcher_predictionFragment"

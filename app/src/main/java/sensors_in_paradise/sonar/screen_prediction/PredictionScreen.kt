@@ -11,6 +11,11 @@ import android.view.View
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.components.XAxis.XAxisPosition
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import sensors_in_paradise.sonar.*
@@ -25,6 +30,7 @@ import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import java.nio.ByteBuffer
 import kotlin.math.round
 import kotlin.random.Random
+
 
 class PredictionScreen(
     private var currentUseCase: UseCase,
@@ -50,6 +56,7 @@ class PredictionScreen(
 
     private var lastPredictionTime = 0L
 
+    private val numOutputs = 6
     private val numDevices = 5
     private var numConnectedDevices = 0
     private var isRunning = false
@@ -100,7 +107,7 @@ class PredictionScreen(
         val size = 6
         val randoms = FloatArray(size)
         for (i in 0 until size) {
-            randoms[i] = Random.nextFloat() * i.toFloat()
+            randoms[i] = Random.nextFloat() * (i.toFloat() + 1)
         }
         return randoms.map { it / randoms.sum() }.toFloatArray()
     }
@@ -117,6 +124,8 @@ class PredictionScreen(
         timer.base = SystemClock.elapsedRealtime()
         timer.start()
         textView.visibility = View.VISIBLE
+
+        clearChartData()
 
         predictionHistoryStorage =
             PredictionHistoryStorage(
@@ -184,17 +193,19 @@ class PredictionScreen(
             val prediction = Prediction(outputLabelMap[i]!!, percentage)
             predictions.add(prediction)
         }
+        val predictionsUnordered = predictions.clone() as ArrayList<Prediction>
         predictions.sortWith(Prediction.PredictionsComparator)
+        val highestPrediction = predictions[0]
 
-        setBarChartData(predictions)
+        setBarChartData(predictionsUnordered, highestPrediction.label)
 
-        val prediction = predictions[0]
-        textView.text = prediction.label
+
+        textView.text = highestPrediction.label
 
         predictionHistoryStorage?.let {
-            val relativeTime = it.addPrediction(prediction)
+            val relativeTime = it.addPrediction(highestPrediction)
             predictionHistoryAdapter.addPrediction(
-                prediction,
+                highestPrediction,
                 relativeTime,
                 predictionInterval,
                 recyclerView
@@ -278,26 +289,83 @@ class PredictionScreen(
 
         barChart.setDrawBarShadow(false)
         barChart.setDrawValueAboveBar(true)
-
         barChart.description.isEnabled = false
-
-        // if more than 60 entries are displayed in the chart, no values will be
-        // drawn
-
-        // if more than 60 entries are displayed in the chart, no values will be
-        // drawn
-        barChart.setMaxVisibleValueCount(60)
+        barChart.legend.isEnabled = false
+        barChart.setTouchEnabled(false)
 
         // scaling can now only be done on x- and y-axis separately
 
         // scaling can now only be done on x- and y-axis separately
         barChart.setPinchZoom(false)
+        barChart.isDoubleTapToZoomEnabled = false
 
         barChart.setDrawGridBackground(false)
+
+        //val xAxisFormatter: ValueFormatter = DayAxisValueFormatter(chart)
+
+        val xAxis: XAxis = barChart.xAxis
+        xAxis.position = XAxisPosition.BOTTOM
+        //xAxis.typeface = tfLight
+        xAxis.setDrawGridLines(false)
+        xAxis.granularity = 1f // only intervals of 1 day
+
+        // xAxis.labelCount = 7
+        //xAxis.setValueFormatter(xAxisFormatter)
+
+        //val custom: IAxisValueFormatter = MyAxisValueFormatter()
+
+        barChart.axisLeft.isEnabled = false
+        barChart.axisRight.isEnabled = false
+
+        clearChartData()
+//        val l: Legend = chart.getLegend()
+//        l.verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
+//        l.horizontalAlignment = Legend.LegendHorizontalAlignment.LEFT
+//        l.orientation = Legend.LegendOrientation.HORIZONTAL
+//        l.setDrawInside(false)
+//        l.form = LegendForm.SQUARE
+//        l.formSize = 9f
+//        l.textSize = 11f
+//        l.xEntrySpace = 4f
+
+//        val mv = XYMarkerView(this, xAxisFormatter)
+//        mv.setChartView(barChart) // For bounds control
+//
+//        chart.setMarker(mv)
     }
 
-    setBarChartData(predictions: ArrayList<Prediction>) {
+    private fun clearChartData() {
+        setBarChartData(
+            ArrayList((0..numOutputs).map { Prediction("", 0.1f) }),
+            "_"
+        )
+    }
 
+    private fun setBarChartData(predictions: ArrayList<Prediction>, highestPrediction: String) {
+        val values = ArrayList(predictions.mapIndexed { i, prediction ->
+            BarEntry(
+                i.toFloat(),
+                prediction.percentage
+            )
+        })
+
+        val dataSet = BarDataSet(values, "")
+        dataSet.colors = (predictions).map {
+            if (it.label == highestPrediction) context.getColor(R.color.colorPrimaryDark)
+            else context.getColor(R.color.colorAccent)
+        }
+        dataSet.setValueTextColors((predictions).map { context.getColor(R.color.hardBackgroundContrast) })
+
+        val barData = BarData(dataSet)
+        barData.setValueTextSize(10f);
+//        barData.setValueTypeface(tfLight);
+        barData.barWidth = 0.9f;
+
+        barChart.setData(barData)
+        barChart.animateY(((0.1) * predictionInterval).toInt())
+//        barChart.animator.ani
+//        barChart.animat
+        //barChart.invalidate()
     }
 
     override fun onActivityResumed() {
