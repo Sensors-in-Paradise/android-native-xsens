@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
-import androidx.preference.SwitchPreferenceCompat
 import sensors_in_paradise.sonar.util.PreferencesHelper
 
 class SettingsActivity : AppCompatActivity() {
