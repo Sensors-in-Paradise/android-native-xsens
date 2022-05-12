@@ -18,13 +18,29 @@
         android:layout_width="match_parent"
         android:layout_height="100dp"
         app:layoutDescription="@xml/prediction_fragment_scene">
-
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_right_predictionFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="125dp" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_left_predictionFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="125dp" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_center_predictionFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5" />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_start_predict"
             style="@style/Widget.MaterialComponents.Button.Icon"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:layout_marginStart="32dp"
             android:insetLeft="0dp"
             android:insetTop="0dp"
             android:insetRight="0dp"
@@ -35,8 +51,8 @@
             app:iconPadding="0dp"
             app:iconSize="64dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/guideline_right_predictionFragment"
+            app:layout_constraintStart_toStartOf="@+id/guideline_left_predictionFragment"
             app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle" />
         <LinearLayout
@@ -45,10 +61,12 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/button_start_predict2"
-            android:layout_marginEnd="32dp"
+            app:layout_constraintStart_toEndOf="@+id/button_start_predict"
+            app:layout_constraintEnd_toEndOf="@+id/guideline_right_predictionFragment"
+            android:rotation="90"
+            android:scaleX="0.5"
+            android:scaleY="0.5"
             >
 
             <Chronometer
