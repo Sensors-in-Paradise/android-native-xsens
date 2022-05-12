@@ -9,6 +9,7 @@ import android.os.SystemClock
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
@@ -40,7 +41,7 @@ class PredictionScreen(
     private lateinit var progressBar: ProgressBar
     private lateinit var timer: Chronometer
     private lateinit var textView: TextView
-
+    private lateinit var toggleMotionLayout: MotionLayout
     private lateinit var metadataStorage: XSensDotMetadataStorage
     private var predictionHistoryStorage: PredictionHistoryStorage? = null
     private lateinit var predictionHelper: PredictionHelper
@@ -79,8 +80,10 @@ class PredictionScreen(
     private fun togglePrediction() {
         if (isRunning) {
             stopDataCollection()
+            toggleMotionLayout.transitionToStart()
         } else {
             startDataCollection()
+            toggleMotionLayout.transitionToEnd()
         }
     }
 
@@ -241,6 +244,7 @@ class PredictionScreen(
         textView.visibility = View.GONE
         predictionButton = activity.findViewById(R.id.button_start_predict)
         progressBar = activity.findViewById(R.id.progressBar_nextPrediction_predictionFragment)
+
         predictionButton.setOnClickListener {
             if (initModelFromCurrentUseCase()) {
                 val signatures = model?.signatureKeys
@@ -264,6 +268,7 @@ class PredictionScreen(
                 )
             }
         }
+        toggleMotionLayout = activity.findViewById(R.id.motionLayout_predictionToggling_predictionFragment)
 
         mainHandler = Handler(Looper.getMainLooper())
     }

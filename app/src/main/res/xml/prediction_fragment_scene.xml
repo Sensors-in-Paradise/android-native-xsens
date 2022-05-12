@@ -5,23 +5,27 @@
     <ConstraintSet android:id="@+id/start">
         <Constraint android:id="@+id/ll_timeInfo_predictionFragment"
             android:alpha="0"
-
             motion:layout_constraintTop_toTopOf="parent"
             motion:layout_constraintEnd_toEndOf="parent"
             motion:layout_constraintBottom_toBottomOf="parent"
-            motion:layout_constraintStart_toEndOf="@+id/button_start_predict2"
+            motion:layout_constraintStart_toEndOf="@+id/button_start_predict"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="0dp"
+
+            android:scaleX="0.5"
+            android:scaleY="0.5"
             >
         </Constraint>
-        <Constraint android:id="@+id/button_start_predict2"
+        <Constraint android:id="@+id/button_start_predict"
             android:alpha="1"
             motion:layout_constraintBottom_toBottomOf="parent"
-            motion:layout_constraintEnd_toStartOf="@+id/ll_timeInfo_predictionFragment"
+            motion:layout_constraintEnd_toEndOf="parent"
             motion:layout_constraintStart_toStartOf="parent"
             motion:layout_constraintTop_toTopOf="parent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="0dp"
             />
     </ConstraintSet>
 
@@ -31,25 +35,31 @@
             motion:layout_constraintTop_toTopOf="parent"
             motion:layout_constraintEnd_toEndOf="parent"
             motion:layout_constraintBottom_toBottomOf="parent"
-            motion:layout_constraintStart_toEndOf="@+id/button_start_predict2"
+            motion:layout_constraintStart_toEndOf="@+id/button_start_predict"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="32dp"
+            android:scaleX="1"
+            android:scaleY="1"
+
             />
-        <Constraint android:id="@+id/button_start_predict2"
+        <Constraint android:id="@+id/button_start_predict"
             android:alpha="1"
             motion:layout_constraintBottom_toBottomOf="parent"
             motion:layout_constraintEnd_toStartOf="@+id/ll_timeInfo_predictionFragment"
             motion:layout_constraintStart_toStartOf="parent"
             motion:layout_constraintTop_toTopOf="parent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginStart="32dp"
+            android:icon="@drawable/ic_baseline_stop_24"
             />
     </ConstraintSet>
 
     <Transition
         motion:constraintSetEnd="@id/end"
         motion:constraintSetStart="@+id/start"
-        motion:duration="2000">
-        <OnClick />
+        motion:duration="1000">
+<!--        <OnClick motion:targetId="@+id/button_start_predict"/>-->
     </Transition>
 </MotionScene>

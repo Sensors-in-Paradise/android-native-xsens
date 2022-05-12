@@ -14,21 +14,28 @@
         android:layout_height="wrap_content"
         android:visibility="invisible" />
     <androidx.constraintlayout.motion.widget.MotionLayout
+        android:id="@+id/motionLayout_predictionToggling_predictionFragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         app:layoutDescription="@xml/prediction_fragment_scene">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_start_predict2"
+            android:id="@+id/button_start_predict"
             style="@style/Widget.MaterialComponents.Button.Icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginStart="32dp"
+            android:insetLeft="0dp"
+            android:insetTop="0dp"
+            android:insetRight="0dp"
+            android:insetBottom="0dp"
+            android:padding="0dp"
             app:icon="@drawable/ic_baseline_play_arrow_24"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconSize="64dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/ll_timeInfo_predictionFragment"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle" />
@@ -40,19 +47,22 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/button_start_predict2">
+            app:layout_constraintStart_toEndOf="@+id/button_start_predict2"
+            android:layout_marginEnd="32dp"
+            >
 
             <Chronometer
-                android:id="@+id/timer_predict_predict2"
+                android:id="@+id/timer_predict_predict"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:textColor="?android:textColorHint"
                 android:textSize="48dp"
+
                 />
 
             <TextView
-                android:id="@+id/tv_predict_prediction2"
+                android:id="@+id/tv_predict_prediction"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
@@ -63,59 +73,7 @@
         </LinearLayout>
 
     </androidx.constraintlayout.motion.widget.MotionLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginVertical="16dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonRecord">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_start_predict"
-            style="@style/Widget.MaterialComponents.Button.Icon"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:insetLeft="0dp"
-            android:insetTop="0dp"
-            android:insetRight="0dp"
-            android:insetBottom="0dp"
-            android:padding="0dp"
-            app:icon="@drawable/ic_baseline_play_arrow_24"
-            app:iconGravity="textStart"
-            app:iconPadding="0dp"
-            app:iconSize="64dp"
-            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginLeft="20dp"
-            android:orientation="vertical">
-
-            <Chronometer
-                android:id="@+id/timer_predict_predict"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:textColor="?android:textColorHint"
-                android:textSize="48dp" />
-
-            <TextView
-                android:id="@+id/tv_predict_prediction"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:textSize="25sp"
-                android:textStyle="bold"
-                tools:visibility="gone" />
-
-        </LinearLayout>
-
-    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
