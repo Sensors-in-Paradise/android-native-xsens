@@ -10,6 +10,7 @@ import android.os.SystemClock
 import android.util.Log
 import android.view.View
 import android.view.animation.AccelerateInterpolator
+import android.view.animation.LinearInterpolator
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.github.mikephil.charting.charts.BarChart
@@ -62,16 +63,19 @@ class PredictionScreen(
 
     private var lastPredictionTime = 0L
 
-    private val numOutputs = 6
+    private val numOutputs = 8
     val outputLabelMap = mapOf(
         0 to "Running",
         1 to "Squats",
         2 to "Stairs Down",
         3 to "1 min Pitch",
         4 to "Standing",
-        5 to "Walking"
+        5 to "Walking",
+        6 to "Walking",
+        7 to "Walking",
+        8 to "Walking"
     ).withDefault { "" }
-    private val numBars = min(numOutputs, 5)
+    private val numBars = min(numOutputs, 6)
 
     private val numDevices = 5
     private var numConnectedDevices = 0
@@ -120,9 +124,8 @@ class PredictionScreen(
     }
 
     private fun getDummyPrediction(): FloatArray {
-        val size = 6
-        val randoms = FloatArray(size)
-        for (i in 0 until size) {
+        val randoms = FloatArray(numOutputs)
+        for (i in 0 until numOutputs) {
             randoms[i] = Random.nextFloat() * (i.toFloat() + 1f)
         }
         return randoms.map { it / randoms.sum() }.toFloatArray()
@@ -305,7 +308,7 @@ class PredictionScreen(
         barChart.axisLeft.isEnabled = false
         barChart.axisRight.isEnabled = false
 
-        val range = (0 until numOutputs)
+        val range = (0 until numBars)
 
         val xAxis: XAxis = barChart.xAxis
         xAxis.position = XAxisPosition.BOTTOM
@@ -322,7 +325,7 @@ class PredictionScreen(
         val initValues = range.map { i ->
             BarEntry(
                 i.toFloat(),
-                0.1f
+                0.5f
             )
         }
         val dataSet = BarDataSet(initValues, "")
@@ -344,34 +347,58 @@ class PredictionScreen(
 
     private fun clearChartData() {
         changeBarChartData(
-            ArrayList((0 until numOutputs).map { Prediction("", 0.1f) }),
+            ArrayList((0 until numBars).map { Prediction("", 0.5f) }),
             "_"
         )
     }
 
+    private fun getLimitedPredictions(predictions: ArrayList<Prediction>): ArrayList<Prediction> {
+        return if (predictions.size <= numBars) {
+            predictions
+        } else {
+            val limitedPredictions = ArrayList<Prediction>()
+            var othersPercentage = 0f
+            for ((i, prediction) in predictions.withIndex()) {
+                if (i < numBars - 1) {
+                    limitedPredictions.add(prediction)
+                } else {
+                    othersPercentage += prediction.percentage
+                }
+            }
+            limitedPredictions.add(Prediction("Others", othersPercentage))
+            limitedPredictions
+        }
+    }
+
     private fun changeBarChartData(predictions: ArrayList<Prediction>, highestPrediction: String) {
-        val oldValues = (0 until numOutputs).map { barChart.data.dataSets[0].getEntryForIndex(it) }
-        val newValues = predictions.mapIndexed { i, prediction ->
+        val limitedPredictions = getLimitedPredictions(predictions)
+        val oldValues = (0 until numBars).map { barChart.data.dataSets[0].getEntryForIndex(it) }
+        val newValues = limitedPredictions.mapIndexed { i, prediction ->
             BarEntry(
                 i.toFloat(),
                 prediction.percentage
             )
         }
 
-        val xAxisLabels = predictions.map { p ->
+        val xAxisLabels = limitedPredictions.map { p ->
             if (p.label.length <= 10) p.label
-            else "${p.label.substring(0, 10)}.."
+            else "${p.label.substring(0, 9)}.."
         }
-        barChart.xAxis.valueFormatter =  IndexAxisValueFormatter(xAxisLabels)
+        barChart.xAxis.valueFormatter = IndexAxisValueFormatter(xAxisLabels)
 
         val dataSet = barChart.data.dataSets[0] as BarDataSet
-        dataSet.colors = (predictions).map {
+        dataSet.colors = (limitedPredictions).map {
             if (it.label == highestPrediction) context.getColor(R.color.colorPrimaryDark)
             else context.getColor(R.color.colorAccent)
         }
 
-        val changer = AnimateDataSetChanged((0.15 * predictionInterval).toInt(), barChart, oldValues, newValues)
-        changer.setInterpolator(AccelerateInterpolator()) // optionally set the Interpolator
+        val changer = AnimateDataSetChanged(
+            (0.15 * predictionInterval).toInt(),
+            barChart,
+            oldValues,
+            newValues
+        )
+        changer.setInterpolator(LinearInterpolator())
         changer.run()
     }
 
