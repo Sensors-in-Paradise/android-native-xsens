@@ -39,10 +39,12 @@ class LabelsEditorDialog(
     private var previousItem: ClickableCarouselTextView
     private var currentItem: ClickableCarouselTextView
     private var nextItem: ClickableCarouselTextView
-    private var endTV: TextView
-    private var statusTV: TextView
-    private var startTV: TextView
 
+    private var statusTV: TextView
+    private var startRangeTV: TextView
+    private var endRangeTV: TextView
+    private var startCurrentActivityRangeTV: TextView
+    private var endCurrentActivityRangeTV: TextView
     /*Stores a list of VisualSequenceViewHolder and its position in the viewSwitcher*/
     private var visualizers: ArrayList<Pair<Int, VisualSequenceViewHolder>> = ArrayList()
 
@@ -75,8 +77,11 @@ class LabelsEditorDialog(
         currentItem = root.findViewById(R.id.tv_carouselItem2_labelEditor)
         nextItem = root.findViewById(R.id.tv_carouselItem3_labelEditor)
         carousel = root.findViewById(R.id.carousel_labels_labelEditor)
-        endTV = root.findViewById(R.id.tv_endDuration_labelEditor)
-        startTV = root.findViewById(R.id.tv_startDuration_labelEditor)
+        endRangeTV = root.findViewById(R.id.tv_endBigRange_labelEditor)
+        startRangeTV = root.findViewById(R.id.tv_startBigRange_labelEditor)
+        endCurrentActivityRangeTV = root.findViewById(R.id.tv_endSmallRange_labelEditor)
+        startCurrentActivityRangeTV = root.findViewById(R.id.tv_startSmallRange_labelEditor)
+
         statusTV = root.findViewById(R.id.tv_consistencyStatus_labelEditor)
         rangeSlider = root.findViewById(R.id.rangeSlider_labelEditor)
         motionLayout = root.findViewById(R.id.motionLayout_carouselParent_labelEditor)
@@ -283,8 +288,8 @@ class LabelsEditorDialog(
             startTime,
             endTime
         )
-        startTV.text = GlobalValues.getDurationAsString(rangeStart)
-        endTV.text = GlobalValues.getDurationAsString(rangeEnd)
+        startRangeTV.text = GlobalValues.getDurationAsString(rangeStart)
+        endRangeTV.text = GlobalValues.getDurationAsString(rangeEnd)
         updateSeekBar()
     }
     private fun updateSeekBar() {
@@ -293,6 +298,8 @@ class LabelsEditorDialog(
         videoSeekBar.min = startTime.toInt()
         videoSeekBar.max = endTime.toInt()
         videoSeekBar.progress = startTime.toInt()
+        startCurrentActivityRangeTV.text = GlobalValues.getDurationAsString(startTime.toLong())
+        endCurrentActivityRangeTV.text = GlobalValues.getDurationAsString(endTime.toLong())
     }
 
     private fun loopVisualizerForSelectedActivity() {
