@@ -73,7 +73,6 @@ class LabelsEditorDialog(
 
         videoView = root.findViewById(R.id.videoView_labelEditor)
         poseSequenceView = root.findViewById(R.id.textureView_labelEditor)
-        previousItem = root.findViewById(R.id.tv_carouselItem1_labelEditor)
         currentItem = root.findViewById(R.id.tv_carouselItem2_labelEditor)
         nextItem = root.findViewById(R.id.tv_carouselItem3_labelEditor)
         carousel = root.findViewById(R.id.carousel_labels_labelEditor)
@@ -123,7 +122,6 @@ class LabelsEditorDialog(
             override fun populate(view: View, index: Int) {
                 // need to implement this to populate the view at the given index
                 val tf = view as TextView
-
                 tf.text = formatLabel(activities[index].activity)
             }
 

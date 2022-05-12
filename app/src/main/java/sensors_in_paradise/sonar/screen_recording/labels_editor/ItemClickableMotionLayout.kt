@@ -12,6 +12,11 @@ import kotlin.math.abs
 
 class ItemClickableMotionLayout(context: Context, attributeSet: AttributeSet) :
     MotionLayout(context, attributeSet) {
+    init {
+        // Set empty on click listener here so that the MotionLayout received touch events
+        // even when it has only one child so it does not need to scroll
+        setOnClickListener {}
+    }
     private val touchSlop: Int = ViewConfiguration.get(context).scaledTouchSlop
     private var initialX = 0f
     private var initialY = 0f

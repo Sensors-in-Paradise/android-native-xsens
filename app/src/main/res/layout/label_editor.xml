@@ -56,15 +56,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:alpha="0.2"
+                android:ellipsize="end"
                 android:maxWidth="100dp"
                 android:maxLines="2"
                 android:text="ITEM 0"
-                android:textAlignment="center"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/tv_carouselItem1_labelEditor"
-                app:layout_constraintTop_toTopOf="parent"
-
-                />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <sensors_in_paradise.sonar.screen_recording.labels_editor.ClickableCarouselTextView
                 android:id="@+id/tv_carouselItem1_labelEditor"
@@ -72,7 +70,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:maxWidth="100dp"
-
+                android:ellipsize="end"
                 android:maxLines="2"
                 android:text="ITEM 1"
                 android:textAlignment="center"
@@ -88,6 +86,7 @@
                 android:maxLines="2"
                 android:scaleX="1.5"
                 android:scaleY="1.5"
+                android:ellipsize="end"
                 android:text="ITEM 2"
                 android:textAlignment="center"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -103,6 +102,7 @@
                 android:layout_marginStart="16dp"
                 android:maxWidth="100dp"
                 android:maxLines="2"
+                android:ellipsize="end"
                 android:text="ITEM 3"
                 android:textAlignment="center"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -117,6 +117,7 @@
                 android:alpha="0.2"
                 android:maxWidth="100dp"
                 android:maxLines="2"
+                android:ellipsize="end"
                 android:text="ITEM 4"
                 android:textAlignment="center"
                 app:layout_constraintBottom_toBottomOf="parent"

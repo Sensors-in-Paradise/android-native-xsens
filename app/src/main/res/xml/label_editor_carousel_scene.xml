@@ -148,7 +148,7 @@
             motion:layout_constraintBottom_toBottomOf="parent"
             motion:layout_constraintTop_toTopOf="parent"
             motion:layout_constraintEnd_toStartOf="@id/tv_carouselItem2_labelEditor"
-            motion:layout_constraintStart_toStartOf="parent"
+            android:layout_marginEnd="16dp"
             android:id="@+id/tv_carouselItem1_labelEditor"
             android:alpha="0.2"
            />
