@@ -4,7 +4,7 @@ abstract class VisualSequenceViewHolder(
     private val onSourceLoadedListener: () -> Unit,
     protected val onStartLoadingSource: () -> Unit,
     private val onSeekToNewPosition: ((ms: Long) -> Unit)? = null
-) : IntervalLooper() {
+) : IntervalLoopSeeker() {
     var sourcePath: String? = null
     var isSourceLoaded = false
     fun loadSource() {

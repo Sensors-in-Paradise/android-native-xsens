@@ -5,17 +5,15 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.media.MediaPlayer
-import android.os.Handler
-import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.TextView
 import android.widget.VideoView
 import com.google.android.material.slider.RangeSlider
 import sensors_in_paradise.sonar.GlobalValues
+import sensors_in_paradise.sonar.IntervalLooper
 import sensors_in_paradise.sonar.R
-import sensors_in_paradise.sonar.screen_recording.labels_editor.VisualSequenceViewHolder
 import java.io.File
-import java.util.*
 
 class VideoDialog(
     context: Context,
@@ -25,25 +23,10 @@ class VideoDialog(
     onPositiveButtonClickListener: DialogInterface.OnClickListener? = null,
     neutralButtonText: String = "Neutral",
     onNeutralButtonClickListener: DialogInterface.OnClickListener? = null
-) : RangeSlider.OnSliderTouchListener {
-    private val timer: Timer = Timer()
+) : IntervalLooper(50L, true), RangeSlider.OnSliderTouchListener {
     private var mediaPlayer: MediaPlayer? = null
-    private val uiHandler = Handler(Looper.getMainLooper())
-    private lateinit var rangeSlider: RangeSlider
-    private val updateSeekBarTask = object : TimerTask() {
-        override fun run() {
-            uiHandler.post {
-                val videoTime = mediaPlayer?.timestamp?.anchorMediaTimeUs
-                if (videoTime != null) {
-                    val progress = videoTime / 1000L
-                    rangeSlider.values = rangeSlider.values.apply {
-                        this[0] = progress.toFloat()
-                    }
-                    rangeSlider.invalidate()
-                }
-            }
-        }
-    }
+
+    private var rangeSlider: RangeSlider
 
     init {
         val builder = AlertDialog.Builder(context)
@@ -63,11 +46,17 @@ class VideoDialog(
                 rangeSlider.values = arrayListOf(0f)
                 rangeSlider.valueTo = mp.duration.toFloat()
                 endTimeTV.text = GlobalValues.getDurationAsString(mp.duration.toLong())
-                timer.scheduleAtFixedRate(
-                    updateSeekBarTask,
-                    0L,
-                    1000L / VisualSequenceViewHolder.FPS
-                )
+
+                startLooping {
+                    val videoTime = mediaPlayer?.timestamp?.anchorMediaTimeUs
+                    if (videoTime != null) {
+                        val progress = videoTime / 1000L
+                        rangeSlider.values = rangeSlider.values.apply {
+                            this[0] = progress.toFloat()
+                        }
+                        rangeSlider.invalidate()
+                    }
+                }
             }
             start()
         }
@@ -94,7 +83,8 @@ class VideoDialog(
                 "Yes",
                 onPositiveButtonClickListener
             )
-            builder.setNegativeButton("Cancel"
+            builder.setNegativeButton(
+                "Cancel"
             ) { dialog, _ ->
                 // User cancelled the dialog
                 dialog.cancel()
@@ -103,6 +93,11 @@ class VideoDialog(
             builder.setPositiveButton(
                 "Ok", null
             )
+        }
+        builder.setOnDismissListener {
+            Log.d("VideoDialog", "Dialog dismissed")
+            stopLooping()
+            mediaPlayer?.release()
         }
         // Create the AlertDialog object and return it
         builder.create().show()
