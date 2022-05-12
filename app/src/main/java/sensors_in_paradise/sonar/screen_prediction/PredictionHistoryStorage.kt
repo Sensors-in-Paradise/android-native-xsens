@@ -17,7 +17,7 @@ class PredictionHistoryStorage(
     data class Prediction(var label: String, var percentage: Float) {
         fun percentageAsString(): String {
             val roundedPercentage = round(percentage * 100) / 100
-            return "$roundedPercentage%"
+            return "$roundedPercentage %"
         }
 
         companion object {

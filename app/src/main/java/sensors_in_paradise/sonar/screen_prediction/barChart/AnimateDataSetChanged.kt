@@ -1,14 +1,12 @@
 package sensors_in_paradise.sonar.screen_prediction.barChart
 
 import android.os.Handler
-import android.os.Looper
 import android.view.animation.Interpolator
 import android.view.animation.LinearInterpolator
 import com.github.mikephil.charting.charts.BarLineChartBase
 import com.github.mikephil.charting.charts.Chart
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
-import com.github.mikephil.charting.data.DataSet
 import com.github.mikephil.charting.data.Entry
 import java.util.*
 

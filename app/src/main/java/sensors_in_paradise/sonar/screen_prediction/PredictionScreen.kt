@@ -39,11 +39,10 @@ class PredictionScreen(
     private lateinit var recyclerView: RecyclerView
     private lateinit var predictionHistoryAdapter: PredictionHistoryAdapter
     private lateinit var predictionButton: MaterialButton
-    private lateinit var viewSwitcher: ViewSwitcher
     private lateinit var progressBar: ProgressBar
     private lateinit var timer: Chronometer
     private lateinit var textView: TextView
-    private lateinit var predictionBarBarChart: PredictionBarChart
+    private lateinit var predictionBarChart: PredictionBarChart
 
     private lateinit var metadataStorage: XSensDotMetadataStorage
     private var predictionHistoryStorage: PredictionHistoryStorage? = null
@@ -112,7 +111,7 @@ class PredictionScreen(
     private fun getDummyPrediction(): FloatArray {
         val randoms = FloatArray(numOutputs)
         for (i in 0 until numOutputs) {
-            randoms[i] = Random.nextFloat() * (i.toFloat() + 1f)
+            randoms[i] = Random.nextFloat() * (i.toFloat() + 1f) * (i.toFloat() + 1f) * (i.toFloat() + 1f)
         }
         return randoms.map { it / randoms.sum() }.toFloatArray()
     }
@@ -130,7 +129,7 @@ class PredictionScreen(
         timer.start()
         textView.visibility = View.VISIBLE
 
-        predictionBarBarChart.resetData()
+        predictionBarChart.resetData()
 
         predictionHistoryStorage =
             PredictionHistoryStorage(
@@ -138,14 +137,14 @@ class PredictionScreen(
                 System.currentTimeMillis(),
                 PreferencesHelper.shouldStorePrediction(context)
             )
-        predictionHistoryAdapter.predictionHistory = arrayListOf<Pair<Prediction, Long>>()
+        predictionHistoryAdapter.predictionHistory = arrayListOf()
+        predictionHistoryAdapter.addPrediction(Prediction("", 0f), 0)
 
         isRunning = true
         mainHandler.postDelayed(updatePredictionTask, 4000)
         mainHandler.postDelayed(updateProgressBarTask, 100)
         progressBar.visibility = View.VISIBLE
         predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
-        viewSwitcher.displayedChild = 1
 //        }
     }
 
@@ -172,7 +171,6 @@ class PredictionScreen(
         }
         textView.text = ""
         textView.visibility = View.GONE
-        viewSwitcher.displayedChild = 0
         isRunning = false
         mainHandler.removeCallbacks(updatePredictionTask)
         mainHandler.removeCallbacks(updateProgressBarTask)
@@ -189,11 +187,10 @@ class PredictionScreen(
             val prediction = Prediction(outputLabelMap[i]!!, percentage)
             predictions.add(prediction)
         }
-        val predictionsUnordered = predictions.clone() as ArrayList<Prediction>
         predictions.sortWith(Prediction.PredictionsComparator)
         val highestPrediction = predictions[0]
 
-        predictionBarBarChart.changeData(predictions, highestPrediction.label)
+        predictionBarChart.changeData(predictions, highestPrediction.label)
 
         textView.text = highestPrediction.label
 
@@ -202,10 +199,8 @@ class PredictionScreen(
             predictionHistoryAdapter.addPrediction(
                 highestPrediction,
                 relativeTime,
-                predictionInterval,
                 recyclerView
             )
-            viewSwitcher.displayedChild = 0
         }
     }
 
@@ -238,13 +233,9 @@ class PredictionScreen(
 
         // Initializing prediction RV
         recyclerView = activity.findViewById(R.id.rv_prediction)
-        predictionHistoryAdapter = PredictionHistoryAdapter(
-            context,
-            predictionHistoryStorage?.getPredictionHistory()
-                ?: arrayListOf<Pair<Prediction, Long>>()
-        )
+        predictionHistoryAdapter = PredictionHistoryAdapter(context, arrayListOf())
         recyclerView.adapter = predictionHistoryAdapter
-        viewSwitcher = activity.findViewById(R.id.viewSwitcher_predictionFragment)
+
         // Buttons and Timer
         timer = activity.findViewById(R.id.timer_predict_predict)
         textView = activity.findViewById(R.id.tv_predict_prediction)
@@ -275,7 +266,8 @@ class PredictionScreen(
             }
         }
         val barChart: BarChart = activity.findViewById(R.id.barChart_predict_predictions)
-        predictionBarBarChart = PredictionBarChart(context, barChart, numOutputs, predictionInterval)
+        predictionBarChart =
+            PredictionBarChart(context, barChart, numOutputs, predictionInterval)
 
         mainHandler = Handler(Looper.getMainLooper())
     }
