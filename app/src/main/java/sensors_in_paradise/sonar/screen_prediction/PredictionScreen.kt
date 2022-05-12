@@ -3,28 +3,41 @@ package sensors_in_paradise.sonar.screen_prediction
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.graphics.Typeface
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import android.view.View
+import android.view.animation.AccelerateInterpolator
 import android.widget.*
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.recyclerview.widget.RecyclerView
+import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.components.XAxis.XAxisPosition
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
+import sensors_in_paradise.sonar.screen_prediction.barChart.AnimateDataSetChanged
 import sensors_in_paradise.sonar.screen_train.PredictionHistoryStorage
 import sensors_in_paradise.sonar.screen_train.PredictionHistoryStorage.Prediction
+import sensors_in_paradise.sonar.use_cases.UseCase
 import sensors_in_paradise.sonar.util.PredictionHelper
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.UIHelper
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
-import sensors_in_paradise.sonar.use_cases.UseCase
 import java.nio.ByteBuffer
+import kotlin.math.min
 import kotlin.math.round
 import kotlin.random.Random
+
 
 class PredictionScreen(
     private var currentUseCase: UseCase,
@@ -41,6 +54,8 @@ class PredictionScreen(
     private lateinit var progressBar: ProgressBar
     private lateinit var timer: Chronometer
     private lateinit var textView: TextView
+    private lateinit var barChart: BarChart
+
     private lateinit var toggleMotionLayout: MotionLayout
     private lateinit var metadataStorage: XSensDotMetadataStorage
     private var predictionHistoryStorage: PredictionHistoryStorage? = null
@@ -48,6 +63,17 @@ class PredictionScreen(
     private val rawSensorDataMap = mutableMapOf<String, MutableList<Pair<Long, FloatArray>>>()
 
     private var lastPredictionTime = 0L
+
+    private val numOutputs = 6
+    val outputLabelMap = mapOf(
+        0 to "Running",
+        1 to "Squats",
+        2 to "Stairs Down",
+        3 to "1 min Pitch",
+        4 to "Standing",
+        5 to "Walking"
+    ).withDefault { "" }
+    private val numBars = min(numOutputs, 5)
 
     private val numDevices = 5
     private var numConnectedDevices = 0
@@ -101,7 +127,7 @@ class PredictionScreen(
         val size = 6
         val randoms = FloatArray(size)
         for (i in 0 until size) {
-            randoms[i] = Random.nextFloat() * i.toFloat()
+            randoms[i] = Random.nextFloat() * (i.toFloat() + 1f)
         }
         return randoms.map { it / randoms.sum() }.toFloatArray()
     }
@@ -118,6 +144,8 @@ class PredictionScreen(
         timer.base = SystemClock.elapsedRealtime()
         timer.start()
         textView.visibility = View.VISIBLE
+
+        clearChartData()
 
         predictionHistoryStorage =
             PredictionHistoryStorage(
@@ -170,30 +198,24 @@ class PredictionScreen(
 
     @SuppressLint("NotifyDataSetChanged")
     private fun addPredictionToHistory(output: FloatArray) {
-        val outputLabelMap = mapOf(
-            0 to "Running",
-            1 to "Squats",
-            2 to "Stairs Down",
-            3 to "Stairs Up",
-            4 to "Standing",
-            5 to "Walking"
-        ).withDefault { "" }
-
         val predictions = ArrayList<Prediction>()
         for (i in output.indices) {
             val percentage = round(output[i] * 10000) / 100
             val prediction = Prediction(outputLabelMap[i]!!, percentage)
             predictions.add(prediction)
         }
+        val predictionsUnordered = predictions.clone() as ArrayList<Prediction>
         predictions.sortWith(Prediction.PredictionsComparator)
+        val highestPrediction = predictions[0]
 
-        val prediction = predictions[0]
-        textView.text = prediction.label
+        changeBarChartData(predictions, highestPrediction.label)
+
+        textView.text = highestPrediction.label
 
         predictionHistoryStorage?.let {
-            val relativeTime = it.addPrediction(prediction)
+            val relativeTime = it.addPrediction(highestPrediction)
             predictionHistoryAdapter.addPrediction(
-                prediction,
+                highestPrediction,
                 relativeTime,
                 predictionInterval,
                 recyclerView
@@ -268,9 +290,95 @@ class PredictionScreen(
                 )
             }
         }
+        initializeBarChart()
         toggleMotionLayout = activity.findViewById(R.id.motionLayout_predictionToggling_predictionFragment)
 
         mainHandler = Handler(Looper.getMainLooper())
+    }
+
+    private fun initializeBarChart() {
+        barChart = activity.findViewById(R.id.barChart_predict_predictions)
+
+        barChart.description.isEnabled = false
+        barChart.legend.isEnabled = false
+
+        barChart.setDrawBarShadow(false)
+        barChart.setDrawValueAboveBar(true)
+        barChart.setTouchEnabled(false)
+        barChart.setDrawGridBackground(false)
+
+        barChart.setFitBars(false)
+        barChart.axisLeft.isEnabled = false
+        barChart.axisRight.isEnabled = false
+
+        val range = (0 until numOutputs)
+
+        val xAxis: XAxis = barChart.xAxis
+        xAxis.position = XAxisPosition.BOTTOM
+        xAxis.setDrawAxisLine(false)
+        xAxis.setDrawGridLines(false)
+//        val xAxisLabels = outputLabelMap.values.map { label ->
+//            if (label.length <= 8) label
+//            else "${label.substring(0, 8)}.."
+//        }
+//        xAxis.valueFormatter = IndexAxisValueFormatter(xAxisLabels)
+        xAxis.textColor = context.getColor(R.color.hardBackgroundContrast)
+        xAxis.typeface = Typeface.DEFAULT_BOLD
+
+        val initValues = range.map { i ->
+            BarEntry(
+                i.toFloat(),
+                0.1f
+            )
+        }
+        val dataSet = BarDataSet(initValues, "")
+        dataSet.setValueTextColors((range).map { context.getColor(R.color.hardBackgroundContrast) })
+        dataSet.valueFormatter = object : ValueFormatter() {
+            override fun getFormattedValue(value: Float): String {
+                return "${value.toInt()} %"
+            }
+        }
+
+        val barData = BarData(dataSet)
+        barData.setValueTextSize(10f)
+        barData.setValueTypeface(Typeface.DEFAULT_BOLD)
+        barData.barWidth = 0.9f
+
+        barChart.setData(barData)
+        clearChartData()
+    }
+
+    private fun clearChartData() {
+        changeBarChartData(
+            ArrayList((0 until numOutputs).map { Prediction("", 0.1f) }),
+            "_"
+        )
+    }
+
+    private fun changeBarChartData(predictions: ArrayList<Prediction>, highestPrediction: String) {
+        val oldValues = (0 until numOutputs).map { barChart.data.dataSets[0].getEntryForIndex(it) }
+        val newValues = predictions.mapIndexed { i, prediction ->
+            BarEntry(
+                i.toFloat(),
+                prediction.percentage
+            )
+        }
+
+        val xAxisLabels = predictions.map { p ->
+            if (p.label.length <= 10) p.label
+            else "${p.label.substring(0, 10)}.."
+        }
+        barChart.xAxis.valueFormatter =  IndexAxisValueFormatter(xAxisLabels)
+
+        val dataSet = barChart.data.dataSets[0] as BarDataSet
+        dataSet.colors = (predictions).map {
+            if (it.label == highestPrediction) context.getColor(R.color.colorPrimaryDark)
+            else context.getColor(R.color.colorAccent)
+        }
+
+        val changer = AnimateDataSetChanged((0.15 * predictionInterval).toInt(), barChart, oldValues, newValues)
+        changer.setInterpolator(AccelerateInterpolator()) // optionally set the Interpolator
+        changer.run()
     }
 
     override fun onActivityResumed() {
