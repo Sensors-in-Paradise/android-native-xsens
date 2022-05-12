@@ -44,6 +44,7 @@ class VideoDialog(
             }
         }
     }
+
     init {
         val builder = AlertDialog.Builder(context)
         val root = LayoutInflater.from(context).inflate(R.layout.video_dialog, null)
@@ -52,7 +53,8 @@ class VideoDialog(
         rangeSlider.isEnabled = false
         rangeSlider.addOnSliderTouchListener(this)
         val endTimeTV = root.findViewById<TextView>(R.id.textView_endTime_videoDialog)
-        val videoView = root.findViewById<VideoView>(R.id.videoView_recordingVideo_videoDialog).apply {
+        val videoView = root.findViewById<VideoView>(R.id.videoView_recordingVideo_videoDialog)
+        videoView.apply {
             setVideoPath(videoFile.absolutePath)
             setOnPreparedListener { mp ->
                 mp.isLooping = true
@@ -61,12 +63,16 @@ class VideoDialog(
                 rangeSlider.values = arrayListOf(0f)
                 rangeSlider.valueTo = mp.duration.toFloat()
                 endTimeTV.text = GlobalValues.getDurationAsString(mp.duration.toLong())
-                timer.scheduleAtFixedRate(updateSeekBarTask, 0L, 1000L / VisualSequenceViewHolder.FPS)
+                timer.scheduleAtFixedRate(
+                    updateSeekBarTask,
+                    0L,
+                    1000L / VisualSequenceViewHolder.FPS
+                )
             }
             start()
         }
 
-        rangeSlider.addOnChangeListener { slider, value, fromUser ->
+        rangeSlider.addOnChangeListener { _, value, fromUser ->
             if (fromUser) {
                 mediaPlayer?.seekTo(value.toInt())
             }
@@ -88,11 +94,11 @@ class VideoDialog(
                 "Yes",
                 onPositiveButtonClickListener
             )
-            builder.setNegativeButton("Cancel",
-                DialogInterface.OnClickListener { dialog, id ->
-                    // User cancelled the dialog
-                    dialog.cancel()
-                })
+            builder.setNegativeButton("Cancel"
+            ) { dialog, _ ->
+                // User cancelled the dialog
+                dialog.cancel()
+            }
         } else {
             builder.setPositiveButton(
                 "Ok", null
