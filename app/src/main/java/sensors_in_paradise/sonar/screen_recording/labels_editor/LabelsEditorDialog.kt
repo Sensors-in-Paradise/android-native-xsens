@@ -57,7 +57,7 @@ class LabelsEditorDialog(
     private var visualizerFrameLayout: FrameLayout
     private var videoView: VideoView
     private var poseSequenceView: TextureView
-    private var poseSequenceBackround: ImageView
+    private var poseSequenceBackground: ImageView
     private val activeVisualizer: VisualSequenceViewHolder?
         get() {
             return if (activeVisualizerIndex != null) {
@@ -71,9 +71,9 @@ class LabelsEditorDialog(
 
         previousItem = root.findViewById(R.id.tv_carouselItem1_labelEditor)
 
-        videoView = root.findViewById(R.id.videoView_labelEditor)
-        poseSequenceView = root.findViewById(R.id.textureView_labelEditor)
-        poseSequenceBackground = root.findViewById(R.id.imageView_labelEditor)
+        videoView = root.findViewById(R.id.videoView_stickmanBackground_labelEditor)
+        poseSequenceView = root.findViewById(R.id.textureView_stickmanBackground_labelEditor)
+        poseSequenceBackground = root.findViewById(R.id.imageView_stickmanBackground_labelEditor)
         previousItem = root.findViewById(R.id.tv_carouselItem1_labelEditor)
         currentItem = root.findViewById(R.id.tv_carouselItem2_labelEditor)
         nextItem = root.findViewById(R.id.tv_carouselItem3_labelEditor)
@@ -225,14 +225,14 @@ class LabelsEditorDialog(
         if (visualizerSwitcher.displayedChild == 0 && viewIndex == 1) {
             visualizerSwitcher.showNext()
             if (PreferencesHelper.shouldShowPoseBackground(context)) {
-                poseSequenceBackround.setImageURI(Uri.parse(PreferencesHelper.getPoseSequenceBackground(context)))
-                poseSequenceBackround.visibility = View.VISIBLE
+                poseSequenceBackground.setImageURI(Uri.parse(PreferencesHelper.getPoseSequenceBackground(context)))
+                poseSequenceBackground.visibility = View.VISIBLE
             } else {
-                poseSequenceBackround.visibility = View.GONE
+                poseSequenceBackground.visibility = View.GONE
             }
         } else if (visualizerSwitcher.displayedChild == 1 && viewIndex == 0) {
             visualizerSwitcher.showPrevious()
-            poseSequenceBackround.visibility = View.GONE
+            poseSequenceBackground.visibility = View.GONE
         }
         activeVisualizerIndex = visualizerIndex
         if (!activeVisualizer!!.isSourceLoaded) {
