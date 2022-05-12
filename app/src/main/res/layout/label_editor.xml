@@ -12,7 +12,7 @@
         android:layout_height="400dp">
 
         <ImageView
-            android:id="@+id/imageView_labelEditor"
+            android:id="@+id/imageView_stickmanBackground_labelEditor"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:drawingCacheQuality="high"
@@ -27,13 +27,13 @@
             android:outAnimation="@android:anim/slide_out_right">
 
             <VideoView
-                android:id="@+id/videoView_labelEditor"
+                android:id="@+id/videoView_stickmanBackground_labelEditor"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center" />
 
             <TextureView
-                android:id="@+id/textureView_labelEditor"
+                android:id="@+id/textureView_stickmanBackground_labelEditor"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center" />

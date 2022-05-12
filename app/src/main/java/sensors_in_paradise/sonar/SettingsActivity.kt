@@ -27,13 +27,13 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {
-        private var bgPrefs: SwitchPreference? = null
+        private var editorStickmanBackgroundPref: SwitchPreference? = null
 
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
 
-            bgPrefs = findPreference("showPoseBackground") as SwitchPreference?
-            bgPrefs?.onPreferenceChangeListener =
+            editorStickmanBackgroundPref = findPreference("showPoseBackground") as SwitchPreference?
+            editorStickmanBackgroundPref?.onPreferenceChangeListener =
                 Preference.OnPreferenceChangeListener { _, newValue ->
                     if (newValue as Boolean) {
                         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
@@ -66,11 +66,11 @@ class SettingsActivity : AppCompatActivity() {
                         } catch (e: SecurityException) {
                             e.printStackTrace()
                             editor.putBoolean("showPoseBackground", false)
-                            bgPrefs?.isChecked = false
+                            editorStickmanBackgroundPref?.isChecked = false
                         }
                     } else {
                         editor.putBoolean("showPoseBackground", false)
-                        bgPrefs?.isChecked = false
+                        editorStickmanBackgroundPref?.isChecked = false
                     }
                     editor.apply()
                 }
