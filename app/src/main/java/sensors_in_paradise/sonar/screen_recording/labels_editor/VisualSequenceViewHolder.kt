@@ -2,7 +2,8 @@ package sensors_in_paradise.sonar.screen_recording.labels_editor
 
 abstract class VisualSequenceViewHolder(
     private val onSourceLoadedListener: () -> Unit,
-    protected val onStartLoadingSource: () -> Unit
+    protected val onStartLoadingSource: () -> Unit,
+    private val onSeekToNewPosition: ((ms: Long) -> Unit)? = null
 ) : IntervalLooper() {
     var sourcePath: String? = null
     var isSourceLoaded = false
@@ -18,7 +19,9 @@ abstract class VisualSequenceViewHolder(
 
     protected abstract fun loadSource(sourcePath: String, onSourceLoadedListener: () -> Unit)
 
-    abstract override fun seekTo(ms: Long)
+    override fun seekTo(ms: Long) {
+        onSeekToNewPosition?.let { it(ms) }
+    }
 
     companion object {
         const val FPS = 60L
