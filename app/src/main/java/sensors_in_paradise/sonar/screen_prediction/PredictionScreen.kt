@@ -16,15 +16,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotPayload
+import org.tensorflow.lite.support.metadata.MetadataExtractor
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
+import sensors_in_paradise.sonar.use_cases.UseCase
 import sensors_in_paradise.sonar.util.PredictionHelper
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.UIHelper
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
-import sensors_in_paradise.sonar.use_cases.UseCase
 import java.nio.ByteBuffer
 import kotlin.math.round
+import kotlin.properties.Delegates
 
 class PredictionScreen(
     private var currentUseCase: UseCase,
@@ -48,7 +50,7 @@ class PredictionScreen(
 
     private var lastPrediction = 0L
 
-    private val numDevices = 5
+    private var numDevices by Delegates.notNull<Int>()
     private var numConnectedDevices = 0
     private var isRunning = false
 
@@ -270,6 +272,7 @@ class PredictionScreen(
         if (!currentUseCase.getModelFile().exists()) {
             return false
         }
+
         model = TFLiteModel(
             currentUseCase.getModelFile(), intArrayOf(
                 1,
@@ -277,6 +280,9 @@ class PredictionScreen(
                 predictionHelper.dataLineFloatSize
             ), 6
         )
+        if (model!!.hasMetadata) {
+            model = TFLiteModel(currentUseCase.getModelFile())
+        }
         return true
     }
 }

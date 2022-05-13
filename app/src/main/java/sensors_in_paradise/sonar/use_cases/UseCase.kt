@@ -62,7 +62,7 @@ class UseCase(
         return recordingsSubDir
     }
     fun importDefaultModel() {
-        extractFileFromAssets(context, "LSTMModel-1-18.tflite", getModelFile())
+        extractFileFromAssets(context, "model.tflite", getModelFile())
     }
 
     fun getDisplayInfo(): String {
