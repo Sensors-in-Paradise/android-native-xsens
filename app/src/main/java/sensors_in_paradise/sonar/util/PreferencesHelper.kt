@@ -34,39 +34,60 @@ class PreferencesHelper private constructor() {
             }
             return "$url/"
         }
+
         fun getWebDAVUser(context: Context): String {
             return getSharedPreferences(context).getString(
                 "cloudWebDAVUserName",
                 context.getString(R.string.default_webdav_username)
             )!!
         }
+
         fun getWebDAVToken(context: Context): String {
             return getSharedPreferences(context).getString(
                 "cloudWebDavToken",
                 ""
             )!!
         }
+
         fun shouldRecordWithCamera(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("recordWithCamera", false)
         }
+
         fun shouldStoreRawCameraRecordings(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("storeRawCameraVideo", false)
         }
+
         fun shouldUploadCameraRecordings(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("uploadCameraVideo", false)
         }
+
         fun shouldStorePoseEstimation(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("storePoseEstimation", false)
         }
+
+        fun shouldShowPoseBackground(context: Context): Boolean {
+            return getSharedPreferences(context).getBoolean("showPoseBackground", false)
+        }
+
+        fun getPoseSequenceBackground(context: Context): String {
+            return getSharedPreferences(context).getString(
+                "poseSequenceBackground",
+                ""
+            )!!
+        }
+
         fun shouldPlaySoundOnRecordingStartAndStop(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("playSoundOnRecordingStartAndStop", false)
         }
+
         fun shouldViewSensorHeadingMenuItems(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("viewHeadingMenuItems", false)
         }
+
         fun isOnDeviceTrainingScreenEnabled(context: Context): Boolean {
             return getSharedPreferences(context).getBoolean("onDeviceTraining", false)
         }
+
         fun getCameraRecordingQuality(context: Context): Quality {
             return when (getSharedPreferences(context).getString("videoRecordingQuality", "LOWEST")) {
                 "HIGHEST" -> Quality.HIGHEST

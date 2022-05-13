@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -8,26 +9,36 @@
     <FrameLayout
         android:id="@+id/frameLayout_labelEditor"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="400dp">
 
-       <ViewSwitcher
-           android:id="@+id/viewSwitcher_visualizer_labelEditor"
-           android:layout_width="match_parent"
-           android:layout_height="400dp"
-           android:inAnimation="@android:anim/slide_in_left"
-           android:outAnimation="@android:anim/slide_out_right">
-           <VideoView
-               android:id="@+id/videoView_labelEditor"
-               android:layout_width="match_parent"
-               android:layout_height="match_parent"
-               android:layout_gravity="center" />
+        <ImageView
+            android:id="@+id/imageView_stickmanBackground_labelEditor"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:drawingCacheQuality="high"
+            android:scaleType="centerCrop"
+            android:visibility="gone"/>
 
-           <TextureView
-               android:id="@+id/textureView_labelEditor"
-               android:layout_width="wrap_content"
-               android:layout_height="match_parent"
-               android:layout_gravity="center" />
-       </ViewSwitcher>
+        <ViewSwitcher
+            android:id="@+id/viewSwitcher_visualizer_labelEditor"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:inAnimation="@android:anim/slide_in_left"
+            android:outAnimation="@android:anim/slide_out_right">
+
+            <VideoView
+                android:id="@+id/videoView_stickmanBackground_labelEditor"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center" />
+
+            <TextureView
+                android:id="@+id/textureView_stickmanBackground_labelEditor"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center" />
+
+        </ViewSwitcher>
 
         <ProgressBar
             android:id="@+id/progressBar_visualizer_labelEditor"
