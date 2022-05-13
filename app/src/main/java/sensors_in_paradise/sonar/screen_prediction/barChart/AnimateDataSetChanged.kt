@@ -10,7 +10,6 @@ import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.Entry
 import java.util.*
 
-
 class AnimateDataSetChanged(
     private val duration: Int,
     private val chart: Chart<*>,

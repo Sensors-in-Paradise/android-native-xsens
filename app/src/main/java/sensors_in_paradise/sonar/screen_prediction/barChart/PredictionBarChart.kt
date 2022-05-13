@@ -71,7 +71,9 @@ class PredictionBarChart(
         resetData()
     }
 
-    private fun getLimitedPredictions(predictions: ArrayList<PredictionHistoryStorage.Prediction>): ArrayList<PredictionHistoryStorage.Prediction> {
+    private fun getLimitedPredictions(
+        predictions: ArrayList<PredictionHistoryStorage.Prediction>
+    ): ArrayList<PredictionHistoryStorage.Prediction> {
         return if (predictions.size <= numBars) {
             predictions
         } else {

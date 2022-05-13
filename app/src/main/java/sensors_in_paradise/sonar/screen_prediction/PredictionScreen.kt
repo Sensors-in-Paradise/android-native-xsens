@@ -27,8 +27,6 @@ import sensors_in_paradise.sonar.util.UIHelper
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import java.nio.ByteBuffer
 import kotlin.math.round
-import kotlin.random.Random
-
 
 class PredictionScreen(
     private var currentUseCase: UseCase,
