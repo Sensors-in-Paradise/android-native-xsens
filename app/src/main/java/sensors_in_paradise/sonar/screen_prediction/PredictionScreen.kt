@@ -9,6 +9,7 @@ import android.os.SystemClock
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.github.mikephil.charting.charts.BarChart
 import com.google.android.material.button.MaterialButton
@@ -44,6 +45,7 @@ class PredictionScreen(
     private lateinit var textView: TextView
     private lateinit var predictionBarChart: PredictionBarChart
 
+    private lateinit var toggleMotionLayout: MotionLayout
     private lateinit var metadataStorage: XSensDotMetadataStorage
     private var predictionHistoryStorage: PredictionHistoryStorage? = null
     private lateinit var predictionHelper: PredictionHelper
@@ -72,7 +74,7 @@ class PredictionScreen(
     private val updatePredictionTask = object : Runnable {
         override fun run() {
             addPredictionToHistory(getDummyPrediction())
-            //processAndPredict()
+            // processAndPredict()
             mainHandler.postDelayed(this, predictionInterval)
         }
     }
@@ -93,8 +95,10 @@ class PredictionScreen(
     private fun togglePrediction() {
         if (isRunning) {
             stopDataCollection()
+            toggleMotionLayout.transitionToStart()
         } else {
             startDataCollection()
+            toggleMotionLayout.transitionToEnd()
         }
     }
 
@@ -239,9 +243,10 @@ class PredictionScreen(
         // Buttons and Timer
         timer = activity.findViewById(R.id.timer_predict_predict)
         textView = activity.findViewById(R.id.tv_predict_prediction)
-        textView.visibility = View.GONE
+        textView.text = ""
         predictionButton = activity.findViewById(R.id.button_start_predict)
         progressBar = activity.findViewById(R.id.progressBar_nextPrediction_predictionFragment)
+
         predictionButton.setOnClickListener {
             if (initModelFromCurrentUseCase()) {
                 val signatures = model?.signatureKeys
@@ -268,6 +273,7 @@ class PredictionScreen(
         val barChart: BarChart = activity.findViewById(R.id.barChart_predict_predictions)
         predictionBarChart =
             PredictionBarChart(context, barChart, numOutputs, predictionInterval)
+        toggleMotionLayout = activity.findViewById(R.id.motionLayout_predictionToggling_predictionFragment)
 
         mainHandler = Handler(Looper.getMainLooper())
     }
