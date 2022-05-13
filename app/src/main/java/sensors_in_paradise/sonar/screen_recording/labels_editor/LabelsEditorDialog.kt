@@ -120,7 +120,6 @@ class LabelsEditorDialog(
             override fun populate(view: View, index: Int) {
                 // need to implement this to populate the view at the given index
                 val tf = view as TextView
-
                 tf.text = formatLabel(activities[index].activity)
             }
 
