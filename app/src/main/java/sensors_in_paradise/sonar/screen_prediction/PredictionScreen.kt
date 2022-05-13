@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.mikephil.charting.charts.BarChart
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
+import com.xsens.dot.android.sdk.models.XsensDotPayload
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
 import sensors_in_paradise.sonar.screen_prediction.barChart.PredictionBarChart
@@ -53,7 +54,7 @@ class PredictionScreen(
 
     private var lastPredictionTime = 0L
 
-    private val numOutputs = 7
+    private val numOutputs = 6
     val outputLabelMap = mapOf(
         0 to "Running",
         1 to "Squats",
@@ -61,7 +62,6 @@ class PredictionScreen(
         3 to "1 min Pitch",
         4 to "Standing",
         5 to "Walking",
-        6 to "cooking"
     ).withDefault { "" }
 
     private val numDevices = 5
@@ -73,8 +73,7 @@ class PredictionScreen(
     private val predictionInterval = 4000L
     private val updatePredictionTask = object : Runnable {
         override fun run() {
-            addPredictionToHistory(getDummyPrediction())
-            // processAndPredict()
+            processAndPredict()
             mainHandler.postDelayed(this, predictionInterval)
         }
     }
@@ -95,10 +94,8 @@ class PredictionScreen(
     private fun togglePrediction() {
         if (isRunning) {
             stopDataCollection()
-            toggleMotionLayout.transitionToStart()
         } else {
             startDataCollection()
-            toggleMotionLayout.transitionToEnd()
         }
     }
 
@@ -112,23 +109,15 @@ class PredictionScreen(
         }
     }
 
-    private fun getDummyPrediction(): FloatArray {
-        val randoms = FloatArray(numOutputs)
-        for (i in 0 until numOutputs) {
-            randoms[i] = Random.nextFloat() * (i.toFloat() + 1f) * (i.toFloat() + 1f) * (i.toFloat() + 1f)
-        }
-        return randoms.map { it / randoms.sum() }.toFloatArray()
-    }
-
     private fun startDataCollection() {
         sensorOccupationInterface?.onSensorOccupationStatusChanged(true)
         clearBuffers()
         lastPredictionTime = 0L
-//        if (tryInitializeSensorDataMap()) {
-//            for (device in devices.getConnected()) {
-//                device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
-//                device.startMeasuring()
-//            }
+        if (tryInitializeSensorDataMap()) {
+            for (device in devices.getConnected()) {
+                device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
+                device.startMeasuring()
+            }
         timer.base = SystemClock.elapsedRealtime()
         timer.start()
         textView.visibility = View.VISIBLE
@@ -150,7 +139,9 @@ class PredictionScreen(
         mainHandler.postDelayed(updateProgressBarTask, 100)
         progressBar.visibility = View.VISIBLE
         predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
-//        }
+
+        toggleMotionLayout.transitionToEnd()
+        }
     }
 
     private fun tryInitializeSensorDataMap(): Boolean {
@@ -182,6 +173,8 @@ class PredictionScreen(
         progressBar.visibility = View.INVISIBLE
         predictionButton.setIconResource(R.drawable.ic_baseline_play_arrow_24)
         model?.close()
+
+        toggleMotionLayout.transitionToStart()
     }
 
     @SuppressLint("NotifyDataSetChanged")
