@@ -132,6 +132,7 @@ class PredictionScreen(
         timer.base = SystemClock.elapsedRealtime()
         timer.start()
         textView.visibility = View.VISIBLE
+        textView.text = ""
 
         predictionBarChart.resetData()
 
@@ -243,7 +244,6 @@ class PredictionScreen(
         // Buttons and Timer
         timer = activity.findViewById(R.id.timer_predict_predict)
         textView = activity.findViewById(R.id.tv_predict_prediction)
-        textView.text = ""
         predictionButton = activity.findViewById(R.id.button_start_predict)
         progressBar = activity.findViewById(R.id.progressBar_nextPrediction_predictionFragment)
 

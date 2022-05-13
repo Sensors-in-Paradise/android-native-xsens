@@ -45,14 +45,14 @@
                 android:layout_width="4dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@color/red" />
+                android:background="@color/colorSecondary" />
 
             <View
                 android:id="@+id/view_lowerSegmentUpperLayout_historyItem"
                 android:layout_width="4dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@color/red" />
+                android:background="@color/colorSecondary" />
             </LinearLayout>
 
         </FrameLayout>
@@ -99,7 +99,7 @@
                     android:layout_width="4dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@color/red" />
+                    android:background="@color/colorSecondary" />
 
                 <View
                     android:id="@+id/view_lowerSegment_historyItem"
@@ -115,7 +115,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginVertical="16dp"
+            android:layout_marginVertical="8dp"
             android:orientation="vertical">
 
             <TextView

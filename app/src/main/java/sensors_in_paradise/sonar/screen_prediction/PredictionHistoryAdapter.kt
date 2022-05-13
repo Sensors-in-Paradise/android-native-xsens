@@ -10,6 +10,7 @@ import sensors_in_paradise.sonar.screen_train.PredictionHistoryStorage.Predictio
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.math.min
+import kotlin.math.sqrt
 
 class PredictionHistoryAdapter(
     val context: Context,
@@ -57,7 +58,7 @@ class PredictionHistoryAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         super.onBindViewHolder(holder, position)
 
-        val paddingSize = min((predictionHistory[position].left.size - 1) * 10, 200)
+        val paddingSize = min((sqrt(predictionHistory[position].left.size.toDouble() - 1) * 15f).toInt(), 200)
         holder.apply {
             val titleParam = titleTV.layoutParams as ViewGroup.MarginLayoutParams
             titleParam.setMargins(0, paddingSize, 0, 0)

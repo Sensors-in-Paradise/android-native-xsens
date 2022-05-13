@@ -63,6 +63,13 @@ abstract class HistoryAdapter(private val isLineCentered: Boolean = false) :
             if (!isLineCentered) {
                 upperDotLayout.visibility = View.GONE
 
+                val titleParam = titleTV.layoutParams as ViewGroup.MarginLayoutParams
+                titleParam.setMargins(0, 8, 0, 0)
+                titleTV.layoutParams = titleParam
+                val subTitleParam = subTitleTV.layoutParams as ViewGroup.MarginLayoutParams
+                subTitleParam.setMargins(0, 0, 0, 8)
+                subTitleTV.layoutParams = subTitleParam
+
                 lowerSegmentView.visibility =
                     if (position == itemCount - 1) View.INVISIBLE else View.VISIBLE
                 upperSegmentView.visibility = if (position == 0) View.INVISIBLE else View.VISIBLE
