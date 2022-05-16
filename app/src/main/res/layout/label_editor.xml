@@ -226,7 +226,7 @@
                     android:layout_height="wrap_content"
                     app:layout_constraintEnd_toStartOf="@+id/tv_endSmallRange_labelEditor"
                     app:layout_constraintStart_toEndOf="@+id/tv_startSmallRange_labelEditor"
-                    app:layout_constraintTop_toTopOf="parent"></SeekBar>
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/tv_endSmallRange_labelEditor"

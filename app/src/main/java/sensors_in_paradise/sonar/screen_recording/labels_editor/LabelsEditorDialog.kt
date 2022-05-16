@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.page2.labels_editor
+package sensors_in_paradise.sonar.screen_recording.labels_editor
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
@@ -19,7 +19,6 @@ import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.screen_recording.PersistentCategoriesDialog
 import sensors_in_paradise.sonar.screen_recording.Recording
-import sensors_in_paradise.sonar.screen_recording.labels_editor.*
 import sensors_in_paradise.sonar.use_cases.UseCase
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import kotlin.math.abs
