@@ -3,6 +3,7 @@ package sensors_in_paradise.sonar.page2.labels_editor
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import android.view.View
 import android.view.TextureView
@@ -20,6 +21,7 @@ import sensors_in_paradise.sonar.screen_recording.PersistentCategoriesDialog
 import sensors_in_paradise.sonar.screen_recording.Recording
 import sensors_in_paradise.sonar.screen_recording.labels_editor.*
 import sensors_in_paradise.sonar.use_cases.UseCase
+import sensors_in_paradise.sonar.util.PreferencesHelper
 import kotlin.math.abs
 
 @SuppressLint("ClickableViewAccessibility")
@@ -58,6 +60,7 @@ class LabelsEditorDialog(
     private var videoView: VideoView
     private var poseSequenceView: TextureView
     private var videoSeekBar: SeekBar
+    private var poseSequenceBackground: ImageView
     private val activeVisualizer: VisualSequenceViewHolder?
         get() {
             return if (activeVisualizerIndex != null) {
@@ -71,8 +74,10 @@ class LabelsEditorDialog(
 
         previousItem = root.findViewById(R.id.tv_carouselItem1_labelEditor)
 
-        videoView = root.findViewById(R.id.videoView_labelEditor)
-        poseSequenceView = root.findViewById(R.id.textureView_labelEditor)
+        videoView = root.findViewById(R.id.videoView_stickmanBackground_labelEditor)
+        poseSequenceView = root.findViewById(R.id.textureView_stickmanBackground_labelEditor)
+        poseSequenceBackground = root.findViewById(R.id.imageView_stickmanBackground_labelEditor)
+        previousItem = root.findViewById(R.id.tv_carouselItem1_labelEditor)
         currentItem = root.findViewById(R.id.tv_carouselItem2_labelEditor)
         nextItem = root.findViewById(R.id.tv_carouselItem3_labelEditor)
         carousel = root.findViewById(R.id.carousel_labels_labelEditor)
@@ -228,8 +233,15 @@ class LabelsEditorDialog(
         activeVisualizer?.stopLooping()
         if (visualizerSwitcher.displayedChild == 0 && viewIndex == 1) {
             visualizerSwitcher.showNext()
+            if (PreferencesHelper.shouldShowPoseBackground(context)) {
+                poseSequenceBackground.setImageURI(Uri.parse(PreferencesHelper.getPoseSequenceBackground(context)))
+                poseSequenceBackground.visibility = View.VISIBLE
+            } else {
+                poseSequenceBackground.visibility = View.GONE
+            }
         } else if (visualizerSwitcher.displayedChild == 1 && viewIndex == 0) {
             visualizerSwitcher.showPrevious()
+            poseSequenceBackground.visibility = View.GONE
         }
         activeVisualizerIndex = visualizerIndex
         if (!activeVisualizer!!.isSourceLoaded) {

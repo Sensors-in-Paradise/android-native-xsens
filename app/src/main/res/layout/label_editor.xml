@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -8,7 +9,15 @@
     <FrameLayout
         android:id="@+id/frameLayout_labelEditor"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="400dp">
+
+        <ImageView
+            android:id="@+id/imageView_stickmanBackground_labelEditor"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:drawingCacheQuality="high"
+            android:scaleType="centerCrop"
+            android:visibility="gone"/>
 
         <ViewSwitcher
             android:id="@+id/viewSwitcher_visualizer_labelEditor"
@@ -18,16 +27,17 @@
             android:outAnimation="@android:anim/slide_out_right">
 
             <VideoView
-                android:id="@+id/videoView_labelEditor"
+                android:id="@+id/videoView_stickmanBackground_labelEditor"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center" />
 
             <TextureView
-                android:id="@+id/textureView_labelEditor"
+                android:id="@+id/textureView_stickmanBackground_labelEditor"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center" />
+
         </ViewSwitcher>
 
         <ProgressBar
@@ -41,8 +51,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
+        android:orientation="vertical"
+       >
         <sensors_in_paradise.sonar.screen_recording.labels_editor.ItemClickableMotionLayout
             android:id="@+id/motionLayout_carouselParent_labelEditor"
             android:layout_width="match_parent"
@@ -60,6 +70,7 @@
                 android:maxWidth="100dp"
                 android:maxLines="2"
                 android:text="ITEM 0"
+                android:textAlignment="center"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/tv_carouselItem1_labelEditor"
                 app:layout_constraintTop_toTopOf="parent" />
