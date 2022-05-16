@@ -271,17 +271,20 @@ class LabelsEditorDialog(
         }
         return result
     }
+
     private fun getRangeOfCurrentAdjacentActivities(): Pair<Long, Long> {
         val rangeStart = editableRecording.getRelativeStartTimeOfActivity(selectedItemIndex - 1)
         val rangeEnd = editableRecording.getRelativeEndTimeOfActivity(selectedItemIndex + 1)
         return Pair(rangeStart, rangeEnd)
     }
+
     private fun getRangeOfCurrentActivity(): Pair<Float, Float> {
         val startTime =
             editableRecording.getRelativeStartTimeOfActivity(selectedItemIndex).toFloat()
         val endTime = editableRecording.getRelativeEndTimeOfActivity(selectedItemIndex).toFloat()
         return Pair(startTime, endTime)
     }
+
     private fun updateRangeSlider() {
         val (rangeStart, rangeEnd) = getRangeOfCurrentAdjacentActivities()
         rangeSlider.valueFrom = rangeStart.toFloat()
@@ -301,6 +304,7 @@ class LabelsEditorDialog(
         endRangeTV.text = GlobalValues.getDurationAsString(rangeEnd)
         updateSeekBar()
     }
+
     private fun updateSeekBar() {
         val (startTime, endTime) =
             getRangeOfCurrentActivity()
@@ -408,6 +412,7 @@ class LabelsEditorDialog(
         rangeSlider.values = values
         Log.d("LabelsEditorDialog", "splitCurrentActivity values: ${values.joinToString()}")
     }
+    
     private fun onSeekToNewPosition(ms: Long) {
         videoSeekBar.progress = ms.toInt()
     }
