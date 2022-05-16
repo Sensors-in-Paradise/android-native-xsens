@@ -16,7 +16,7 @@ class TFLiteModel(tfLiteModelFile: File) {
     var hasMetadata: Boolean = false
     private lateinit var outputs: Array<FloatArray>
     private lateinit var interpreter: Interpreter
-    private lateinit var extractor: MetadataExtractor
+    lateinit var extractor: MetadataExtractor
 
     init {
         try {
@@ -52,5 +52,20 @@ class TFLiteModel(tfLiteModelFile: File) {
             outputs
         )
         return outputs[0]
+    }
+
+    fun readSensorFile(): String {
+        val inputStream = extractor.getAssociatedFile("sensor.txt")
+        Log.d(
+            "PredictionScreen-readFeatureFile",
+            inputStream.bufferedReader().use { it.readText() })
+        return inputStream.bufferedReader().use { it.readText() }
+    }
+    fun readSensorDataFile(): String {
+        val inputStream = extractor.getAssociatedFile("sensor_data.txt")
+        Log.d(
+            "PredictionScreen-readFeatureFile",
+            inputStream.bufferedReader().use { it.readText() })
+        return inputStream.bufferedReader().use { it.readText() }
     }
 }

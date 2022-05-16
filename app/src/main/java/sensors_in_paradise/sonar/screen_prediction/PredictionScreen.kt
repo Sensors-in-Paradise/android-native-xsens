@@ -280,8 +280,10 @@ class PredictionScreen(
                 predictionHelper.dataLineFloatSize
             ), 6
         )
+        numDevices = 5
         if (model!!.hasMetadata) {
             model = TFLiteModel(currentUseCase.getModelFile())
+            numDevices = model!!.extractor.getInputTensorShape(0)[2] / 6
         }
         return true
     }

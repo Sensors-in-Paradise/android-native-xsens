@@ -62,7 +62,7 @@ class UseCase(
         return recordingsSubDir
     }
     fun importDefaultModel() {
-        extractFileFromAssets(context, "model.tflite", getModelFile())
+        extractFileFromAssets(context, "model8.tflite", getModelFile())
     }
 
     fun getDisplayInfo(): String {
