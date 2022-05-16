@@ -8,7 +8,7 @@ open class IntervalLooper(private val intervalMs: Long, val callRunOnUiThread: B
     private var loopTimerTask: TimerTask? = null
     private val timer: Timer = Timer()
     private val uiHandler = Handler(Looper.getMainLooper())
-    
+
     fun startLooping(run: Runnable) {
         loopTimerTask?.cancel()
         loopTimerTask = object : TimerTask() {
