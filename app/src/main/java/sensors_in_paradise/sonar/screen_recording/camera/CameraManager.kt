@@ -248,19 +248,25 @@ class CameraManager(
             bindImageAnalyzer()
         }
 
-        val poseEstimator = createPoseEstimator()
-        poseStorageManager = if (poseStorageManager == null) {
-            PoseEstimationStorageManager(outputFile)
-        } else {
-            poseStorageManager!!.reset(outputFile)
+        if (shouldRecordPose()) {
+            val poseModel = PreferencesHelper.getPoseEstimationModel(context)
+
+            poseStorageManager = if (poseStorageManager == null) {
+                PoseEstimationStorageManager(outputFile)
+            } else {
+                poseStorageManager!!.reset(outputFile)
+            }
+
+            val localDateTime = LocalDateTime.now()
+            poseStorageManager!!.writeHeader(localDateTime, poseModel.toString(), 2)
+            poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
+
+            val isPoseModelActual = imageProcessor?.poseDetector?.modelType == poseModel
+            if (imageProcessor == null || !isPoseModelActual) {
+                imageProcessor =
+                    ImageProcessor(context, createPoseEstimator(poseModel), poseStorageManager!!)
+            }
         }
-
-        val localDateTime = LocalDateTime.now()
-        poseStorageManager!!.writeHeader(localDateTime, "ThunderI8", 2)
-        poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
-
-        imageProcessor =
-            imageProcessor ?: ImageProcessor(context, poseEstimator, poseStorageManager!!)
     }
 
     /** Stops the recording and returns the UNIX timestamp of
@@ -294,8 +300,7 @@ class CameraManager(
         return shouldShowVideo() && PreferencesHelper.shouldStorePoseEstimation(context)
     }
 
-    private fun createPoseEstimator(): MoveNet {
-        val modelType = ModelType.ThunderI8
+    private fun createPoseEstimator(modelType: ModelType): MoveNet {
         val targetDevice = Device.GPU
 
         return MoveNet.create(context, targetDevice, modelType)

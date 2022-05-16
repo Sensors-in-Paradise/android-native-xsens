@@ -40,7 +40,11 @@ enum class ModelType {
     ThunderI8
 }
 
-class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: NnApiDelegate?) :
+class MoveNet(
+    private val interpreter: Interpreter,
+    override val modelType: ModelType,
+    private var gpuDelegate: NnApiDelegate?
+) :
     PoseDetector {
 
     companion object {
@@ -53,10 +57,14 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: NnA
         private const val BODY_EXPANSION_RATIO = 1.2f
 
         // TFLite file names.
-        private const val LIGHTNING_F16_FILENAME = "lite-model_movenet_singlepose_lightning_tflite_float16_4.tflite"
-        private const val LIGHTNING_I8_FILENAME = "lite-model_movenet_singlepose_lightning_tflite_int8_4.tflite"
-        private const val THUNDER_F16_FILENAME = "lite-model_movenet_singlepose_thunder_tflite_float16_4.tflite"
-        private const val THUNDER_I8_FILENAME = "lite-model_movenet_singlepose_thunder_tflite_int8_4.tflite"
+        private const val LIGHTNING_F16_FILENAME =
+            "lite-model_movenet_singlepose_lightning_tflite_float16_4.tflite"
+        private const val LIGHTNING_I8_FILENAME =
+            "lite-model_movenet_singlepose_lightning_tflite_int8_4.tflite"
+        private const val THUNDER_F16_FILENAME =
+            "lite-model_movenet_singlepose_thunder_tflite_float16_4.tflite"
+        private const val THUNDER_I8_FILENAME =
+            "lite-model_movenet_singlepose_thunder_tflite_int8_4.tflite"
 
         // allow specifying model type.
         fun create(context: Context, device: Device, modelType: ModelType): MoveNet {
@@ -67,20 +75,29 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: NnA
                 gpuDelegate = NnApiDelegate()
                 options.addDelegate(gpuDelegate)
             }
-            return MoveNet(
-                Interpreter(
-                    FileUtil.loadMappedFile(
-                        context,
-                        when (modelType) {
-                            ModelType.LightningF16 -> LIGHTNING_F16_FILENAME
-                            ModelType.LightningI8 -> LIGHTNING_I8_FILENAME
-                            ModelType.ThunderF16 -> THUNDER_F16_FILENAME
-                            ModelType.ThunderI8 -> THUNDER_I8_FILENAME
-                        }
-                    ), options
-                ),
-                gpuDelegate
+
+            val modelFile = FileUtil.loadMappedFile(
+                context,
+                when (modelType) {
+                    ModelType.LightningF16 -> LIGHTNING_F16_FILENAME
+                    ModelType.LightningI8 -> LIGHTNING_I8_FILENAME
+                    ModelType.ThunderF16 -> THUNDER_F16_FILENAME
+                    ModelType.ThunderI8 -> THUNDER_I8_FILENAME
+                }
             )
+            return try {
+                MoveNet(
+                    Interpreter(modelFile, options),
+                    modelType,
+                    gpuDelegate
+                )
+            } catch (_: Exception) {
+                MoveNet(
+                    Interpreter(modelFile, Interpreter.Options()),
+                    modelType,
+                    null
+                )
+            }
         }
 
         // default to lightning.
