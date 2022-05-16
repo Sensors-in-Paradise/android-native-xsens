@@ -102,6 +102,7 @@ class SensorAdapter(
 
         viewHolder.statusIV.setImageDrawable(statusDrawable)
     }
+
     private fun getConnectionStateLabel(connectionState: Int): String {
         return when (connectionState) {
             XsensDotDevice.CONN_STATE_CONNECTED -> "Connected"
@@ -112,6 +113,7 @@ class SensorAdapter(
             else -> "Unknown"
         }
     }
+
     private fun getHeadingStateLabel(headingState: Int): String {
         return when (headingState) {
             XsensDotDevice.HEADING_STATUS_XRM_DEFAULT_ALIGNMENT -> "default"
@@ -120,6 +122,7 @@ class SensorAdapter(
             else -> "unknown"
         }
     }
+
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount(): Int {
         return devices.size

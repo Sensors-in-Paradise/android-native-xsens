@@ -51,7 +51,8 @@ class StringItemStorage(file: File) : JSONStorage(file) {
     fun getItemsAsArray(): Array<String> {
         return Array(this.items.length()) { i -> this.items[i].toString() }
     }
-    fun getItemsAsArrayList(): ArrayList<String> {
+
+	fun getItemsAsArrayList(): ArrayList<String> {
         return getItemsAsArray().toCollection(ArrayList())
     }
 }

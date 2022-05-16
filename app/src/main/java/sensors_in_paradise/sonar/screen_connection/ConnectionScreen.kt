@@ -59,9 +59,12 @@ class ConnectionScreen(private val scannedDevices: XSENSArrayList) :
             }
         }
     }
+
     override fun onXsensDotServicesDiscovered(address: String, status: Int) {
     }
+
     override fun onXsensDotFirmwareVersionRead(s: String, s1: String) {}
+
     override fun onXsensDotTagChanged(address: String, tag: String) {
         val device = scannedDevices[address]
         if (device != null) {
@@ -72,17 +75,21 @@ class ConnectionScreen(private val scannedDevices: XSENSArrayList) :
             sensorAdapter.notifyItemChanged(address)
         }
     }
+
     override fun onXsensDotBatteryChanged(s: String, i: Int, i1: Int) {}
+
     override fun onXsensDotDataChanged(address: String, xsensDotData: XsensDotData) {
         for (connectionInterface in connectionInterfaces) {
             connectionInterface.onXsensDotDataChanged(address, xsensDotData)
         }
     }
+
     override fun onXsensDotInitDone(address: String) {
         activity.runOnUiThread {
             sensorAdapter.notifyItemChanged(address)
         }
     }
+
     override fun onXsensDotButtonClicked(s: String, l: Long) {}
     override fun onXsensDotPowerSavingTriggered(s: String) {}
     override fun onReadRemoteRssi(s: String, i: Int) {}
@@ -91,12 +98,14 @@ class ConnectionScreen(private val scannedDevices: XSENSArrayList) :
             connectionInterface.onXsensDotOutputRateUpdate(address, outputRate)
         }
     }
+
     override fun onXsensDotFilterProfileUpdate(s: String, i: Int) {}
     override fun onXsensDotGetFilterProfileInfo(
         s: String,
         arrayList: ArrayList<FilterProfileInfo>
     ) {
     }
+
     override fun onSyncStatusUpdate(s: String, b: Boolean) {}
     override fun onXsensDotScanned(device: BluetoothDevice, i: Int) {
         if (!scannedDevices.contains(device.address)) {
@@ -143,6 +152,7 @@ class ConnectionScreen(private val scannedDevices: XSENSArrayList) :
             mXsScanner!!.startScan()
         }
     }
+
     @SuppressLint("SetTextI18n")
     override fun onActivityResumed() {
         if (PermissionsHelper.areAllPermissionsGranted(context)) {
@@ -177,6 +187,7 @@ class ConnectionScreen(private val scannedDevices: XSENSArrayList) :
         mXsScanner = XsensDotScanner(context, this)
         mXsScanner!!.setScanMode(ScanSettings.SCAN_MODE_BALANCED)
     }
+
     override fun onConnectionUpdateRequested(
         device: XsensDotDevice,
         wantsConnection: Boolean
@@ -250,6 +261,7 @@ class ConnectionScreen(private val scannedDevices: XSENSArrayList) :
             setSyncProgress(progress)
         }
     }
+
     @SuppressLint("SetTextI18n")
     private fun setSyncProgress(progress: Int) {
         syncBtn.text = "Syncing connected sensors: $progress%"
@@ -269,7 +281,8 @@ class ConnectionScreen(private val scannedDevices: XSENSArrayList) :
     fun addConnectionInterface(connectionInterface: ConnectionInterface) {
         connectionInterfaces.add(connectionInterface)
     }
-    fun notifyItemChanged(address: String) {
+
+	fun notifyItemChanged(address: String) {
         sensorAdapter.notifyItemChanged(address)
     }
 }

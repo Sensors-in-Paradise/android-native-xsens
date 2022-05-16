@@ -65,6 +65,7 @@ class TrainingScreen(
     override fun onScreenOpened() {
         populateAndAnimateCharts()
     }
+
     fun populateAndAnimateCharts() {
         populateDurationPieChart(
             activitiesPieChart,

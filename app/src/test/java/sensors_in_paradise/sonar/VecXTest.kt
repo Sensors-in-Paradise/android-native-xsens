@@ -22,6 +22,7 @@ class VecXTest {
         assertEquals(3f, a.y)
         assertEquals(4f, a.z)
     }
+
     @Test
     fun assignHigherDimVec() {
         val a = Vec3(0.5f, 1f, 2f)
@@ -32,6 +33,7 @@ class VecXTest {
         assertEquals(3f, a.y)
         assertEquals(4f, a.z)
     }
+
     @Test
     fun assignLowerDimVec() {
         val a = Vec3(0.5f, 1f, 2f)
@@ -43,6 +45,7 @@ class VecXTest {
         assertEquals(2f, b.z)
         assertEquals(4f, b.w)
     }
+
     @After
     fun cleanUp() {
     }

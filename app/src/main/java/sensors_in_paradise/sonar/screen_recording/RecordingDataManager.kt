@@ -15,6 +15,7 @@ class RecordingDataManager(recordingsDir: File) :
     init {
         loadRecordingsFromStorage()
     }
+
     fun reloadRecordingsFromStorage() {
         loadRecordingsFromStorage()
     }
@@ -35,8 +36,9 @@ class RecordingDataManager(recordingsDir: File) :
     private fun isRecordingDir(file: File): Boolean {
         val childDirs = file.listFiles { dir, filename -> dir.resolve(filename).isDirectory }
         if (childDirs == null || childDirs.isEmpty()) {
+            val activeFlagFile = file.resolve(GlobalValues.ACTIVE_RECORDING_FLAG_FILENAME)
             val metadataFile = file.resolve(GlobalValues.METADATA_JSON_FILENAME)
-            return metadataFile.exists()
+            return metadataFile.exists() && !activeFlagFile.exists()
         }
         return false
     }
@@ -73,6 +75,7 @@ class RecordingDataManager(recordingsDir: File) :
 
         return result
     }
+
     fun getPeopleDurationsOfTrainableRecordings(): Map<String, Long> {
         val result = mutableMapOf<String, Long>()
         for (recording in this) {

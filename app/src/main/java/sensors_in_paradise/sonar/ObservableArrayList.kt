@@ -13,6 +13,7 @@ open class ObservableArrayList<T> : ArrayList<T>() {
             listener(size)
         }
     }
+
     override fun add(element: T): Boolean {
         val result = super.add(element)
         notifyObserversOfSizeChanged()

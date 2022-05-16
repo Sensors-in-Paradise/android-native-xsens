@@ -129,6 +129,7 @@ abstract class Object3D(
     fun notifyVerticesChanged() {
         onObjectChanged?.onObjectChanged()
     }
+
     /**Updates the default state of this object 3d using it's current state*/
     fun updateDefaultState(applyOnChildren: Boolean = true) {
         for (i in vertices.indices) {
@@ -142,10 +143,11 @@ abstract class Object3D(
             }
         }
     }
-    fun resetToDefaultState(
-        applyOnChildren: Boolean = true,
-        shouldNotifyThatVerticesChanged: Boolean = true
-    ) {
+
+	fun resetToDefaultState(
+	    applyOnChildren: Boolean = true,
+	    shouldNotifyThatVerticesChanged: Boolean = true
+	) {
         for (i in vertices.indices) {
             vertices[i].assign(defaultVertices[i])
         }

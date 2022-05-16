@@ -12,6 +12,11 @@ import kotlin.math.abs
 
 class ItemClickableMotionLayout(context: Context, attributeSet: AttributeSet) :
     MotionLayout(context, attributeSet) {
+    init {
+        // Set empty on click listener here so that the MotionLayout received touch events
+        // even when it has only one child so it does not need to scroll
+        setOnClickListener {}
+    }
     private val touchSlop: Int = ViewConfiguration.get(context).scaledTouchSlop
     private var initialX = 0f
     private var initialY = 0f
@@ -45,6 +50,7 @@ class ItemClickableMotionLayout(context: Context, attributeSet: AttributeSet) :
         }
         return false
     }
+
     private fun findChildByPosition(x: Float, y: Float): View? {
         val count = childCount
         for (i in count - 1 downTo 0) {
@@ -57,6 +63,7 @@ class ItemClickableMotionLayout(context: Context, attributeSet: AttributeSet) :
         }
         return null
     }
+
     private val sPoint = FloatArray(2)
     private val sInvMatrix = Matrix()
     private fun isPositionInChildView(child: View, xPos: Float, yPos: Float): Boolean {

@@ -55,7 +55,8 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
             save()
         }
     }
-    fun setActivities(activities: ArrayList<LabelEntry>, save: Boolean = false) {
+
+	fun setActivities(activities: ArrayList<LabelEntry>, save: Boolean = false) {
         clearActivities()
         for (activity in activities) {
             addActivity(activity)
@@ -64,7 +65,8 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
             save()
         }
     }
-    fun getActivities(): ArrayList<LabelEntry> {
+
+	fun getActivities(): ArrayList<LabelEntry> {
         val result = ArrayList<LabelEntry>()
         for (i in 0 until activities.length()) {
             val activityObj = activities[i] as JSONObject
@@ -74,24 +76,30 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
         }
         return result
     }
-    fun getVideoCaptureStartedTime(): Long? {
+
+	fun getVideoCaptureStartedTime(): Long? {
         val v = json.optLong("videoCaptureStartTime")
         return if (v != 0L) v else null
     }
-    fun getPoseCaptureStartedTime(): Long? {
+
+	fun getPoseCaptureStartedTime(): Long? {
         val v = json.optLong("poseCaptureStartTime")
         return if (v != 0L) v else null
     }
-    fun getDuration(): Long {
+
+	fun getDuration(): Long {
         return getTimeEnded() - getTimeStarted()
     }
-    fun getTimeStarted(): Long {
+
+	fun getTimeStarted(): Long {
         return json.getLong("startTimestamp")
     }
-    fun getTimeEnded(): Long {
+
+	fun getTimeEnded(): Long {
         return json.getLong("endTimestamp")
     }
-    fun getPerson(): String {
+
+	fun getPerson(): String {
         return json.getString("person")
     }
 
@@ -107,6 +115,7 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
             null
         }
     }
+
     fun hasBeenUsedForOnDeviceTraining(): Boolean {
         val macAddress = GlobalValues.getMacAddress()
         if (json.has(ON_DEVICE_TRAINING_METADATA_KEY)) {
@@ -114,6 +123,7 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
         }
         return false
     }
+
     fun setUsedForOnDeviceTraining(save: Boolean = true) {
         if (!json.has(ON_DEVICE_TRAINING_METADATA_KEY)) {
             json.put(ON_DEVICE_TRAINING_METADATA_KEY, JSONObject())
@@ -134,11 +144,13 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
             save()
         }
     }
+
     private fun clearActivities() {
        while (activities.length() > 0) {
                activities.remove(0)
            }
     }
+
     private fun addActivity(activity: LabelEntry) {
         val obj = JSONObject()
         obj.put("timeStarted", activity.timeStarted)
@@ -157,6 +169,7 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
     private fun setPerson(person: String) {
         json.put("person", person)
     }
+
     private fun setSensorMacMap(sensorMacMap: Map<String, String>) {
         val obj = JSONObject()
         for (entry in sensorMacMap.entries) {
@@ -174,10 +187,12 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
         }
         return result
     }
-    fun clone(): RecordingMetadataStorage {
+
+	fun clone(): RecordingMetadataStorage {
         return RecordingMetadataStorage(file!!, json)
     }
-        companion object {
-            private const val ON_DEVICE_TRAINING_METADATA_KEY = "onDeviceTraining"
-        }
+
+    companion object {
+        private const val ON_DEVICE_TRAINING_METADATA_KEY = "onDeviceTraining"
+    }
 }

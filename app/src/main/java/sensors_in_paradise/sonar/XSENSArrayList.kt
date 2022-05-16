@@ -12,6 +12,7 @@ class XSENSArrayList : ArrayList<XSensDotDeviceWithOfflineMetadata>() {
         }
         return false
     }
+
     operator fun get(deviceAddress: String): XSensDotDeviceWithOfflineMetadata? {
         for (device in this) {
             if (device.address == deviceAddress) {
@@ -20,7 +21,8 @@ class XSENSArrayList : ArrayList<XSensDotDeviceWithOfflineMetadata>() {
         }
         return null
     }
-    fun indexOf(deviceAddress: String): Int {
+
+	fun indexOf(deviceAddress: String): Int {
         for ((index, device) in this.withIndex()) {
             if (device.address == deviceAddress) {
                 return index
@@ -28,7 +30,8 @@ class XSENSArrayList : ArrayList<XSensDotDeviceWithOfflineMetadata>() {
         }
         return -1
     }
-    fun getConnected(): ArrayList<XsensDotDevice> {
+
+	fun getConnected(): ArrayList<XsensDotDevice> {
         val devices = ArrayList<XsensDotDevice>()
         for (device in this) {
             if (device.connectionState == XsensDotDevice.CONN_STATE_CONNECTED) {
@@ -37,7 +40,8 @@ class XSENSArrayList : ArrayList<XSensDotDeviceWithOfflineMetadata>() {
         }
         return devices
     }
-    fun getConnectedWithOfflineMetadata(): XSENSArrayList {
+
+	fun getConnectedWithOfflineMetadata(): XSENSArrayList {
         val devices = XSENSArrayList()
         for (device in this) {
             if (device.connectionState == XsensDotDevice.CONN_STATE_CONNECTED) {
@@ -46,7 +50,8 @@ class XSENSArrayList : ArrayList<XSensDotDeviceWithOfflineMetadata>() {
         }
         return devices
     }
-    fun areAllConnectedDevicesSynced(): Boolean {
+
+	fun areAllConnectedDevicesSynced(): Boolean {
         for (device in getConnected()) {
             if (!device.isSynced) {
                 return false
@@ -54,7 +59,8 @@ class XSENSArrayList : ArrayList<XSensDotDeviceWithOfflineMetadata>() {
         }
         return true
     }
-    fun insertSortedBySet(device: XSensDotDeviceWithOfflineMetadata): Int {
+
+	fun insertSortedBySet(device: XSensDotDeviceWithOfflineMetadata): Int {
         val set = device.getSet()
         for (i in 0 until size) {
             var returnIndex = -1

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -8,26 +9,36 @@
     <FrameLayout
         android:id="@+id/frameLayout_labelEditor"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="400dp">
 
-       <ViewSwitcher
-           android:id="@+id/viewSwitcher_visualizer_labelEditor"
-           android:layout_width="match_parent"
-           android:layout_height="400dp"
-           android:inAnimation="@android:anim/slide_in_left"
-           android:outAnimation="@android:anim/slide_out_right">
-           <VideoView
-               android:id="@+id/videoView_labelEditor"
-               android:layout_width="match_parent"
-               android:layout_height="match_parent"
-               android:layout_gravity="center" />
+        <ImageView
+            android:id="@+id/imageView_stickmanBackground_labelEditor"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:drawingCacheQuality="high"
+            android:scaleType="centerCrop"
+            android:visibility="gone"/>
 
-           <TextureView
-               android:id="@+id/textureView_labelEditor"
-               android:layout_width="wrap_content"
-               android:layout_height="match_parent"
-               android:layout_gravity="center" />
-       </ViewSwitcher>
+        <ViewSwitcher
+            android:id="@+id/viewSwitcher_visualizer_labelEditor"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:inAnimation="@android:anim/slide_in_left"
+            android:outAnimation="@android:anim/slide_out_right">
+
+            <VideoView
+                android:id="@+id/videoView_stickmanBackground_labelEditor"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center" />
+
+            <TextureView
+                android:id="@+id/textureView_stickmanBackground_labelEditor"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center" />
+
+        </ViewSwitcher>
 
         <ProgressBar
             android:id="@+id/progressBar_visualizer_labelEditor"
@@ -54,30 +65,29 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
+                android:alpha="0.2"
+                android:ellipsize="end"
+                android:maxWidth="100dp"
                 android:maxLines="2"
                 android:text="ITEM 0"
+                android:textAlignment="center"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/tv_carouselItem1_labelEditor"
-                app:layout_constraintTop_toTopOf="parent"
-                android:alpha="0.2"
-                android:maxWidth="100dp"
-                android:textAlignment="center"
-
-                />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <sensors_in_paradise.sonar.screen_recording.labels_editor.ClickableCarouselTextView
                 android:id="@+id/tv_carouselItem1_labelEditor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
+                android:maxWidth="100dp"
+                android:ellipsize="end"
                 android:maxLines="2"
-
                 android:text="ITEM 1"
+                android:textAlignment="center"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/tv_carouselItem2_labelEditor"
-                app:layout_constraintTop_toTopOf="parent"
-                android:maxWidth="100dp"
-                android:textAlignment="center"/>
+                app:layout_constraintTop_toTopOf="parent" />
 
             <sensors_in_paradise.sonar.screen_recording.labels_editor.ClickableCarouselTextView
                 android:id="@+id/tv_carouselItem2_labelEditor"
@@ -87,6 +97,7 @@
                 android:maxLines="2"
                 android:scaleX="1.5"
                 android:scaleY="1.5"
+                android:ellipsize="end"
                 android:text="ITEM 2"
                 android:textAlignment="center"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -100,28 +111,29 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
+                android:maxWidth="100dp"
                 android:maxLines="2"
+                android:ellipsize="end"
                 android:text="ITEM 3"
+                android:textAlignment="center"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/tv_carouselItem2_labelEditor"
-                app:layout_constraintTop_toTopOf="parent"
-                android:maxWidth="100dp"
-                android:textAlignment="center"/>
+                app:layout_constraintTop_toTopOf="parent" />
 
             <sensors_in_paradise.sonar.screen_recording.labels_editor.ClickableCarouselTextView
                 android:id="@+id/tv_carouselItem4_labelEditor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:maxLines="2"
-                android:text="ITEM 4"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/tv_carouselItem3_labelEditor"
-                app:layout_constraintTop_toTopOf="parent"
                 android:alpha="0.2"
                 android:maxWidth="100dp"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:text="ITEM 4"
                 android:textAlignment="center"
-                />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/tv_carouselItem3_labelEditor"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/guideline"
