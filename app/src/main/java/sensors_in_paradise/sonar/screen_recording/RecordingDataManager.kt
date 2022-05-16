@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.screen_recording
 
+import android.util.Log
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.ObservableArrayList
 import java.io.File
@@ -15,6 +16,7 @@ class RecordingDataManager(recordingsDir: File) :
     init {
         loadRecordingsFromStorage()
     }
+
     fun reloadRecordingsFromStorage() {
         loadRecordingsFromStorage()
     }
@@ -35,8 +37,9 @@ class RecordingDataManager(recordingsDir: File) :
     private fun isRecordingDir(file: File): Boolean {
         val childDirs = file.listFiles { dir, filename -> dir.resolve(filename).isDirectory }
         if (childDirs == null || childDirs.isEmpty()) {
+            val activeFlagFile = file.resolve(GlobalValues.ACTIVE_RECORDING_FLAG_FILENAME)
             val metadataFile = file.resolve(GlobalValues.METADATA_JSON_FILENAME)
-            return metadataFile.exists()
+            return metadataFile.exists() && !activeFlagFile.exists()
         }
         return false
     }
@@ -55,30 +58,52 @@ class RecordingDataManager(recordingsDir: File) :
         remove(recording)
     }
 
-    fun getActivityDurationsOfTrainableRecordings(): Map<String, Long> {
+    fun getActivityDurationsOfTrainableRecordings(filterForPerson: String? = null): Map<String, Long> {
+        Log.d(
+            "RecordingDataManager",
+            "Getting activity durations of trainable recordings for $filterForPerson"
+        )
         val result = mutableMapOf<String, Long>()
         for (recording in this) {
-
             val metadata = recording.metadataStorage
-            if (!metadata.hasBeenUsedForOnDeviceTraining()) {
-                val activities = metadata.getActivities()
-                for ((index, labelEntry) in activities.withIndex()) {
-                    val timeEnded =
-                        if (index + 1 < activities.size) activities[index + 1].timeStarted else metadata.getTimeEnded()
-                    val duration = timeEnded - labelEntry.timeStarted
-                    result[labelEntry.activity] = duration + (result[labelEntry.activity] ?: 0L)
+            if (filterForPerson == null || metadata.getPerson() == filterForPerson) {
+                if (!metadata.hasBeenUsedForOnDeviceTraining()) {
+                    val activities = metadata.getActivities()
+                    for ((index, labelEntry) in activities.withIndex()) {
+                        val duration = RecordingMetadataStorage.getDurationOfActivity(
+                            activities,
+                            index,
+                            metadata.getTimeEnded()
+                        )
+                        result[labelEntry.activity] = duration + (result[labelEntry.activity] ?: 0L)
+                    }
                 }
             }
         }
-
         return result
     }
-    fun getPeopleDurationsOfTrainableRecordings(): Map<String, Long> {
+
+    fun getPeopleDurationsOfTrainableRecordings(filterForActivity: String? = null): Map<String, Long> {
         val result = mutableMapOf<String, Long>()
-        for (recording in this) {
+        for (recording in this.filter { !it.metadataStorage.hasBeenUsedForOnDeviceTraining() }) {
             val metadata = recording.metadataStorage
             val person = metadata.getPerson()
-            result[person] = metadata.getDuration() + (result[person] ?: 0L)
+            if (filterForActivity != null) {
+                val activities = metadata.getActivities()
+                for ((index, labelEntry) in activities.withIndex()) {
+                    val (_, activity) = labelEntry
+                    if (activity == filterForActivity) {
+                        val duration = RecordingMetadataStorage.getDurationOfActivity(
+                            activities,
+                            index,
+                            metadata.getTimeEnded()
+                        )
+                        result[person] = duration + (result[person] ?: 0L)
+                    }
+                }
+            } else {
+                result[person] = metadata.getDuration() + (result[person] ?: 0L)
+            }
         }
         return result
     }

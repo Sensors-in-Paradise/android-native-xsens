@@ -53,9 +53,11 @@ open class Cube(children: ArrayList<Object3D> = ArrayList()) : LineObject3D(
     fun getTopSide(): Array<Vec4> {
         return arrayOf(_ltb, _ltf, _rtb, _rtf)
     }
-    fun getNegativeXSide(): Array<Vec4> {
+
+	fun getNegativeXSide(): Array<Vec4> {
         return arrayOf(_lbb, _lbf, _ltb, _ltf)
     }
+
     companion object {
         // lbb for left-bottom-back
         private val lbb = Vec4(-0.5f, 0f, 0.5f)

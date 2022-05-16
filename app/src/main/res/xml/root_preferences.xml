@@ -46,8 +46,8 @@
     </PreferenceCategory>
     <PreferenceCategory app:title="Data recording options">
         <SwitchPreferenceCompat
-            app:key="playSoundOnRecordingStart"
-            app:title="Play sound when starting to record"
+            app:key="playSoundOnRecordingStartAndStop"
+            app:title="Play start/stop sound"
             app:summary="This can be useful to synchronize the sensor recordings with recordings from external cameras etc."
             />
         <SwitchPreferenceCompat
@@ -70,7 +70,11 @@
             app:dependency="recordWithCamera"
             app:key="storePoseEstimation"
             app:title="Store estimated poses as stickman"
-            app:summary="Store pose data estimated by TensorFlow-MoveNet when recording. "/>
+            app:summary="Store pose data estimated by TensorFlow-MoveNet when recording."/>
+        <SwitchPreference
+            app:key="showPoseBackground"
+            app:title="Stickman Background"
+            app:summary="Show selected background image for Pose Sequence in Label Editor. Please note that you can only select png files."/>
     </PreferenceCategory>
     <PreferenceCategory app:title="Advanced sensor options">
         <SwitchPreferenceCompat
@@ -106,6 +110,14 @@ the object they are connected to. \nMore detailed information can be found in th
             android:singleLine="true"
             android:title="WebDAV token"
             android:summary="The token for logging into your WebDAV cloud account"/>
+        <SwitchPreferenceCompat
+            android:id="@+id/switchPreferenceCompat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:dependency="storeRawCameraVideo"
+            app:key="uploadCameraVideo"
+            app:summary="Upload the raw Videos that were shot by the camera during recordings"
+            app:title="Upload camera video " />
     </PreferenceCategory>
 
 </PreferenceScreen>

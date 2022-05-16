@@ -63,6 +63,7 @@ class PredictionScreen(
             mainHandler.postDelayed(this, predictionInterval)
         }
     }
+
     private val updateProgressBarTask = object : Runnable {
         override fun run() {
             var progress = 0
@@ -233,8 +234,7 @@ class PredictionScreen(
         mainHandler = Handler(Looper.getMainLooper())
     }
 
-    override fun onActivityResumed() {
-    }
+    override fun onActivityResumed() {}
 
     override fun onActivityWillDestroy() {
         // Nothing to do
@@ -261,7 +261,7 @@ class PredictionScreen(
     }
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
-        // Nothing to do (?)
+        // Nothing to do
     }
 
     override fun onUseCaseChanged(useCase: UseCase) {

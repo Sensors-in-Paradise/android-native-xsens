@@ -6,7 +6,9 @@ import android.util.Log
 import com.google.common.net.MediaType
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import sensors_in_paradise.sonar.screen_recording.RecordingDataManager
+import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.File
+import java.net.URLConnection
 
 class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: RecordingDataManager) :
     DavCloudClientInterface {
@@ -18,9 +20,12 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
     private val davCloud = DavCloudClient(activity, this)
     val recordingUiItems = RecordingUIItemArrayList()
     private val dirCreationRequests = mutableSetOf<File>()
+    private val videoUpload = PreferencesHelper.shouldUploadCameraRecordings(context)
+
     init {
         reloadRecordings()
     }
+
     fun reloadRecordings() {
         recordingUiItems.clear()
         for (recording in recordingsManager) {
@@ -45,7 +50,9 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
     }
 
     fun synchronize() {
+        Log.d("DAVCLOUD", "Synchronize")
         for (recordingUiItem in recordingUiItems) {
+            Log.d("DAVCLOUD", "trying recording")
             if (recordingUiItem.isValid) {
                 uploadRecording(recordingUiItem)
             }
@@ -58,6 +65,7 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
     }
 
     private fun uploadRecording(recording: RecordingUIItem) {
+        Log.d("DAVCLOUD", "Uploading recording!")
         if (davCloudMetadata.isDirCreated(recording.dir)) {
             uploadFilesOfRecording(recording)
         } else {
@@ -77,6 +85,8 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
 
     private fun uploadFilesOfRecording(recording: RecordingUIItem) {
         for (file in recording.filesToBeUploaded) {
+            val fileType = URLConnection.guessContentTypeFromName(file.toString())
+            if (fileType != null && fileType.startsWith("video") && !videoUpload) continue
             if (!davCloudMetadata.isFileUploaded(file)) {
                 Log.d("DAVCLOUD", "Uploading file: ${file.name}")
                 recording.setStatusOfFileOrDir(file, UploadStatus.UPLOADING)
@@ -86,7 +96,6 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
                     MediaType.CSV_UTF_8
                 )
             } else {
-                // Log.d("DAVCLOUD", "File already uploaded: ${file.name}")
                 recording.setStatusOfFileOrDir(file, UploadStatus.UPLOADED)
             }
             onItemChanged?.let { it(recording) }
@@ -100,7 +109,6 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
         for (recording in recordings) {
             recording.setStatusOfFileOrDir(localReferenceDir, UploadStatus.UPLOADED)
             uploadRecording(recording)
-
             onRecordingStatusChanged(recording)
         }
     }
@@ -146,6 +154,7 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
             }
         }
     }
+
     private fun areAllRecordingsFinished(): Boolean {
        return recordingUiItems.areAllUploadedOrFailed()
     }

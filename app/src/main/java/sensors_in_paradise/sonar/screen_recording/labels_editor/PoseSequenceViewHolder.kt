@@ -7,14 +7,16 @@ import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.PoseEst
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.VisualizationUtils
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Person
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.PoseSequence
+import sensors_in_paradise.sonar.util.PreferencesHelper
 
 class PoseSequenceViewHolder(
     private val context: Context,
     private val textureView: TextureView,
     onSourceLoadedListener: () -> Unit,
-    onStartLoadingSource: () -> Unit
+    onStartLoadingSource: () -> Unit,
+    onSeekToNewPosition: ((ms: Long) -> Unit)? = null
 ) :
-    VisualSequenceViewHolder(onSourceLoadedListener, onStartLoadingSource) {
+    VisualSequenceViewHolder(onSourceLoadedListener, onStartLoadingSource, onSeekToNewPosition) {
     private var poseSequence: PoseSequence? = null
 
     init {
@@ -27,6 +29,7 @@ class PoseSequenceViewHolder(
     }
 
     override fun seekTo(ms: Long) {
+        super.seekTo(ms)
         poseSequence?.let { poseSequence ->
             val persons = getPosesAtTime(ms, poseSequence)
             drawOnCanvas(persons)
@@ -61,7 +64,8 @@ class PoseSequenceViewHolder(
             VisualizationUtils.drawBodyKeyPoints(
                 persons,
                 canvas,
-                clearColor = context.getColor(R.color.slightBackgroundContrast),
+                clearColor = if (PreferencesHelper.shouldShowPoseBackground(context)) null
+                             else context.getColor(R.color.slightBackgroundContrast),
                 circleColor = context.getColor(R.color.stickmanJoints),
                 lineColor = context.getColor(R.color.backgroundContrast)
             )

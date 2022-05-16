@@ -63,6 +63,7 @@ android {
             universalApk true
         }
     }
+    namespace 'sensors_in_paradise.sonar'
     configurations.all {
         resolutionStrategy.force 'com.google.code.findbugs:jsr305:3.0.2'
     }

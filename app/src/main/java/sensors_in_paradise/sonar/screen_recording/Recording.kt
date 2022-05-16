@@ -16,7 +16,8 @@ const val XSENS_EMPTY_FILE_SIZE = 435
 enum class RecordingFileState {
     Empty,
     Unsynchronized,
-    Valid
+    Valid,
+    WithoutSensor
 }
 
 open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorage) {
@@ -33,8 +34,18 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
     val isValid
         get() = state != RecordingFileState.Empty
 
+    private fun doSensorFilesExist(dir: File): Boolean {
+        var childCSVs = dir.listFiles { _, name -> name.endsWith(".csv") }?.toList()
+        childCSVs = childCSVs?.filterNot { csvFile -> csvFile.name == POSE_CAPTURE_FILENAME }
+        if (childCSVs == null || childCSVs.isEmpty()) {
+            return true
+        }
+        return false
+    }
+
     private fun areFilesEmpty(dir: File): Boolean {
-        val childCSVs = dir.listFiles { _, name -> name.endsWith(".csv") }
+        var childCSVs = dir.listFiles { _, name -> name.endsWith(".csv") }?.toList()
+        childCSVs = childCSVs?.filterNot { csvFile -> csvFile.name == POSE_CAPTURE_FILENAME }
         if (childCSVs != null && childCSVs.isNotEmpty()) {
             for (child in childCSVs) {
                 if (child.length() < XSENS_EMPTY_FILE_SIZE) {
@@ -45,7 +56,8 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
         }
         return true
     }
-    fun getDisplayTitle(): String {
+
+	fun getDisplayTitle(): String {
         val numActivities = metadataStorage.getActivities().size
         var result = ""
         if (hasVideoRecording()) {
@@ -57,7 +69,8 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
         result += "$numActivities ${if (numActivities == 1) "activity" else "activities"}"
         return result
     }
-    fun getDirectory(): File {
+
+	fun getDirectory(): File {
         return dir
     }
 
@@ -74,14 +87,16 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
     fun hasVideoRecording(): Boolean {
         return getVideoFile().exists()
     }
-    fun getVideoFile(): File {
+
+	fun getVideoFile(): File {
         return dir.resolve(VIDEO_CAPTURE_FILENAME)
     }
 
     fun hasPoseSequenceRecording(): Boolean {
         return getPoseSequenceFile().exists()
     }
-    fun getPoseSequenceFile(): File {
+
+	fun getPoseSequenceFile(): File {
         return dir.resolve(POSE_CAPTURE_FILENAME)
     }
 
@@ -89,7 +104,9 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
         var state = checkCache()
         if (state != null) return state
 
-        state = if (areFilesEmpty(dir)) {
+        state = if (doSensorFilesExist(dir)) {
+            RecordingFileState.WithoutSensor
+        } else if (areFilesEmpty(dir)) {
             RecordingFileState.Empty
         } else if (!areFilesSynchronized()) {
             RecordingFileState.Unsynchronized
@@ -200,6 +217,9 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
         if (state == null) return state
 
         return when (state) {
+            "Without Sensors" -> {
+                RecordingFileState.WithoutSensor
+            }
             "Valid" -> {
                 RecordingFileState.Valid
             }
@@ -214,6 +234,9 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
 
     private fun saveCache(state: RecordingFileState) {
         val recordingState = when (state) {
+            RecordingFileState.WithoutSensor -> {
+                "Without Sensors"
+            }
             RecordingFileState.Valid -> {
                 "Valid"
             }
@@ -227,7 +250,8 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
 
         metadataStorage.setRecordingState(recordingState)
     }
-    fun getActivitiesSummary(): String {
+
+	fun getActivitiesSummary(): String {
         return metadataStorage.getActivities().joinToString("\n") { (activityStartTime, activity) ->
             GlobalValues.getDurationAsString(activityStartTime - metadataStorage.getTimeStarted()) + "   " +
                     activity
