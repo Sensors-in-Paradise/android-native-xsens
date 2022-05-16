@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.page2.labels_editor
+package sensors_in_paradise.sonar.screen_recording.labels_editor
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
@@ -19,7 +19,6 @@ import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.screen_recording.PersistentCategoriesDialog
 import sensors_in_paradise.sonar.screen_recording.Recording
-import sensors_in_paradise.sonar.screen_recording.labels_editor.*
 import sensors_in_paradise.sonar.use_cases.UseCase
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import kotlin.math.abs
@@ -30,7 +29,7 @@ class LabelsEditorDialog(
     val useCase: UseCase,
     val recording: Recording,
     private val onRecordingChanged: () -> Unit
-) : RangeSlider.OnSliderTouchListener {
+) : RangeSlider.OnSliderTouchListener, SeekBar.OnSeekBarChangeListener {
 
     private var activitiesDialog: PersistentCategoriesDialog? = null
     private val editableRecording =
@@ -41,10 +40,12 @@ class LabelsEditorDialog(
     private var previousItem: ClickableCarouselTextView
     private var currentItem: ClickableCarouselTextView
     private var nextItem: ClickableCarouselTextView
-    private var endTV: TextView
-    private var statusTV: TextView
-    private var startTV: TextView
 
+    private var statusTV: TextView
+    private var startRangeTV: TextView
+    private var endRangeTV: TextView
+    private var startCurrentActivityRangeTV: TextView
+    private var endCurrentActivityRangeTV: TextView
     /*Stores a list of VisualSequenceViewHolder and its position in the viewSwitcher*/
     private var visualizers: ArrayList<Pair<Int, VisualSequenceViewHolder>> = ArrayList()
 
@@ -57,6 +58,7 @@ class LabelsEditorDialog(
     private var visualizerFrameLayout: FrameLayout
     private var videoView: VideoView
     private var poseSequenceView: TextureView
+    private var videoSeekBar: SeekBar
     private var poseSequenceBackground: ImageView
     private val activeVisualizer: VisualSequenceViewHolder?
         get() {
@@ -78,8 +80,11 @@ class LabelsEditorDialog(
         currentItem = root.findViewById(R.id.tv_carouselItem2_labelEditor)
         nextItem = root.findViewById(R.id.tv_carouselItem3_labelEditor)
         carousel = root.findViewById(R.id.carousel_labels_labelEditor)
-        endTV = root.findViewById(R.id.tv_endDuration_labelEditor)
-        startTV = root.findViewById(R.id.tv_startDuration_labelEditor)
+        endRangeTV = root.findViewById(R.id.tv_endBigRange_labelEditor)
+        startRangeTV = root.findViewById(R.id.tv_startBigRange_labelEditor)
+        endCurrentActivityRangeTV = root.findViewById(R.id.tv_endSmallRange_labelEditor)
+        startCurrentActivityRangeTV = root.findViewById(R.id.tv_startSmallRange_labelEditor)
+
         statusTV = root.findViewById(R.id.tv_consistencyStatus_labelEditor)
         rangeSlider = root.findViewById(R.id.rangeSlider_labelEditor)
         motionLayout = root.findViewById(R.id.motionLayout_carouselParent_labelEditor)
@@ -87,7 +92,8 @@ class LabelsEditorDialog(
         visualizerPreparingIndicator = root.findViewById(R.id.progressBar_visualizer_labelEditor)
         visualizerSwitcher = root.findViewById(R.id.viewSwitcher_visualizer_labelEditor)
         visualizerFrameLayout = root.findViewById(R.id.frameLayout_labelEditor)
-
+        videoSeekBar = root.findViewById(R.id.seekBar_videoSeek_labelEditor)
+        videoSeekBar.setOnSeekBarChangeListener(this)
         rangeSlider.addOnChangeListener { slider, value, _ ->
             val numThumbs = slider.values.size
 
@@ -102,7 +108,7 @@ class LabelsEditorDialog(
                     value.toLong()
                 )
             }
-            activeVisualizer?.stopLooping()
+            updateSeekBar()
             activeVisualizer?.seekTo(
                 editableRecording.relativeSensorTimeToVideoTime(value.toLong())
             )
@@ -181,7 +187,8 @@ class LabelsEditorDialog(
             val visualizer = VideoViewHolder(
                 videoView,
                 this::onVisualizerSourceLoaded,
-                this::onVisualizerStartLoadingSource
+                this::onVisualizerStartLoadingSource,
+                this::onSeekToNewPosition
             )
             visualizer.sourcePath = recording.getVideoFile().absolutePath
             visualizers.add(Pair(0, visualizer))
@@ -191,7 +198,8 @@ class LabelsEditorDialog(
                 context,
                 poseSequenceView,
                 this::onVisualizerSourceLoaded,
-                this::onVisualizerStartLoadingSource
+                this::onVisualizerStartLoadingSource,
+                this::onSeekToNewPosition
             )
             visualizer.sourcePath = recording.getPoseSequenceFile().absolutePath
             visualizers.add(Pair(1, visualizer))
@@ -213,6 +221,7 @@ class LabelsEditorDialog(
             }
         } else {
             visualizerFrameLayout.visibility = View.GONE
+            videoSeekBar.visibility = View.GONE
         }
     }
 
@@ -263,32 +272,47 @@ class LabelsEditorDialog(
         return result
     }
 
-    private fun updateRangeSlider() {
+    private fun getRangeOfCurrentAdjacentActivities(): Pair<Long, Long> {
         val rangeStart = editableRecording.getRelativeStartTimeOfActivity(selectedItemIndex - 1)
-        rangeSlider.valueFrom = rangeStart.toFloat()
         val rangeEnd = editableRecording.getRelativeEndTimeOfActivity(selectedItemIndex + 1)
+        return Pair(rangeStart, rangeEnd)
+    }
+
+    private fun getRangeOfCurrentActivity(): Pair<Float, Float> {
+        val startTime =
+            editableRecording.getRelativeStartTimeOfActivity(selectedItemIndex).toFloat()
+        val endTime = editableRecording.getRelativeEndTimeOfActivity(selectedItemIndex).toFloat()
+        return Pair(startTime, endTime)
+    }
+
+    private fun updateRangeSlider() {
+        val (rangeStart, rangeEnd) = getRangeOfCurrentAdjacentActivities()
+        rangeSlider.valueFrom = rangeStart.toFloat()
         rangeSlider.valueTo = rangeEnd.toFloat()
         Log.d(
             "LabelsEditorDialog",
             "setActivitySelected rangeStart $rangeStart and rangeEnd $rangeEnd"
         )
+        val (startTime, endTime) =
+            getRangeOfCurrentActivity()
 
-        rangeSlider.values = arrayListOf(
-            editableRecording.getRelativeStartTimeOfActivity(selectedItemIndex).toFloat(),
-            editableRecording.getRelativeEndTimeOfActivity(selectedItemIndex).toFloat()
-        )
-        startTV.text = GlobalValues.getDurationAsString(rangeStart)
-        endTV.text = GlobalValues.getDurationAsString(rangeEnd)
-
-        val startTime =
-            editableRecording.getRelativeStartTimeOfActivity(selectedItemIndex).toFloat()
-        val endTime = editableRecording.getRelativeEndTimeOfActivity(selectedItemIndex).toFloat()
-
-        Log.d("LabelsEditorDialog", "setActivitySelected startTime $startTime and endTime $endTime")
         rangeSlider.values = arrayListOf(
             startTime,
             endTime
         )
+        startRangeTV.text = GlobalValues.getDurationAsString(rangeStart)
+        endRangeTV.text = GlobalValues.getDurationAsString(rangeEnd)
+        updateSeekBar()
+    }
+
+    private fun updateSeekBar() {
+        val (startTime, endTime) =
+            getRangeOfCurrentActivity()
+        videoSeekBar.min = startTime.toInt()
+        videoSeekBar.max = endTime.toInt()
+        videoSeekBar.progress = startTime.toInt()
+        startCurrentActivityRangeTV.text = GlobalValues.getDurationAsString(startTime.toLong())
+        endCurrentActivityRangeTV.text = GlobalValues.getDurationAsString(endTime.toLong())
     }
 
     private fun loopVisualizerForSelectedActivity() {
@@ -355,6 +379,7 @@ class LabelsEditorDialog(
 
     @SuppressLint("RestrictedApi")
     override fun onStartTrackingTouch(slider: RangeSlider) {
+        activeVisualizer?.stopLooping()
     }
 
     @SuppressLint("RestrictedApi")
@@ -388,6 +413,10 @@ class LabelsEditorDialog(
         Log.d("LabelsEditorDialog", "splitCurrentActivity values: ${values.joinToString()}")
     }
 
+    private fun onSeekToNewPosition(ms: Long) {
+        videoSeekBar.progress = ms.toInt()
+    }
+
     private class HorizontalSwipeDetector(val onHorizontalSwipe: (isSwipeToLeft: Boolean) -> Unit) :
         GestureDetector.SimpleOnGestureListener() {
 
@@ -407,5 +436,19 @@ class LabelsEditorDialog(
             }
             return true
         }
+    }
+
+    override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+        if (fromUser) {
+            activeVisualizer?.seekTo(progress.toLong())
+        }
+    }
+
+    override fun onStartTrackingTouch(seekBar: SeekBar?) {
+       activeVisualizer?.stopLooping()
+    }
+
+    override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            activeVisualizer?.resumeLooping(videoSeekBar.progress.toLong() - getRangeOfCurrentActivity().first.toLong())
     }
 }
