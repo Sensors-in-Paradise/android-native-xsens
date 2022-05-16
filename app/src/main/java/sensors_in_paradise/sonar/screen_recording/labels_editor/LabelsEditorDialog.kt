@@ -412,7 +412,7 @@ class LabelsEditorDialog(
         rangeSlider.values = values
         Log.d("LabelsEditorDialog", "splitCurrentActivity values: ${values.joinToString()}")
     }
-    
+
     private fun onSeekToNewPosition(ms: Long) {
         videoSeekBar.progress = ms.toInt()
     }
