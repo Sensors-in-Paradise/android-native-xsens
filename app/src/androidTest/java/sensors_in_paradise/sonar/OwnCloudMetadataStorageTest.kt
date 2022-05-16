@@ -22,7 +22,7 @@ class OwnCloudMetadataStorageTest {
         assertFalse(storage.isFileUploaded(testFile))
         storage.setFileUploaded(testFile)
         assertTrue(storage.isFileUploaded(testFile))
-        storage.file.delete()
+        storage.file!!.delete()
     }
 
     @Test
@@ -32,7 +32,7 @@ class OwnCloudMetadataStorageTest {
         assertFalse(storage.isFileUploaded(testFile))
         storage.setFileUploaded(testFile)
         assertTrue(storage.isFileUploaded(testFile))
-        storage.file.delete()
+        storage.file!!.delete()
     }
 
     @Test
@@ -43,7 +43,7 @@ class OwnCloudMetadataStorageTest {
         assertFalse(storage.isDirCreated(testDir))
         storage.setDirCreated(testDir)
         assertTrue(storage.isDirCreated(testDir))
-        storage.file.delete()
+        storage.file!!.delete()
     }
 
     @Test
@@ -54,7 +54,7 @@ class OwnCloudMetadataStorageTest {
         assertFalse(storage.isDirCreated(testDir))
         storage.setDirCreated(testDir)
         assertTrue(storage.isDirCreated(testDir))
-        storage.file.delete()
+        storage.file!!.delete()
     }
 
     @Test
@@ -73,6 +73,6 @@ class OwnCloudMetadataStorageTest {
         assertTrue(storageB.isDirCreated(testDir))
         assertTrue(storageB.isFileUploaded(testFile))
 
-        storageB.file.delete()
+        storageB.file!!.delete()
     }
 }
