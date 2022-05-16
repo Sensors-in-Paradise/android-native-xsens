@@ -21,6 +21,7 @@ open class IntervalLooper(private val intervalMs: Long, val callRunOnUiThread: B
         }
         timer.scheduleAtFixedRate(loopTimerTask, 0L, intervalMs)
     }
+
     fun stopLooping() {
         loopTimerTask?.cancel()
     }
