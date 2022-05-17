@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 import androidx.camera.video.Quality
 import androidx.preference.PreferenceManager
 import sensors_in_paradise.sonar.R
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.ModelType
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.ModelType
 
 class PreferencesHelper private constructor() {
     companion object {

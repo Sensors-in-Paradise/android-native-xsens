@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================
 */
-package sensors_in_paradise.sonar.page2.camera.pose_estimation
+package sensors_in_paradise.sonar.screen_recording.camera.pose_estimation
 
 import android.content.Context
 import android.graphics.*
@@ -27,7 +27,6 @@ import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.ResizeOp
 import org.tensorflow.lite.support.image.ops.ResizeWithCropOrPadOp
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
-import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.PoseDetector
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.*
 import kotlin.math.abs
 import kotlin.math.max

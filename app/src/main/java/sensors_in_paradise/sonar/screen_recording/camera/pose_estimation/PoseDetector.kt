@@ -20,7 +20,6 @@ limitations under the License.
 package sensors_in_paradise.sonar.screen_recording.camera.pose_estimation
 
 import android.graphics.Bitmap
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.ModelType
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Person
 
 interface PoseDetector : AutoCloseable {
