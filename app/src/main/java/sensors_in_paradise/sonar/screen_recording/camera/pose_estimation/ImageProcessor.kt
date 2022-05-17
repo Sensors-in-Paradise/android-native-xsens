@@ -16,6 +16,9 @@ class ImageProcessor(
         /** Threshold for confidence score. */
         private const val MIN_CONFIDENCE = .4f
         const val POSE_ESTIMATION_FREQUENCY = 25
+
+        const val INPUT_WIDTH = 1280
+        const val INPUT_HEIGHT = 720
     }
 
     private val lock = Any()

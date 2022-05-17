@@ -56,7 +56,7 @@ class CameraManager(
     @SuppressLint("UnsafeOptInUsageError")
     private val imageAnalysis = ImageAnalysis.Builder()
         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-        .setTargetResolution(Size(1280, 720))
+        .setTargetResolution(Size(ImageProcessor.INPUT_WIDTH, ImageProcessor.INPUT_HEIGHT))
         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
         .build()
         .apply {
@@ -256,7 +256,12 @@ class CameraManager(
         }
 
         val localDateTime = LocalDateTime.now()
-        poseStorageManager!!.writeHeader(localDateTime, "ThunderI8", 2)
+        poseStorageManager!!.writeHeader(
+            localDateTime,
+            Pair(ImageProcessor.INPUT_WIDTH, ImageProcessor.INPUT_HEIGHT),
+            "ThunderI8",
+            2
+        )
         poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
 
         imageProcessor =
