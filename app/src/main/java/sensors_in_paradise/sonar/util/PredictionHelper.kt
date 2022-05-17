@@ -8,21 +8,31 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.properties.Delegates
 
 class PredictionHelper(
     private val context: Context,
     private val showToasts: Boolean
 ) {
 
-    private val numDevices = 5
+    var numDevices by Delegates.notNull<Int>()
     private val sizeOfFloat = 4
-    private val numQuats = 0
-    private val numFreeAccs = 3
-    private var numDataLines = 0
+    var numQuats by Delegates.notNull<Int>()
+    var numAccs by Delegates.notNull<Int>()
+    var numGyros by Delegates.notNull<Int>()
+    private var numDataLines: Int = 0
 
-    private val dataLineByteSize = sizeOfFloat * (numQuats + numFreeAccs) * numDevices
-    val dataLineFloatSize = (numQuats + numFreeAccs) * numDevices
+    private var dataLineByteSize by Delegates.notNull<Int>()
+    var dataLineFloatSize by Delegates.notNull<Int>()
     val dataVectorSize = 180
+
+    private fun calcDataLineFloatSize(): Int {
+        return ((numQuats + numAccs + numGyros) * numDevices).apply { dataLineFloatSize = this }
+    }
+
+    fun calcDataLineByteSize(): Int {
+        return (sizeOfFloat * calcDataLineFloatSize()).apply { dataLineByteSize = this }
+    }
 
     private fun fillEmptyDataLines(rawSensorDataMap: MutableMap<String, MutableList<Pair<Long, FloatArray>>>) {
         val frequency = 60
@@ -93,18 +103,12 @@ class PredictionHelper(
         }
     }
 
-    private fun normalizeLine(dataArray: FloatArray, minArray: DoubleArray, maxArray: DoubleArray): FloatArray {
-        // val numElements = numQuats + numFreeAccs
-        val numElements = 4 + numFreeAccs
+    private fun normalizeLine(dataArray: FloatArray, meanArray: DoubleArray, stdArray: DoubleArray): FloatArray {
+        val numElements = numQuats + numAccs + numGyros
         val normalizedArray = FloatArray(numElements)
-
-        val lowerBound = 0.0001
-        val upperBound = 0.9999
         for (i in 0 until numElements) {
-            val rawNormalize = (dataArray[i].toDouble() - minArray[i]) / (maxArray[i] - minArray[i])
-            val clippedNormalize = max(min(upperBound, rawNormalize), lowerBound)
 
-            normalizedArray[i] = clippedNormalize.toFloat()
+            normalizedArray[i] = ((dataArray[i].toDouble() - meanArray[i]) / stdArray[i]).toFloat()
         }
         return normalizedArray
     }

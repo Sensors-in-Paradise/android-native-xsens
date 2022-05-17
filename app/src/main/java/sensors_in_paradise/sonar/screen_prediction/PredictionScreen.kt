@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotPayload
+import com.xsens.dot.android.sdk.utils.XsensDotParser
 import org.tensorflow.lite.support.metadata.MetadataExtractor
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
@@ -24,6 +25,7 @@ import sensors_in_paradise.sonar.util.PredictionHelper
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.UIHelper
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
+import java.io.File
 import java.nio.ByteBuffer
 import kotlin.math.round
 import kotlin.properties.Delegates
@@ -34,6 +36,7 @@ class PredictionScreen(
     private val sensorOccupationInterface: SensorOccupationInterface?
 ) : ScreenInterface, ConnectionInterface {
 
+    private var featuresToPredict: ArrayList<String> = ArrayList()
     private lateinit var activity: Activity
     private lateinit var context: Context
     private lateinit var recyclerView: RecyclerView
@@ -55,8 +58,8 @@ class PredictionScreen(
     private var isRunning = false
 
     private lateinit var mainHandler: Handler
-
-    private val predictionInterval = 4000L
+    private val frequency = 60 // Hz
+    private var predictionInterval = 4000L // ms
     private val updatePredictionTask = object : Runnable {
         override fun run() {
             processAndPredict()
@@ -102,14 +105,14 @@ class PredictionScreen(
         lastPrediction = 0L
         if (tryInitializeSensorDataMap()) {
             for (device in devices.getConnected()) {
-                device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
+                device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_CUSTOM_MODE_4
                 device.startMeasuring()
             }
             timer.base = SystemClock.elapsedRealtime()
             timer.start()
 
             isRunning = true
-            mainHandler.postDelayed(updatePredictionTask, 4000)
+            mainHandler.postDelayed(updatePredictionTask, predictionInterval)
             mainHandler.postDelayed(updateProgressBarTask, 100)
             progressBar.visibility = View.VISIBLE
             predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
@@ -151,14 +154,7 @@ class PredictionScreen(
     private fun addPredictionViews(output: FloatArray) {
         predictions.clear()
 
-        val outputLabelMap = mapOf(
-            0 to "Running",
-            1 to "Squats",
-            2 to "Stairs Down",
-            3 to "Stairs Up",
-            4 to "Standing",
-            5 to "Walking"
-        ).withDefault { "" }
+        val outputLabelMap = model!!.getLabelsMap()
 
         for (i in output.indices) {
             val percentage = round(output[i] * 10000) / 100
@@ -253,12 +249,28 @@ class PredictionScreen(
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
 
         val timeStamp: Long = xsensDotData.sampleTimeFine
-        val quat: FloatArray = xsensDotData.quat
-        val freeAcc: FloatArray = xsensDotData.freeAcc
 
         val deviceTag = metadataStorage.getTagForAddress(deviceAddress)
-        rawSensorDataMap[deviceTag]?.add(Pair(timeStamp, quat + freeAcc))
+        val features = ArrayList<FloatArray>()
+        featuresToPredict.forEach { s ->
+            val dataProccessor = XsensDotParser.getDefaultDataProcessor()
+            val packet = XsensDotParser.getXsDataPacket(dataProccessor, xsensDotData.dq, xsensDotData.dv)
+            features.add(
+                when (s) {
+                    "Gyr" -> XsensDotParser.getCalibratedGyroscopeData(packet).map { it.toFloat() }.toFloatArray()
+                    "DV" -> xsensDotData.dv
+                    "Acc" -> XsensDotParser.getCalibratedAcceleration(packet)
+                    "DQ" -> xsensDotData.dq
+                    else -> {
+                        throw kotlin.IllegalArgumentException("Unknown feature: $s")
+                    }
+                } as FloatArray
+            )
+        }
+        val featuresArray = features.reduce(FloatArray::plus)
+        rawSensorDataMap[deviceTag]?.add(Pair(timeStamp, featuresArray))
     }
+
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
         // Nothing to do
@@ -272,19 +284,43 @@ class PredictionScreen(
         if (!currentUseCase.getModelFile().exists()) {
             return false
         }
+        return if (modelHasMetaData(currentUseCase.getModelFile())) {
+            initMetadataModel(currentUseCase.getModelFile())
+            true
+        } else {
+            initStdModel()
+            true
+        }
+    }
 
+    private fun initMetadataModel(modelFile: File) {
+        model = TFLiteModel(modelFile)
+        numDevices = model!!.getNumDevices()
+        featuresToPredict = model!!.getSensorDataToPredict()
+        predictionInterval = model!!.getPredictionInterval() + 1000L //ms
+    }
+
+    private fun modelHasMetaData(modelFile: File): Boolean {
+        val buffer = ByteBuffer.allocate(modelFile.readBytes().size)
+        buffer.put(modelFile.readBytes())
+        buffer.rewind()
+        return MetadataExtractor(buffer).hasMetadata()
+    }
+
+    private fun initStdModel() {
+        numDevices = (5).apply { predictionHelper.numDevices = this }
+        predictionHelper.numQuats = 4
+        predictionHelper.numAccs = 3
         model = TFLiteModel(
             currentUseCase.getModelFile(), intArrayOf(
                 1,
                 predictionHelper.dataVectorSize,
-                predictionHelper.dataLineFloatSize
+                predictionHelper.calcDataLineByteSize()
             ), 6
         )
-        numDevices = 5
-        if (model!!.hasMetadata) {
-            model = TFLiteModel(currentUseCase.getModelFile())
-            numDevices = model!!.extractor.getInputTensorShape(0)[2] / 6
-        }
-        return true
+        featuresToPredict = arrayListOf(
+            "DV",
+            "DQ"
+        )
     }
 }
