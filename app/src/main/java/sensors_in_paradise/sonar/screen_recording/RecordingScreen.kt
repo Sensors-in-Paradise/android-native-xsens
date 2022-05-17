@@ -226,6 +226,7 @@ class RecordingScreen(
             viewAnimator.displayedChild = tab.position
             if (tab == cameraTab) {
                 cameraManager.bindPreview()
+                cameraManager.clearPreview()
             }
         }
     }

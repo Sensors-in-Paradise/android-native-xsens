@@ -62,7 +62,6 @@ class CameraManager(
         .apply {
             setAnalyzer(imageAnalysisExecutor) { imageProxy ->
                 val rotationDegrees = imageProxy.imageInfo.rotationDegrees
-
                 imageProxy.image?.let {
                     imageProcessor?.processImage(
                         it, overlayView, rotationDegrees == 90
@@ -117,6 +116,10 @@ class CameraManager(
             isPreviewBound = false
             cameraProvider?.unbind(preview)
         }
+    }
+
+    fun clearPreview() {
+     imageProcessor?.clearView(overlayView)
     }
 
     private var isCaptureBound = false
@@ -289,7 +292,7 @@ class CameraManager(
         }
 
         if (imageProcessor != null && poseStorageManager != null) {
-            imageProcessor?.clearView(overlayView)
+            clearPreview()
             poseStorageManager?.closeFile()
             onPoseRecordingFinalized?.invoke(poseStartTime ?: 0L, poseStorageManager!!.csvFile)
         }
