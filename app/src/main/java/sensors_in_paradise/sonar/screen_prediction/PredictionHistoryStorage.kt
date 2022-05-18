@@ -19,17 +19,6 @@ class PredictionHistoryStorage(
             val roundedPercentage = round(percentage * 100) / 100
             return "$roundedPercentage %"
         }
-
-        companion object {
-            val PredictionsComparator = Comparator<Prediction> { left, right ->
-                // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
-                when {
-                    (left.percentage < right.percentage) -> 0
-                    (left.percentage > right.percentage) -> -1
-                    else -> 0
-                }
-            }
-        }
     }
 
     private lateinit var history: JSONArray

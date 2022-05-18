@@ -188,7 +188,7 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
         return result
     }
 
-	fun clone(): RecordingMetadataStorage {
+    fun clone(): RecordingMetadataStorage {
         return RecordingMetadataStorage(file!!, json)
     }
 

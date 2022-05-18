@@ -40,11 +40,6 @@ class PredictionBarChart(
         barChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
         barChart.xAxis.setDrawAxisLine(false)
         barChart.xAxis.setDrawGridLines(false)
-//        val xAxisLabels = outputLabelMap.values.map { label ->
-//            if (label.length <= 8) label
-//            else "${label.substring(0, 8)}.."
-//        }
-//        xAxis.valueFormatter = IndexAxisValueFormatter(xAxisLabels)
         barChart.xAxis.textColor = context.getColor(R.color.hardBackgroundContrast)
         barChart.xAxis.typeface = Typeface.DEFAULT_BOLD
 
@@ -67,7 +62,7 @@ class PredictionBarChart(
         barData.setValueTypeface(Typeface.DEFAULT_BOLD)
         barData.barWidth = 0.9f
 
-        barChart.setData(barData)
+        barChart.data = barData
         resetData()
     }
 

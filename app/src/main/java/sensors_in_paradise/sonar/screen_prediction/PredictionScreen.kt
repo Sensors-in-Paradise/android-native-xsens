@@ -184,7 +184,7 @@ class PredictionScreen(
             val prediction = Prediction(outputLabelMap[i]!!, percentage)
             predictions.add(prediction)
         }
-        predictions.sortWith(Prediction.PredictionsComparator)
+        predictions.sortByDescending { it.percentage }
         val highestPrediction = predictions[0]
 
         predictionBarChart.changeData(predictions, highestPrediction.label)
