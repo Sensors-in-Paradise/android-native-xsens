@@ -20,7 +20,7 @@ class RecordingUIItem(recording: Recording, private val recordingsBaseDir: File)
     private fun getFilesAndDirsToBeUploadedList(): ArrayList<File> {
         val files = ArrayList<File>()
         files.addAll(getRecordingFiles())
-        files.add(metadataStorage.file!!)
+        files.add(metadataStorage.file)
         if (hasVideoRecording()) {
             files.add(getVideoFile())
         }

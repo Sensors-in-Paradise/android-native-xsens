@@ -35,8 +35,7 @@
             motion:layout_constraintBottom_toBottomOf="parent"
             motion:layout_constraintEnd_toEndOf="@+id/guideline_left_predictionFragment"
             motion:layout_constraintTop_toTopOf="parent"
-            motion:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle"
-            />
+            motion:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle" />
 
         <Constraint
             android:id="@+id/tv_predict_prediction"
@@ -46,14 +45,11 @@
             motion:layout_constraintBottom_toBottomOf="parent"
             motion:layout_constraintEnd_toEndOf="@id/timer_predict_predict"
             motion:layout_constraintStart_toStartOf="@id/timer_predict_predict"
-            motion:layout_constraintTop_toBottomOf="@id/timer_predict_predict"
-           />
+            motion:layout_constraintTop_toBottomOf="@id/timer_predict_predict" />
     </ConstraintSet>
 
     <Transition
         motion:constraintSetEnd="@id/end"
         motion:constraintSetStart="@+id/start"
-        motion:duration="500">
-        <!--        <OnClick motion:targetId="@+id/button_start_predict"/>-->
-    </Transition>
+        motion:duration="500" />
 </MotionScene>

@@ -10,9 +10,6 @@ class PredictionHistoryStorage(
     useCase: UseCase,
     private val startTimestamp: Long,
     shouldStorePrediction: Boolean = false
-) : JSONStorage(
-    if (shouldStorePrediction) useCase.getPredictionHistoryJSONFile(startTimestamp)
-    else null
 ) {
     data class Prediction(var label: String, var percentage: Float) {
         fun percentageAsString(): String {
@@ -22,13 +19,25 @@ class PredictionHistoryStorage(
     }
 
     private lateinit var history: JSONArray
-    override fun onFileNewlyCreated() {
+    private val jsonStorage = if (shouldStorePrediction) object :
+        JSONStorage(useCase.getPredictionHistoryJSONFile(startTimestamp)) {
+        override fun onFileNewlyCreated() {
+            json.put("startTimestamp", startTimestamp)
+            json.put("history", JSONArray())
+        }
+
+        override fun onJSONInitialized() {
+            history = json.getJSONArray("history")
+        }
+
+        fun saveHistory() { save() }
+    }
+    else {
+        val json = JSONObject()
         json.put("startTimestamp", startTimestamp)
         json.put("history", JSONArray())
-    }
-
-    override fun onJSONInitialized() {
         history = json.getJSONArray("history")
+        null
     }
 
     fun addPrediction(
@@ -40,7 +49,7 @@ class PredictionHistoryStorage(
         val relativeTime = System.currentTimeMillis() - startTimestamp
         predictionObj.put("relativeTimestamp", relativeTime)
         history.put(predictionObj)
-        save()
+        jsonStorage?.saveHistory()
         return relativeTime
     }
 

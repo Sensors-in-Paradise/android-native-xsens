@@ -189,7 +189,7 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
     }
 
     fun clone(): RecordingMetadataStorage {
-        return RecordingMetadataStorage(file!!, json)
+        return RecordingMetadataStorage(file, json)
     }
 
     companion object {

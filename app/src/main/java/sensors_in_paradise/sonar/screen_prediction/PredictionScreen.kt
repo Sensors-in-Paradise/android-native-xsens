@@ -117,29 +117,29 @@ class PredictionScreen(
                 device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
                 device.startMeasuring()
             }
-        timer.base = SystemClock.elapsedRealtime()
-        timer.start()
-        textView.visibility = View.VISIBLE
-        textView.text = ""
+            timer.base = SystemClock.elapsedRealtime()
+            timer.start()
+            textView.visibility = View.VISIBLE
+            textView.text = ""
 
-        predictionBarChart.resetData()
+            predictionBarChart.resetData()
 
-        predictionHistoryStorage =
-            PredictionHistoryStorage(
-                currentUseCase,
-                System.currentTimeMillis(),
-                PreferencesHelper.shouldStorePrediction(context)
-            )
-        predictionHistoryAdapter.predictionHistory = arrayListOf()
-        predictionHistoryAdapter.addPrediction(Prediction("", 0f), 0)
+            predictionHistoryStorage =
+                PredictionHistoryStorage(
+                    currentUseCase,
+                    System.currentTimeMillis(),
+                    PreferencesHelper.shouldStorePrediction(context)
+                )
+            predictionHistoryAdapter.predictionHistory = arrayListOf()
+            predictionHistoryAdapter.addPrediction(Prediction("", 0f), 0)
 
-        isRunning = true
-        mainHandler.postDelayed(updatePredictionTask, 4000)
-        mainHandler.postDelayed(updateProgressBarTask, 100)
-        progressBar.visibility = View.VISIBLE
-        predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
+            isRunning = true
+            mainHandler.postDelayed(updatePredictionTask, 4000)
+            mainHandler.postDelayed(updateProgressBarTask, 100)
+            progressBar.visibility = View.VISIBLE
+            predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
 
-        toggleMotionLayout.transitionToEnd()
+            toggleMotionLayout.transitionToEnd()
         }
     }
 
@@ -177,7 +177,7 @@ class PredictionScreen(
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private fun addPredictionToHistory(output: FloatArray) {
+    private fun updatePrediction(output: FloatArray) {
         val predictions = ArrayList<Prediction>()
         for (i in output.indices) {
             val percentage = round(output[i] * 10000) / 100
@@ -216,7 +216,7 @@ class PredictionScreen(
 
     private fun predict(sensorDataByteBuffer: ByteBuffer) {
         lastPredictionTime = System.currentTimeMillis()
-        model?.predict(sensorDataByteBuffer)?.let { addPredictionToHistory(it) }
+        model?.predict(sensorDataByteBuffer)?.let { updatePrediction(it) }
     }
 
     override fun onActivityCreated(activity: Activity) {
@@ -265,7 +265,8 @@ class PredictionScreen(
         val barChart: BarChart = activity.findViewById(R.id.barChart_predict_predictions)
         predictionBarChart =
             PredictionBarChart(context, barChart, numOutputs, predictionInterval)
-        toggleMotionLayout = activity.findViewById(R.id.motionLayout_predictionToggling_predictionFragment)
+        toggleMotionLayout =
+            activity.findViewById(R.id.motionLayout_predictionToggling_predictionFragment)
 
         mainHandler = Handler(Looper.getMainLooper())
     }
