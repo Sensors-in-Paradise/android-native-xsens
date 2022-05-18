@@ -6,15 +6,14 @@ import android.widget.Toast
 import sensors_in_paradise.sonar.XSensDotDeviceWithOfflineMetadata
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import kotlin.math.max
-import kotlin.math.min
 import kotlin.properties.Delegates
 
 class PredictionHelper(
     private val context: Context,
-    private val showToasts: Boolean
-) {
+    private val showToasts: Boolean,
 
+    ) {
+    lateinit var normalizationParams: HashMap<String, HashMap<String, ArrayList<Double>>>
     var numDevices by Delegates.notNull<Int>()
     private val sizeOfFloat = 4
     var numQuats by Delegates.notNull<Int>()
@@ -24,7 +23,7 @@ class PredictionHelper(
 
     private var dataLineByteSize by Delegates.notNull<Int>()
     var dataLineFloatSize by Delegates.notNull<Int>()
-    val dataVectorSize = 180
+    var dataVectorSize by Delegates.notNull<Int>()
 
     private fun calcDataLineFloatSize(): Int {
         return ((numQuats + numAccs + numGyros) * numDevices).apply { dataLineFloatSize = this }
@@ -103,12 +102,16 @@ class PredictionHelper(
         }
     }
 
-    private fun normalizeLine(dataArray: FloatArray, meanArray: DoubleArray, stdArray: DoubleArray): FloatArray {
+    private fun normalizeLine(
+        dataArray: FloatArray,
+        normalizationParams: java.util.HashMap<String, java.util.ArrayList<Double>>?
+    ): FloatArray {
         val numElements = numQuats + numAccs + numGyros
         val normalizedArray = FloatArray(numElements)
         for (i in 0 until numElements) {
-
-            normalizedArray[i] = ((dataArray[i].toDouble() - meanArray[i]) / stdArray[i]).toFloat()
+            normalizedArray[i] =
+                ((dataArray[i].toDouble() - (normalizationParams?.get("mean")?.get(i)
+                    ?: 0.0)) / (normalizationParams?.get("std")?.get(i) ?: 1.0)).toFloat()
         }
         return normalizedArray
     }
@@ -154,12 +157,28 @@ class PredictionHelper(
 
                 var normalizedFloatArray = FloatArray(0)
 
+
                 when (XSensDotDeviceWithOfflineMetadata.extractTagPrefixFromTag(deviceTag)) {
-                    "LF" -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-0.8126836, -0.79424906, -0.7957623, -0.8094078, -31.278593, -32.166283, -18.486694), doubleArrayOf(0.8145418, 0.79727143, 0.81989765, 0.8027102, 28.956848, 30.199568, 22.69250))
-                    "LW" -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-0.8398707, -0.8926556, -0.9343553, -0.9552342, -11.258037, -10.1190405, -8.37381), doubleArrayOf(0.7309214, 0.9186623, 0.97258735, 0.9084077, 10.640987, 11.26736, 12.94717))
-                    "ST" -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-0.87042844, -0.6713179, -0.6706054, -0.80093706, -20.164385, -20.21316, -8.670398), doubleArrayOf(0.87503606, 0.686213, 0.67588365, 0.8398282, 15.221635, 13.93141, 11.75221))
-                    "RW" -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-0.9208972, -0.8918428, -0.9212201, -0.9103423, -14.090326, -14.17955, -11.573973), doubleArrayOf(0.93993384, 0.888225, 0.9099328, 0.9181471, 14.901558, 11.34146, 15.649994))
-                    "RF" -> normalizedFloatArray = normalizeLine((deviceDataList[row].second), doubleArrayOf(-0.8756618, -0.85241073, -0.8467437, -0.8629473, -31.345306, -31.825573, -16.296654), doubleArrayOf(0.8837259, 0.98513246, 0.9278882, 0.8547427, 31.27872, 30.43604, 20.430))
+                    "LF" -> normalizedFloatArray = normalizeLine(
+                        (deviceDataList[row].second),
+                        normalizationParams["LF"]
+                    )
+                    "RF" -> normalizedFloatArray = normalizeLine(
+                        (deviceDataList[row].second),
+                        normalizationParams["RF"]
+                    )
+                    "LW" -> normalizedFloatArray = normalizeLine(
+                        (deviceDataList[row].second),
+                        normalizationParams["LW"]
+                    )
+                    "RW" -> normalizedFloatArray = normalizeLine(
+                        (deviceDataList[row].second),
+                        normalizationParams["RW"]
+                    )
+                    "STS" -> normalizedFloatArray = normalizeLine(
+                        (deviceDataList[row].second),
+                        normalizationParams["ST"]
+                    )
                     else -> { // Note the block
                         UIHelper.showAlert(context, "Unknown Device!")
                     }

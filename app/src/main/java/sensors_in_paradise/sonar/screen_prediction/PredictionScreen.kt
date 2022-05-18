@@ -298,6 +298,7 @@ class PredictionScreen(
         numDevices = model!!.getNumDevices()
         featuresToPredict = model!!.getSensorDataToPredict()
         predictionInterval = model!!.getPredictionInterval() + 1000L //ms
+        predictionHelper.normalizationParams = model!!.normalizationParams
     }
 
     private fun modelHasMetaData(modelFile: File): Boolean {

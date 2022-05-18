@@ -63,7 +63,7 @@ class UseCase(
     }
 
     fun importDefaultModel() {
-        extractFileFromAssets(context, "model8.tflite", getModelFile())
+        extractFileFromAssets(context, "model12.tflite", getModelFile())
     }
 
     fun getDisplayInfo(): String {

@@ -19,9 +19,6 @@ class GlobalValues private constructor() {
         const val ACTIVE_RECORDING_FLAG_FILENAME = "active"
         const val METADATA_JSON_FILENAME = "metadata.json"
         const val MEASUREMENT_MODE = XsensDotPayload.PAYLOAD_TYPE_CUSTOM_MODE_4
-        fun getSensorRecordingsBaseDir(context: Context): File {
-            return context.getExternalFilesDir(null) ?: context.dataDir
-        }
 
         fun getSensorRecordingsTempDir(context: Context): File {
             return context.dataDir.resolve("temp")
