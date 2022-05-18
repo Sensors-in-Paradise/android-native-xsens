@@ -18,10 +18,11 @@ import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.core.util.Consumer
 import androidx.lifecycle.LifecycleOwner
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.*
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Device
 import sensors_in_paradise.sonar.screen_recording.LoggingManager
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.ImageProcessor
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.ModelType
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.MoveNet
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.PoseEstimationStorageManager
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.File
@@ -251,24 +252,30 @@ class CameraManager(
             bindImageAnalyzer()
         }
 
-        val poseEstimator = createPoseEstimator()
-        poseStorageManager = if (poseStorageManager == null) {
-            PoseEstimationStorageManager(outputFile)
-        } else {
-            poseStorageManager!!.reset(outputFile)
-        }
+        if (shouldRecordPose()) {
+            val poseModel = PreferencesHelper.getPoseEstimationModel(context)
+
+            poseStorageManager = if (poseStorageManager == null) {
+                PoseEstimationStorageManager(outputFile)
+            } else {
+                poseStorageManager!!.reset(outputFile)
+            }
 
         val localDateTime = LocalDateTime.now()
         poseStorageManager!!.writeHeader(
             localDateTime,
             Pair(ImageProcessor.INPUT_WIDTH, ImageProcessor.INPUT_HEIGHT),
-            "ThunderI8",
+            poseModel.toString(),
             2
         )
         poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
 
-        imageProcessor =
-            imageProcessor ?: ImageProcessor(context, poseEstimator, poseStorageManager!!)
+            val isPoseModelActual = imageProcessor?.poseDetector?.modelType == poseModel
+            if (imageProcessor == null || !isPoseModelActual) {
+                imageProcessor =
+                    ImageProcessor(context, createPoseEstimator(poseModel), poseStorageManager!!)
+            }
+        }
     }
 
     /** Stops the recording and returns the UNIX timestamp of
@@ -302,8 +309,7 @@ class CameraManager(
         return shouldShowVideo() && PreferencesHelper.shouldStorePoseEstimation(context)
     }
 
-    private fun createPoseEstimator(): MoveNet {
-        val modelType = ModelType.ThunderI8
+    private fun createPoseEstimator(modelType: ModelType): MoveNet {
         val targetDevice = Device.GPU
 
         return MoveNet.create(context, targetDevice, modelType)

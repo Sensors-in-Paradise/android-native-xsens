@@ -20,13 +20,14 @@
 
     <PreferenceCategory app:title="Appearance">
         <SwitchPreferenceCompat
-            app:key="unfollowSystemTheme"
-            app:summary="If this setting is enabled, the app will not follow the selected system theme, meaning you can choose light or dark mode for this app individually"
-            app:title="Do not use system theme"
-            app:defaultValue="false"/>
+            app:key="followSystemTheme"
+            app:summary="If enabled, the app will follow the selected system theme. \nIf disabled, you can choose light or dark mode for this app individually"
+            app:title="Use system theme"
+            app:defaultValue="true"
+            android:disableDependentsState="true"/>
 
         <SwitchPreferenceCompat
-            app:dependency="unfollowSystemTheme"
+            app:dependency="followSystemTheme"
             app:key="darkMode"
             app:title="Dark mode" />
     </PreferenceCategory>
@@ -64,17 +65,29 @@
             app:defaultValue="HD"
             app:title="Camera recording quality"
             android:entries="@array/video_quality_labels"
-            android:entryValues="@array/video_quality_values"
-            />
+            android:entryValues="@array/video_quality_values" />
         <SwitchPreferenceCompat
             app:dependency="recordWithCamera"
             app:key="storePoseEstimation"
             app:title="Store estimated poses as stickman"
             app:summary="Store pose data estimated by TensorFlow-MoveNet when recording."/>
+        <ListPreference
+            app:dependency="storePoseEstimation"
+            app:key="poseEstimationModel"
+            app:title="Pose Estimation Model"
+            app:summary="(Models marked with ⚠ won't run GPU accelerated.)"
+            android:defaultValue="@string/default_pose_estimation_model"
+            android:entries="@array/pose_estimation_model_labels"
+            android:entryValues="@array/pose_estimation_model_values" />
         <SwitchPreference
             app:key="showPoseBackground"
             app:title="Stickman Background"
             app:summary="Show selected background image for Pose Sequence in Label Editor. Please note that you can only select png files."/>
+        <Preference
+            app:enabled="false"
+            android:selectable="false"
+            android:persistent="false"
+            android:summary="⚠ The combination of video capture and pose estimation can result in reduced performance."/>
     </PreferenceCategory>
     <PreferenceCategory app:title="Advanced sensor options">
         <SwitchPreferenceCompat

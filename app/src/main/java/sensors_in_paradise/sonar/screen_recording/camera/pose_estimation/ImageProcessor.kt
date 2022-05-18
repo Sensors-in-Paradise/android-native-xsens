@@ -11,7 +11,7 @@ import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Pe
 
 class ImageProcessor(
     private val context: Context,
-    private val poseDetector: PoseDetector,
+    val poseDetector: PoseDetector,
     private val poseEstimationStorageManager: PoseEstimationStorageManager
 ) {
     companion object {
