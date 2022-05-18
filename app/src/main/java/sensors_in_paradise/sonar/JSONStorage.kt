@@ -61,4 +61,10 @@ abstract class JSONStorage @Throws(
     fun getJsonString(indentSpaces: Int = 4): String {
         return json.toString(indentSpaces)
     }
+    companion object {
+        @JvmStatic
+        protected fun getOrCreateChildObj(root: JSONObject, child: String): JSONObject {
+            return root.optJSONObject(child) ?: JSONObject().apply { root.put(child, this) }
+        }
+    }
 }

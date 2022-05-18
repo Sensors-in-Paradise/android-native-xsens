@@ -2,6 +2,7 @@ package sensors_in_paradise.sonar.util
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.camera.video.Quality
 import androidx.preference.PreferenceManager
 import sensors_in_paradise.sonar.R
@@ -30,6 +31,7 @@ class PreferencesHelper private constructor() {
                 "cloudBaseURL",
                 context.getString(R.string.default_webdav_cloud_url)
             )!!
+            Log.d("PreferencesHelper", "url: $url")
             if (url.endsWith("/")) {
                 return url
             }
