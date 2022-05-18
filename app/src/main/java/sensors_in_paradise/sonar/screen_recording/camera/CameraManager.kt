@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.page2.camera
+package sensors_in_paradise.sonar.screen_recording.camera
 
 import android.annotation.SuppressLint
 import android.content.Context

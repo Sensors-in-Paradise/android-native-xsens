@@ -15,7 +15,7 @@ import com.xsens.dot.android.sdk.events.XsensDotData
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
 import sensors_in_paradise.sonar.XSENSArrayList
-import sensors_in_paradise.sonar.page2.camera.CameraManager
+import sensors_in_paradise.sonar.screen_recording.camera.CameraManager
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.use_cases.UseCase
 import java.io.IOException
