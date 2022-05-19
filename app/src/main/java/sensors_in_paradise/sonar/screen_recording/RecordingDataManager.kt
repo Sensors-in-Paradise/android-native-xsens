@@ -1,6 +1,5 @@
 package sensors_in_paradise.sonar.screen_recording
 
-import android.util.Log
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.ObservableArrayList
 import java.io.File
@@ -82,7 +81,7 @@ class RecordingDataManager(recordingsDir: File) :
         val result = mutableMapOf<String, Long>()
         for (recording in this.filter { !it.metadataStorage.hasBeenUsedForOnDeviceTraining() }) {
             val activityDuration = getActivityDurationsOfRecording(filterForPerson, recording)
-            activityDuration.forEach { (name, duration) -> result.merge(name, duration, Long::plus)}
+            activityDuration.forEach { (name, duration) -> result.merge(name, duration, Long::plus) }
         }
         return result
     }
@@ -91,7 +90,7 @@ class RecordingDataManager(recordingsDir: File) :
         val result = mutableMapOf<String, Long>()
         for (recording in this) {
             val activityDuration = getActivityDurationsOfRecording(filterForPerson, recording)
-            activityDuration.forEach { (name, duration) -> result.merge(name, duration, Long::plus)}
+            activityDuration.forEach { (name, duration) -> result.merge(name, duration, Long::plus) }
         }
         return result
     }
@@ -126,7 +125,7 @@ class RecordingDataManager(recordingsDir: File) :
         val result = mutableMapOf<String, Long>()
         for (recording in this.filter { !it.metadataStorage.hasBeenUsedForOnDeviceTraining() }) {
             val peopleDuration = getPeopleDurationsOfRecording(filterForActivity, recording)
-            peopleDuration.forEach { (name, duration) -> result.merge(name, duration, Long::plus)}
+            peopleDuration.forEach { (name, duration) -> result.merge(name, duration, Long::plus) }
         }
         return result
     }
@@ -135,7 +134,7 @@ class RecordingDataManager(recordingsDir: File) :
         val result = mutableMapOf<String, Long>()
         for (recording in this) {
             val peopleDuration = getPeopleDurationsOfRecording(filterForActivity, recording)
-            peopleDuration.forEach { (name, duration) -> result.merge(name, duration, Long::plus)}
+            peopleDuration.forEach { (name, duration) -> result.merge(name, duration, Long::plus) }
         }
         return result
     }

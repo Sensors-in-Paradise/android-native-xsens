@@ -2,10 +2,7 @@ package sensors_in_paradise.sonar.screen_data
 
 import android.app.Activity
 import android.content.Context
-import android.util.Log
 import android.widget.Button
-import android.widget.CompoundButton
-import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.view.isVisible
@@ -92,7 +89,7 @@ class DataScreen(
                 peoplePieChart.isHighlightPerTapEnabled = true
             }
         })
-        activitiesPieChart.description.isEnabled = false;
+        activitiesPieChart.description.isEnabled = false
 
         peoplePieChart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
             override fun onValueSelected(e: Entry?, h: Highlight?) {

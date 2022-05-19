@@ -3,11 +3,8 @@ package sensors_in_paradise.sonar
 import android.Manifest
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import java.io.File
-import java.net.NetworkInterface
-import java.net.SocketException
 import java.util.*
 import kotlin.collections.ArrayList
 

@@ -3,11 +3,9 @@
 package sensors_in_paradise.sonar.screen_recording
 
 import android.os.Build
-import android.util.Log
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
 import java.lang.IndexOutOfBoundsException
