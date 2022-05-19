@@ -2,7 +2,6 @@ package sensors_in_paradise.sonar.util
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.camera.video.Quality
 import androidx.preference.PreferenceManager
 import sensors_in_paradise.sonar.R
