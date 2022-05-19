@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.page2.camera
+package sensors_in_paradise.sonar.screen_recording.camera
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -57,13 +57,12 @@ class CameraManager(
     @SuppressLint("UnsafeOptInUsageError")
     private val imageAnalysis = ImageAnalysis.Builder()
         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-        .setTargetResolution(Size(1280, 720))
+        .setTargetResolution(Size(ImageProcessor.INPUT_WIDTH, ImageProcessor.INPUT_HEIGHT))
         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
         .build()
         .apply {
             setAnalyzer(imageAnalysisExecutor) { imageProxy ->
                 val rotationDegrees = imageProxy.imageInfo.rotationDegrees
-
                 imageProxy.image?.let {
                     imageProcessor?.processImage(
                         it, overlayView, rotationDegrees == 90
@@ -118,6 +117,10 @@ class CameraManager(
             isPreviewBound = false
             cameraProvider?.unbind(preview)
         }
+    }
+
+    fun clearPreview() {
+     imageProcessor?.clearView(overlayView)
     }
 
     private var isCaptureBound = false
@@ -258,9 +261,14 @@ class CameraManager(
                 poseStorageManager!!.reset(outputFile)
             }
 
-            val localDateTime = LocalDateTime.now()
-            poseStorageManager!!.writeHeader(localDateTime, poseModel.toString(), 2)
-            poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
+        val localDateTime = LocalDateTime.now()
+        poseStorageManager!!.writeHeader(
+            localDateTime,
+            Pair(ImageProcessor.INPUT_WIDTH, ImageProcessor.INPUT_HEIGHT),
+            poseModel.toString(),
+            2
+        )
+        poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
 
             val isPoseModelActual = imageProcessor?.poseDetector?.modelType == poseModel
             if (imageProcessor == null || !isPoseModelActual) {
@@ -291,7 +299,7 @@ class CameraManager(
         }
 
         if (imageProcessor != null && poseStorageManager != null) {
-            imageProcessor?.clearView(overlayView)
+            clearPreview()
             poseStorageManager?.closeFile()
             onPoseRecordingFinalized?.invoke(poseStartTime ?: 0L, poseStorageManager!!.csvFile)
         }
