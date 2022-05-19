@@ -48,7 +48,7 @@ abstract class JSONStorage @Throws(
     @Throws(IOException::class)
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     fun save() {
-        Files.write(file.toPath(), json.toString().encodeToByteArray())
+        saveJSONObject(json, file)
     }
 
     /** Initialize the json object with all its members here.
@@ -61,7 +61,12 @@ abstract class JSONStorage @Throws(
     fun getJsonString(indentSpaces: Int = 4): String {
         return json.toString(indentSpaces)
     }
+
     companion object {
+        fun saveJSONObject(obj: JSONObject, file: File) {
+            Files.write(file.toPath(), obj.toString().encodeToByteArray())
+        }
+
         @JvmStatic
         protected fun getOrCreateChildObj(root: JSONObject, child: String): JSONObject {
             return root.optJSONObject(child) ?: JSONObject().apply { root.put(child, this) }

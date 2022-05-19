@@ -65,7 +65,8 @@
             app:defaultValue="HD"
             app:title="Camera recording quality"
             android:entries="@array/video_quality_labels"
-            android:entryValues="@array/video_quality_values" />
+            android:entryValues="@array/video_quality_values"
+            />
         <SwitchPreferenceCompat
             app:dependency="recordWithCamera"
             app:key="storePoseEstimation"
@@ -89,15 +90,22 @@
             android:persistent="false"
             android:summary="⚠ The combination of video capture and pose estimation can result in reduced performance."/>
     </PreferenceCategory>
+    <PreferenceCategory app:title="Activity prediction options">
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:key="storePrediction"
+            app:title="Store prediction as file" />
+    </PreferenceCategory>
     <PreferenceCategory app:title="Advanced sensor options">
         <SwitchPreferenceCompat
-            app:key="viewHeadingMenuItems"
             app:defaultValue="false"
+            app:key="viewHeadingMenuItems"
             app:summary="Show menu items for resetting or reverting sensor heading. \nHeading reset aligns heading (orientation) outputs among all sensors and with
 the object they are connected to. \nMore detailed information can be found in the Xsens Dot User Manual subsection 4.1.3"
             app:title="Sensor heading options" />
-        <Preference android:title="XSens Dot User Manual" >
-            <intent android:action="android.intent.action.VIEW"
+        <Preference android:title="XSens Dot User Manual">
+            <intent
+                android:action="android.intent.action.VIEW"
                 android:data="https://www.xsens.com/hubfs/Downloads/Manuals/Xsens%20DOT%20User%20Manual.pdf" />
         </Preference>
     </PreferenceCategory>
@@ -107,22 +115,22 @@ the object they are connected to. \nMore detailed information can be found in th
             android:key="cloudBaseURL"
             android:selectAllOnFocus="false"
             android:singleLine="true"
-            android:title="WebDAV URL"
-            android:summary="The base url for the WebDAV cloud you want to upload your files to"/>
+            android:summary="The base url for the WebDAV cloud you want to upload your files to"
+            android:title="WebDAV URL" />
         <EditTextPreference
             android:defaultValue="@string/default_webdav_username"
             android:key="cloudWebDAVUserName"
             android:selectAllOnFocus="false"
             android:singleLine="true"
-            android:title="WebDAV user name"
-            android:summary="The user name for logging into your WebDAV cloud account"/>
+            android:summary="The user name for logging into your WebDAV cloud account"
+            android:title="WebDAV user name" />
         <EditTextPreference
             android:defaultValue=""
             android:key="cloudWebDavToken"
             android:selectAllOnFocus="false"
             android:singleLine="true"
-            android:title="WebDAV token"
-            android:summary="The token for logging into your WebDAV cloud account"/>
+            android:summary="The token for logging into your WebDAV cloud account"
+            android:title="WebDAV token" />
         <SwitchPreferenceCompat
             android:id="@+id/switchPreferenceCompat"
             android:layout_width="wrap_content"

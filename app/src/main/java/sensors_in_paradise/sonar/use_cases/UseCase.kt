@@ -44,6 +44,15 @@ class UseCase(
         return useCaseDir.resolve("trainHistory.json")
     }
 
+    private fun getPredictionsDir(): File {
+        return useCaseDir.resolve("predictions").apply { mkdir() }
+    }
+
+    fun getPredictionHistoryJSONFile(startTimestamp: Long): File {
+        val predictionsDir = getPredictionsDir()
+        return predictionsDir.resolve("$startTimestamp.json")
+    }
+
     fun getAvailableRecordingSubDirs(): List<String> {
         val subDirs =
             (getRecordingsDir().listFiles { d, name -> File(d, name).isDirectory })?.map { it.name }

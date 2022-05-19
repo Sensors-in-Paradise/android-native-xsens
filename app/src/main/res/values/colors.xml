@@ -2,9 +2,11 @@
 <resources>
     <color name="colorPrimary">#ffab91</color>
     <color name="colorPrimaryDark">#c97b63</color>
+    <color name="colorSecondary">#E53935</color>
     <color name="colorAccent">#90a4ae</color>
     <color name="backgroundContrast">#e0e0e0</color>
     <color name="slightBackgroundContrast">#263238</color>
+    <color name="hardBackgroundContrast">#FFF</color>
     <color name="stickmanJoints">#c97b63</color>
 
     <color name="transparent">#00FF5722</color>

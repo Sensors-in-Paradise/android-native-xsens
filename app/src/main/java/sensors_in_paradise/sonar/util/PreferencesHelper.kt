@@ -107,6 +107,10 @@ class PreferencesHelper private constructor() {
             }
         }
 
+        fun shouldStorePrediction(context: Context): Boolean {
+            return getSharedPreferences(context).getBoolean("storePrediction", false)
+        }
+
         fun getPoseEstimationModel(context: Context): ModelType {
             return when (getSharedPreferences(context).getString(
                 "poseEstimationModel",
