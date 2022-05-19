@@ -31,7 +31,6 @@ class PreferencesHelper private constructor() {
                 "cloudBaseURL",
                 context.getString(R.string.default_webdav_cloud_url)
             )!!
-            Log.d("PreferencesHelper", "url: $url")
             if (url.endsWith("/")) {
                 return url
             }
