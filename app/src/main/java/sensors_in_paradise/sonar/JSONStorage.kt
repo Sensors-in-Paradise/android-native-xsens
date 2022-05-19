@@ -61,7 +61,7 @@ abstract class JSONStorage @Throws(
     fun getJsonString(indentSpaces: Int = 4): String {
         return json.toString(indentSpaces)
     }
-    
+
     companion object {
         fun saveJSONObject(obj: JSONObject, file: File) {
             Files.write(file.toPath(), obj.toString().encodeToByteArray())
