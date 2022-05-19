@@ -73,6 +73,8 @@ class DataScreen(
                 peoplePieChart.isHighlightPerTapEnabled = true
             }
         })
+        activitiesPieChart.description.isEnabled = false;
+
         peoplePieChart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
             override fun onValueSelected(e: Entry?, h: Highlight?) {
                 val pieEntry = e as PieEntry?
@@ -89,6 +91,7 @@ class DataScreen(
                 activitiesPieChart.isHighlightPerTapEnabled = true
             }
         })
+        peoplePieChart.description.isEnabled = false;
     }
 
     override fun onScreenOpened() {
