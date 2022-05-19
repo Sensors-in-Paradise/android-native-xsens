@@ -12,8 +12,8 @@ import java.text.DateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class TrainingHistoryAdapter(trainingHistory: ArrayList<TrainingHistoryStorage.TrainingOccasion>) :
-    RecyclerView.Adapter<TrainingHistoryAdapter.ViewHolder>() {
+class DataHistoryAdapter(trainingHistory: ArrayList<DataHistoryStorage.TrainingOccasion>) :
+    RecyclerView.Adapter<DataHistoryAdapter.ViewHolder>() {
     var trainingHistory = trainingHistory
         @SuppressLint("NotifyDataSetChanged")
         set(value) {
@@ -34,7 +34,7 @@ class TrainingHistoryAdapter(trainingHistory: ArrayList<TrainingHistoryStorage.T
         viewType: Int
     ): ViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.training_occasion, parent, false)
+            .inflate(R.layout.data_occasion, parent, false)
         return ViewHolder(view)
     }
 

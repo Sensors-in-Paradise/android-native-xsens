@@ -30,13 +30,6 @@
             app:key="darkMode"
             app:title="Dark mode" />
     </PreferenceCategory>
-    <PreferenceCategory app:title="Advances Features">
-        <SwitchPreferenceCompat
-            app:key="onDeviceTraining"
-            app:summary="Shows a tab on which transfer learning of the model of the current use case can be triggered"
-            app:title="On-device training "
-            app:defaultValue="false"/>
-    </PreferenceCategory>
     <PreferenceCategory app:title="Developer options">
         <SwitchPreferenceCompat
             app:key="verboseToasts"

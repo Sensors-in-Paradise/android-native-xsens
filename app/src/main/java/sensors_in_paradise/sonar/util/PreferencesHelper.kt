@@ -84,10 +84,6 @@ class PreferencesHelper private constructor() {
             return getSharedPreferences(context).getBoolean("viewHeadingMenuItems", false)
         }
 
-        fun isOnDeviceTrainingScreenEnabled(context: Context): Boolean {
-            return getSharedPreferences(context).getBoolean("onDeviceTraining", false)
-        }
-
         fun getCameraRecordingQuality(context: Context): Quality {
             return when (getSharedPreferences(context).getString("videoRecordingQuality", "LOWEST")) {
                 "HIGHEST" -> Quality.HIGHEST

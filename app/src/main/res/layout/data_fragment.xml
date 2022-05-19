@@ -17,7 +17,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Data available for training "
+            android:text="Data collected "
             android:textSize="20sp" />
 
         <TextView
@@ -46,7 +46,7 @@
                     android:textAlignment="center" />
 
                 <com.github.mikephil.charting.charts.PieChart
-                    android:id="@+id/pieChart_availableData_trainingFragment"
+                    android:id="@+id/pieChart_availableData_dataFragment"
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
                     android:layout_weight="1" />
@@ -67,7 +67,7 @@
                     android:textAlignment="center" />
 
                 <com.github.mikephil.charting.charts.PieChart
-                    android:id="@+id/pieChart_availableDataPeople_trainingFragment"
+                    android:id="@+id/pieChart_availableDataPeople_dataFragment"
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
                     android:layout_weight="1" />
@@ -81,7 +81,7 @@
             android:text="Training history"
             android:textSize="20sp" />
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView_history_trainingFragment"
+            android:id="@+id/recyclerView_history_dataFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layoutManager="LinearLayoutManager"
@@ -95,7 +95,7 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/button_trainModel_trainingFragment"
+        android:id="@+id/button_trainModel_dataFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"

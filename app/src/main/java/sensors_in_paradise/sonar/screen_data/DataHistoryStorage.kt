@@ -5,7 +5,7 @@ import org.json.JSONObject
 import sensors_in_paradise.sonar.JSONStorage
 import sensors_in_paradise.sonar.use_cases.UseCase
 
-class TrainingHistoryStorage(useCase: UseCase) :
+class DataHistoryStorage(useCase: UseCase) :
     JSONStorage(useCase.getTrainingHistoryJSONFile()) {
     data class TrainingOccasion(
         val timestamp: Long,
