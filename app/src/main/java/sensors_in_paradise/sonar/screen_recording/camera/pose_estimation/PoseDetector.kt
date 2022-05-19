@@ -24,6 +24,8 @@ import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Pe
 
 interface PoseDetector : AutoCloseable {
 
+    val modelType: ModelType
+
     fun estimatePoses(bitmap: Bitmap): List<Person>
 
     fun lastInferenceTimeNanos(): Long

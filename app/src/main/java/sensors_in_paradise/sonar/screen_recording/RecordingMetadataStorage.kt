@@ -1,4 +1,5 @@
 @file:Suppress("SwallowedException")
+
 package sensors_in_paradise.sonar.screen_recording
 
 import android.os.Build
@@ -8,12 +9,15 @@ import org.json.JSONObject
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.JSONStorage
 import java.io.File
+import java.lang.IndexOutOfBoundsException
 
-class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JSONStorage(file, initialJson) {
+class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) :
+    JSONStorage(file, initialJson) {
     data class LabelEntry(
         var timeStarted: Long,
         var activity: String
     )
+
     private lateinit var activities: JSONArray
     override fun onFileNewlyCreated() {
         activities = JSONArray()
@@ -56,7 +60,7 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
         }
     }
 
-	fun setActivities(activities: ArrayList<LabelEntry>, save: Boolean = false) {
+    fun setActivities(activities: ArrayList<LabelEntry>, save: Boolean = false) {
         clearActivities()
         for (activity in activities) {
             addActivity(activity)
@@ -66,7 +70,7 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
         }
     }
 
-	fun getActivities(): ArrayList<LabelEntry> {
+    fun getActivities(): ArrayList<LabelEntry> {
         val result = ArrayList<LabelEntry>()
         for (i in 0 until activities.length()) {
             val activityObj = activities[i] as JSONObject
@@ -77,29 +81,29 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
         return result
     }
 
-	fun getVideoCaptureStartedTime(): Long? {
+    fun getVideoCaptureStartedTime(): Long? {
         val v = json.optLong("videoCaptureStartTime")
         return if (v != 0L) v else null
     }
 
-	fun getPoseCaptureStartedTime(): Long? {
+    fun getPoseCaptureStartedTime(): Long? {
         val v = json.optLong("poseCaptureStartTime")
         return if (v != 0L) v else null
     }
 
-	fun getDuration(): Long {
+    fun getDuration(): Long {
         return getTimeEnded() - getTimeStarted()
     }
 
-	fun getTimeStarted(): Long {
+    fun getTimeStarted(): Long {
         return json.getLong("startTimestamp")
     }
 
-	fun getTimeEnded(): Long {
+    fun getTimeEnded(): Long {
         return json.getLong("endTimestamp")
     }
 
-	fun getPerson(): String {
+    fun getPerson(): String {
         return json.getString("person")
     }
 
@@ -146,9 +150,9 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
     }
 
     private fun clearActivities() {
-       while (activities.length() > 0) {
-               activities.remove(0)
-           }
+        while (activities.length() > 0) {
+            activities.remove(0)
+        }
     }
 
     private fun addActivity(activity: LabelEntry) {
@@ -194,5 +198,19 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) : JS
 
     companion object {
         private const val ON_DEVICE_TRAINING_METADATA_KEY = "onDeviceTraining"
+        fun getDurationOfActivity(
+            activities: ArrayList<LabelEntry>,
+            index: Int,
+            recordingEndedTimeStamp: Long
+        ): Long {
+            // index is allowed to be equal to activities.size
+            if (index >= activities.size || index < 0) {
+                throw IndexOutOfBoundsException("Index $index out of bounds for activities of size ${activities.size}")
+            }
+            val timeStarted = activities[index].timeStarted
+            val timeEnded =
+                if (index + 1 < activities.size) activities[index + 1].timeStarted else recordingEndedTimeStamp
+            return timeEnded - timeStarted
+        }
     }
 }

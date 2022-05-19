@@ -4,11 +4,11 @@
         <item>Reply</item>
         <item>Reply to all</item>
     </string-array>
-
     <string-array name="reply_values">
         <item>reply</item>
         <item>reply_all</item>
     </string-array>
+
     <string-array name="video_quality_labels">
         <item>Highest available</item>
         <item>UHD</item>
@@ -24,5 +24,18 @@
         <item>HD</item>
         <item>SD</item>
         <item>LOWEST</item>
+    </string-array>
+
+    <string-array name="pose_estimation_model_labels">
+        <item>Thunder Float16 ⚠</item>
+        <item>Thunder Int8</item>
+        <item>Lightning Float16 ⚠</item>
+        <item>Lightning Int8</item>
+    </string-array>
+    <string-array name="pose_estimation_model_values">
+        <item>ThunderF16</item>
+        <item>ThunderI8</item>
+        <item>LightningF16</item>
+        <item>LightningI8</item>
     </string-array>
 </resources>

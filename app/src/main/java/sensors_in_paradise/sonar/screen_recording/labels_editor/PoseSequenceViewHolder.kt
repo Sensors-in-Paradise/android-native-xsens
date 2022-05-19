@@ -13,9 +13,10 @@ class PoseSequenceViewHolder(
     private val context: Context,
     private val textureView: TextureView,
     onSourceLoadedListener: () -> Unit,
-    onStartLoadingSource: () -> Unit
+    onStartLoadingSource: () -> Unit,
+    onSeekToNewPosition: ((ms: Long) -> Unit)? = null
 ) :
-    VisualSequenceViewHolder(onSourceLoadedListener, onStartLoadingSource) {
+    VisualSequenceViewHolder(onSourceLoadedListener, onStartLoadingSource, onSeekToNewPosition) {
     private var poseSequence: PoseSequence? = null
 
     init {
@@ -28,6 +29,7 @@ class PoseSequenceViewHolder(
     }
 
     override fun seekTo(ms: Long) {
+        super.seekTo(ms)
         poseSequence?.let { poseSequence ->
             val persons = getPosesAtTime(ms, poseSequence)
             drawOnCanvas(persons)

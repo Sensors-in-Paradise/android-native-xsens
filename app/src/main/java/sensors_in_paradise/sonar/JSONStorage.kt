@@ -66,5 +66,10 @@ abstract class JSONStorage @Throws(
         fun saveJSONObject(obj: JSONObject, file: File) {
             Files.write(file.toPath(), obj.toString().encodeToByteArray())
         }
+
+        @JvmStatic
+        protected fun getOrCreateChildObj(root: JSONObject, child: String): JSONObject {
+            return root.optJSONObject(child) ?: JSONObject().apply { root.put(child, this) }
+        }
     }
 }

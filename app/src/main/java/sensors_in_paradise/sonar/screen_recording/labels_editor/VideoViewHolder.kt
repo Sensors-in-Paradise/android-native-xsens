@@ -7,9 +7,10 @@ import android.widget.VideoView
 class VideoViewHolder(
     private val videoView: VideoView,
     onSourceLoadedListener: () -> Unit,
-    onStartLoadingSource: () -> Unit
+    onStartLoadingSource: () -> Unit,
+    onSeekToNewPosition: ((ms: Long) -> Unit)? = null
 ) :
-    VisualSequenceViewHolder(onSourceLoadedListener, onStartLoadingSource) {
+    VisualSequenceViewHolder(onSourceLoadedListener, onStartLoadingSource, onSeekToNewPosition) {
     private var mediaPlayer: MediaPlayer? = null
 
     override fun loadSource(sourcePath: String, onSourceLoadedListener: () -> Unit) {
@@ -23,6 +24,7 @@ class VideoViewHolder(
     }
 
     override fun seekTo(ms: Long) {
+        super.seekTo(ms)
         try {
             mediaPlayer?.seekTo(ms, MediaPlayer.SEEK_CLOSEST)
         } catch (e: IllegalStateException) {
