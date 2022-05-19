@@ -7,9 +7,9 @@ import sensors_in_paradise.sonar.use_cases.UseCase
 import kotlin.math.round
 
 class PredictionHistoryStorage(
-    useCase: UseCase,
+    private val useCase: UseCase,
     private val startTimestamp: Long,
-    shouldStorePrediction: Boolean = false
+    private val shouldStorePrediction: Boolean = false
 ) {
     data class Prediction(var label: String, var percentage: Float) {
         fun percentageAsString(): String {
@@ -18,26 +18,11 @@ class PredictionHistoryStorage(
         }
     }
 
-    private lateinit var history: JSONArray
-    private val jsonStorage = if (shouldStorePrediction) object :
-        JSONStorage(useCase.getPredictionHistoryJSONFile(startTimestamp)) {
-        override fun onFileNewlyCreated() {
-            json.put("startTimestamp", startTimestamp)
-            json.put("history", JSONArray())
-        }
-
-        override fun onJSONInitialized() {
-            history = json.getJSONArray("history")
-        }
-
-        fun saveHistory() { save() }
-    }
-    else {
-        val json = JSONObject()
-        json.put("startTimestamp", startTimestamp)
-        json.put("history", JSONArray())
-        history = json.getJSONArray("history")
-        null
+    private var history: JSONArray
+    val json = JSONObject().apply {
+        put("startTimestamp", startTimestamp)
+        history = JSONArray()
+        put("history", history)
     }
 
     fun addPrediction(
@@ -49,7 +34,9 @@ class PredictionHistoryStorage(
         val relativeTime = System.currentTimeMillis() - startTimestamp
         predictionObj.put("relativeTimestamp", relativeTime)
         history.put(predictionObj)
-        jsonStorage?.saveHistory()
+        if (shouldStorePrediction) {
+            JSONStorage.saveJSONObject(json, useCase.getPredictionHistoryJSONFile(startTimestamp))
+        }
         return relativeTime
     }
 
