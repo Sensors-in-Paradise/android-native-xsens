@@ -23,7 +23,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Only the recordings in the selected subirectory 📂 of the current use case 💼 are considered" />
+            android:text="Only recordings in the current directory are considered" />
 
         <LinearLayout
             android:layout_width="match_parent"
