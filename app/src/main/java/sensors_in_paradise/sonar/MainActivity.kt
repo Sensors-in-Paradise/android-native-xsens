@@ -18,7 +18,7 @@ import sensors_in_paradise.sonar.screen_connection.ConnectionScreen
 import sensors_in_paradise.sonar.screen_prediction.PredictionScreen
 import sensors_in_paradise.sonar.screen_recording.RecordingDataManager
 import sensors_in_paradise.sonar.screen_recording.RecordingScreen
-import sensors_in_paradise.sonar.screen_train.TrainingScreen
+import sensors_in_paradise.sonar.screen_data.TrainingScreen
 import sensors_in_paradise.sonar.uploader.DavCloudRecordingsUploader
 import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.util.PreferencesHelper
