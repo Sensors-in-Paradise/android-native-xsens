@@ -3,6 +3,7 @@
 package sensors_in_paradise.sonar.screen_recording
 
 import android.os.Build
+import android.util.Log
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -121,9 +122,8 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) :
     }
 
     fun hasBeenUsedForOnDeviceTraining(): Boolean {
-        val macAddress = GlobalValues.getMacAddress()
         if (json.has(ON_DEVICE_TRAINING_METADATA_KEY)) {
-            return json.has(macAddress)
+            return json.get(ON_DEVICE_TRAINING_METADATA_KEY) as Boolean
         }
         return false
     }
@@ -133,7 +133,7 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) :
             json.put(ON_DEVICE_TRAINING_METADATA_KEY, JSONObject())
         }
         val onDeviceTrainingObj = json.getJSONObject(ON_DEVICE_TRAINING_METADATA_KEY)
-        val macAddress = GlobalValues.getMacAddress()
+        val macAddress = ""
         if (!onDeviceTrainingObj.has(macAddress)) {
             val deviceInfoObj = JSONObject()
             deviceInfoObj.put("device_model", Build.MODEL)

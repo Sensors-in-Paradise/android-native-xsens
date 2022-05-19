@@ -75,11 +75,35 @@
             </LinearLayout>
 
         </LinearLayout>
-        <TextView
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Training history"
-            android:textSize="20sp" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Filter for On-Device Training  "
+                android:textSize="20sp" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switch_filterForTraining_dataFragment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="48dp"
+                android:minHeight="48dp" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textView_historyHeading_dataFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="History:"
+            android:textSize="20sp"
+            android:visibility="invisible" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView_history_dataFragment"
             android:layout_width="match_parent"
@@ -90,7 +114,9 @@
             android:paddingBottom="54dp"
             android:paddingTop="8dp"
 
-            />
+            >
+
+        </androidx.recyclerview.widget.RecyclerView>
 
     </LinearLayout>
 
@@ -102,4 +128,5 @@
         android:drawableLeft="@drawable/ic_baseline_model_training_24"
         android:text="Train model"
         android:layout_marginHorizontal="8dp"/>
+
 </FrameLayout>
