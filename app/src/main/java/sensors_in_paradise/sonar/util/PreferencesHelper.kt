@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.camera.video.Quality
 import androidx.preference.PreferenceManager
 import sensors_in_paradise.sonar.R
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.ModelType
 
 class PreferencesHelper private constructor() {
     companion object {
@@ -17,7 +18,7 @@ class PreferencesHelper private constructor() {
         }
 
         fun shouldFollowSystemTheme(context: Context): Boolean {
-            return !getSharedPreferences(context).getBoolean("unfollowSystemTheme", false)
+            return getSharedPreferences(context).getBoolean("followSystemTheme", false)
         }
 
         fun shouldShowToastsVerbose(context: Context): Boolean {
@@ -77,7 +78,10 @@ class PreferencesHelper private constructor() {
         }
 
         fun shouldPlaySoundOnRecordingStartAndStop(context: Context): Boolean {
-            return getSharedPreferences(context).getBoolean("playSoundOnRecordingStartAndStop", false)
+            return getSharedPreferences(context).getBoolean(
+                "playSoundOnRecordingStartAndStop",
+                false
+            )
         }
 
         fun shouldViewSensorHeadingMenuItems(context: Context): Boolean {
@@ -85,7 +89,10 @@ class PreferencesHelper private constructor() {
         }
 
         fun getCameraRecordingQuality(context: Context): Quality {
-            return when (getSharedPreferences(context).getString("videoRecordingQuality", "LOWEST")) {
+            return when (getSharedPreferences(context).getString(
+                "videoRecordingQuality",
+                "LOWEST"
+            )) {
                 "HIGHEST" -> Quality.HIGHEST
                 "UHD" -> Quality.UHD
                 "FHD" -> Quality.FHD
@@ -93,6 +100,23 @@ class PreferencesHelper private constructor() {
                 "SD" -> Quality.SD
                 "LOWEST" -> Quality.LOWEST
                 else -> Quality.LOWEST
+            }
+        }
+
+        fun shouldStorePrediction(context: Context): Boolean {
+            return getSharedPreferences(context).getBoolean("storePrediction", false)
+        }
+
+        fun getPoseEstimationModel(context: Context): ModelType {
+            return when (getSharedPreferences(context).getString(
+                "poseEstimationModel",
+                "ThunderI8"
+            )) {
+                "LightningF16" -> ModelType.LightningF16
+                "LightningI8" -> ModelType.LightningI8
+                "ThunderF16" -> ModelType.ThunderF16
+                "ThunderI8" -> ModelType.ThunderI8
+                else -> ModelType.ThunderI8
             }
         }
     }

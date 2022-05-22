@@ -8,21 +8,23 @@ import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import android.view.View
-import android.widget.Chronometer
-import android.widget.ProgressBar
-import android.widget.Toast
-import android.widget.ViewSwitcher
+import android.widget.*
+import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.recyclerview.widget.RecyclerView
+import com.github.mikephil.charting.charts.BarChart
 import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
+import sensors_in_paradise.sonar.screen_prediction.barChart.PredictionBarChart
+import sensors_in_paradise.sonar.screen_train.PredictionHistoryStorage
+import sensors_in_paradise.sonar.screen_train.PredictionHistoryStorage.Prediction
+import sensors_in_paradise.sonar.use_cases.UseCase
 import sensors_in_paradise.sonar.util.PredictionHelper
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.UIHelper
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
-import sensors_in_paradise.sonar.use_cases.UseCase
 import java.nio.ByteBuffer
 import kotlin.math.round
 
@@ -35,18 +37,30 @@ class PredictionScreen(
     private lateinit var activity: Activity
     private lateinit var context: Context
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: PredictionsAdapter
+    private lateinit var predictionHistoryAdapter: PredictionHistoryAdapter
     private lateinit var predictionButton: MaterialButton
-    private lateinit var viewSwitcher: ViewSwitcher
     private lateinit var progressBar: ProgressBar
     private lateinit var timer: Chronometer
+    private lateinit var textView: TextView
+    private lateinit var predictionBarChart: PredictionBarChart
 
+    private lateinit var toggleMotionLayout: MotionLayout
     private lateinit var metadataStorage: XSensDotMetadataStorage
+    private var predictionHistoryStorage: PredictionHistoryStorage? = null
     private lateinit var predictionHelper: PredictionHelper
-    private val predictions = ArrayList<Prediction>()
     private val rawSensorDataMap = mutableMapOf<String, MutableList<Pair<Long, FloatArray>>>()
 
-    private var lastPrediction = 0L
+    private var lastPredictionTime = 0L
+
+    private val numOutputs = 6
+    val outputLabelMap = mapOf(
+        0 to "Running",
+        1 to "Squats",
+        2 to "Stairs Down",
+        3 to "1 min Pitch",
+        4 to "Standing",
+        5 to "Walking",
+    ).withDefault { "" }
 
     private val numDevices = 5
     private var numConnectedDevices = 0
@@ -68,7 +82,7 @@ class PredictionScreen(
 
             if (isRunning) {
                 progress =
-                    ((100 * (System.currentTimeMillis() - lastPrediction)) / predictionInterval).toInt()
+                    ((100 * (System.currentTimeMillis() - lastPredictionTime)) / predictionInterval).toInt()
                 mainHandler.postDelayed(this, 40)
             }
             progressBar.progress = progress
@@ -97,7 +111,7 @@ class PredictionScreen(
     private fun startDataCollection() {
         sensorOccupationInterface?.onSensorOccupationStatusChanged(true)
         clearBuffers()
-        lastPrediction = 0L
+        lastPredictionTime = 0L
         if (tryInitializeSensorDataMap()) {
             for (device in devices.getConnected()) {
                 device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
@@ -105,13 +119,27 @@ class PredictionScreen(
             }
             timer.base = SystemClock.elapsedRealtime()
             timer.start()
+            textView.visibility = View.VISIBLE
+            textView.text = ""
+
+            predictionBarChart.resetData()
+
+            predictionHistoryStorage =
+                PredictionHistoryStorage(
+                    currentUseCase,
+                    System.currentTimeMillis(),
+                    PreferencesHelper.shouldStorePrediction(context)
+                )
+            predictionHistoryAdapter.predictionHistory = arrayListOf()
+            predictionHistoryAdapter.addPrediction(Prediction("", 0f), 0)
 
             isRunning = true
             mainHandler.postDelayed(updatePredictionTask, 4000)
             mainHandler.postDelayed(updateProgressBarTask, 100)
             progressBar.visibility = View.VISIBLE
             predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
-            viewSwitcher.displayedChild = 1
+
+            toggleMotionLayout.transitionToEnd()
         }
     }
 
@@ -136,37 +164,41 @@ class PredictionScreen(
         for (device in devices.getConnected()) {
             device.stopMeasuring()
         }
-        viewSwitcher.displayedChild = 0
+        textView.text = ""
+        textView.visibility = View.GONE
         isRunning = false
         mainHandler.removeCallbacks(updatePredictionTask)
         mainHandler.removeCallbacks(updateProgressBarTask)
         progressBar.visibility = View.INVISIBLE
         predictionButton.setIconResource(R.drawable.ic_baseline_play_arrow_24)
         model?.close()
+
+        toggleMotionLayout.transitionToStart()
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private fun addPredictionViews(output: FloatArray) {
-        predictions.clear()
-
-        val outputLabelMap = mapOf(
-            0 to "Running",
-            1 to "Squats",
-            2 to "Stairs Down",
-            3 to "Stairs Up",
-            4 to "Standing",
-            5 to "Walking"
-        ).withDefault { "" }
-
+    private fun updatePrediction(output: FloatArray) {
+        val predictions = ArrayList<Prediction>()
         for (i in output.indices) {
             val percentage = round(output[i] * 10000) / 100
             val prediction = Prediction(outputLabelMap[i]!!, percentage)
             predictions.add(prediction)
         }
+        predictions.sortByDescending { it.percentage }
+        val highestPrediction = predictions[0]
 
-        predictions.sortWith(Prediction.PredictionsComparator)
-        adapter.notifyDataSetChanged()
-        viewSwitcher.displayedChild = 0
+        predictionBarChart.changeData(predictions, highestPrediction.label)
+
+        textView.text = highestPrediction.label
+
+        predictionHistoryStorage?.let {
+            val relativeTime = it.addPrediction(highestPrediction)
+            predictionHistoryAdapter.addPrediction(
+                highestPrediction,
+                relativeTime,
+                recyclerView
+            )
+        }
     }
 
     private fun processAndPredict() {
@@ -183,8 +215,8 @@ class PredictionScreen(
     }
 
     private fun predict(sensorDataByteBuffer: ByteBuffer) {
-        lastPrediction = System.currentTimeMillis()
-        model?.predict(sensorDataByteBuffer)?.let { addPredictionViews(it) }
+        lastPredictionTime = System.currentTimeMillis()
+        model?.predict(sensorDataByteBuffer)?.let { updatePrediction(it) }
     }
 
     override fun onActivityCreated(activity: Activity) {
@@ -198,13 +230,15 @@ class PredictionScreen(
 
         // Initializing prediction RV
         recyclerView = activity.findViewById(R.id.rv_prediction)
-        adapter = PredictionsAdapter(predictions, activity.getColor(R.color.colorPrimary))
-        recyclerView.adapter = adapter
-        viewSwitcher = activity.findViewById(R.id.viewSwitcher_predictionFragment)
+        predictionHistoryAdapter = PredictionHistoryAdapter(context, arrayListOf())
+        recyclerView.adapter = predictionHistoryAdapter
+
         // Buttons and Timer
         timer = activity.findViewById(R.id.timer_predict_predict)
+        textView = activity.findViewById(R.id.tv_predict_prediction)
         predictionButton = activity.findViewById(R.id.button_start_predict)
         progressBar = activity.findViewById(R.id.progressBar_nextPrediction_predictionFragment)
+
         predictionButton.setOnClickListener {
             if (initModelFromCurrentUseCase()) {
                 val signatures = model?.signatureKeys
@@ -228,6 +262,11 @@ class PredictionScreen(
                 )
             }
         }
+        val barChart: BarChart = activity.findViewById(R.id.barChart_predict_predictions)
+        predictionBarChart =
+            PredictionBarChart(context, barChart, numOutputs, predictionInterval)
+        toggleMotionLayout =
+            activity.findViewById(R.id.motionLayout_predictionToggling_predictionFragment)
 
         mainHandler = Handler(Looper.getMainLooper())
     }

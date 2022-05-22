@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.page2.camera
+package sensors_in_paradise.sonar.screen_recording.camera
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -18,10 +18,11 @@ import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.core.util.Consumer
 import androidx.lifecycle.LifecycleOwner
-import sensors_in_paradise.sonar.page2.camera.pose_estimation.*
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Device
 import sensors_in_paradise.sonar.screen_recording.LoggingManager
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.ImageProcessor
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.ModelType
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.MoveNet
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.PoseEstimationStorageManager
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.File
@@ -56,13 +57,12 @@ class CameraManager(
     @SuppressLint("UnsafeOptInUsageError")
     private val imageAnalysis = ImageAnalysis.Builder()
         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-        .setTargetResolution(Size(1280, 720))
+        .setTargetResolution(Size(ImageProcessor.INPUT_WIDTH, ImageProcessor.INPUT_HEIGHT))
         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
         .build()
         .apply {
             setAnalyzer(imageAnalysisExecutor) { imageProxy ->
                 val rotationDegrees = imageProxy.imageInfo.rotationDegrees
-
                 imageProxy.image?.let {
                     imageProcessor?.processImage(
                         it, overlayView, rotationDegrees == 90
@@ -117,6 +117,10 @@ class CameraManager(
             isPreviewBound = false
             cameraProvider?.unbind(preview)
         }
+    }
+
+    fun clearPreview() {
+     imageProcessor?.clearView(overlayView)
     }
 
     private var isCaptureBound = false
@@ -248,19 +252,30 @@ class CameraManager(
             bindImageAnalyzer()
         }
 
-        val poseEstimator = createPoseEstimator()
-        poseStorageManager = if (poseStorageManager == null) {
-            PoseEstimationStorageManager(outputFile)
-        } else {
-            poseStorageManager!!.reset(outputFile)
-        }
+        if (shouldRecordPose()) {
+            val poseModel = PreferencesHelper.getPoseEstimationModel(context)
+
+            poseStorageManager = if (poseStorageManager == null) {
+                PoseEstimationStorageManager(outputFile)
+            } else {
+                poseStorageManager!!.reset(outputFile)
+            }
 
         val localDateTime = LocalDateTime.now()
-        poseStorageManager!!.writeHeader(localDateTime, "ThunderI8", 2)
+        poseStorageManager!!.writeHeader(
+            localDateTime,
+            Pair(ImageProcessor.INPUT_WIDTH, ImageProcessor.INPUT_HEIGHT),
+            poseModel.toString(),
+            2
+        )
         poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
 
-        imageProcessor =
-            imageProcessor ?: ImageProcessor(context, poseEstimator, poseStorageManager!!)
+            val isPoseModelActual = imageProcessor?.poseDetector?.modelType == poseModel
+            if (imageProcessor == null || !isPoseModelActual) {
+                imageProcessor =
+                    ImageProcessor(context, createPoseEstimator(poseModel), poseStorageManager!!)
+            }
+        }
     }
 
     /** Stops the recording and returns the UNIX timestamp of
@@ -284,7 +299,7 @@ class CameraManager(
         }
 
         if (imageProcessor != null && poseStorageManager != null) {
-            imageProcessor?.clearView(overlayView)
+            clearPreview()
             poseStorageManager?.closeFile()
             onPoseRecordingFinalized?.invoke(poseStartTime ?: 0L, poseStorageManager!!.csvFile)
         }
@@ -294,8 +309,7 @@ class CameraManager(
         return shouldShowVideo() && PreferencesHelper.shouldStorePoseEstimation(context)
     }
 
-    private fun createPoseEstimator(): MoveNet {
-        val modelType = ModelType.ThunderI8
+    private fun createPoseEstimator(modelType: ModelType): MoveNet {
         val targetDevice = Device.GPU
 
         return MoveNet.create(context, targetDevice, modelType)

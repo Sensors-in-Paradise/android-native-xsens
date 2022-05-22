@@ -33,9 +33,10 @@ class PoseEstimationStorageManager(var csvFile: File) {
         fileWriter = null
     }
 
-    fun writeHeader(startTime: LocalDateTime, modelType: String, dimensions: Int) {
+    fun writeHeader(startTime: LocalDateTime, captureResolution: Pair<Int, Int>, modelType: String, dimensions: Int) {
         val header = listOf<String>(
             "sep=$separator",
+            "CaptureResolution: ${captureResolution.first}x${captureResolution.second}",
             "ModelType: $modelType",
             "Dimensions: $dimensions",
             "StartTime: $startTime",
