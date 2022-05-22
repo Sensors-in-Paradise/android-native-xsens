@@ -134,22 +134,6 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         super.onDestroy()
     }
 
-    /*private fun setTrainingTabVisible(visible: Boolean) {
-        if (visible) {
-            tabIndexToScreenIndexMap[2] = 2
-            tabIndexToScreenIndexMap[3] = 3
-            if (tabLayout.tabCount < 4) {
-                tabLayout.addTab(trainingTab, 2)
-            }
-        } else {
-            tabIndexToScreenIndexMap[2] = 3
-            tabIndexToScreenIndexMap.remove(3)
-            if (tabLayout.tabCount > 3) {
-                tabLayout.removeTab(trainingTab)
-            }
-        }
-    }*/
-
     private fun initClickListeners() {
         tabLayout.addOnTabSelectedListener(this)
     }
