@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.screen_train
+package sensors_in_paradise.sonar.screen_data
 
 import android.annotation.SuppressLint
 import sensors_in_paradise.sonar.GlobalValues
@@ -7,7 +7,7 @@ import java.text.DateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class TrainingHistoryAdapter(trainingHistory: ArrayList<TrainingHistoryStorage.TrainingOccasion>) :
+class DataHistoryAdapter(trainingHistory: ArrayList<DataHistoryStorage.TrainingOccasion>) :
     HistoryAdapter() {
     var trainingHistory = trainingHistory
         @SuppressLint("NotifyDataSetChanged")
