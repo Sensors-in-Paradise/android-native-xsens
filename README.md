@@ -30,4 +30,8 @@ TODO (give an overview where in the code what is done)
 
 ## External sources used
 
-TODO (link Xsens Documents and Github Repos we used)
+[Xsens DOT Manual](https://www.xsens.com/hubfs/Downloads/Manuals/Xsens%20DOT%20User%20Manual.pdf)
+[WebDAV Client on Github](https://github.com/thegrizzlylabs/sardine-android)
+[Charts Library on Github](https://github.com/PhilJay/MPAndroidChart)
+
+TODO (link more Documents or Repos)
