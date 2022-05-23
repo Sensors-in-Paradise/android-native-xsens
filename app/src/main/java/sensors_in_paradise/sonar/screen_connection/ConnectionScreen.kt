@@ -215,7 +215,7 @@ class ConnectionScreen(private val scannedDevices: XSENSArrayList) :
         if (address != null) {
             activity.runOnUiThread {
                 sensorAdapter.notifyItemChanged(address)
-                Toast.makeText(context, "Sync finished of device: $address $isSuccess", Toast.LENGTH_LONG).show()
+                Log.d("Sync", "Sync finished of device: $address $isSuccess")
             }
         }
     }
