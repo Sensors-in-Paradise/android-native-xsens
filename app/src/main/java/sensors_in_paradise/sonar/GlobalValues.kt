@@ -62,5 +62,18 @@ class GlobalValues private constructor() {
 
             return minutes.toString().padStart(2, '0') + ":" + seconds.toString().padStart(2, '0')
         }
+        private val fileEmojiMap = mapOf(
+            "mp4" to "\uD83C\uDF9E️",
+            "json" to "\uD83D\uDCD8",
+            "csv" to "\uD83D\uDCCA"
+        )
+        fun getFileEmoji(file: File): String {
+            if (file.isDirectory) {
+                return "\uD83D\uDCC1"
+            }
+            val name = file.name
+            val extension = name.substring(name.lastIndexOf(".") + 1)
+            return fileEmojiMap[extension] ?: "\uD83D\uDCC4"
+        }
     }
 }

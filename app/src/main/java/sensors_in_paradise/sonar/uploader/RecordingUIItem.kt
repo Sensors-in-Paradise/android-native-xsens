@@ -74,14 +74,8 @@ class RecordingUIItem(recording: Recording, private val recordingsBaseDir: File)
             result += " ".repeat(indent * 4) + "${getEmojiStatusOfFileOrDir(dir)} \uD83D\uDCC1${dir.name}\n"
             indent++
         }
-        val metadataEmoji = "\uD83D\uDCD8"
-        val fileEmoji = "\uD83D\uDCC4"
-        val videoEmoji = "\uD83C\uDFA5"
         for (file in filesToBeUploaded) {
-            val docItem = when (file.name) {
-                GlobalValues.METADATA_JSON_FILENAME -> metadataEmoji
-                VIDEO_CAPTURE_FILENAME -> videoEmoji
-                else -> fileEmoji }
+            val docItem = GlobalValues.getFileEmoji(file)
             result += " ".repeat(indent * 4) + "${getEmojiStatusOfFileOrDir(file)}  $docItem${file.name}\n"
         }
         return result

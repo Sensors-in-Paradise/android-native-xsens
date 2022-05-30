@@ -9,7 +9,7 @@ import java.nio.file.attribute.BasicFileAttributes
 
 class UseCase(
     val context: Context,
-    baseDir: File,
+    private val baseDir: File,
     val title: String,
     private val onUseCaseDeleted: (useCase: UseCase) -> Unit,
     private val onUseCaseDuplicated: (originalUseCase: UseCase, duplicateTitle: String) -> UseCase,
@@ -69,6 +69,10 @@ class UseCase(
 
     fun getRecordingsSubDir(): File {
         return recordingsSubDir
+    }
+
+    fun getRelativePathOfRecordingsSubDir(): String {
+        return recordingsSubDir.absolutePath.replaceFirst(baseDir.absolutePath, "")
     }
 
     fun importDefaultModel() {

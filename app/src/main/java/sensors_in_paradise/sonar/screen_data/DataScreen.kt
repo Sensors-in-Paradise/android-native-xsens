@@ -16,6 +16,7 @@ import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.ScreenInterface
 import sensors_in_paradise.sonar.screen_recording.RecordingDataManager
 import sensors_in_paradise.sonar.use_cases.UseCase
+import sensors_in_paradise.sonar.util.dialogs.file_explorer.FileExplorerDialog
 
 class DataScreen(
     private val recordingsManager: RecordingDataManager,
@@ -33,7 +34,7 @@ class DataScreen(
     private lateinit var dataHistoryAdapter: DataHistoryAdapter
     private lateinit var dataHistoryStorage: DataHistoryStorage
     private lateinit var trainBtn: Button
-
+    private lateinit var exploreFilesBtn: Button
     override fun onActivityCreated(activity: Activity) {
         this.activity = activity
         this.context = activity
@@ -47,6 +48,7 @@ class DataScreen(
         dataHistoryStorage = DataHistoryStorage(currentUseCase)
         dataHistoryAdapter = DataHistoryAdapter(dataHistoryStorage.getTrainingHistory())
         trainBtn = activity.findViewById(R.id.button_trainModel_dataFragment)
+        exploreFilesBtn = activity.findViewById(R.id.button_exploreFiles_dataFragment)
         historyRV.adapter = dataHistoryAdapter
         trainBtn.setOnClickListener {
             val item = dataHistoryStorage.addTrainingOccasion(
@@ -115,6 +117,13 @@ class DataScreen(
                 activitiesPieChart.isHighlightPerTapEnabled = true
             }
         })
+        exploreFilesBtn.setOnClickListener {
+            FileExplorerDialog(
+                context,
+                currentUseCase.getRecordingsSubDir(),
+                currentUseCase.getRelativePathOfRecordingsSubDir()
+            )
+        }
         peoplePieChart.description.isEnabled = false
 
         filterSwitch.setOnCheckedChangeListener { _, _ -> populateAndAnimateCharts() }
