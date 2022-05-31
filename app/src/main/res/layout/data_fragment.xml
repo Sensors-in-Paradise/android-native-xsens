@@ -76,6 +76,8 @@
 
         </LinearLayout>
 
+
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -95,11 +97,17 @@
                 android:minHeight="48dp" />
 
         </LinearLayout>
-
+        <Button
+            android:id="@+id/button_exploreFiles_dataFragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Explore files"
+            android:backgroundTint="@color/colorAccent"/>
         <TextView
             android:id="@+id/textView_historyHeading_dataFragment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:text="History:"
             android:textSize="20sp"
             android:visibility="invisible" />

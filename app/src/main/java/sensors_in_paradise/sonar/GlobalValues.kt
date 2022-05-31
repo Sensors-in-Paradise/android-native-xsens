@@ -16,6 +16,7 @@ class GlobalValues private constructor() {
         const val ACTIVE_RECORDING_FLAG_FILENAME = "active"
         const val METADATA_JSON_FILENAME = "metadata.json"
         const val MEASUREMENT_MODE = XsensDotPayload.PAYLOAD_TYPE_CUSTOM_MODE_4
+
         fun getSensorRecordingsBaseDir(context: Context): File {
             return context.getExternalFilesDir(null) ?: context.dataDir
         }
@@ -23,9 +24,11 @@ class GlobalValues private constructor() {
         fun getSensorRecordingsTempDir(context: Context): File {
             return context.dataDir.resolve("temp")
         }
+
         fun getVideoRecordingsTempDir(context: Context): File {
             return context.dataDir.resolve("videoTemp")
         }
+
         fun getPoseRecordingsTempDir(context: Context): File {
             return context.dataDir.resolve("poseTemp")
         }
@@ -54,6 +57,7 @@ class GlobalValues private constructor() {
         fun formatTag(tagPrefix: String, deviceSetKey: String): String {
             return "$tagPrefix-$deviceSetKey"
         }
+
         fun getDurationAsString(durationMS: Long): String {
 
             val diffSecs = (durationMS) / 1000
@@ -61,6 +65,20 @@ class GlobalValues private constructor() {
             val seconds = diffSecs - (diffSecs / 60) * 60
 
             return minutes.toString().padStart(2, '0') + ":" + seconds.toString().padStart(2, '0')
+        }
+        private val fileEmojiMap = mapOf(
+            "mp4" to "\uD83C\uDF9E️",
+            "json" to "\uD83D\uDCD8",
+            "csv" to "\uD83D\uDCCA"
+        )
+
+        fun getFileEmoji(file: File): String {
+            if (file.isDirectory) {
+                return "\uD83D\uDCC1"
+            }
+            val name = file.name
+            val extension = name.substring(name.lastIndexOf(".") + 1)
+            return fileEmojiMap[extension] ?: "\uD83D\uDCC4"
         }
     }
 }
