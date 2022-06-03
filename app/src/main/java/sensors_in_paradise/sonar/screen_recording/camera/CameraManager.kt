@@ -20,10 +20,7 @@ import androidx.core.util.Consumer
 import androidx.lifecycle.LifecycleOwner
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Device
 import sensors_in_paradise.sonar.screen_recording.LoggingManager
-import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.ImageProcessor
-import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.ModelType
-import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.MoveNet
-import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.PoseEstimationStorageManager
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.*
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.File
 import java.time.LocalDateTime
@@ -53,6 +50,9 @@ class CameraManager(
     private var imageProcessor: ImageProcessor? = null
     private var poseStorageManager: PoseEstimationStorageManager? = null
     private val imageAnalysisExecutor = Executors.newFixedThreadPool(2)
+
+    // TODO
+    private val handDetector = HandDetector(context)
 
     @SuppressLint("UnsafeOptInUsageError")
     private val imageAnalysis = ImageAnalysis.Builder()
@@ -120,7 +120,7 @@ class CameraManager(
     }
 
     fun clearPreview() {
-     imageProcessor?.clearView(overlayView)
+        imageProcessor?.clearView(overlayView)
     }
 
     private var isCaptureBound = false
@@ -261,19 +261,19 @@ class CameraManager(
                 poseStorageManager!!.reset(outputFile)
             }
 
-        val localDateTime = LocalDateTime.now()
-        poseStorageManager!!.writeHeader(
-            localDateTime,
-            Pair(ImageProcessor.INPUT_WIDTH, ImageProcessor.INPUT_HEIGHT),
-            poseModel.toString(),
-            2
-        )
-        poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
+            val localDateTime = LocalDateTime.now()
+            poseStorageManager!!.writeHeader(
+                localDateTime,
+                Pair(ImageProcessor.INPUT_WIDTH, ImageProcessor.INPUT_HEIGHT),
+                poseModel.toString(),
+                2
+            )
+            poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
 
-            val isPoseModelActual = imageProcessor?.poseDetector?.modelType == poseModel
+            val isPoseModelActual = imageProcessor?.bodyPoseDetector?.modelType == poseModel
             if (imageProcessor == null || !isPoseModelActual) {
                 imageProcessor =
-                    ImageProcessor(context, createPoseEstimator(poseModel), poseStorageManager!!)
+                    ImageProcessor(context, poseStorageManager!!, createPoseEstimator(poseModel))
             }
         }
     }

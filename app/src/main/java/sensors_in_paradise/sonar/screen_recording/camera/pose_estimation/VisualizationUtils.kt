@@ -20,6 +20,9 @@ limitations under the License.
 package sensors_in_paradise.sonar.screen_recording.camera.pose_estimation
 
 import android.graphics.*
+import com.google.common.collect.ImmutableSet
+import com.google.mediapipe.formats.proto.LandmarkProto.NormalizedLandmarkList
+import com.google.mediapipe.solutions.hands.Hands
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.BodyPart
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.KeyPoint
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Person
@@ -31,28 +34,6 @@ object VisualizationUtils {
 
     /** Width of line used to connected two keypoints.  */
     private const val LINE_WIDTH = 6f
-
-    /** Pair of keypoints to draw lines between.  */
-    private val bodyJoints = listOf(
-        Pair(BodyPart.NOSE, BodyPart.LEFT_EYE),
-        Pair(BodyPart.NOSE, BodyPart.RIGHT_EYE),
-        Pair(BodyPart.LEFT_EYE, BodyPart.LEFT_EAR),
-        Pair(BodyPart.RIGHT_EYE, BodyPart.RIGHT_EAR),
-        Pair(BodyPart.NOSE, BodyPart.LEFT_SHOULDER),
-        Pair(BodyPart.NOSE, BodyPart.RIGHT_SHOULDER),
-        Pair(BodyPart.LEFT_SHOULDER, BodyPart.LEFT_ELBOW),
-        Pair(BodyPart.LEFT_ELBOW, BodyPart.LEFT_WRIST),
-        Pair(BodyPart.RIGHT_SHOULDER, BodyPart.RIGHT_ELBOW),
-        Pair(BodyPart.RIGHT_ELBOW, BodyPart.RIGHT_WRIST),
-        Pair(BodyPart.LEFT_SHOULDER, BodyPart.RIGHT_SHOULDER),
-        Pair(BodyPart.LEFT_SHOULDER, BodyPart.LEFT_HIP),
-        Pair(BodyPart.RIGHT_SHOULDER, BodyPart.RIGHT_HIP),
-        Pair(BodyPart.LEFT_HIP, BodyPart.RIGHT_HIP),
-        Pair(BodyPart.LEFT_HIP, BodyPart.LEFT_KNEE),
-        Pair(BodyPart.LEFT_KNEE, BodyPart.LEFT_ANKLE),
-        Pair(BodyPart.RIGHT_HIP, BodyPart.RIGHT_KNEE),
-        Pair(BodyPart.RIGHT_KNEE, BodyPart.RIGHT_ANKLE)
-    )
 
     enum class Transformation {
         NORMALIZE,
@@ -81,8 +62,38 @@ object VisualizationUtils {
         return PointF(pScaled.x * outputSize.x, pScaled.y * outputSize.y)
     }
 
-    fun transformKeyPoints(
+    fun convertTo2DPoints(
         persons: List<Person>,
+        joints: List<Pair<BodyPart, BodyPart>>,
+    ): Pair<List<List<PointF>>, List<Pair<Int, Int>>> {
+        val points = persons.map { person ->
+            person.keyPoints.map { keyPoint ->
+                keyPoint.coordinate
+            }
+        }
+        val lines = joints.map { bodyParts ->
+            Pair(bodyParts.first.position, bodyParts.second.position)
+        }
+        return Pair(points, lines)
+    }
+
+    fun convertTo2DPoints(
+        hands: List<NormalizedLandmarkList>,
+        joints: ImmutableSet<Hands.Connection>,
+    ): Pair<List<List<PointF>>, List<Pair<Int, Int>>> {
+        val points = hands.map { hand ->
+            hand.landmarkList.map { landmark ->
+                PointF(landmark.x, landmark.y)
+            }
+        }
+        val lines = joints.map { handConnection ->
+            Pair(handConnection.start(), handConnection.end())
+        }
+        return Pair(points, lines)
+    }
+
+    fun transformPoints(
+        pointLists: List<List<PointF>>,
         bitmap: Bitmap?,
         canvas: Canvas?,
         transformation: Transformation,
@@ -90,6 +101,39 @@ object VisualizationUtils {
     ) {
         val inputSize = bitmap?.let { PointF(bitmap.width.toFloat(), bitmap.height.toFloat()) }
         val outputSize = canvas?.let { PointF(canvas.width.toFloat(), canvas.height.toFloat()) }
+        pointLists.forEach { points ->
+            points.forEach { point ->
+                when (transformation) {
+                    Transformation.NORMALIZE -> {
+                        val newPoint = normalizePoint(point, inputSize!!)
+                        point.x = newPoint.x; point.y = newPoint.y
+                    }
+
+                    Transformation.ROTATE90 -> {
+                        val newPoint = rotatePoint90(point)
+                        point.x = newPoint.x; point.y = newPoint.y
+                    }
+
+                    Transformation.PROJECT_ON_CANVAS -> {
+                        val newPoint = projectPointOnCanvas(
+                            point,
+                            inputSize!!,
+                            outputSize!!,
+                            isRotated
+                        )
+                        point.x = newPoint.x; point.y = newPoint.y
+                    }
+                }
+            }
+        }
+    }
+
+    fun transformKeyPoints(
+        persons: List<Person>,
+        bitmap: Bitmap?,
+        transformation: Transformation
+    ) {
+        val inputSize = bitmap?.let { PointF(bitmap.width.toFloat(), bitmap.height.toFloat()) }
         persons.forEach { person ->
             person.keyPoints.forEach { keyPoint ->
                 when (transformation) {
@@ -98,16 +142,38 @@ object VisualizationUtils {
 
                     Transformation.ROTATE90 -> keyPoint.coordinate =
                         rotatePoint90(keyPoint.coordinate)
-
-                    Transformation.PROJECT_ON_CANVAS -> keyPoint.coordinate =
-                        projectPointOnCanvas(
-                            keyPoint.coordinate,
-                            inputSize!!,
-                            outputSize!!,
-                            isRotated
-                        )
+                    else -> {}
                 }
             }
+        }
+    }
+
+    fun transformHandLandmarks(
+        hands: List<NormalizedLandmarkList>,
+        bitmap: Bitmap?,
+        transformation: Transformation
+    ): List<NormalizedLandmarkList> {
+        val inputSize = bitmap?.let { PointF(bitmap.width.toFloat(), bitmap.height.toFloat()) }
+        return hands.map { hand ->
+            val listBuilder = hand.toBuilder()
+            val x = hand.landmarkList
+            val landmarkList = hand.landmarkList.map { landMark ->
+                val landMarkBuilder = landMark.toBuilder()
+                val oldCoordinate = PointF(landMark.x, landMark.y)
+                val newCoordinate = when (transformation) {
+                    Transformation.NORMALIZE -> normalizePoint(oldCoordinate, inputSize!!)
+                    Transformation.ROTATE90 -> rotatePoint90(oldCoordinate)
+                    else -> {
+                        oldCoordinate
+                    }
+                }
+                landMarkBuilder.x = newCoordinate.x; landMarkBuilder.y = newCoordinate.y
+                landMarkBuilder.build()
+            }
+            listBuilder
+                .clearLandmark()
+                .addAllLandmark(landmarkList)
+                .build()
         }
     }
 
@@ -155,9 +221,10 @@ object VisualizationUtils {
     }
 
     // Draw line and point indicate body pose
-    fun drawBodyKeyPoints(
-        persons: List<Person>,
+    fun drawSkeleton(
+        pointLists: List<List<PointF>>,
         canvas: Canvas,
+        lines: List<Pair<Int, Int>> = listOf(),
         clearColor: Int? = null,
         circleColor: Int = Color.BLACK,
         lineColor: Int = Color.WHITE,
@@ -181,18 +248,17 @@ object VisualizationUtils {
             canvas.drawColor(clearColor)
         }
 
-        persons.forEach { person ->
-            bodyJoints.forEach {
-                val pointA = person.keyPoints[it.first.position].coordinate
-                val pointB = person.keyPoints[it.second.position].coordinate
+        pointLists.forEach { points ->
+            lines.forEach { line ->
+                val pointA = points[line.first]
+                val pointB = points[line.second]
                 canvas.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintLine)
             }
 
-            person.keyPoints.forEach { point ->
-                val coordinate = point.coordinate
+            points.forEach { point ->
                 canvas.drawCircle(
-                    coordinate.x,
-                    coordinate.y,
+                    point.x,
+                    point.y,
                     circleRadius,
                     paintCircle
                 )

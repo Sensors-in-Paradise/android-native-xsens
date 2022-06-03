@@ -53,22 +53,21 @@ class PoseSequenceViewHolder(
     }
 
     private fun drawOnCanvas(persons: List<Person>) {
+        // TODO use lines and points form here
         textureView.lockCanvas()?.let { canvas ->
             VisualizationUtils.transformKeyPoints(
                 persons,
                 textureView.bitmap,
-                canvas,
-                VisualizationUtils.Transformation.PROJECT_ON_CANVAS,
-                false
+                VisualizationUtils.Transformation.PROJECT_ON_CANVAS
             )
-            VisualizationUtils.drawBodyKeyPoints(
-                persons,
-                canvas,
-                clearColor = if (PreferencesHelper.shouldShowPoseBackground(context)) null
-                             else context.getColor(R.color.slightBackgroundContrast),
-                circleColor = context.getColor(R.color.stickmanJoints),
-                lineColor = context.getColor(R.color.backgroundContrast)
-            )
+//            VisualizationUtils.drawBodyKeyPoints(
+//                persons,
+//                canvas,
+//                clearColor = if (PreferencesHelper.shouldShowPoseBackground(context)) null
+//                             else context.getColor(R.color.slightBackgroundContrast),
+//                circleColor = context.getColor(R.color.stickmanJoints),
+//                lineColor = context.getColor(R.color.backgroundContrast)
+//            )
             textureView.unlockCanvasAndPost(canvas)
         }
     }
