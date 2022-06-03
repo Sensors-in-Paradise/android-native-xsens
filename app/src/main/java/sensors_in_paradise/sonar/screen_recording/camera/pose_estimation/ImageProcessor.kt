@@ -12,7 +12,7 @@ class ImageProcessor(
     private val context: Context,
     private val poseEstimationStorageManager: PoseEstimationStorageManager,
     val bodyPoseDetector: PoseDetector? = null,
-    private val handPoseDetector: HandDetector? = null
+    val handPoseDetector: HandDetector? = null
 ) {
     companion object {
         /** Threshold for confidence score. */

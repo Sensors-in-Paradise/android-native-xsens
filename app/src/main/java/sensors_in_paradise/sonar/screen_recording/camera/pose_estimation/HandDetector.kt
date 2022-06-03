@@ -14,7 +14,7 @@ class HandDetector(context: Context) {
     init {
         val handsOptions = HandsOptions.builder()
             .setMaxNumHands(2)
-            .setStaticImageMode(false)
+            .setStaticImageMode(true) //TODO false
             .setRunOnGpu(true)
             .build()
         hands = Hands(context, handsOptions)
@@ -23,6 +23,10 @@ class HandDetector(context: Context) {
     fun estimatePose(bitmap: Bitmap, resultListener: ResultListener<HandsResult>) {
         hands.setResultListener(resultListener)
         hands.send(bitmap)
+    }
+
+    companion object {
+        const val MODEL_NAME = "HandLandmark"
     }
 }
 

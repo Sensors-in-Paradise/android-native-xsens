@@ -253,6 +253,7 @@ class CameraManager(
         }
 
         if (shouldRecordPose()) {
+            val useHandPose = PreferencesHelper.shouldUseHandPoseEstimation(context)
             val poseModel = PreferencesHelper.getPoseEstimationModel(context)
 
             poseStorageManager = if (poseStorageManager == null) {
@@ -265,15 +266,22 @@ class CameraManager(
             poseStorageManager!!.writeHeader(
                 localDateTime,
                 Pair(ImageProcessor.INPUT_WIDTH, ImageProcessor.INPUT_HEIGHT),
-                poseModel.toString(),
-                2
+                if (useHandPose) HandDetector.MODEL_NAME else poseModel.toString(),
+                if (useHandPose) 3 else 2
             )
             poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
 
-            val isPoseModelActual = imageProcessor?.bodyPoseDetector?.modelType == poseModel
-            if (imageProcessor == null || !isPoseModelActual) {
-                imageProcessor =
-                    ImageProcessor(context, poseStorageManager!!, createPoseEstimator(poseModel))
+            val isDetectorActual = useHandPose == (
+                    imageProcessor?.bodyPoseDetector == null ||
+                            imageProcessor?.handPoseDetector != null)
+            val isPoseModelActual =
+                useHandPose || imageProcessor?.bodyPoseDetector?.modelType == poseModel
+            if (imageProcessor == null || !isDetectorActual || !isPoseModelActual) {
+                imageProcessor = ImageProcessor(
+                    context, poseStorageManager!!,
+                    bodyPoseDetector = if (!useHandPose) createPoseEstimator(poseModel) else null,
+                    handPoseDetector = if (useHandPose) HandDetector(context) else null
+                )
             }
         }
     }
