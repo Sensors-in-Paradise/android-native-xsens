@@ -1,38 +1,23 @@
 package sensors_in_paradise.sonar.screen_prediction
 
 import android.util.Log
-import org.json.JSONObject
-import org.json.JSONTokener
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.metadata.MetadataExtractor
-import java.io.BufferedReader
 import java.io.File
 import java.nio.ByteBuffer
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 import kotlin.properties.Delegates
 
 class TFLiteModel(tfLiteModelFile: File) {
-    constructor(tfLiteModelFile: File, inputs: IntArray, outputSize: Int) : this(tfLiteModelFile) {
-        this.interpreter = Interpreter(tfLiteModelFile).apply {
-            resizeInput(0, inputs)
-        }
-        this.outputs = arrayOf(FloatArray(outputSize))
-    }
-
     var hasMetadata: Boolean = false
-    private var windowSize by Delegates.notNull<Int>()
+    var windowSize by Delegates.notNull<Int>()
     private val frequency = 60
     private lateinit var outputs: Array<FloatArray>
     private lateinit var interpreter: Interpreter
     var extractor: MetadataExtractor
-    private lateinit var sensors: ArrayList<String>
     private lateinit var labels: ArrayList<String>
-    private lateinit var sensorData: ArrayList<String>
-    lateinit var normalizationParams: HashMap<String, HashMap<String, ArrayList<Double>>>
+    private lateinit var features: Array<String>
 
     init {
-        //try {
             val buffer = ByteBuffer.allocate(tfLiteModelFile.readBytes().size)
             buffer.put(tfLiteModelFile.readBytes())
             buffer.rewind()
@@ -40,52 +25,16 @@ class TFLiteModel(tfLiteModelFile: File) {
             if (hasMetadata()) {
                 Log.d("TFLiteModel", "Metadata found")
                 val inputs = extractor.getInputTensorShape(0)
-                outputs = arrayOf(FloatArray(extractor.getOutputTensorShape(0)[0]))
                 interpreter = Interpreter(tfLiteModelFile).apply {
                     resizeInput(0, inputs)
                 }
-                sensors = ArrayList(readSensorFile().split("\n"))
-                sensorData = ArrayList(readSensorDataFile().split("\n"))
+                features = readFeatureFile().split("\n").toTypedArray()
                 labels = ArrayList(readLabelsFile().split("\n"))
+                outputs = arrayOf(FloatArray(extractor.getOutputTensorShape(0)[1]))
                 windowSize = extractor.getInputTensorShape(0)[1]
-                normalizationParams = parseNormalizationParams()
             } else {
                 Log.e("TFLiteModel", "No metadata found")
             }
-        //} catch (e: Exception) {
-        //    Log.d(
-        //        "TFLiteModel-init",
-        //        "Model doesn't have Metadata or is missing sensor.txt, sensor_data.txt, labels.txt or normalization_params.txt"
-        //   )
-        //}
-    }
-
-    private fun parseNormalizationParams(): HashMap<String, HashMap<String, ArrayList<Double>>> {
-        val string =
-            extractor.getAssociatedFile("normalization_params.txt").bufferedReader().use { it.readText() }
-        val jsonObject = JSONTokener(string).nextValue() as JSONObject
-        val paramsDictionary = HashMap<String, HashMap<String, ArrayList<Double>>>()
-        // fill Hashmap with normalization params. The sensor_data is in order.
-        for (sensor in sensors) {
-            val sensorObject = jsonObject.getJSONObject(sensor)
-            paramsDictionary[sensor] = HashMap()
-            paramsDictionary[sensor]?.set("std", ArrayList())
-            paramsDictionary[sensor]?.set("mean", ArrayList())
-
-            for (sensor_data in sensorData) {
-                val std = sensorObject.getJSONArray("std_$sensor_data")
-                val mean = sensorObject.getJSONArray("mean_$sensor_data")
-                paramsDictionary[sensor]?.get("std")?.apply { add(std.getDouble(0))
-                    add(std.getDouble(1))
-                    add(std.getDouble(2))
-                }
-                paramsDictionary[sensor]?.get("mean")?.apply { add(mean.getDouble(0))
-                    add(mean.getDouble(1))
-                    add(mean.getDouble(2))
-                }
-            }
-        }
-        return paramsDictionary
     }
 
     val signatureKeys: Array<String> = interpreter.signatureKeys
@@ -106,13 +55,8 @@ class TFLiteModel(tfLiteModelFile: File) {
         return outputs[0]
     }
 
-    private fun readSensorFile(): String {
-        val inputStream = extractor.getAssociatedFile("sensors.txt")
-        return inputStream.bufferedReader().use { it.readText() }
-    }
-
-    private fun readSensorDataFile(): String {
-        val inputStream = extractor.getAssociatedFile("sensor_data.txt")
+    private fun readFeatureFile(): String {
+        val inputStream = extractor.getAssociatedFile("features.txt")
         return inputStream.bufferedReader().use { it.readText() }
     }
 
@@ -127,15 +71,45 @@ class TFLiteModel(tfLiteModelFile: File) {
         }.toMap()
     }
 
+    fun getDeviceTags(): Array<String> {
+        return features.map { it.substringAfterLast("_") }.distinct().toTypedArray()
+    }
+
     fun getNumDevices(): Int {
-        return sensors.size
+        return getDeviceTags().size
     }
 
-    fun getSensorDataToPredict(): ArrayList<String> {
-        return sensorData
+    fun getFeaturesToPredict(): Array<String> {
+        return features
     }
 
-    fun getPredictionInterval(): Long {
+    fun getWindowInSeconds(): Long {
         return 1000L * (windowSize / frequency)
+    }
+
+    fun runTraining(windows: Any, labels: Any): FloatArray {
+        val inputs = HashMap<String, Any>()
+        inputs["windows"] = windows
+        inputs["labels"] = labels
+        val outputs = HashMap<String, Any>()
+        outputs["loss"] = FloatArray(1)
+        interpreter.runSignature(inputs, outputs, "train")
+        return outputs["loss"] as FloatArray
+    }
+
+    fun runSave(file: File) {
+        val inputs = HashMap<String, Any>()
+        val outputs = HashMap<String, Any>()
+        val checkpointPath = file.absolutePath
+        inputs["checkpoint_path"] = checkpointPath
+        interpreter.runSignature(inputs, outputs, "save")
+    }
+
+    fun runRestore(file: File) {
+        val inputs = HashMap<String, Any>()
+        val outputs = HashMap<String, Any>()
+        val checkpointPath = file.absolutePath
+        inputs["checkpoint_path"] = checkpointPath
+        interpreter.runSignature(inputs, outputs, "restore")
     }
 }

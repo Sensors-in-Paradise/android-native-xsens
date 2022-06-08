@@ -37,6 +37,9 @@ class XSensDotDeviceWithOfflineMetadata(
             }
         )
     }
+    fun getTagPrefix(): String? {
+        return extractTagPrefixFromTag(tag)
+    }
 
     fun hasSetColor(): Boolean {
         return when (getSet()) {
