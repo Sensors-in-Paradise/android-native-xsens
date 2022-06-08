@@ -20,13 +20,9 @@ limitations under the License.
 package sensors_in_paradise.sonar.screen_recording.camera.pose_estimation
 
 import android.graphics.*
-import com.google.common.collect.ImmutableSet
 import com.google.mediapipe.formats.proto.LandmarkProto.NormalizedLandmarkList
 import com.google.mediapipe.solutions.hands.Hands
-import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.BodyPart
-import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.KeyPoint
-import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Person
-import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.PoseSequence
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.*
 
 object VisualizationUtils {
     /** Radius of circle used to draw keypoints.  */
@@ -62,34 +58,38 @@ object VisualizationUtils {
         return PointF(pScaled.x * outputSize.x, pScaled.y * outputSize.y)
     }
 
+    @JvmName("convertTo2DPoints1")
     fun convertTo2DPoints(
-        persons: List<Person>,
-        joints: List<Pair<BodyPart, BodyPart>>,
-    ): Pair<List<List<PointF>>, List<Pair<Int, Int>>> {
-        val points = persons.map { person ->
+        persons: List<Person>
+    ): List<List<PointF>> {
+        return persons.map { person ->
             person.keyPoints.map { keyPoint ->
                 keyPoint.coordinate
             }
         }
-        val lines = joints.map { bodyParts ->
-            Pair(bodyParts.first.position, bodyParts.second.position)
-        }
-        return Pair(points, lines)
     }
 
+    @JvmName("convertTo2DPoints2")
     fun convertTo2DPoints(
-        hands: List<NormalizedLandmarkList>,
-        joints: ImmutableSet<Hands.Connection>,
-    ): Pair<List<List<PointF>>, List<Pair<Int, Int>>> {
-        val points = hands.map { hand ->
+        hands: List<NormalizedLandmarkList>
+    ): List<List<PointF>> {
+        return hands.map { hand ->
             hand.landmarkList.map { landmark ->
                 PointF(landmark.x, landmark.y)
             }
         }
-        val lines = joints.map { handConnection ->
-            Pair(handConnection.start(), handConnection.end())
+    }
+
+    fun get2DLines(poseType: Pose): List<Pair<Int, Int>> {
+        return when (poseType) {
+            Pose.BodyPose -> Person.BODY_JOINTS.map { bodyParts ->
+                Pair(bodyParts.first.position, bodyParts.second.position)
+            }
+
+            Pose.HandPose -> Hands.HAND_CONNECTIONS.map { handConnection ->
+                Pair(handConnection.start(), handConnection.end())
+            }
         }
-        return Pair(points, lines)
     }
 
     fun transformPoints(
@@ -178,49 +178,51 @@ object VisualizationUtils {
     }
 
     @Suppress("ComplexCondition")
-    fun interpolatePersons(
+    fun interpolatePoses(
         poseSequence: PoseSequence,
         floorIndex: Int,
         timeStamp: Long,
         timeMargin: Long = 800
-    ): List<Person> {
-        val lowerTimeStamp = poseSequence.timeStamps.getOrNull(floorIndex) ?: Long.MAX_VALUE
-        val upperTimeStamp = poseSequence.timeStamps.getOrNull(floorIndex + 1)
-        val lowerPerson = poseSequence.personsArray.getOrNull(floorIndex)?.getOrNull(0)
-        val upperPerson = poseSequence.personsArray.getOrNull(floorIndex + 1)?.getOrNull(0)
-        if (lowerPerson == null ||
-            timeStamp < lowerTimeStamp ||
-            timeStamp > upperTimeStamp ?: Long.MAX_VALUE ||
-            (timeStamp - lowerTimeStamp) > timeMargin
-        ) { // No prior sample / TimeStamp inconsistent / big gap to prior AND next sample
-            return listOf<Person>()
-        } else if (upperPerson == null ||
-            upperTimeStamp == null ||
-            (upperTimeStamp - lowerTimeStamp) > timeMargin
-        ) { // No next sample / big gap to next sample
-            return listOf(lowerPerson)
-        } else {
-            val interpolateFactor =
-                (timeStamp - lowerTimeStamp).toFloat() / (upperTimeStamp - lowerTimeStamp).toFloat()
-            val person = Person(
-                lowerPerson.id,
-                BodyPart.values().map { bp ->
-                    val lowerP = lowerPerson.keyPoints[bp.position].coordinate
-                    val upperP = upperPerson.keyPoints[bp.position].coordinate
+    ): List<List<PointF>> {
+        val priorTimestamp = poseSequence.timeStamps.getOrNull(floorIndex) ?: Long.MAX_VALUE
+        val nextTimestamp = poseSequence.timeStamps.getOrNull(floorIndex + 1)
+        val priorPoses = poseSequence.posesArray.getOrNull(floorIndex)
 
-                    val x = lowerP.x + (upperP.x - lowerP.x) * interpolateFactor
-                    val y = lowerP.y + (upperP.y - lowerP.y) * interpolateFactor
+        val interpolatedPoses = mutableListOf<List<PointF>>()
+        priorPoses?.indices?.forEach {
+            val priorPose = poseSequence.posesArray.getOrNull(floorIndex)?.getOrNull(it)
+            val nextPose = poseSequence.posesArray.getOrNull(floorIndex + 1)?.getOrNull(it)
 
-                    KeyPoint(bp, PointF(x, y), 1f)
-                }.toList(),
-                lowerPerson.boundingBox,
-                lowerPerson.score
-            )
-            return listOf(person)
+            if (priorPose == null ||
+                timeStamp < priorTimestamp ||
+                timeStamp > nextTimestamp ?: Long.MAX_VALUE ||
+                (timeStamp - priorTimestamp) > timeMargin
+            ) { // No prior sample / TimeStamp inconsistent / big gap to prior AND next sample
+                // Do nothing
+            } else if (nextPose == null ||
+                nextTimestamp == null ||
+                (nextTimestamp - priorTimestamp) > timeMargin
+            ) { // No next sample / big gap to next sample
+                interpolatedPoses.add(priorPose)
+            } else {
+                val interpolateFactor =
+                    (timeStamp - priorTimestamp).toFloat() / (nextTimestamp - priorTimestamp).toFloat()
+                val posePoints = priorPose.indices.map { pIndex ->
+                    val priorPoint = priorPose[pIndex]
+                    val nextPoint = nextPose[pIndex]
+
+                    val x = priorPoint.x + (nextPoint.x - priorPoint.x) * interpolateFactor
+                    val y = priorPoint.y + (nextPoint.y - priorPoint.y) * interpolateFactor
+
+                    PointF(x, y)
+                }.toList()
+                interpolatedPoses.add(posePoints)
+            }
         }
+        return interpolatedPoses
     }
 
-    // Draw line and point indicate body pose
+    // Draw line and point indicating pose
     fun drawSkeleton(
         pointLists: List<List<PointF>>,
         canvas: Canvas,

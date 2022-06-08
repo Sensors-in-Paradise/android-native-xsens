@@ -4,9 +4,9 @@ import android.content.Context
 import android.graphics.*
 import android.media.Image
 import android.view.TextureView
-import com.google.mediapipe.solutions.hands.Hands
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Person
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Pose
 
 class ImageProcessor(
     private val context: Context,
@@ -59,7 +59,13 @@ class ImageProcessor(
         }
     }
 
-    private fun drawOnCanvas(points: List<List<PointF>>, lines: List<Pair<Int, Int>>, overlayView: TextureView, bitmap: Bitmap, isRotated90: Boolean) {
+    private fun drawOnCanvas(
+        points: List<List<PointF>>,
+        lines: List<Pair<Int, Int>>,
+        overlayView: TextureView,
+        bitmap: Bitmap,
+        isRotated90: Boolean
+    ) {
         val surfaceCanvas = overlayView.lockCanvas()
         surfaceCanvas?.let { canvas ->
             VisualizationUtils.transformPoints(
@@ -67,7 +73,6 @@ class ImageProcessor(
                 VisualizationUtils.Transformation.PROJECT_ON_CANVAS,
                 isRotated90
             )
-
             VisualizationUtils.drawSkeleton(
                 points,
                 canvas,
@@ -75,12 +80,15 @@ class ImageProcessor(
                 circleColor = context.getColor(R.color.stickmanJoints),
                 lineColor = context.getColor(R.color.slightBackgroundContrast)
             )
-
             overlayView.unlockCanvasAndPost(canvas)
         }
     }
 
-    private fun processBodyPoseImage(bitmap: Bitmap, overlayView: TextureView, isRotated90: Boolean) {
+    private fun processBodyPoseImage(
+        bitmap: Bitmap,
+        overlayView: TextureView,
+        isRotated90: Boolean
+    ) {
         val persons = extractPoses(bitmap)
 
         VisualizationUtils.transformKeyPoints(
@@ -93,28 +101,35 @@ class ImageProcessor(
                 VisualizationUtils.Transformation.ROTATE90
             )
         }
-        poseEstimationStorageManager.storePoses(persons)
+        poseEstimationStorageManager.storeBodyPoses(persons)
 
-        val (pointLists, lines) = VisualizationUtils.convertTo2DPoints(persons, Person.BODY_JOINTS)
+        val pointLists = VisualizationUtils.convertTo2DPoints(persons)
+        val lines = VisualizationUtils.get2DLines(Pose.BodyPose)
         drawOnCanvas(pointLists, lines, overlayView, bitmap, isRotated90)
     }
 
-    private fun processHandPoseImage(bitmap: Bitmap, overlayView: TextureView, isRotated90: Boolean) {
+    private fun processHandPoseImage(
+        bitmap: Bitmap,
+        overlayView: TextureView,
+        isRotated90: Boolean
+    ) {
         handPoseDetector!!.estimatePose(bitmap) { handsResult ->
             var hands = handsResult.multiHandLandmarks().toList()
-
+            val handsClasses = handsResult.multiHandedness().map { handClass ->
+                handClass.label
+            }
             if (isRotated90) {
                 hands = VisualizationUtils.transformHandLandmarks(
                     hands, null,
                     VisualizationUtils.Transformation.ROTATE90
                 )
             }
-            // poseEstimationStorageManager.storePoses(persons)
+            poseEstimationStorageManager.storeHandPoses(hands, handsClasses)
 
-            val (pointLists, lines) = VisualizationUtils.convertTo2DPoints(hands, Hands.HAND_CONNECTIONS)
+            val pointLists = VisualizationUtils.convertTo2DPoints(hands)
+            val lines = VisualizationUtils.get2DLines(Pose.HandPose)
             drawOnCanvas(pointLists, lines, overlayView, bitmap, isRotated90)
         }
-
     }
 
     fun processImage(bitmap: Bitmap, overlayView: TextureView, isRotated90: Boolean) {
@@ -125,6 +140,6 @@ class ImageProcessor(
     }
 
     fun processImage(image: Image, overlayView: TextureView, isRotated90: Boolean) {
-            processImage(imageToBitmap(image), overlayView, isRotated90)
+        processImage(imageToBitmap(image), overlayView, isRotated90)
     }
 }

@@ -24,6 +24,6 @@ abstract class VisualSequenceViewHolder(
     }
 
     companion object {
-        const val FPS = 60L
+        const val FPS = 24L
     }
 }

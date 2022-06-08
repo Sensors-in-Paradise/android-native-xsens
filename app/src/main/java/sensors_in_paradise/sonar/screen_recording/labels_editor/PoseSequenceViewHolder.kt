@@ -1,11 +1,11 @@
 package sensors_in_paradise.sonar.screen_recording.labels_editor
 
 import android.content.Context
+import android.graphics.PointF
 import android.view.TextureView
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.PoseEstimationStorageManager
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.VisualizationUtils
-import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Person
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.PoseSequence
 import sensors_in_paradise.sonar.util.PreferencesHelper
 
@@ -18,6 +18,7 @@ class PoseSequenceViewHolder(
 ) :
     VisualSequenceViewHolder(onSourceLoadedListener, onStartLoadingSource, onSeekToNewPosition) {
     private var poseSequence: PoseSequence? = null
+    private var jointsToDraw: List<Pair<Int, Int>>? = null
 
     init {
         textureView.isOpaque = false
@@ -25,49 +26,51 @@ class PoseSequenceViewHolder(
 
     override fun loadSource(sourcePath: String, onSourceLoadedListener: () -> Unit) {
         poseSequence = PoseEstimationStorageManager.loadPoseSequenceFromCSV(context, sourcePath)
+        jointsToDraw = VisualizationUtils.get2DLines(poseSequence!!.type)
         onSourceLoadedListener()
     }
 
     override fun seekTo(ms: Long) {
         super.seekTo(ms)
         poseSequence?.let { poseSequence ->
-            val persons = getPosesAtTime(ms, poseSequence)
-            drawOnCanvas(persons)
+            val poses = getPosesAtTime(ms, poseSequence)
+            drawOnCanvas(poses)
         }
     }
 
-    private fun getPosesAtTime(ms: Long, poseSequence: PoseSequence): List<Person> {
+    private fun getPosesAtTime(ms: Long, poseSequence: PoseSequence): List<List<PointF>> {
         val timeStamp = poseSequence.startTime + ms
         val poseIndex = poseSequence.timeStamps.binarySearch(timeStamp)
         return if (poseIndex < -1) {
             // When timeStamp lies between two samples
-            VisualizationUtils.interpolatePersons(
+            VisualizationUtils.interpolatePoses(
                 poseSequence,
                 -(poseIndex + 2),
                 timeStamp
             )
         } else {
-            poseSequence.personsArray.getOrElse(poseIndex) { listOf<Person>() }
-                .map { it.copy() }
+            poseSequence.posesArray.getOrElse(poseIndex) { listOf() }
+                .map { it.toList() }
         }
     }
 
-    private fun drawOnCanvas(persons: List<Person>) {
-        // TODO use lines and points form here
+    private fun drawOnCanvas(poses: List<List<PointF>>) {
         textureView.lockCanvas()?.let { canvas ->
-            VisualizationUtils.transformKeyPoints(
-                persons,
+            VisualizationUtils.transformPoints(
+                poses,
                 textureView.bitmap,
+                canvas,
                 VisualizationUtils.Transformation.PROJECT_ON_CANVAS
             )
-//            VisualizationUtils.drawBodyKeyPoints(
-//                persons,
-//                canvas,
-//                clearColor = if (PreferencesHelper.shouldShowPoseBackground(context)) null
-//                             else context.getColor(R.color.slightBackgroundContrast),
-//                circleColor = context.getColor(R.color.stickmanJoints),
-//                lineColor = context.getColor(R.color.backgroundContrast)
-//            )
+            VisualizationUtils.drawSkeleton(
+                poses,
+                canvas,
+                jointsToDraw!!,
+                clearColor = if (PreferencesHelper.shouldShowPoseBackground(context)) null
+                    else context.getColor(R.color.slightBackgroundContrast),
+                circleColor = context.getColor(R.color.stickmanJoints),
+                lineColor = context.getColor(R.color.backgroundContrast)
+            )
             textureView.unlockCanvasAndPost(canvas)
         }
     }

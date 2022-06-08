@@ -21,6 +21,7 @@ import androidx.lifecycle.LifecycleOwner
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Device
 import sensors_in_paradise.sonar.screen_recording.LoggingManager
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.*
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Pose
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import java.io.File
 import java.time.LocalDateTime
@@ -267,7 +268,8 @@ class CameraManager(
                 localDateTime,
                 Pair(ImageProcessor.INPUT_WIDTH, ImageProcessor.INPUT_HEIGHT),
                 if (useHandPose) HandDetector.MODEL_NAME else poseModel.toString(),
-                if (useHandPose) 3 else 2
+                if (useHandPose) 3 else 2,
+                if (useHandPose) Pose.HandPose else Pose.BodyPose
             )
             poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
 
