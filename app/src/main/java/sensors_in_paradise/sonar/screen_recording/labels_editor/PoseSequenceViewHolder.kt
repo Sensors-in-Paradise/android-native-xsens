@@ -50,7 +50,7 @@ class PoseSequenceViewHolder(
             )
         } else {
             poseSequence.posesArray.getOrElse(poseIndex) { listOf() }
-                .map { it.toList() }
+                .filterNotNull().map { it.toList() }
         }
     }
 

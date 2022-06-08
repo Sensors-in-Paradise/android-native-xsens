@@ -116,7 +116,12 @@ class ImageProcessor(
         handPoseDetector!!.estimatePose(bitmap) { handsResult ->
             var hands = handsResult.multiHandLandmarks().toList()
             val handsClasses = handsResult.multiHandedness().map { handClass ->
-                handClass.label
+                // Because of camera mirroring, the sides are inverted
+                when(handClass.label) {
+                    "Right" -> "Left"
+                    "Left" -> "Right"
+                    else -> {handClass.label}
+                }
             }
             if (isRotated90) {
                 hands = VisualizationUtils.transformHandLandmarks(

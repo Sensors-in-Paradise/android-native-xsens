@@ -190,8 +190,8 @@ class PoseEstimationStorageManager(var csvFile: File) {
             return listOf(Person(0, keyPoints, null, personConfidence))
         }
 
-        private fun hand2DPointsFromCSVLine(line: Map<String, String>): List<List<PointF>> {
-            val hands = mutableListOf<List<PointF>>()
+        private fun hand2DPointsFromCSVLine(line: Map<String, String>): List<List<PointF>?> {
+            val hands = mutableListOf<List<PointF>?>()
             listOf("LEFT", "RIGHT").forEach { side ->
                 try {
                     val handPoints = HandPart.values().map { handPart ->
@@ -200,7 +200,9 @@ class PoseEstimationStorageManager(var csvFile: File) {
                         PointF(x, y)
                     }
                     hands.add(handPoints)
-                } catch (_: Exception) { }
+                } catch (_: Exception) {
+                    hands.add(null)
+                }
             }
             return hands
         }
@@ -208,7 +210,7 @@ class PoseEstimationStorageManager(var csvFile: File) {
         private fun posesFromCSVLine(
             line: Map<String, String>,
             poseType: Pose
-        ): List<List<PointF>> {
+        ): List<List<PointF>?> {
             return when (poseType) {
                 Pose.BodyPose -> VisualizationUtils.convertTo2DPoints(personsFromCSVLine(line))
                 Pose.HandPose -> hand2DPointsFromCSVLine(line)
@@ -219,7 +221,7 @@ class PoseEstimationStorageManager(var csvFile: File) {
             var startTime = 0L
             var poseType = Pose.BodyPose
             val timeStamps = ArrayList<Long>()
-            val posesArray = ArrayList<List<List<PointF>>>()
+            val posesArray = ArrayList<List<List<PointF>?>>()
 
             try {
                 startTime = extractStartTimeFromCSV(context, inputFile)

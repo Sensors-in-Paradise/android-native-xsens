@@ -9,7 +9,7 @@ enum class Pose {
 
 data class PoseSequence(
     val timeStamps: ArrayList<Long>,
-    val posesArray: ArrayList<List<List<PointF>>>,
+    val posesArray: ArrayList<List<List<PointF>?>>,
     val startTime: Long,
     val type: Pose
 )
