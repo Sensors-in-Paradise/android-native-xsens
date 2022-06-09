@@ -14,15 +14,34 @@
         android:layout_height="wrap_content"
         android:visibility="invisible" />
 
-    <LinearLayout
+    <androidx.constraintlayout.motion.widget.MotionLayout
+        android:id="@+id/motionLayout_predictionToggling_predictionFragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         android:layout_marginVertical="16dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonRecord">
+        app:layoutDescription="@xml/prediction_fragment_scene">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_left_predictionFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.38" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_centerLeft_predictionFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.47" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_centerRight_predictionFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.53" />
+
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_start_predict"
@@ -38,57 +57,61 @@
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconSize="64dp"
+            app:layout_constraintBottom_toBottomOf="@+id/guideline_centerLeft_predictionFragment"
+            app:layout_constraintEnd_toEndOf="@+id/guideline_centerLeft_predictionFragment"
+            app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle" />
 
         <Chronometer
             android:id="@+id/timer_predict_predict"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="12dp"
+            android:layout_gravity="center"
+            android:textColor="?android:textColorHint"
             android:textSize="48dp"
-            android:textColor="?android:textColorHint"/>
+            app:layout_constraintBottom_toTopOf="@id/tv_predict_prediction"
+            app:layout_constraintStart_toEndOf="@id/guideline_centerRight_predictionFragment"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    </LinearLayout>
+        <TextView
+            android:id="@+id/tv_predict_prediction"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/timer_predict_predict"
+            app:layout_constraintStart_toStartOf="@id/timer_predict_predict"
+            app:layout_constraintTop_toBottomOf="@id/timer_predict_predict"
+            tools:visibility="visible" />
 
-    <ViewSwitcher
-        android:id="@+id/viewSwitcher_predictionFragment"
+    </androidx.constraintlayout.motion.widget.MotionLayout>
+
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical">
+
+        <com.github.mikephil.charting.charts.BarChart
+            android:id="@+id/barChart_predict_predictions"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_gravity="bottom" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_prediction"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="30dp"
             android:clipToPadding="false"
             android:paddingBottom="8dp"
             app:layoutManager="LinearLayoutManager" />
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:orientation="vertical">
-
-                <ProgressBar
-                    style="?android:attr/progressBarStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_weight="1" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_weight="1"
-                    android:text="Waiting for prediction..." />
-            </LinearLayout>
-        </FrameLayout>
-    </ViewSwitcher>
+    </LinearLayout>
 
 </LinearLayout>

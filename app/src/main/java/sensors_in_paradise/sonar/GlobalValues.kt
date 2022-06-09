@@ -23,9 +23,11 @@ class GlobalValues private constructor() {
         fun getSensorRecordingsTempDir(context: Context): File {
             return context.dataDir.resolve("temp")
         }
+
         fun getVideoRecordingsTempDir(context: Context): File {
             return context.dataDir.resolve("videoTemp")
         }
+
         fun getPoseRecordingsTempDir(context: Context): File {
             return context.dataDir.resolve("poseTemp")
         }
@@ -52,6 +54,7 @@ class GlobalValues private constructor() {
         fun formatTag(tagPrefix: String, deviceSetKey: String): String {
             return "$tagPrefix-$deviceSetKey"
         }
+
         fun getDurationAsString(durationMS: Long): String {
 
             val diffSecs = (durationMS) / 1000
@@ -60,6 +63,7 @@ class GlobalValues private constructor() {
 
             return minutes.toString().padStart(2, '0') + ":" + seconds.toString().padStart(2, '0')
         }
+
         fun getMacAddress(): String {
             try {
                 val all = Collections.list(NetworkInterface.getNetworkInterfaces())
@@ -83,6 +87,21 @@ class GlobalValues private constructor() {
             }
 
             return "02:00:00:00:00:00"
+        }
+
+        private val fileEmojiMap = mapOf(
+            "mp4" to "\uD83C\uDF9E️",
+            "json" to "\uD83D\uDCD8",
+            "csv" to "\uD83D\uDCCA"
+        )
+
+        fun getFileEmoji(file: File): String {
+            if (file.isDirectory) {
+                return "\uD83D\uDCC1"
+            }
+            val name = file.name
+            val extension = name.substring(name.lastIndexOf(".") + 1)
+            return fileEmojiMap[extension] ?: "\uD83D\uDCC4"
         }
     }
 }

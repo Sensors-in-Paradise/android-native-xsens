@@ -1,6 +1,5 @@
 package sensors_in_paradise.sonar.screen_recording
 
-import android.util.Log
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.ObservableArrayList
 import java.io.File
@@ -58,27 +57,66 @@ class RecordingDataManager(recordingsDir: File) :
         remove(recording)
     }
 
+    private fun getActivityDurationsOfRecording(
+        filterForPerson: String? = null,
+        recording: Recording
+    ): Map<String, Long> {
+        val result = mutableMapOf<String, Long>()
+        val metadata = recording.metadataStorage
+        if (filterForPerson == null || metadata.getPerson() == filterForPerson) {
+            val activities = metadata.getActivities()
+            for ((index, labelEntry) in activities.withIndex()) {
+                val duration = RecordingMetadataStorage.getDurationOfActivity(
+                    activities,
+                    index,
+                    metadata.getTimeEnded()
+                )
+                result[labelEntry.activity] = duration + (result[labelEntry.activity] ?: 0L)
+            }
+        }
+        return result
+    }
+
     fun getActivityDurationsOfTrainableRecordings(filterForPerson: String? = null): Map<String, Long> {
-        Log.d(
-            "RecordingDataManager",
-            "Getting activity durations of trainable recordings for $filterForPerson"
-        )
+        val result = mutableMapOf<String, Long>()
+        for (recording in this.filter { !it.metadataStorage.hasBeenUsedForOnDeviceTraining() }) {
+            val activityDuration = getActivityDurationsOfRecording(filterForPerson, recording)
+            activityDuration.forEach { (name, duration) -> result.merge(name, duration, Long::plus) }
+        }
+        return result
+    }
+
+    fun getActivityDurationsOfAllRecordings(filterForPerson: String? = null): Map<String, Long> {
         val result = mutableMapOf<String, Long>()
         for (recording in this) {
-            val metadata = recording.metadataStorage
-            if (filterForPerson == null || metadata.getPerson() == filterForPerson) {
-                if (!metadata.hasBeenUsedForOnDeviceTraining()) {
-                    val activities = metadata.getActivities()
-                    for ((index, labelEntry) in activities.withIndex()) {
-                        val duration = RecordingMetadataStorage.getDurationOfActivity(
-                            activities,
-                            index,
-                            metadata.getTimeEnded()
-                        )
-                        result[labelEntry.activity] = duration + (result[labelEntry.activity] ?: 0L)
-                    }
+            val activityDuration = getActivityDurationsOfRecording(filterForPerson, recording)
+            activityDuration.forEach { (name, duration) -> result.merge(name, duration, Long::plus) }
+        }
+        return result
+    }
+
+    private fun getPeopleDurationsOfRecording(
+        filterForActivity: String? = null,
+        recording: Recording
+    ): Map<String, Long> {
+        val result = mutableMapOf<String, Long>()
+        val metadata = recording.metadataStorage
+        val person = metadata.getPerson()
+        if (filterForActivity != null) {
+            val activities = metadata.getActivities()
+            for ((index, labelEntry) in activities.withIndex()) {
+                val (_, activity) = labelEntry
+                if (activity == filterForActivity) {
+                    val duration = RecordingMetadataStorage.getDurationOfActivity(
+                        activities,
+                        index,
+                        metadata.getTimeEnded()
+                    )
+                    result[person] = duration + (result[person] ?: 0L)
                 }
             }
+        } else {
+            result[person] = metadata.getDuration() + (result[person] ?: 0L)
         }
         return result
     }
@@ -86,24 +124,17 @@ class RecordingDataManager(recordingsDir: File) :
     fun getPeopleDurationsOfTrainableRecordings(filterForActivity: String? = null): Map<String, Long> {
         val result = mutableMapOf<String, Long>()
         for (recording in this.filter { !it.metadataStorage.hasBeenUsedForOnDeviceTraining() }) {
-            val metadata = recording.metadataStorage
-            val person = metadata.getPerson()
-            if (filterForActivity != null) {
-                val activities = metadata.getActivities()
-                for ((index, labelEntry) in activities.withIndex()) {
-                    val (_, activity) = labelEntry
-                    if (activity == filterForActivity) {
-                        val duration = RecordingMetadataStorage.getDurationOfActivity(
-                            activities,
-                            index,
-                            metadata.getTimeEnded()
-                        )
-                        result[person] = duration + (result[person] ?: 0L)
-                    }
-                }
-            } else {
-                result[person] = metadata.getDuration() + (result[person] ?: 0L)
-            }
+            val peopleDuration = getPeopleDurationsOfRecording(filterForActivity, recording)
+            peopleDuration.forEach { (name, duration) -> result.merge(name, duration, Long::plus) }
+        }
+        return result
+    }
+
+    fun getPeopleDurationsOfAllRecordings(filterForActivity: String? = null): Map<String, Long> {
+        val result = mutableMapOf<String, Long>()
+        for (recording in this) {
+            val peopleDuration = getPeopleDurationsOfRecording(filterForActivity, recording)
+            peopleDuration.forEach { (name, duration) -> result.merge(name, duration, Long::plus) }
         }
         return result
     }

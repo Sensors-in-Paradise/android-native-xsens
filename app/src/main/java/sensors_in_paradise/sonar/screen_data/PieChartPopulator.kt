@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.screen_train
+package sensors_in_paradise.sonar.screen_data
 
 import android.annotation.SuppressLint
 import android.content.Context

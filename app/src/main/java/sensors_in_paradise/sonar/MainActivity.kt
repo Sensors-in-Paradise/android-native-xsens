@@ -18,7 +18,7 @@ import sensors_in_paradise.sonar.screen_connection.ConnectionScreen
 import sensors_in_paradise.sonar.screen_prediction.PredictionScreen
 import sensors_in_paradise.sonar.screen_recording.RecordingDataManager
 import sensors_in_paradise.sonar.screen_recording.RecordingScreen
-import sensors_in_paradise.sonar.screen_train.TrainingScreen
+import sensors_in_paradise.sonar.screen_data.DataScreen
 import sensors_in_paradise.sonar.uploader.DavCloudRecordingsUploader
 import sensors_in_paradise.sonar.uploader.RecordingsUploaderDialog
 import sensors_in_paradise.sonar.util.PreferencesHelper
@@ -46,9 +46,9 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
     private val tabIndexToScreenIndexMap = mutableMapOf(
         0 to 0,
         1 to 1,
-        2 to 3
+        2 to 2,
+        3 to 3
     )
-    private lateinit var trainingTab: TabLayout.Tab
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,7 +60,6 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         recordingsManager = RecordingDataManager(
             useCaseHandler.getCurrentUseCase().getRecordingsSubDir()
         )
-        trainingTab = tabLayout.getTabAt(2)!!
 
         supportActionBar?.subtitle = useCaseHandler.getCurrentUseCase().getDisplayInfo()
         useCaseHandler.setOnUseCaseChanged { useCase: UseCase ->
@@ -91,8 +90,8 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         )
         screenHandlers.add(recordingScreen)
 
-        val trainingScreen = TrainingScreen(recordingsManager, useCaseHandler.getCurrentUseCase())
-        screenHandlers.add(trainingScreen)
+        val dataScreen = DataScreen(recordingsManager, useCaseHandler.getCurrentUseCase())
+        screenHandlers.add(dataScreen)
 
         val predictionScreen = PredictionScreen(useCaseHandler.getCurrentUseCase(), scannedDevices, this)
         screenHandlers.add(predictionScreen)
@@ -127,29 +126,12 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener, Conne
         for (handler in screenHandlers) {
             handler.onActivityResumed()
         }
-        setTrainingTabVisible(PreferencesHelper.isOnDeviceTrainingScreenEnabled(this))
     }
 
     override fun onDestroy() {
         screenHandlers.forEach { handler -> handler.onActivityWillDestroy() }
 
         super.onDestroy()
-    }
-
-    private fun setTrainingTabVisible(visible: Boolean) {
-        if (visible) {
-            tabIndexToScreenIndexMap[2] = 2
-            tabIndexToScreenIndexMap[3] = 3
-            if (tabLayout.tabCount < 4) {
-                tabLayout.addTab(trainingTab, 2)
-            }
-        } else {
-            tabIndexToScreenIndexMap[2] = 3
-            tabIndexToScreenIndexMap.remove(3)
-            if (tabLayout.tabCount > 3) {
-                tabLayout.removeTab(trainingTab)
-            }
-        }
     }
 
     private fun initClickListeners() {

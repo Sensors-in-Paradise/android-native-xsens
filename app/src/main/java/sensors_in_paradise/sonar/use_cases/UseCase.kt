@@ -9,7 +9,7 @@ import java.nio.file.attribute.BasicFileAttributes
 
 class UseCase(
     val context: Context,
-    baseDir: File,
+    private val baseDir: File,
     val title: String,
     private val onUseCaseDeleted: (useCase: UseCase) -> Unit,
     private val onUseCaseDuplicated: (originalUseCase: UseCase, duplicateTitle: String) -> UseCase,
@@ -44,6 +44,15 @@ class UseCase(
         return useCaseDir.resolve("trainHistory.json")
     }
 
+    private fun getPredictionsDir(): File {
+        return useCaseDir.resolve("predictions").apply { mkdir() }
+    }
+
+    fun getPredictionHistoryJSONFile(startTimestamp: Long): File {
+        val predictionsDir = getPredictionsDir()
+        return predictionsDir.resolve("$startTimestamp.json")
+    }
+
     fun getAvailableRecordingSubDirs(): List<String> {
         val subDirs =
             (getRecordingsDir().listFiles { d, name -> File(d, name).isDirectory })?.map { it.name }
@@ -60,6 +69,10 @@ class UseCase(
 
     fun getRecordingsSubDir(): File {
         return recordingsSubDir
+    }
+
+    fun getRelativePathOfRecordingsSubDir(): String {
+        return recordingsSubDir.absolutePath.replaceFirst(baseDir.absolutePath, "")
     }
 
     fun importDefaultModel() {
