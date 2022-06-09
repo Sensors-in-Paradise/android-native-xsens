@@ -18,7 +18,7 @@ class PredictionBarChart(
     private val context: Context,
     private val barChart: BarChart,
     numOutputs: Int,
-    private val predictionInterval: Long
+    private val animationDurationMs: Long =  450L
 ) {
     private val numBars = min(numOutputs, 6)
 
@@ -119,7 +119,7 @@ class PredictionBarChart(
         }
 
         val changer = AnimateDataSetChanged(
-            (0.15 * predictionInterval).toInt(),
+            animationDurationMs.toInt(),
             barChart,
             oldValues,
             newValues

@@ -3,26 +3,37 @@ package sensors_in_paradise.sonar.screen_prediction
 import android.util.Log
 import com.xsens.dot.android.sdk.events.XsensDotData
 import java.nio.ByteBuffer
+import java.nio.FloatBuffer
 import java.util.Collections.max
 
 class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize: Int = 90) :
     LinkedHashMap<String, ArrayList<Pair<Long, Float>>>() {
 
-    private val featuresPerSensorTagPrefix =  LinkedHashMap<String, List<String>>()
+    private val featuresPerSensorTagPrefix = LinkedHashMap<String, List<String>>()
 
     init {
         for (feature in featuresWithSensorTagPrefix) {
-            put(feature.lowercase(), ArrayList(windowSize + cushion))
+            if(feature.isNotEmpty()){
+            put(feature.uppercase(), ArrayList(windowSize + cushion))
+            }
         }
         for (deviceTagPrefix in extractDeviceTagPrefixes(this.keys)) {
-            featuresPerSensorTagPrefix[deviceTagPrefix] = extractFeatures(deviceTagPrefix, this.keys)
+            Log.w(
+                "InMemoryWindow-init",
+                "deviceTagPrefix in features: $deviceTagPrefix"
+            )
+            featuresPerSensorTagPrefix[deviceTagPrefix] =
+                extractFeatures(deviceTagPrefix, this.keys)
         }
     }
 
     fun appendSensorData(deviceTagPrefix: String, xsensDotData: XsensDotData) {
         val timeStamp: Long = xsensDotData.sampleTimeFine
-        if(deviceTagPrefix !in featuresPerSensorTagPrefix){
-            Log.w("InMemoryWindow-appendSensorData", "The device tag prefix $deviceTagPrefix for the given sensor data is not mentioned in the features that should be collected for this window.")
+        if (deviceTagPrefix !in featuresPerSensorTagPrefix.keys) {
+            Log.w(
+                "InMemoryWindow-appendSensorData",
+                "The device tag prefix $deviceTagPrefix for the given sensor data is not mentioned in the features that should be collected for this window."
+            )
             return
         }
         for (featureTag in featuresPerSensorTagPrefix[deviceTagPrefix]!!) {
@@ -55,27 +66,27 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
             .substringBefore("]") else featureTag.split("_")[1]
         val featureAxisIndex = featureAxisTagToIndex(featureType, featureAxisTag)
         return when (featureType) {
-            "quat" -> xsensDotData.quat[featureAxisIndex]
-            "acc" -> xsensDotData.acc[featureAxisIndex].toFloat()
-            "mag" -> xsensDotData.mag[featureAxisIndex].toFloat()
-            "gyr" -> xsensDotData.gyr[featureAxisIndex].toFloat()
-            "dq" -> xsensDotData.dq[featureAxisIndex].toFloat()
-            "dv" -> xsensDotData.dv[featureAxisIndex].toFloat()
+            "QUAT" -> xsensDotData.quat[featureAxisIndex]
+            "ACC" -> xsensDotData.acc[featureAxisIndex].toFloat()
+            "MAG" -> xsensDotData.mag[featureAxisIndex].toFloat()
+            "GYR" -> xsensDotData.gyr[featureAxisIndex].toFloat()
+            "DQ" -> xsensDotData.dq[featureAxisIndex].toFloat()
+            "DV" -> xsensDotData.dv[featureAxisIndex].toFloat()
             else -> throw IllegalArgumentException("Unknown feature type: $featureType")
         }
     }
 
     private fun featureAxisTagToIndex(featureType: String, featureAxisTag: String): Int {
         return when (featureAxisTag) {
-            "w" -> 0
-            "x" -> 1
-            "y" -> 2
-            "z" -> 3
-            "1" -> 0
-            "2" -> 1
-            "3" -> 2
-            else -> throw IllegalArgumentException("Invalid feature axis")
-        } - if (featureType == "quat" || featureType == "dq") 0 else 1
+            "W" -> 0
+            "X" -> 1
+            "Y" -> 2
+            "Z" -> 3
+            "1" -> 1
+            "2" -> 2
+            "3" -> 3
+            else -> throw IllegalArgumentException("Invalid feature axis $featureAxisTag")
+        } - if (featureType == "QUAT" || featureType == "DQ") 0 else 1
     }
 
     private fun extractDeviceTagPrefixes(keys: MutableSet<String>): List<String> {
@@ -88,17 +99,17 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
             .toList()
     }
 
-    fun compileWindow(): ByteBuffer {
+    fun compileWindow(): FloatBuffer {
         //find starting indices of feature vectors closest to the starting timestamp
         val startingIndices: Array<Int> = getStartIndices()
 
         //return byteBuffer of feature vectors starting at the starting indices
-        val buffer = ByteBuffer.allocate(this.values.size * windowSize * bytesPerFloat)
+        val buffer = FloatBuffer.allocate(this.values.size * windowSize * bytesPerFloat)
         for (i in 0 until windowSize) {
             for ((j, key) in this.keys.withIndex()) {
                 val index = startingIndices[j] + i
                 if (index < this[key]!!.size) {
-                    buffer.putFloat(this[key]!![index].second)
+                    buffer.put(this[key]!![index].second)
                 } else {
                     throw IllegalStateException("Not enough data to fill window for feature: $key")
                 }
@@ -116,7 +127,7 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
 
     private fun getStartIndices(): Array<Int> {
         //find latest starting timestamp of each feature
-        val startingTimestamp: Long = max(this.values.map { it[0].first })
+        val startingTimestamp: Long = max(this.values.map { if (it.isEmpty()) 0 else it[0].first })
         //find starting indices of feature vectors closest to the starting timestamp
         return this.values.map {
             findClosestIndex(startingTimestamp, it)
@@ -125,6 +136,7 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
 
     private fun hasEnoughDataToCompileWindow(startIndices: Array<Int>): Boolean {
         for ((i, key) in this.keys.withIndex()) {
+            Log.d("InMemoryWindow-hasEnoughDataToCompileWindow", "startIndices[$i] = ${startIndices[i]}")
             if (startIndices[i] + windowSize > (this[key]?.size ?: 0)) {
                 return false
             }

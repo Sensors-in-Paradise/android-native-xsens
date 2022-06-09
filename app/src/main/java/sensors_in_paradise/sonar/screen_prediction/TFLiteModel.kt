@@ -1,59 +1,60 @@
 package sensors_in_paradise.sonar.screen_prediction
 
-import android.util.Log
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.metadata.MetadataExtractor
 import java.io.File
 import java.nio.ByteBuffer
-import kotlin.properties.Delegates
+import java.nio.ByteOrder
+import java.nio.FloatBuffer
 
-class TFLiteModel(tfLiteModelFile: File) {
-    var hasMetadata: Boolean = false
-    var windowSize by Delegates.notNull<Int>()
+
+class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFile: File) {
+    class InvalidModelMetadata(message: String): Exception(message)
+
+    val windowSize: Int
     private val frequency = 60
-    private lateinit var outputs: Array<FloatArray>
-    private lateinit var interpreter: Interpreter
-    var extractor: MetadataExtractor
-    private lateinit var labels: ArrayList<String>
-    private lateinit var features: Array<String>
+    private val output: FloatBuffer
+    private val interpreter: Interpreter
+    private val extractor: MetadataExtractor
+    private val labels: ArrayList<String>
+    private val features: Array<String>
+    val signatureKeys: Array<String>
 
     init {
-            val buffer = ByteBuffer.allocate(tfLiteModelFile.readBytes().size)
-            buffer.put(tfLiteModelFile.readBytes())
-            buffer.rewind()
-            extractor = MetadataExtractor(buffer)
-            if (hasMetadata()) {
-                Log.d("TFLiteModel", "Metadata found")
-                val inputs = extractor.getInputTensorShape(0)
-                interpreter = Interpreter(tfLiteModelFile).apply {
-                    resizeInput(0, inputs)
-                }
-                features = readFeatureFile().split("\n").toTypedArray()
-                labels = ArrayList(readLabelsFile().split("\n"))
-                outputs = arrayOf(FloatArray(extractor.getOutputTensorShape(0)[1]))
-                windowSize = extractor.getInputTensorShape(0)[1]
-            } else {
-                Log.e("TFLiteModel", "No metadata found")
-            }
+        val buffer = ByteBuffer.allocate(tfLiteModelFile.readBytes().size)
+        buffer.put(tfLiteModelFile.readBytes())
+        buffer.rewind()
+        extractor = MetadataExtractor(buffer)
+        if (!hasMetadata()) {
+            throw InvalidModelMetadata("The model ${tfLiteModelFile.name} does not have any metadata")
+        }
+        val inputs = extractor.getInputTensorShape(0)
+        interpreter = Interpreter(tfLiteModelFile).apply {
+            resizeInput(0, inputs)
+        }
+        signatureKeys = interpreter.signatureKeys
+        features = readFeatureFile().split("\n").filter { it.isNotEmpty() }.toTypedArray()
+        labels = ArrayList(readLabelsFile().split("\n").filter { it.isNotEmpty() })
+        output = FloatBuffer.allocate(labels.size)
+        windowSize = extractor.getInputTensorShape(0)[1]
     }
 
-    val signatureKeys: Array<String> = interpreter.signatureKeys
 
     private fun hasMetadata(): Boolean {
-        return extractor.hasMetadata().apply { hasMetadata = this }
+        return extractor.hasMetadata()
     }
 
     fun close() {
         interpreter.close()
     }
-
+    /*
     fun predict(sensorDataByteBuffer: ByteBuffer): FloatArray {
         interpreter.run(
             sensorDataByteBuffer,
-            outputs
+            output
         )
-        return outputs[0]
-    }
+        return output[0]
+    }*/
 
     private fun readFeatureFile(): String {
         val inputStream = extractor.getAssociatedFile("features.txt")
@@ -72,7 +73,7 @@ class TFLiteModel(tfLiteModelFile: File) {
     }
 
     fun getDeviceTags(): Array<String> {
-        return features.map { it.substringAfterLast("_") }.distinct().toTypedArray()
+        return features.map { it.substringAfterLast("_") }.distinct().filter { it != "" }.toTypedArray()
     }
 
     fun getNumDevices(): Int {
@@ -83,8 +84,18 @@ class TFLiteModel(tfLiteModelFile: File) {
         return features
     }
 
-    fun getWindowInSeconds(): Long {
+    fun getWindowInMilliSeconds(): Long {
         return 1000L * (windowSize / frequency)
+    }
+
+    fun runInfer(window: FloatBuffer): FloatArray {
+        val inputs = HashMap<String, Any>()
+        inputs["input_window"] = window.rewind()
+        val outputs = HashMap<String, Any>()
+        outputs["output"] = this.output
+        interpreter.runSignature(inputs, outputs, "infer")
+        output.rewind()
+        return output.array()
     }
 
     fun runTraining(windows: Any, labels: Any): FloatArray {

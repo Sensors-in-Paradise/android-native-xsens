@@ -1,6 +1,5 @@
 package sensors_in_paradise.sonar.screen_prediction
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.os.Handler
@@ -17,6 +16,7 @@ import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import sensors_in_paradise.sonar.*
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
+import sensors_in_paradise.sonar.screen_prediction.TFLiteModel.InvalidModelMetadata
 import sensors_in_paradise.sonar.screen_prediction.barChart.PredictionBarChart
 import sensors_in_paradise.sonar.screen_train.PredictionHistoryStorage
 import sensors_in_paradise.sonar.screen_train.PredictionHistoryStorage.Prediction
@@ -47,13 +47,11 @@ class PredictionScreen(
     private var predictionHistoryStorage: PredictionHistoryStorage? = null
 
     private var lastPredictionTime = 0L
-
     private var numConnectedDevices = 0
     private var isRunning = false
     private var window: InMemoryWindow? = null
     private lateinit var mainHandler: Handler
     private var predictionInterval: Long? = null
-
     private val updatePredictionTask = object : Runnable {
         override fun run() {
             predict()
@@ -81,8 +79,12 @@ class PredictionScreen(
             startDataCollection()
         }
     }
-
-    private fun startDataCollection() {
+    private fun checkPredictionPreconditions(): Boolean{
+        val isInvalidTagConnected = devices.getConnectedWithOfflineMetadata().any { !it.isTagValid() }
+        if(isInvalidTagConnected){
+            MessageDialog(context, context.getString(R.string.sensor_tag_prefix_pattern_explanation), "Tags of connected sensors invalid")
+            return false
+        }
         val requiredButNotConnectedDevices = getRequiredButNotConnectedDevices()
         if (requiredButNotConnectedDevices.isNotEmpty()) {
             UIHelper.showAlert(
@@ -93,6 +95,13 @@ class PredictionScreen(
                         "    ${requiredButNotConnectedDevices.joinToString("\n    ")}",
                 title = "Not enough sensors connected"
             )
+            return false
+        }
+        return true
+    }
+
+    private fun startDataCollection() {
+        if(!checkPredictionPreconditions()){
             return
         }
         sensorOccupationInterface?.onSensorOccupationStatusChanged(true)
@@ -107,30 +116,29 @@ class PredictionScreen(
             device.measurementMode =
                 XsensDotPayload.PAYLOAD_TYPE_CUSTOM_MODE_4 //TODO("Set measurement mode from model metadata")
             device.startMeasuring()
-            timer.base = SystemClock.elapsedRealtime()
-            timer.start()
-            textView.visibility = View.VISIBLE
-            textView.text = ""
-
-            predictionBarChart.resetData()
-
-            predictionHistoryStorage =
-                PredictionHistoryStorage(
-                    currentUseCase,
-                    System.currentTimeMillis(),
-                    PreferencesHelper.shouldStorePrediction(context)
-                )
-            predictionHistoryAdapter.predictionHistory = arrayListOf()
-            predictionHistoryAdapter.addPrediction(Prediction("", 0f), 0)
-
-            isRunning = true
-            mainHandler.postDelayed(updatePredictionTask, predictionInterval!!)
-            mainHandler.postDelayed(updateProgressBarTask, 100)
-            progressBar.visibility = View.VISIBLE
-            predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
-
-            toggleMotionLayout.transitionToEnd()
         }
+        timer.base = SystemClock.elapsedRealtime()
+        timer.start()
+        textView.visibility = View.VISIBLE
+        textView.text = ""
+
+        predictionBarChart.resetData()
+
+        predictionHistoryStorage =
+            PredictionHistoryStorage(
+                currentUseCase,
+                System.currentTimeMillis(),
+                PreferencesHelper.shouldStorePrediction(context)
+            )
+        predictionHistoryAdapter.predictionHistory = arrayListOf()
+        predictionHistoryAdapter.addPrediction(Prediction("", 0f), 0)
+        isRunning = true
+        mainHandler.postDelayed(updatePredictionTask, predictionInterval!!)
+        mainHandler.postDelayed(updateProgressBarTask, 100)
+        progressBar.visibility = View.VISIBLE
+        predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
+
+        toggleMotionLayout.transitionToEnd()
     }
 
     private fun getRequiredButNotConnectedDevices(): List<String> {
@@ -188,8 +196,22 @@ class PredictionScreen(
         lastPredictionTime = System.currentTimeMillis()
         if (window != null) {
             if (window!!.hasEnoughDataToCompileWindow()) {
-                model?.predict(window!!.compileWindow())?.let { updatePrediction(it) }
+                // TODO: remove toast
+                Toast.makeText(
+                    context,
+                    "Predicting",
+                    Toast.LENGTH_SHORT
+                ).show()
+                model?.runInfer(window!!.compileWindow())?.let { updatePrediction(it) }
                 window!!.clearValues()
+
+            } else {
+                Toast.makeText(
+                    context,
+                    "Not enough data collected for prediction.",
+                    Toast.LENGTH_SHORT
+                ).show()
+
             }
         }
     }
@@ -212,31 +234,43 @@ class PredictionScreen(
         progressBar = activity.findViewById(R.id.progressBar_nextPrediction_predictionFragment)
 
         predictionButton.setOnClickListener {
-            if (initModelFromCurrentUseCase()) {
-                val signatures = model?.signatureKeys
-                Log.d("PredictionScreen-onActivityCreated", signatures.toString())
-                togglePrediction()
-            } else {
-                MessageDialog(
-                    context,
-                    message = context.getString(
-                        R.string.missing_model_dialog_message,
-                        currentUseCase.getModelFile().absolutePath
-                    ),
-                    title = context.getString(R.string.missing_model_dialog_title),
-                    positiveButtonText = "Okay",
-                    neutralButtonText = "Import default Model",
-                    onNeutralButtonClickListener = { _, _ ->
-                        currentUseCase.importDefaultModel()
-                        initModelFromCurrentUseCase()
-                        togglePrediction()
-                    }
-                )
+            when (initModelFromCurrentUseCase()) {
+                ModelInitializationResult.SUCCESS -> {
+                    val signatures = model?.signatureKeys
+                    Log.d("PredictionScreen-onActivityCreated", signatures.toString())
+                    togglePrediction()
+                }
+                ModelInitializationResult.MISSING_METADATA -> {
+                    MessageDialog(
+                        context,
+                        message = context.getString(
+                            R.string.missing_metadata_dialog_message
+                        ),
+                        title = context.getString(R.string.missing_metadata_dialog_title),
+                        positiveButtonText = "Okay",
+                        neutralButtonText = "Import default Model"
+                    )
+                }
+                ModelInitializationResult.FILE_NOT_EXISTING -> {
+                    MessageDialog(
+                        context,
+                        message = context.getString(
+                            R.string.missing_model_dialog_message,
+                            currentUseCase.getModelFile().absolutePath
+                        ),
+                        title = context.getString(R.string.missing_model_dialog_title),
+                        positiveButtonText = "Okay",
+                        neutralButtonText = "Import default Model",
+                        onNeutralButtonClickListener = { _, _ ->
+                            currentUseCase.importDefaultModel()
+                        }
+                    )
+                }
             }
         }
         val barChart: BarChart = activity.findViewById(R.id.barChart_predict_predictions)
         predictionBarChart =
-            PredictionBarChart(context, barChart, model!!.getLabelsMap().size, predictionInterval!!)
+            PredictionBarChart(context, barChart, (model?.getLabelsMap()?.size) ?: 0)
         toggleMotionLayout =
             activity.findViewById(R.id.motionLayout_predictionToggling_predictionFragment)
 
@@ -283,24 +317,29 @@ class PredictionScreen(
 
     override fun onUseCaseChanged(useCase: UseCase) {
         currentUseCase = useCase
-        initModelFromCurrentUseCase()
     }
 
-    private fun initModelFromCurrentUseCase(): Boolean {
+    enum class ModelInitializationResult { SUCCESS, FILE_NOT_EXISTING, MISSING_METADATA }
+
+    private fun initModelFromCurrentUseCase(): ModelInitializationResult {
         if (!currentUseCase.getModelFile().exists()) {
-            return false
+            return ModelInitializationResult.FILE_NOT_EXISTING
         }
-        initMetadataModel(currentUseCase.getModelFile())
-        return true
+        try {
+            initMetadataModel(currentUseCase.getModelFile())
+        } catch (e: InvalidModelMetadata) {
+            return ModelInitializationResult.MISSING_METADATA
+        }
+        return ModelInitializationResult.SUCCESS
     }
 
+    @Throws(InvalidModelMetadata::class)
     private fun initMetadataModel(modelFile: File) {
         model = TFLiteModel(modelFile)
-        predictionInterval = model!!.getWindowInSeconds() + cushion //ms
+        predictionInterval = model!!.getWindowInMilliSeconds() + cushion //ms
     }
 
-
     companion object {
-        const val cushion = 1000L //ms
+        const val cushion = 5000L //ms
     }
 }

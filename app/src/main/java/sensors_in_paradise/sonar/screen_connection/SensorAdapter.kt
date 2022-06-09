@@ -114,7 +114,7 @@ class SensorAdapter(
 
         viewHolder.statusIV.setImageDrawable(statusDrawable)
 
-        val isSensorTagCompliant = device.tag.matches(sensorTagRegex)
+        val isSensorTagCompliant = device.isTagValid()
         viewHolder.tagSpellingWarningTextView.apply {
             visibility =
                 if (isSensorTagCompliant || !isConnected) View.GONE else View.VISIBLE
@@ -154,7 +154,4 @@ class SensorAdapter(
         }
     }
 
-    companion object {
-        private val sensorTagRegex = Regex("^\\w+-\\d+\$")
-    }
 }
