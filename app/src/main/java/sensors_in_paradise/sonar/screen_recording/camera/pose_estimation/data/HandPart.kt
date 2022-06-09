@@ -22,8 +22,4 @@ enum class HandPart(val position: Int) {
     PINKY_PIP(18),
     PINKY_DIP(19),
     PINKY_TIP(20);
-
-    companion object {
-        private val map = values().associateBy(HandPart::position)
-    }
 }

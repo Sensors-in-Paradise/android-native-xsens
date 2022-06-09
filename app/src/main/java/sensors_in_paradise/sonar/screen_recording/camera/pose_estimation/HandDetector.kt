@@ -7,14 +7,13 @@ import com.google.mediapipe.solutions.hands.Hands
 import com.google.mediapipe.solutions.hands.HandsOptions
 import com.google.mediapipe.solutions.hands.HandsResult
 
-
 class HandDetector(context: Context) {
     private val hands: Hands
 
     init {
         val handsOptions = HandsOptions.builder()
             .setMaxNumHands(2)
-            .setStaticImageMode(true) //TODO false
+            .setStaticImageMode(true)
             .setRunOnGpu(true)
             .build()
         hands = Hands(context, handsOptions)
@@ -29,5 +28,3 @@ class HandDetector(context: Context) {
         const val MODEL_NAME = "HandLandmark"
     }
 }
-
-

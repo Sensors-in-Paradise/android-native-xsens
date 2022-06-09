@@ -72,8 +72,7 @@ class PoseEstimationStorageManager(var csvFile: File) {
         handsLabels: List<String>,
         timeStamp: Long
     ) {
-        if (hands.isEmpty())
-            return
+        if (hands.isEmpty()) return
 
         var outputLine = timeStamp.toString()
 
@@ -85,10 +84,8 @@ class PoseEstimationStorageManager(var csvFile: File) {
             HandPart.values().forEach { handPart ->
                 val landmark = landmarkList?.getLandmark(handPart.position)
                 outputLine +=
-                    if (landmark != null)
-                        ",${landmark.x},${landmark.y},${landmark.z}"
-                    else
-                        ",,,"
+                    if (landmark != null) ",${landmark.x},${landmark.y},${landmark.z}"
+                    else ",,,"
             }
         }
         fileWriter?.appendLine(outputLine)

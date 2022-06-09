@@ -22,7 +22,6 @@ class PoseSequenceViewHolder(
     private var jointsToDraw: List<Pair<Int, Int>>? = null
     private var startTime: Long? = null
 
-
     init {
         textureView.isOpaque = false
     }
@@ -64,9 +63,7 @@ class PoseSequenceViewHolder(
 
     override fun seekTo(ms: Long) {
         super.seekTo(ms)
-        if (poseSequences != null && timeStampSequences != null &&
-            startTime != null && jointsToDraw != null
-        ) {
+        if (poseSequences != null) {
             val poses = poseSequences!!.indices.mapNotNull { getPoseAtTime(it, ms) }
             drawOnCanvas(poses)
         }

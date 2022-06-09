@@ -250,44 +250,59 @@ class CameraManager(
             bindImageAnalyzer()
         }
 
-        if (shouldRecordPose()) {
-            val useHandPose = PreferencesHelper.shouldUseHandPoseEstimation(context)
-            val poseModel = PreferencesHelper.getPoseEstimationModel(context)
+        poseStorageManager = if (poseStorageManager == null) PoseEstimationStorageManager(outputFile)
+            else poseStorageManager!!.reset(outputFile)
 
-            poseStorageManager = if (poseStorageManager == null) {
-                PoseEstimationStorageManager(outputFile)
-            } else {
-                poseStorageManager!!.reset(outputFile)
-            }
-
+        val useHandPoseEstimation = PreferencesHelper.shouldUseHandPoseEstimation(context)
+        if (useHandPoseEstimation) {
             val localDateTime = LocalDateTime.now()
             poseStorageManager!!.writeHeader(
                 localDateTime,
                 Pair(ImageProcessor.INPUT_WIDTH, ImageProcessor.INPUT_HEIGHT),
-                if (useHandPose) HandDetector.MODEL_NAME else poseModel.toString(),
-                if (useHandPose) 3 else 2,
-                if (useHandPose) Pose.HandPose else Pose.BodyPose
+                HandDetector.MODEL_NAME,
+                3,
+                Pose.HandPose
             )
             poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
 
-            val isDetectorActual = useHandPose == (
-                    imageProcessor?.bodyPoseDetector == null ||
-                            imageProcessor?.handPoseDetector != null)
+            val isDetectorActual =
+                imageProcessor?.bodyPoseDetector == null &&
+                imageProcessor?.handPoseDetector != null
+
+            if (imageProcessor == null || !isDetectorActual) {
+                imageProcessor = ImageProcessor(
+                    context, poseStorageManager!!,
+                    handPoseDetector = HandDetector(context)
+                )
+            }
+        } else {
+            val poseModel = PreferencesHelper.getPoseEstimationModel(context)
+            val localDateTime = LocalDateTime.now()
+            poseStorageManager!!.writeHeader(
+                localDateTime,
+                Pair(ImageProcessor.INPUT_WIDTH, ImageProcessor.INPUT_HEIGHT),
+                poseModel.toString(),
+                2,
+                Pose.BodyPose
+            )
+            poseStartTime = LoggingManager.normalizeTimeStamp(localDateTime)
+
+            val isDetectorActual =
+                imageProcessor?.bodyPoseDetector != null &&
+                imageProcessor?.handPoseDetector == null
             val isPoseModelActual =
-                useHandPose || imageProcessor?.bodyPoseDetector?.modelType == poseModel
+                imageProcessor?.bodyPoseDetector?.modelType == poseModel
+
             if (imageProcessor == null || !isDetectorActual || !isPoseModelActual) {
                 imageProcessor = ImageProcessor(
                     context, poseStorageManager!!,
-                    bodyPoseDetector = if (!useHandPose) createPoseEstimator(poseModel) else null,
-                    handPoseDetector = if (useHandPose) HandDetector(context) else null
+                    bodyPoseDetector = createPoseEstimator(poseModel)
                 )
             }
         }
     }
 
-    /** Stops the recording and returns the UNIX timestamp of
-     * when the recording did actually start and the file where it's stored
-     * MEIN CODE IST IN ORDNUNG - ALEX! */
+     /* MEIN CODE IST IN ORDNUNG - ALEX! */
 
     private var onPoseRecordingFinalized: ((captureStartTime: Long, tempFile: File) -> Unit)? =
         null

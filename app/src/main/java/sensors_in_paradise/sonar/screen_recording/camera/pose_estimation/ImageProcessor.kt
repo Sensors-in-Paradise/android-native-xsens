@@ -123,10 +123,10 @@ class ImageProcessor(
             var hands = handsResult.multiHandLandmarks().toList()
             val handsClasses = handsResult.multiHandedness().map { handClass ->
                 // Because of camera mirroring, the sides are inverted
-                when(handClass.label) {
+                when (handClass.label) {
                     "Right" -> "Left"
                     "Left" -> "Right"
-                    else -> {handClass.label}
+                    else -> { handClass.label }
                 }
             }
             if (isRotated90) {
@@ -144,10 +144,8 @@ class ImageProcessor(
     }
 
     fun processImage(bitmap: Bitmap, overlayView: TextureView, isRotated90: Boolean) {
-        if (bodyPoseDetector != null)
-            processBodyPoseImage(bitmap, overlayView, isRotated90)
-        if (handPoseDetector != null)
-            processHandPoseImage(bitmap, overlayView, isRotated90)
+        if (bodyPoseDetector != null) processBodyPoseImage(bitmap, overlayView, isRotated90)
+        if (handPoseDetector != null) processHandPoseImage(bitmap, overlayView, isRotated90)
     }
 
     fun processImage(image: Image, overlayView: TextureView, isRotated90: Boolean) {
