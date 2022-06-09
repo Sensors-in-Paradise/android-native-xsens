@@ -17,13 +17,13 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Data available for training "
+            android:text="Data collected "
             android:textSize="20sp" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Only the recordings in the selected subirectory 📂 of the current use case 💼 are considered" />
+            android:text="Only recordings in the current directory are considered" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -46,7 +46,7 @@
                     android:textAlignment="center" />
 
                 <com.github.mikephil.charting.charts.PieChart
-                    android:id="@+id/pieChart_availableData_trainingFragment"
+                    android:id="@+id/pieChart_availableData_dataFragment"
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
                     android:layout_weight="1" />
@@ -67,7 +67,7 @@
                     android:textAlignment="center" />
 
                 <com.github.mikephil.charting.charts.PieChart
-                    android:id="@+id/pieChart_availableDataPeople_trainingFragment"
+                    android:id="@+id/pieChart_availableDataPeople_dataFragment"
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
                     android:layout_weight="1" />
@@ -75,13 +75,45 @@
             </LinearLayout>
 
         </LinearLayout>
-        <TextView
+
+
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Training history"
-            android:textSize="20sp" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Filter for On-Device Training  "
+                android:textSize="20sp" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switch_filterForTraining_dataFragment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="48dp"
+                android:minHeight="48dp" />
+
+        </LinearLayout>
+        <Button
+            android:id="@+id/button_exploreFiles_dataFragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Explore files"
+            android:backgroundTint="@color/colorAccent"/>
+        <TextView
+            android:id="@+id/textView_historyHeading_dataFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="History:"
+            android:textSize="20sp"
+            android:visibility="invisible" />
+
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView_history_trainingFragment"
+            android:id="@+id/recyclerView_history_dataFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layoutManager="LinearLayoutManager"
@@ -90,16 +122,19 @@
             android:paddingBottom="54dp"
             android:paddingTop="8dp"
 
-            />
+            >
+
+        </androidx.recyclerview.widget.RecyclerView>
 
     </LinearLayout>
 
     <Button
-        android:id="@+id/button_trainModel_trainingFragment"
+        android:id="@+id/button_trainModel_dataFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:drawableLeft="@drawable/ic_baseline_model_training_24"
         android:text="Train model"
         android:layout_marginHorizontal="8dp"/>
+
 </FrameLayout>

@@ -103,6 +103,8 @@ class SensorAdapter(
         if (hasSetColor) {
             viewHolder.sensorSetView.setBackgroundColor(device.getSetColor())
             viewHolder.sensorSetView.visibility = View.VISIBLE
+        } else {
+            viewHolder.sensorSetView.visibility = View.INVISIBLE
         }
 
         var statusDrawable = disconnectedDrawable

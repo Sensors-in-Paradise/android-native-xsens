@@ -1,11 +1,11 @@
-package sensors_in_paradise.sonar.screen_train
+package sensors_in_paradise.sonar.screen_data
 
 import org.json.JSONArray
 import org.json.JSONObject
 import sensors_in_paradise.sonar.JSONStorage
 import sensors_in_paradise.sonar.use_cases.UseCase
 
-class TrainingHistoryStorage(useCase: UseCase) :
+class DataHistoryStorage(useCase: UseCase) :
     JSONStorage(useCase.getTrainingHistoryJSONFile()) {
     data class TrainingOccasion(
         val timestamp: Long,

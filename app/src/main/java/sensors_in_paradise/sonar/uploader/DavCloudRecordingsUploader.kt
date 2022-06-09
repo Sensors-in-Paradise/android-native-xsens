@@ -27,6 +27,7 @@ class DavCloudRecordingsUploader(activity: Activity, val recordingsManager: Reco
     }
 
     fun reloadRecordings() {
+        davCloudMetadata.updateWebDavEndpoint()
         recordingUiItems.clear()
         for (recording in recordingsManager) {
             val recording = RecordingUIItem(recording, davCloudMetadata.localUploadedFilesBaseDir)
