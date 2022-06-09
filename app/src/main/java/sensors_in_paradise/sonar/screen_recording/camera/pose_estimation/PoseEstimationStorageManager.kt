@@ -54,10 +54,9 @@ class PoseEstimationStorageManager(var csvFile: File) {
         fileWriter?.appendLine(columns)
     }
 
-    fun storeBodyPoses(persons: List<Person>) {
+    fun storeBodyPoses(persons: List<Person>, timeStamp: Long) {
         val person = persons.getOrNull(0)
         if (person != null) {
-            val timeStamp = LoggingManager.normalizeTimeStamp(LocalDateTime.now())
             val confidence = person.score
             val keyPoints = person.keyPoints
             val outputLine = keyPoints.joinToString(
@@ -68,11 +67,14 @@ class PoseEstimationStorageManager(var csvFile: File) {
         }
     }
 
-    fun storeHandPoses(hands: List<NormalizedLandmarkList>, handsLabels: List<String>) {
+    fun storeHandPoses(
+        hands: List<NormalizedLandmarkList>,
+        handsLabels: List<String>,
+        timeStamp: Long
+    ) {
         if (hands.isEmpty())
             return
 
-        val timeStamp = LoggingManager.normalizeTimeStamp(LocalDateTime.now())
         var outputLine = timeStamp.toString()
 
         // Storing maximum of one left and one right hand

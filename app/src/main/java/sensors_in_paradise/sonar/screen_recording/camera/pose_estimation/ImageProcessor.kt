@@ -5,8 +5,10 @@ import android.graphics.*
 import android.media.Image
 import android.view.TextureView
 import sensors_in_paradise.sonar.R
+import sensors_in_paradise.sonar.screen_recording.LoggingManager
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Person
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Pose
+import java.time.LocalDateTime
 
 class ImageProcessor(
     private val context: Context,
@@ -89,6 +91,8 @@ class ImageProcessor(
         overlayView: TextureView,
         isRotated90: Boolean
     ) {
+        val timeStamp = LoggingManager.normalizeTimeStamp(LocalDateTime.now())
+
         val persons = extractPoses(bitmap)
 
         VisualizationUtils.transformKeyPoints(
@@ -101,7 +105,7 @@ class ImageProcessor(
                 VisualizationUtils.Transformation.ROTATE90
             )
         }
-        poseEstimationStorageManager.storeBodyPoses(persons)
+        poseEstimationStorageManager.storeBodyPoses(persons, timeStamp)
 
         val pointLists = VisualizationUtils.convertTo2DPoints(persons)
         val lines = VisualizationUtils.get2DLines(Pose.BodyPose)
@@ -113,6 +117,8 @@ class ImageProcessor(
         overlayView: TextureView,
         isRotated90: Boolean
     ) {
+        val timeStamp = LoggingManager.normalizeTimeStamp(LocalDateTime.now())
+
         handPoseDetector!!.estimatePose(bitmap) { handsResult ->
             var hands = handsResult.multiHandLandmarks().toList()
             val handsClasses = handsResult.multiHandedness().map { handClass ->
@@ -129,7 +135,7 @@ class ImageProcessor(
                     VisualizationUtils.Transformation.ROTATE90
                 )
             }
-            poseEstimationStorageManager.storeHandPoses(hands, handsClasses)
+            poseEstimationStorageManager.storeHandPoses(hands, handsClasses, timeStamp)
 
             val pointLists = VisualizationUtils.convertTo2DPoints(hands)
             val lines = VisualizationUtils.get2DLines(Pose.HandPose)

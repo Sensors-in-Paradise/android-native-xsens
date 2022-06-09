@@ -52,9 +52,6 @@ class CameraManager(
     private var poseStorageManager: PoseEstimationStorageManager? = null
     private val imageAnalysisExecutor = Executors.newFixedThreadPool(2)
 
-    // TODO
-    private val handDetector = HandDetector(context)
-
     @SuppressLint("UnsafeOptInUsageError")
     private val imageAnalysis = ImageAnalysis.Builder()
         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
