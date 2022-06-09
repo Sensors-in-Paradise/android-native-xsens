@@ -21,12 +21,9 @@ import sensors_in_paradise.sonar.screen_prediction.barChart.PredictionBarChart
 import sensors_in_paradise.sonar.screen_train.PredictionHistoryStorage
 import sensors_in_paradise.sonar.screen_train.PredictionHistoryStorage.Prediction
 import sensors_in_paradise.sonar.use_cases.UseCase
-import sensors_in_paradise.sonar.util.PredictionHelper
 import sensors_in_paradise.sonar.util.PreferencesHelper
-import sensors_in_paradise.sonar.use_cases.UseCase
 import sensors_in_paradise.sonar.util.UIHelper
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
-import java.nio.ByteBuffer
 import java.io.File
 import kotlin.math.round
 
@@ -162,15 +159,9 @@ class PredictionScreen(
         toggleMotionLayout.transitionToStart()
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private fun addPredictionViews(output: FloatArray) {
-        predictions.clear()
-
-        val outputLabelMap = model!!.getLabelsMap()
-    }
-
     private fun updatePrediction(output: FloatArray) {
         val predictions = ArrayList<Prediction>()
+        val outputLabelMap = model!!.getLabelsMap()
         for (i in output.indices) {
             val percentage = round(output[i] * 10000) / 100
             val prediction = Prediction(outputLabelMap[i]!!, percentage)
@@ -245,7 +236,7 @@ class PredictionScreen(
         }
         val barChart: BarChart = activity.findViewById(R.id.barChart_predict_predictions)
         predictionBarChart =
-            PredictionBarChart(context, barChart, numOutputs, predictionInterval)
+            PredictionBarChart(context, barChart, model!!.getLabelsMap().size, predictionInterval!!)
         toggleMotionLayout =
             activity.findViewById(R.id.motionLayout_predictionToggling_predictionFragment)
 
