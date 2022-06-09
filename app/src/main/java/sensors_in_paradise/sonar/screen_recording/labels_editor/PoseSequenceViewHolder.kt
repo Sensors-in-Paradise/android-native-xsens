@@ -17,40 +17,77 @@ class PoseSequenceViewHolder(
     onSeekToNewPosition: ((ms: Long) -> Unit)? = null
 ) :
     VisualSequenceViewHolder(onSourceLoadedListener, onStartLoadingSource, onSeekToNewPosition) {
-    private var poseSequence: PoseSequence? = null
+    private var poseSequences: List<ArrayList<List<PointF>>>? = null
+    private var timeStampSequences: List<ArrayList<Long>>? = null
     private var jointsToDraw: List<Pair<Int, Int>>? = null
+    private var startTime: Long? = null
+
 
     init {
         textureView.isOpaque = false
     }
 
     override fun loadSource(sourcePath: String, onSourceLoadedListener: () -> Unit) {
-        poseSequence = PoseEstimationStorageManager.loadPoseSequenceFromCSV(context, sourcePath)
-        jointsToDraw = VisualizationUtils.get2DLines(poseSequence!!.type)
+        val multiPoseSequence =
+            PoseEstimationStorageManager.loadPoseSequenceFromCSV(context, sourcePath)
+
+        val (pS, tsS) = convertSequences(multiPoseSequence)
+        poseSequences = pS; timeStampSequences = tsS
+
+        jointsToDraw = VisualizationUtils.get2DLines(multiPoseSequence.type)
+        startTime = multiPoseSequence.startTime
+
         onSourceLoadedListener()
+    }
+
+    // Convert (time) series of 1 .. n poses, to n individual pose series' with own timestamps each
+    private fun convertSequences(
+        poseSequence: PoseSequence
+    ): Pair<List<ArrayList<List<PointF>>>, List<ArrayList<Long>>> {
+        val numPoseInstances = poseSequence.posesArray.maxOf { it.size }
+
+        val posesList = mutableListOf<ArrayList<List<PointF>>>()
+        val timeStampsList = mutableListOf<ArrayList<Long>>()
+        (0 until numPoseInstances).forEach { instanceIndex ->
+            val poses =
+                ArrayList(poseSequence.posesArray.mapNotNull { it.getOrNull(instanceIndex) })
+            posesList.add(poses)
+
+            val timeStamps = arrayListOf<Long>()
+            poseSequence.timeStamps.filterIndexedTo(
+                timeStamps
+            ) { i, _ -> poseSequence.posesArray[i].getOrNull(instanceIndex) != null }
+            timeStampsList.add(timeStamps)
+        }
+        return Pair(posesList.toList(), timeStampsList.toList())
     }
 
     override fun seekTo(ms: Long) {
         super.seekTo(ms)
-        poseSequence?.let { poseSequence ->
-            val poses = getPosesAtTime(ms, poseSequence)
+        if (poseSequences != null && timeStampSequences != null &&
+            startTime != null && jointsToDraw != null
+        ) {
+            val poses = poseSequences!!.indices.mapNotNull { getPoseAtTime(it, ms) }
             drawOnCanvas(poses)
         }
     }
 
-    private fun getPosesAtTime(ms: Long, poseSequence: PoseSequence): List<List<PointF>> {
-        val timeStamp = poseSequence.startTime + ms
-        val poseIndex = poseSequence.timeStamps.binarySearch(timeStamp)
-        return if (poseIndex < -1) {
+    private fun getPoseAtTime(index: Int, ms: Long): List<PointF>? {
+        val poseSequence = poseSequences!![index]
+        val timeStampSequence = timeStampSequences!![index]
+
+        val timeStamp = startTime!! + ms
+        val seqIndex = timeStampSequence.binarySearch(timeStamp)
+        return if (seqIndex < -1) {
             // When timeStamp lies between two samples
-            VisualizationUtils.interpolatePoses(
+            VisualizationUtils.interpolatePose(
                 poseSequence,
-                -(poseIndex + 2),
+                timeStampSequence,
+                -(seqIndex + 2),
                 timeStamp
             )
         } else {
-            poseSequence.posesArray.getOrElse(poseIndex) { listOf() }
-                .filterNotNull().map { pose -> pose.map { PointF(it.x, it.y) } }
+            poseSequence.getOrNull(seqIndex)?.map { PointF(it.x, it.y) }
         }
     }
 

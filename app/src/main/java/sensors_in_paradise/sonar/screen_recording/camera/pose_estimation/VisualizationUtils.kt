@@ -178,48 +178,44 @@ object VisualizationUtils {
     }
 
     @Suppress("ComplexCondition")
-    fun interpolatePoses(
-        poseSequence: PoseSequence,
+    fun interpolatePose(
+        posesArray: ArrayList<List<PointF>>,
+        timeStamps: ArrayList<Long>,
         floorIndex: Int,
         timeStamp: Long,
         timeMargin: Long = 800
-    ): List<List<PointF>> {
-        val priorTimestamp = poseSequence.timeStamps.getOrNull(floorIndex) ?: Long.MAX_VALUE
-        val nextTimestamp = poseSequence.timeStamps.getOrNull(floorIndex + 1)
-        val priorPoses = poseSequence.posesArray.getOrNull(floorIndex)
+    ): List<PointF>? {
+        val priorTimestamp = timeStamps.getOrNull(floorIndex) ?: Long.MAX_VALUE
+        val nextTimestamp = timeStamps.getOrNull(floorIndex + 1)
 
-        val interpolatedPoses = mutableListOf<List<PointF>>()
-        priorPoses?.indices?.forEach {
-            val priorPose = poseSequence.posesArray.getOrNull(floorIndex)?.getOrNull(it)
-            val nextPose = poseSequence.posesArray.getOrNull(floorIndex + 1)?.getOrNull(it)
+        val priorPose = posesArray.getOrNull(floorIndex)
+        val nextPose = posesArray.getOrNull(floorIndex + 1)
 
-            if (priorPose == null ||
-                timeStamp < priorTimestamp ||
-                timeStamp > nextTimestamp ?: Long.MAX_VALUE ||
-                (timeStamp - priorTimestamp) > timeMargin
-            ) { // No prior sample / TimeStamp inconsistent / big gap to prior AND next sample
-                // Do nothing
-            } else if (nextPose == null ||
-                nextTimestamp == null ||
-                (nextTimestamp - priorTimestamp) > timeMargin
-            ) { // No next sample / big gap to next sample
-                interpolatedPoses.add(priorPose)
-            } else {
-                val interpolateFactor =
-                    (timeStamp - priorTimestamp).toFloat() / (nextTimestamp - priorTimestamp).toFloat()
-                val posePoints = priorPose.indices.map { pIndex ->
-                    val priorPoint = priorPose[pIndex]
-                    val nextPoint = nextPose[pIndex]
+        if (priorPose == null ||
+            timeStamp < priorTimestamp ||
+            timeStamp > nextTimestamp ?: Long.MAX_VALUE ||
+            (timeStamp - priorTimestamp) > timeMargin
+        ) { // No prior sample / TimeStamp inconsistent / big gap to prior AND next sample
+            return null
+        } else if (nextPose == null ||
+            nextTimestamp == null ||
+            (nextTimestamp - priorTimestamp) > timeMargin
+        ) { // No next sample / big gap to next sample
+            return priorPose
+        } else {
+            val interpolateFactor =
+                (timeStamp - priorTimestamp).toFloat() / (nextTimestamp - priorTimestamp).toFloat()
+            val posePoints = priorPose.indices.map { pIndex ->
+                val priorPoint = priorPose[pIndex]
+                val nextPoint = nextPose[pIndex]
 
-                    val x = priorPoint.x + (nextPoint.x - priorPoint.x) * interpolateFactor
-                    val y = priorPoint.y + (nextPoint.y - priorPoint.y) * interpolateFactor
+                val x = priorPoint.x + (nextPoint.x - priorPoint.x) * interpolateFactor
+                val y = priorPoint.y + (nextPoint.y - priorPoint.y) * interpolateFactor
 
-                    PointF(x, y)
-                }.toList()
-                interpolatedPoses.add(posePoints)
-            }
+                PointF(x, y)
+            }.toList()
+            return posePoints
         }
-        return interpolatedPoses
     }
 
     // Draw line and point indicating pose
