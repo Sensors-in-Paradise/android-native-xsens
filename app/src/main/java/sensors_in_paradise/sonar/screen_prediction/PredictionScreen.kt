@@ -95,7 +95,7 @@ class PredictionScreen(
         window = model?.let {
             InMemoryWindow(
                 windowSize = it.windowSize,
-                features = it.getFeaturesToPredict()
+                featuresWithSensorTagPrefix = it.getFeaturesToPredict()
             )
         }
         for (device in devices.getConnected()) {

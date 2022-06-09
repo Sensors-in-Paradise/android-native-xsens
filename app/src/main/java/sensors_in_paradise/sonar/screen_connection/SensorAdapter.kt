@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.screen_connection
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
@@ -10,11 +11,13 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.ViewFlipper
 import android.widget.ImageView
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.xsens.dot.android.sdk.models.XsensDotDevice
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.XSENSArrayList
+import sensors_in_paradise.sonar.util.UIHelper
 
 class SensorAdapter(
     context: Context,
@@ -22,9 +25,12 @@ class SensorAdapter(
     private val connectionCallbackUI: UIDeviceConnectionInterface
 ) :
     RecyclerView.Adapter<SensorAdapter.ViewHolder>() {
-    private var disconnectedDrawable: Drawable? = context.getDrawable(R.drawable.ic_baseline_link_off_24)
-    private var connectedDrawable: Drawable? = context.getDrawable(R.drawable.ic_baseline_link_24)
-    private var syncedDrawable: Drawable? = context.getDrawable(R.drawable.ic_baseline_sync_24)
+    private var disconnectedDrawable: Drawable? =
+        AppCompatResources.getDrawable(context, R.drawable.ic_baseline_link_off_24)
+    private var connectedDrawable: Drawable? =
+        AppCompatResources.getDrawable(context, R.drawable.ic_baseline_link_24)
+    private var syncedDrawable: Drawable? =
+        AppCompatResources.getDrawable(context, R.drawable.ic_baseline_sync_24)
 
     /**
      * Provide a reference to the type of views that you are using
@@ -40,6 +46,8 @@ class SensorAdapter(
         val cancelButton: Button = view.findViewById(R.id.button_cancel_connection_sensor_device)
         val statusIV: ImageView = view.findViewById(R.id.imageView_status_connection_fragment)
         val sensorSetView: View = view.findViewById(R.id.view_sensorSetColor_sensorDevice)
+        val tagSpellingWarningTextView: TextView =
+            view.findViewById(R.id.tv_sensorTagSpellingWarning_sensorDevice)
     }
 
     // Create new views (invoked by the layout manager)
@@ -52,6 +60,7 @@ class SensorAdapter(
     }
 
     // Replace the contents of a view (invoked by the layout manager)
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
 
         // Get element from your dataset at this position and replace the
@@ -87,7 +96,8 @@ class SensorAdapter(
         viewHolder.batteryPB.progress = if (isConnected) device.batteryPercentage else 0
         viewHolder.batteryPB.visibility = if (isConnected) View.VISIBLE else View.GONE
 
-        viewHolder.cancelButton.visibility = if (connectionCallbackUI.isSyncing) View.GONE else View.VISIBLE
+        viewHolder.cancelButton.visibility =
+            if (connectionCallbackUI.isSyncing) View.GONE else View.VISIBLE
 
         val hasSetColor = device.hasSetColor()
         if (hasSetColor) {
@@ -101,6 +111,13 @@ class SensorAdapter(
         }
 
         viewHolder.statusIV.setImageDrawable(statusDrawable)
+
+        val isSensorTagCompliant = device.tag.matches(sensorTagRegex)
+        viewHolder.tagSpellingWarningTextView.apply {
+            visibility =
+                if (isSensorTagCompliant || !isConnected) View.GONE else View.VISIBLE
+            setOnClickListener { UIHelper.showAlert(context, context.getString(R.string.sensor_tag_prefix_pattern_explanation),"Sensor tags not compliant") }
+        }
     }
 
     private fun getConnectionStateLabel(connectionState: Int): String {
@@ -133,5 +150,9 @@ class SensorAdapter(
         if (index != -1) {
             notifyItemChanged(index)
         }
+    }
+
+    companion object {
+        private val sensorTagRegex = Regex("^\\w+-\\d+\$")
     }
 }

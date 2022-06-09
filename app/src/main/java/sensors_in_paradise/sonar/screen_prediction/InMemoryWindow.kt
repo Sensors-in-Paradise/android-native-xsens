@@ -1,20 +1,31 @@
 package sensors_in_paradise.sonar.screen_prediction
 
+import android.util.Log
 import com.xsens.dot.android.sdk.events.XsensDotData
 import java.nio.ByteBuffer
 import java.util.Collections.max
 
-class InMemoryWindow(features: Array<String>, val windowSize: Int = 90) :
+class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize: Int = 90) :
     LinkedHashMap<String, ArrayList<Pair<Long, Float>>>() {
+
+    private val featuresPerSensorTagPrefix =  LinkedHashMap<String, List<String>>()
+
     init {
-        for (feature in features) {
+        for (feature in featuresWithSensorTagPrefix) {
             put(feature.lowercase(), ArrayList(windowSize + cushion))
+        }
+        for (deviceTagPrefix in extractDeviceTagPrefixes(this.keys)) {
+            featuresPerSensorTagPrefix[deviceTagPrefix] = extractFeatures(deviceTagPrefix, this.keys)
         }
     }
 
     fun appendSensorData(deviceTagPrefix: String, xsensDotData: XsensDotData) {
         val timeStamp: Long = xsensDotData.sampleTimeFine
-        for (featureTag in extractFeatures(deviceTagPrefix, this.keys)) {
+        if(deviceTagPrefix !in featuresPerSensorTagPrefix){
+            Log.w("InMemoryWindow-appendSensorData", "The device tag prefix $deviceTagPrefix for the given sensor data is not mentioned in the features that should be collected for this window.")
+            return
+        }
+        for (featureTag in featuresPerSensorTagPrefix[deviceTagPrefix]!!) {
             val featureKey = "${featureTag}_${deviceTagPrefix}"
             val featureValues = this[featureKey]
             if (featureValues != null) {
@@ -31,14 +42,17 @@ class InMemoryWindow(features: Array<String>, val windowSize: Int = 90) :
                     )
                 )
             }
-
-
         }
     }
 
     private fun getValueFromXsensDotData(featureTag: String, xsensDotData: XsensDotData): Float {
-        val featureType = featureTag.split("_")[0]
-        val featureAxisTag = featureTag.split("_")[1]
+        // Features can have tags with axis chars like Mag_Y, Quat_Z or dq_X
+        // OR they can have index spelling like dv[1], dv[2] to determine their axis...
+        val hasAxisIndexSpelling = featureTag.contains(indexSpellingRegex)
+        val featureType =
+            if (hasAxisIndexSpelling) featureTag.substringBefore("[") else featureTag.split("_")[0]
+        val featureAxisTag = if (hasAxisIndexSpelling) featureTag.substringAfter("[")
+            .substringBefore("]") else featureTag.split("_")[1]
         val featureAxisIndex = featureAxisTagToIndex(featureType, featureAxisTag)
         return when (featureType) {
             "quat" -> xsensDotData.quat[featureAxisIndex]
@@ -57,8 +71,16 @@ class InMemoryWindow(features: Array<String>, val windowSize: Int = 90) :
             "x" -> 1
             "y" -> 2
             "z" -> 3
+            "1" -> 0
+            "2" -> 1
+            "3" -> 2
             else -> throw IllegalArgumentException("Invalid feature axis")
         } - if (featureType == "quat" || featureType == "dq") 0 else 1
+    }
+
+    private fun extractDeviceTagPrefixes(keys: MutableSet<String>): List<String> {
+        return keys.map { it.substringAfterLast("_") }.distinct()
+            .toList()
     }
 
     private fun extractFeatures(deviceTagPrefix: String, keys: MutableSet<String>): List<String> {
@@ -109,6 +131,7 @@ class InMemoryWindow(features: Array<String>, val windowSize: Int = 90) :
         }
         return true
     }
+
     fun hasEnoughDataToCompileWindow(): Boolean {
         return hasEnoughDataToCompileWindow(getStartIndices())
     }
@@ -134,5 +157,6 @@ class InMemoryWindow(features: Array<String>, val windowSize: Int = 90) :
     companion object {
         private const val cushion = 10
         private const val bytesPerFloat = 4
+        private val indexSpellingRegex = Regex("\\[\\d\\]")
     }
 }

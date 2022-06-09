@@ -22,4 +22,5 @@
     <string name="missing_model_dialog_message">The current use case does not have a tflite model.
 You can either manually place a tflite model under %1$s via PC or import the default model.</string>
     <string name="missing_model_dialog_title">Model missing for this use case!</string>
+    <string name="sensor_tag_prefix_pattern_explanation">In order to use the sensors for on device prediction they need to match the pattern [TAG_PREFIX]-[SENSOR_SET_NUMBER] (regex ^\\w+-\\d+$).\n\nExamples for valid sensor tags would be:\nLW-1 (LW for LeftWrist and 1 for sensor set 1)\nRF-3 (RF for RightFoot and 3 for sensor set 3)\nHowever you can give the sensor tag prefix your own semantic (not necessarily body position), it\'s just important that the tag matches the pattern</string>
 </resources>
