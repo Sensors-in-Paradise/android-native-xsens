@@ -25,6 +25,7 @@ import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.UIHelper
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import java.io.File
+import java.lang.IllegalStateException
 import kotlin.math.round
 
 class PredictionScreen(
@@ -40,7 +41,7 @@ class PredictionScreen(
     private lateinit var progressBar: ProgressBar
     private lateinit var timer: Chronometer
     private lateinit var textView: TextView
-    private lateinit var predictionBarChart: PredictionBarChart
+    private var predictionBarChart: PredictionBarChart? = null
 
     private lateinit var toggleMotionLayout: MotionLayout
     private lateinit var metadataStorage: XSensDotMetadataStorage
@@ -54,8 +55,10 @@ class PredictionScreen(
     private var predictionInterval: Long? = null
     private val updatePredictionTask = object : Runnable {
         override fun run() {
-            predict()
-            mainHandler.postDelayed(this, predictionInterval!!)
+            if(isRunning) {
+                predict()
+                mainHandler.postDelayed(this, predictionInterval!!)
+            }
         }
     }
 
@@ -104,6 +107,9 @@ class PredictionScreen(
         if(!checkPredictionPreconditions()){
             return
         }
+        if(model==null){
+            throw IllegalStateException("The TFLiteModel instance can't be null when starting data collection")
+        }
         sensorOccupationInterface?.onSensorOccupationStatusChanged(true)
         lastPredictionTime = 0L
         window = model?.let {
@@ -121,8 +127,10 @@ class PredictionScreen(
         timer.start()
         textView.visibility = View.VISIBLE
         textView.text = ""
-
-        predictionBarChart.resetData()
+        val barChart: BarChart = activity.findViewById(R.id.barChart_predict_predictions)
+        predictionBarChart =
+            PredictionBarChart(context, barChart, (model!!.getLabelsMap().size))
+        predictionBarChart?.resetData()
 
         predictionHistoryStorage =
             PredictionHistoryStorage(
@@ -178,7 +186,7 @@ class PredictionScreen(
         predictions.sortByDescending { it.percentage }
         val highestPrediction = predictions[0]
 
-        predictionBarChart.changeData(predictions, highestPrediction.label)
+        predictionBarChart?.changeData(predictions, highestPrediction.label)
 
         textView.text = highestPrediction.label
 
@@ -195,23 +203,23 @@ class PredictionScreen(
     private fun predict() {
         lastPredictionTime = System.currentTimeMillis()
         if (window != null) {
-            if (window!!.hasEnoughDataToCompileWindow()) {
-                // TODO: remove toast
-                Toast.makeText(
-                    context,
-                    "Predicting",
-                    Toast.LENGTH_SHORT
-                ).show()
-                model?.runInfer(window!!.compileWindow())?.let { updatePrediction(it) }
-                window!!.clearValues()
+            try {
+                if (window!!.hasEnoughDataToCompileWindow()) {
+                    model?.runInfer(window!!.compileWindow())?.let { updatePrediction(it) }
+                    window!!.clearValues()
 
-            } else {
-                Toast.makeText(
-                    context,
-                    "Not enough data collected for prediction.",
-                    Toast.LENGTH_SHORT
-                ).show()
-
+                } else {
+                    Toast.makeText(
+                        context,
+                        "Not enough data collected for prediction.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }catch(e: InMemoryWindow.SensorsOutOfSyncException){
+                activity.runOnUiThread {
+                    stopDataCollection()
+                    MessageDialog(context, "The following exception occurred:\n${e.message}\n\nTo avoid this, sync the connected sensors on the connection screen before starting live prediction.", "Sensors are out of sync")
+                }
             }
         }
     }
@@ -234,43 +242,46 @@ class PredictionScreen(
         progressBar = activity.findViewById(R.id.progressBar_nextPrediction_predictionFragment)
 
         predictionButton.setOnClickListener {
-            when (initModelFromCurrentUseCase()) {
-                ModelInitializationResult.SUCCESS -> {
-                    val signatures = model?.signatureKeys
-                    Log.d("PredictionScreen-onActivityCreated", signatures.toString())
-                    togglePrediction()
-                }
-                ModelInitializationResult.MISSING_METADATA -> {
-                    MessageDialog(
-                        context,
-                        message = context.getString(
-                            R.string.missing_metadata_dialog_message
-                        ),
-                        title = context.getString(R.string.missing_metadata_dialog_title),
-                        positiveButtonText = "Okay",
-                        neutralButtonText = "Import default Model"
-                    )
-                }
-                ModelInitializationResult.FILE_NOT_EXISTING -> {
-                    MessageDialog(
-                        context,
-                        message = context.getString(
-                            R.string.missing_model_dialog_message,
-                            currentUseCase.getModelFile().absolutePath
-                        ),
-                        title = context.getString(R.string.missing_model_dialog_title),
-                        positiveButtonText = "Okay",
-                        neutralButtonText = "Import default Model",
-                        onNeutralButtonClickListener = { _, _ ->
-                            currentUseCase.importDefaultModel()
-                        }
-                    )
+            if(!isRunning) {
+                when (initModelFromCurrentUseCase()) {
+                    ModelInitializationResult.SUCCESS -> {
+                        val signatures = model?.signatureKeys
+                        Log.d("PredictionScreen-onActivityCreated", signatures.toString())
+                        togglePrediction()
+                    }
+                    ModelInitializationResult.MISSING_METADATA -> {
+                        MessageDialog(
+                            context,
+                            message = context.getString(
+                                R.string.missing_metadata_dialog_message
+                            ),
+                            title = context.getString(R.string.missing_metadata_dialog_title),
+                            positiveButtonText = "Okay",
+                            neutralButtonText = "Import default Model"
+                        )
+                    }
+                    ModelInitializationResult.FILE_NOT_EXISTING -> {
+                        MessageDialog(
+                            context,
+                            message = context.getString(
+                                R.string.missing_model_dialog_message,
+                                currentUseCase.getModelFile().absolutePath
+                            ),
+                            title = context.getString(R.string.missing_model_dialog_title),
+                            positiveButtonText = "Okay",
+                            neutralButtonText = "Import default Model",
+                            onNeutralButtonClickListener = { _, _ ->
+                                currentUseCase.importDefaultModel()
+                            }
+                        )
+                    }
                 }
             }
+            else{
+                togglePrediction()
+            }
         }
-        val barChart: BarChart = activity.findViewById(R.id.barChart_predict_predictions)
-        predictionBarChart =
-            PredictionBarChart(context, barChart, (model?.getLabelsMap()?.size) ?: 0)
+
         toggleMotionLayout =
             activity.findViewById(R.id.motionLayout_predictionToggling_predictionFragment)
 

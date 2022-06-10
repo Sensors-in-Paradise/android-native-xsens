@@ -8,6 +8,7 @@ import java.util.Collections.max
 
 class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize: Int = 90) :
     LinkedHashMap<String, ArrayList<Pair<Long, Float>>>() {
+    class SensorsOutOfSyncException(msg:String = "Sensors are out of sync"): IllegalStateException(msg)
 
     private val featuresPerSensorTagPrefix = LinkedHashMap<String, List<String>>()
 
@@ -104,7 +105,7 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
         val startingIndices: Array<Int> = getStartIndices()
 
         //return byteBuffer of feature vectors starting at the starting indices
-        val buffer = FloatBuffer.allocate(this.values.size * windowSize * bytesPerFloat)
+        val buffer = FloatBuffer.allocate(this.keys.size * windowSize)
         for (i in 0 until windowSize) {
             for ((j, key) in this.keys.withIndex()) {
                 val index = startingIndices[j] + i
@@ -124,26 +125,30 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
             this[key]?.clear()
         }
     }
-
+    @Throws(SensorsOutOfSyncException::class)
     private fun getStartIndices(): Array<Int> {
         //find latest starting timestamp of each feature
         val startingTimestamp: Long = max(this.values.map { if (it.isEmpty()) 0 else it[0].first })
         //find starting indices of feature vectors closest to the starting timestamp
         return this.values.map {
-            findClosestIndex(startingTimestamp, it)
+            val closestIndex = findClosestIndex(startingTimestamp, it)
+            if(closestIndex> sensorsOutOfSyncMinStartIndexDifference){
+                throw SensorsOutOfSyncException("Sensors are out of synch by at least $closestIndex measurements")
+            }
+            return@map closestIndex
         }.toTypedArray()
     }
 
     private fun hasEnoughDataToCompileWindow(startIndices: Array<Int>): Boolean {
         for ((i, key) in this.keys.withIndex()) {
-            Log.d("InMemoryWindow-hasEnoughDataToCompileWindow", "startIndices[$i] = ${startIndices[i]}")
+
             if (startIndices[i] + windowSize > (this[key]?.size ?: 0)) {
                 return false
             }
         }
         return true
     }
-
+    @Throws(SensorsOutOfSyncException::class)
     fun hasEnoughDataToCompileWindow(): Boolean {
         return hasEnoughDataToCompileWindow(getStartIndices())
     }
@@ -170,5 +175,6 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
         private const val cushion = 10
         private const val bytesPerFloat = 4
         private val indexSpellingRegex = Regex("\\[\\d\\]")
+        private const val sensorsOutOfSyncMinStartIndexDifference = 100
     }
 }
