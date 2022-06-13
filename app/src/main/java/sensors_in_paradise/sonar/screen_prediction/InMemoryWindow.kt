@@ -41,20 +41,31 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
             val featureKey = "${featureTag}_${deviceTagPrefix}"
             val featureValues = this[featureKey]
             if (featureValues != null) {
+
+                // insert the new value at the end of the list or if the timestamp of the new value
+                // is lower than the largest timestamp, insert the new value at the correct position
                 var insertionIndex = featureValues.size
                 if (featureValues.isNotEmpty()) {
                     if (featureValues.last().first > timeStamp) {
                         insertionIndex = featureValues.indexOfLast { it.first < timeStamp } + 1
                     }
                 }
+
+                // replace nan values with the forward fill method except for the first time stamp
+                var value = getValueFromXsensDotData(featureTag, xsensDotData)
+                if (value.isNaN()) {
+                    //TODO("Count nans per feature")
+                    value =
+                        if (insertionIndex == 0) 0.0f else featureValues[insertionIndex - 1].second
+                }
                 featureValues.add(
                     insertionIndex, Pair(
                         timeStamp,
-                        getValueFromXsensDotData(featureTag, xsensDotData)
+                        value
                     )
                 )
             }
-        }
+    }
     }
 
     private fun getValueFromXsensDotData(featureTag: String, xsensDotData: XsensDotData): Float {
