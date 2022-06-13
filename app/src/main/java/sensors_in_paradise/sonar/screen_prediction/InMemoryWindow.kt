@@ -2,7 +2,6 @@ package sensors_in_paradise.sonar.screen_prediction
 
 import android.util.Log
 import com.xsens.dot.android.sdk.events.XsensDotData
-import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 import java.util.Collections.max
 
@@ -117,6 +116,8 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
 
         //return byteBuffer of feature vectors starting at the starting indices
         val buffer = FloatBuffer.allocate(this.keys.size * windowSize)
+
+
         for (i in 0 until windowSize) {
             for ((j, key) in this.keys.withIndex()) {
                 val index = startingIndices[j] + i
