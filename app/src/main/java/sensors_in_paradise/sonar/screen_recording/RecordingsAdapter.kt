@@ -85,7 +85,7 @@ class RecordingsAdapter(
                 }
             }
             itemView.setOnLongClickListener {
-                SensorPlacementEstimator().estimateRecording(context, recording)
+                SensorPlacementEstimator().tryEstimateSensorPlacements(context, recording)
                 true
             }
 
