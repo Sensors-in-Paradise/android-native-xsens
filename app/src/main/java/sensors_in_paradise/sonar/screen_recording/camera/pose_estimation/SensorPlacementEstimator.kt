@@ -21,20 +21,7 @@ import kotlin.math.sqrt
 class SensorPlacementEstimator() {
 
     companion object {
-        val POSITIONS = listOf(
-            "HEAD",
-            "LEFT_SHOULDER",
-            "RIGHT_SHOULDER",
-            "LEFT_ELBOW",
-            "RIGHT_ELBOW",
-            "LEFT_WRIST",
-            "RIGHT_WRIST",
-            "HIP",
-            "LEFT_KNEE",
-            "RIGHT_KNEE",
-            "LEFT_ANKLE",
-            "RIGHT_ANKLE"
-        )
+        val POSITIONS = SensorPlacementDialog.POSITIONS_MAP.keys
         const val FRAME_LENGTH = 500
     }
 

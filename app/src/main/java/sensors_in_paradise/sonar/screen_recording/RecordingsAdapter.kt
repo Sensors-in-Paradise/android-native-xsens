@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.SensorPlacementDialog
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.SensorPlacementEstimator
 import sensors_in_paradise.sonar.screen_recording.labels_editor.LabelsEditorDialog
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
@@ -57,7 +58,7 @@ class RecordingsAdapter(
             deleteButton.setOnClickListener {
                 showDeleteRecordingDialog(recording)
             }
-             itemView.setOnClickListener {
+            itemView.setOnClickListener {
                 val onEditBtnClickListener =
                     DialogInterface.OnClickListener { _: DialogInterface, _: Int ->
                         LabelsEditorDialog(context, currentUseCase, recording) {
@@ -85,7 +86,20 @@ class RecordingsAdapter(
                 }
             }
             itemView.setOnLongClickListener {
-                SensorPlacementEstimator().tryEstimateSensorPlacements(context, recording)
+                // TODO
+
+                val sensorPlacementDialog = SensorPlacementDialog(
+                    context,
+                    mapOf()
+                )
+                val scores =
+                    SensorPlacementEstimator().tryEstimateSensorPlacements(context, recording)
+
+                if (scores != null) {
+                    sensorPlacementDialog.updateScores(scores)
+                }
+
+
                 true
             }
 
