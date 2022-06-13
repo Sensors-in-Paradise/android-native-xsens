@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.SensorPlacementEstimator
 import sensors_in_paradise.sonar.screen_recording.labels_editor.LabelsEditorDialog
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import sensors_in_paradise.sonar.util.dialogs.VideoDialog
@@ -56,7 +57,7 @@ class RecordingsAdapter(
             deleteButton.setOnClickListener {
                 showDeleteRecordingDialog(recording)
             }
-            itemView.setOnClickListener {
+             itemView.setOnClickListener {
                 val onEditBtnClickListener =
                     DialogInterface.OnClickListener { _: DialogInterface, _: Int ->
                         LabelsEditorDialog(context, currentUseCase, recording) {
@@ -83,6 +84,11 @@ class RecordingsAdapter(
                     )
                 }
             }
+            itemView.setOnLongClickListener {
+                SensorPlacementEstimator().estimateRecording(context, recording)
+                true
+            }
+
             activityTextView.text =
                 recording.getDisplayTitle()
             durationTextView.text = "Duration: " + GlobalValues.getDurationAsString(duration)

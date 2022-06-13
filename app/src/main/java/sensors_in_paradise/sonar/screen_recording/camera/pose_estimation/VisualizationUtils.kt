@@ -156,7 +156,6 @@ object VisualizationUtils {
         val inputSize = bitmap?.let { PointF(bitmap.width.toFloat(), bitmap.height.toFloat()) }
         return hands.map { hand ->
             val listBuilder = hand.toBuilder()
-            val x = hand.landmarkList
             val landmarkList = hand.landmarkList.map { landMark ->
                 val landMarkBuilder = landMark.toBuilder()
                 val oldCoordinate = PointF(landMark.x, landMark.y)
