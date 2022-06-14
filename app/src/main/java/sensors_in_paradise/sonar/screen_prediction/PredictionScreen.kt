@@ -55,7 +55,7 @@ class PredictionScreen(
     private var predictionInterval: Long? = null
     private val updatePredictionTask = object : Runnable {
         override fun run() {
-            if(isRunning) {
+            if (isRunning) {
                 predict()
                 mainHandler.postDelayed(this, predictionInterval!!)
             }
@@ -82,9 +82,9 @@ class PredictionScreen(
             startDataCollection()
         }
     }
-    private fun checkPredictionPreconditions(): Boolean{
+    private fun checkPredictionPreconditions(): Boolean {
         val isInvalidTagConnected = devices.getConnectedWithOfflineMetadata().any { !it.isTagValid() }
-        if(isInvalidTagConnected){
+        if (isInvalidTagConnected) {
             MessageDialog(context, context.getString(R.string.sensor_tag_prefix_pattern_explanation), "Tags of connected sensors invalid")
             return false
         }
@@ -104,10 +104,10 @@ class PredictionScreen(
     }
 
     private fun startDataCollection() {
-        if(!checkPredictionPreconditions()){
+        if (!checkPredictionPreconditions()) {
             return
         }
-        if(model==null){
+        if (model == null) {
             throw IllegalStateException("The TFLiteModel instance can't be null when starting data collection")
         }
         sensorOccupationInterface?.onSensorOccupationStatusChanged(true)
@@ -120,7 +120,7 @@ class PredictionScreen(
         }
         for (device in devices.getConnected()) {
             device.measurementMode =
-                XsensDotPayload.PAYLOAD_TYPE_CUSTOM_MODE_4 //TODO("Set measurement mode from model metadata")
+                XsensDotPayload.PAYLOAD_TYPE_CUSTOM_MODE_4 // TODO("Set measurement mode from model metadata")
             device.startMeasuring()
         }
         timer.base = SystemClock.elapsedRealtime()
@@ -154,7 +154,6 @@ class PredictionScreen(
             devices.getConnectedWithOfflineMetadata().map { it.getTagPrefix() }
         val requiredDeviceTagPrefixes = model!!.getDeviceTags()
         return requiredDeviceTagPrefixes.filter { !connectedDeviceTagPrefixes.contains(it) }
-
     }
 
     private fun stopDataCollection() {
@@ -207,7 +206,6 @@ class PredictionScreen(
                 if (window!!.hasEnoughDataToCompileWindow()) {
                     model?.runInfer(window!!.compileWindow())?.let { updatePrediction(it) }
                     window!!.clearValues()
-
                 } else {
                     Toast.makeText(
                         context,
@@ -215,7 +213,7 @@ class PredictionScreen(
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-            }catch(e: InMemoryWindow.SensorsOutOfSyncException){
+            } catch (e: InMemoryWindow.SensorsOutOfSyncException) {
                 activity.runOnUiThread {
                     stopDataCollection()
                     MessageDialog(context, "The following exception occurred:\n${e.message}\n\nTo avoid this, sync the connected sensors on the connection screen before starting live prediction.", "Sensors are out of sync")
@@ -242,7 +240,7 @@ class PredictionScreen(
         progressBar = activity.findViewById(R.id.progressBar_nextPrediction_predictionFragment)
 
         predictionButton.setOnClickListener {
-            if(!isRunning) {
+            if (!isRunning) {
                 when (initModelFromCurrentUseCase()) {
                     ModelInitializationResult.SUCCESS -> {
                         val signatures = model?.signatureKeys
@@ -276,8 +274,7 @@ class PredictionScreen(
                         )
                     }
                 }
-            }
-            else{
+            } else {
                 togglePrediction()
             }
         }
@@ -305,7 +302,7 @@ class PredictionScreen(
     }
 
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
-        val deviceTag = metadataStorage.getTagForAddress(deviceAddress)
+        val deviceTag = devices[deviceAddress]?.tag?: return
         val deviceTagPrefix = XSensDotDeviceWithOfflineMetadata.extractTagPrefixFromTag(deviceTag)
         if (deviceTagPrefix != null) {
             window?.appendSensorData(deviceTagPrefix, xsensDotData)
@@ -318,7 +315,6 @@ class PredictionScreen(
                     Toast.LENGTH_LONG
                 ).show()
             }
-
         }
     }
 
@@ -347,10 +343,10 @@ class PredictionScreen(
     @Throws(InvalidModelMetadata::class)
     private fun initMetadataModel(modelFile: File) {
         model = TFLiteModel(modelFile)
-        predictionInterval = model!!.getWindowInMilliSeconds() + cushion //ms
+        predictionInterval = model!!.getWindowInMilliSeconds() + cushion // ms
     }
 
     companion object {
-        const val cushion = 5000L //ms
+        const val cushion = 1000L // ms
     }
 }

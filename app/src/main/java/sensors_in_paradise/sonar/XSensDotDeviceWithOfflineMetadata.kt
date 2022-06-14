@@ -41,7 +41,7 @@ class XSensDotDeviceWithOfflineMetadata(
         return extractTagPrefixFromTag(tag)
     }
 
-    fun isTagValid():Boolean{
+    fun isTagValid(): Boolean {
         return tag.matches(sensorTagRegex)
     }
 

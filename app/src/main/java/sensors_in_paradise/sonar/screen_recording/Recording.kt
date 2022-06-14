@@ -1,9 +1,13 @@
 package sensors_in_paradise.sonar.screen_recording
 
+import com.opencsv.CSVReaderHeaderAware
 import sensors_in_paradise.sonar.GlobalValues
+import sensors_in_paradise.sonar.XSensDotDeviceWithOfflineMetadata
+import sensors_in_paradise.sonar.screen_prediction.InMemoryWindow
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
+import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.random.Random
 
@@ -25,6 +29,7 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
         dir,
         RecordingMetadataStorage(dir.resolve(GlobalValues.METADATA_JSON_FILENAME))
     )
+
     constructor(recording: Recording) : this(
         recording.dir,
         recording.metadataStorage
@@ -57,7 +62,7 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
         return true
     }
 
-	fun getDisplayTitle(): String {
+    fun getDisplayTitle(): String {
         val numActivities = metadataStorage.getActivities().size
         var result = ""
         if (hasVideoRecording()) {
@@ -70,17 +75,17 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
         return result
     }
 
-	fun getDirectory(): File {
+    fun getDirectory(): File {
         return dir
     }
 
     fun delete() {
-            val children = dir.listFiles()
-            if (children != null) {
-                for (child in children) {
-                    child.delete()
-                }
+        val children = dir.listFiles()
+        if (children != null) {
+            for (child in children) {
+                child.delete()
             }
+        }
         dir.delete()
     }
 
@@ -88,7 +93,7 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
         return getVideoFile().exists()
     }
 
-	fun getVideoFile(): File {
+    fun getVideoFile(): File {
         return dir.resolve(VIDEO_CAPTURE_FILENAME)
     }
 
@@ -96,7 +101,7 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
         return getPoseSequenceFile().exists()
     }
 
-	fun getPoseSequenceFile(): File {
+    fun getPoseSequenceFile(): File {
         return dir.resolve(POSE_CAPTURE_FILENAME)
     }
 
@@ -251,11 +256,67 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
         metadataStorage.setRecordingState(recordingState)
     }
 
-	fun getActivitiesSummary(): String {
+    fun getActivitiesSummary(): String {
         return metadataStorage.getActivities().joinToString("\n") { (activityStartTime, activity) ->
             GlobalValues.getDurationAsString(activityStartTime - metadataStorage.getTimeStarted()) + "   " +
                     activity
         }
+    }
+
+    class InvalidRecordingException(msg: String) : Exception(msg)
+
+    fun getWindowAt(
+        relativeStartTime: Long,
+        featuresWithSensorTagPrefix: Array<String>,
+        windowSize: Int? = null
+    ): InMemoryWindow {
+        val window = if (windowSize != null) InMemoryWindow(
+            featuresWithSensorTagPrefix,
+            windowSize
+        ) else InMemoryWindow(featuresWithSensorTagPrefix)
+
+        val tagPrefixToRecordingCSVReaderMap = LinkedHashMap<String, CSVReaderHeaderAware>()
+
+        val requiredTagPrefixes = window.getRequiredSensorTagPrefixes()
+        // STF = SampleTimeFine
+        val tagPrefixToFirstSTFMap = LinkedHashMap<String, Long>()
+        for ((address, tag) in metadataStorage.getSensorMacMap()) {
+            val tagPrefix = XSensDotDeviceWithOfflineMetadata.extractTagPrefixFromTag(tag)
+            if (tagPrefix !in requiredTagPrefixes || tagPrefix == null) {
+                continue
+            }
+
+            val csvDataFile = File(dir, "$address.csv")
+            if (!csvDataFile.exists()) {
+                throw InvalidRecordingException("Recording is incomplete. Data for sensor with tag $tag and address $address is missing (file ${csvDataFile.name} does not exist)")
+            }
+            val fileReader = GlobalValues.getCSVHeaderAwareFileReader(csvDataFile)
+            val csvReader = CSVReaderHeaderAware(fileReader)
+            tagPrefixToRecordingCSVReaderMap[tagPrefix] = csvReader
+
+            val row = csvReader.readMap()
+            if (!row.containsKey("SampleTimeFine")) {
+                throw InvalidRecordingException("Recording is invalid. The file ${csvDataFile.name} does not contain a SampleTimeFine column.")
+            }
+            tagPrefixToFirstSTFMap[tagPrefix] = row["SampleTimeFine"]!!.toLong()
+        }
+        val tagPrefixToSmallestSTFToRelativeStartTimeDiffMap = LinkedHashMap<String, Long>()
+        for ((tagPrefix, csvReader) in tagPrefixToRecordingCSVReaderMap) {
+            do {
+                val row = csvReader.readMap()
+                val stf = row["SampleTimeFine"]!!.toLong()
+                val currentSmallestDiff =
+                    tagPrefixToSmallestSTFToRelativeStartTimeDiffMap[tagPrefix]
+                if ((currentSmallestDiff ?: Long.MAX_VALUE) > abs(stf - relativeStartTime)) {
+                    tagPrefixToSmallestSTFToRelativeStartTimeDiffMap[tagPrefix] =
+                        abs(stf - relativeStartTime)
+                }
+            } while ((currentSmallestDiff ?: Long.MAX_VALUE) >= abs(stf - relativeStartTime))
+        }
+        // TODO: Fill following rows into InMemoryWindow (csvReaders point to the start positions now)
+
+
+        return window
     }
 
     companion object {

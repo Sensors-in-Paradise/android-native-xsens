@@ -118,7 +118,7 @@ class SensorAdapter(
         viewHolder.tagSpellingWarningTextView.apply {
             visibility =
                 if (isSensorTagCompliant || !isConnected) View.GONE else View.VISIBLE
-            setOnClickListener { UIHelper.showAlert(context, context.getString(R.string.sensor_tag_prefix_pattern_explanation),"Sensor tags not compliant") }
+            setOnClickListener { UIHelper.showAlert(context, context.getString(R.string.sensor_tag_prefix_pattern_explanation), "Sensor tags not compliant") }
         }
     }
 
@@ -153,5 +153,4 @@ class SensorAdapter(
             notifyItemChanged(index)
         }
     }
-
 }

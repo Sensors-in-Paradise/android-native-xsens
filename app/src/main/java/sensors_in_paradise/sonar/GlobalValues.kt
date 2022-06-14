@@ -4,8 +4,10 @@ import android.Manifest
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import java.io.File
+import java.io.FileReader
 import java.net.NetworkInterface
 import java.net.SocketException
 import java.util.*
@@ -102,6 +104,21 @@ class GlobalValues private constructor() {
             val name = file.name
             val extension = name.substring(name.lastIndexOf(".") + 1)
             return fileEmojiMap[extension] ?: "\uD83D\uDCC4"
+        }
+        @Throws(NumberFormatException::class)
+        fun getCSVHeaderAwareFileReader(inputFile: File): FileReader {
+            val fileReader = FileReader(inputFile)
+                var headerSize = ""
+                var c = fileReader.read().toChar()
+                while (c != '\n') {
+                    c = fileReader.read().toChar()
+                    if (c.isDigit()) {
+                        headerSize += c
+                    }
+                }
+                fileReader.skip(headerSize.toLong() + 1)
+
+            return fileReader
         }
     }
 }

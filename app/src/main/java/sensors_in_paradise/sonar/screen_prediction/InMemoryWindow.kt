@@ -1,20 +1,22 @@
 package sensors_in_paradise.sonar.screen_prediction
 
 import android.util.Log
+import com.opencsv.CSVReaderHeaderAware
 import com.xsens.dot.android.sdk.events.XsensDotData
+import sensors_in_paradise.sonar.GlobalValues
 import java.nio.FloatBuffer
 import java.util.Collections.max
 
 class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize: Int = 90) :
     LinkedHashMap<String, ArrayList<Pair<Long, Float>>>() {
-    class SensorsOutOfSyncException(msg:String = "Sensors are out of sync"): IllegalStateException(msg)
+    class SensorsOutOfSyncException(msg: String = "Sensors are out of sync") : IllegalStateException(msg)
 
     private val featuresPerSensorTagPrefix = LinkedHashMap<String, List<String>>()
 
     init {
         for (feature in featuresWithSensorTagPrefix) {
-            if(feature.isNotEmpty()){
-            put(feature.uppercase(), ArrayList(windowSize + cushion))
+            if (feature.isNotEmpty()) {
+                put(feature.uppercase(), ArrayList(windowSize + cushion))
             }
         }
         for (deviceTagPrefix in extractDeviceTagPrefixes(this.keys)) {
@@ -37,7 +39,7 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
             return
         }
         for (featureTag in featuresPerSensorTagPrefix[deviceTagPrefix]!!) {
-            val featureKey = "${featureTag}_${deviceTagPrefix}"
+            val featureKey = "${featureTag}_$deviceTagPrefix"
             val featureValues = this[featureKey]
             if (featureValues != null) {
 
@@ -53,7 +55,7 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
                 // replace nan values with the forward fill method except for the first time stamp
                 var value = getValueFromXsensDotData(featureTag, xsensDotData)
                 if (value.isNaN()) {
-                    //TODO("Count nans per feature")
+                    // TODO("Count nans per feature")
                     value =
                         if (insertionIndex == 0) 0.0f else featureValues[insertionIndex - 1].second
                 }
@@ -110,13 +112,16 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
             .toList()
     }
 
+    fun getRequiredSensorTagPrefixes(): List<String>{
+        return extractDeviceTagPrefixes(this.keys)
+    }
+
     fun compileWindow(): FloatBuffer {
-        //find starting indices of feature vectors closest to the starting timestamp
+        // find starting indices of feature vectors closest to the starting timestamp
         val startingIndices: Array<Int> = getStartIndices()
 
-        //return byteBuffer of feature vectors starting at the starting indices
+        // return byteBuffer of feature vectors starting at the starting indices
         val buffer = FloatBuffer.allocate(this.keys.size * windowSize)
-
 
         for (i in 0 until windowSize) {
             for ((j, key) in this.keys.withIndex()) {
@@ -139,12 +144,12 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
     }
     @Throws(SensorsOutOfSyncException::class)
     private fun getStartIndices(): Array<Int> {
-        //find latest starting timestamp of each feature
+        // find latest starting timestamp of each feature
         val startingTimestamp: Long = max(this.values.map { if (it.isEmpty()) 0 else it[0].first })
-        //find starting indices of feature vectors closest to the starting timestamp
+        // find starting indices of feature vectors closest to the starting timestamp
         return this.values.map {
             val closestIndex = findClosestIndex(startingTimestamp, it)
-            if(closestIndex> sensorsOutOfSyncMinStartIndexDifference){
+            if (closestIndex> sensorsOutOfSyncMinStartIndexDifference) {
                 throw SensorsOutOfSyncException("Sensors are out of synch by at least $closestIndex measurements")
             }
             return@map closestIndex

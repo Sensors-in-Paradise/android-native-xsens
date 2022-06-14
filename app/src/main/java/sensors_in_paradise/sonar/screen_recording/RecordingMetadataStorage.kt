@@ -179,7 +179,8 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) :
         }
         json.put("sensorMapping", obj)
     }
-
+    /** Returns map of Mac address of sensors to their respective tag
+     * */
     fun getSensorMacMap(): Map<String, String> {
         val result = mutableMapOf<String, String>()
         val obj = json.getJSONObject("sensorMapping")

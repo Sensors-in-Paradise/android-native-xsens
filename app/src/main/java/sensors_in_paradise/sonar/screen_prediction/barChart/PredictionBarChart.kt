@@ -18,7 +18,7 @@ class PredictionBarChart(
     private val context: Context,
     private val barChart: BarChart,
     numOutputs: Int,
-    private val animationDurationMs: Long =  450L
+    private val animationDurationMs: Long = 450L
 ) {
     private val numBars = min(numOutputs, 6)
 

@@ -4,12 +4,10 @@ import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.metadata.MetadataExtractor
 import java.io.File
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import java.nio.FloatBuffer
 
-
 class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFile: File) {
-    class InvalidModelMetadata(message: String): Exception(message)
+    class InvalidModelMetadata(message: String) : Exception(message)
 
     val windowSize: Int
     private val frequency = 60
@@ -38,7 +36,6 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         output = FloatBuffer.allocate(labels.size)
         windowSize = extractor.getInputTensorShape(0)[1]
     }
-
 
     private fun hasMetadata(): Boolean {
         return extractor.hasMetadata()

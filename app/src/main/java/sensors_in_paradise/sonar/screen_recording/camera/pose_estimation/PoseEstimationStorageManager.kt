@@ -5,6 +5,7 @@ import android.graphics.PointF
 import android.widget.Toast
 import java.time.LocalDateTime
 import com.opencsv.CSVReaderHeaderAware
+import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.PoseSequence
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.KeyPoint
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Person
@@ -87,28 +88,6 @@ class PoseEstimationStorageManager(var csvFile: File) {
             return 0L
         }
 
-        private fun getHeaderAwareFileReader(context: Context, inputFile: String): FileReader {
-            val fileReader = FileReader(inputFile)
-            try {
-                var headerSize = ""
-                var c = fileReader.read().toChar()
-                while (c != '\n') {
-                    c = fileReader.read().toChar()
-                    if (c.isDigit()) {
-                        headerSize += c
-                    }
-                }
-                fileReader.skip(headerSize.toLong() + 1)
-            } catch (_: NumberFormatException) {
-                Toast.makeText(
-                    context,
-                    "CSV Header corrupt",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-            return fileReader
-        }
-
         private fun personsFromCSVLine(line: Map<String, String>): List<Person> {
             var personConfidence = line["Confidence"]!!.toFloat()
             val keyPoints = BodyPart.values().map { bp ->
@@ -132,7 +111,7 @@ class PoseEstimationStorageManager(var csvFile: File) {
             )
             try {
                 csvData.startTime = extractStartTimeFromCSV(context, inputFile)
-                val fileReader = getHeaderAwareFileReader(context, inputFile)
+                val fileReader = GlobalValues.getCSVHeaderAwareFileReader(File(inputFile))
                 val csvReader = CSVReaderHeaderAware(fileReader)
 
                 var line: Map<String, String>? = mapOf("_" to "")
