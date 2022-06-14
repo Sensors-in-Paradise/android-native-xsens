@@ -13,17 +13,17 @@ import java.util.Collections.max
 import java.util.Collections.min
 
 class SensorPlacementDialog(val context: Context, var scores: Map<String, Float>) {
-    private var textureView: ImageView
+    private var imageView: ImageView
     private var textView: TextView
 
     init {
         val builder = AlertDialog.Builder(context)
         val root = LayoutInflater.from(context).inflate(R.layout.sensor_placement_dialog, null)
-        textureView = root.findViewById(R.id.textureView_skeleton_sensorPlacementDialog)
+        imageView = root.findViewById(R.id.textureView_skeleton_sensorPlacementDialog)
         textView = root.findViewById(R.id.textView_ranking_sensorPlacementDialog)
         builder.setView(root)
 
-        textView.text = "dfgdgfsdgfdgfs" // TODO
+        // TODO
 
         builder.setPositiveButton(
             "ok", null
@@ -48,11 +48,14 @@ class SensorPlacementDialog(val context: Context, var scores: Map<String, Float>
 
     fun updateScores(newScores: Map<String, Float>) {
         scores = newScores
+        normalizeScores()
+
+        textView.text = getRankingString()
         drawScores()
     }
 
     private fun drawScores() {
-        val bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.RGB_565)
+        val bitmap = Bitmap.createBitmap(600, 600, Bitmap.Config.RGB_565)
         val canvas = Canvas(bitmap)
         val poses = POSE_POINTS()
         VisualizationUtils.transformPoints(
@@ -69,22 +72,51 @@ class SensorPlacementDialog(val context: Context, var scores: Map<String, Float>
             circleColors = getPositionColors(),
             lineColor = context.getColor(R.color.backgroundContrast)
         )
-        textureView.setImageBitmap(bitmap)
+        imageView.setImageBitmap(bitmap)
     }
 
-    private fun getPositionColors(): List<Int?> {
+    private fun normalizeScores() {
         if (scores.isEmpty()) {
-            return POSITIONS_MAP.map { null }
+            return
         }
         val upperBound = max(scores.values)
         val lowerBound = min(scores.values)
+        scores = scores.mapValues { (_, score) ->
+            if (scores.size == 1) 1f
+            else (score - lowerBound) / (upperBound - lowerBound)
+        }
+    }
+
+    private fun getPositionColors(): List<Int?> {
         return POSITIONS_MAP.keys.map { position ->
-            scores.getOrDefault(position, null)?.let { score ->
-                val relScore = if (scores.size == 1) 1f
-                    else (score - lowerBound) / (upperBound - lowerBound) + lowerBound
-                ColorUtils.blendARGB(context.getColor(R.color.backgroundContrast), Color.RED, relScore)
+            scores.getOrDefault(position, null)?.let { normScore ->
+                ColorUtils.blendARGB(
+                    context.getColor(R.color.backgroundContrast),
+                    context.getColor(R.color.colorSecondary),
+                    normScore
+                )
             }
         }
+    }
+
+    private fun getRankingString(): String {
+        val rankedScores = scores.asIterable().sortedBy { -it.value }
+
+        return rankedScores.joinToString(
+            "\n",
+            limit = 99,
+            transform = { (position, score) ->
+                val name = position
+                    .replace('_', ' ')
+                    .lowercase()
+                    .replaceFirstChar { it.titlecase() }
+                val score = (score * 100f).toInt()
+                var padding = ""
+                if (score < 100) padding += "  "
+                if (score < 10) padding += "  "
+                "$padding$score%  -  $name"
+            }
+        )
     }
 
     companion object {
@@ -103,7 +135,7 @@ class SensorPlacementDialog(val context: Context, var scores: Map<String, Float>
             "LEFT_ANKLE" to PointF(0.55f, 0.85f)
         )
 
-        private val POSE_POINTS = { listOf(POSITIONS_MAP.values.map { PointF(it.x, it.y)}) }
+        private val POSE_POINTS = { listOf(POSITIONS_MAP.values.map { PointF(it.x, it.y) }) }
 
         private val POSE_LINES = listOf(
             Pair(0, 1),
