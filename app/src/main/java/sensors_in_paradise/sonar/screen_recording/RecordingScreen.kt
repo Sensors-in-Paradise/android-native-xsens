@@ -124,7 +124,7 @@ class RecordingScreen(
             activity.findViewById(R.id.button_lessPositions_captureFragment),
             activity.findViewById(R.id.button_morePositions_captureFragment),
             activity.findViewById(R.id.textView_numPositions_captureFragment),
-            //activity.findViewById(R.id.textView_numRecordings_captureFragment), TODO
+            activity.findViewById(R.id.textView_numRecordings_captureFragment),
             onSelectedRecordingsChanged)
     }
 

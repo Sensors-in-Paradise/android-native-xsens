@@ -28,7 +28,7 @@ class SensorPlacementEstimator(
     lessPositionsButton: Button,
     morePositionsButton: Button,
     numPositionsTV: TextView,
-    //private val numRecordingsTV: TextView, TODO
+    private val numRecordingsTV: TextView,
     val onSelectedRecordingsChanged: ((List<Recording>) -> Unit)
 ) {
     val recordings = mutableListOf<Recording>()
@@ -83,7 +83,7 @@ class SensorPlacementEstimator(
 
     private fun onRecordingUpdate() {
         onSelectedRecordingsChanged(recordings)
-        // numRecordingsTV.text = "${recordings.size}" TODO
+        numRecordingsTV.text = "${recordings.size}"
     }
 
     private fun isRecordingEligible(recording: Recording): Boolean {
