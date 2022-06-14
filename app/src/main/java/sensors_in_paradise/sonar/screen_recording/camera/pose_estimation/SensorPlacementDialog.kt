@@ -12,7 +12,10 @@ import sensors_in_paradise.sonar.R
 import java.util.Collections.max
 import java.util.Collections.min
 
-class SensorPlacementDialog(val context: Context, var scores: Map<String, Float>) {
+class SensorPlacementDialog(
+    val context: Context,
+    private var scores: Map<String, Float>,
+) {
     private var imageView: ImageView
     private var textView: TextView
 
@@ -23,18 +26,9 @@ class SensorPlacementDialog(val context: Context, var scores: Map<String, Float>
         textView = root.findViewById(R.id.textView_ranking_sensorPlacementDialog)
         builder.setView(root)
 
-        // TODO
-
-        builder.setPositiveButton(
-            "ok", null
-        )
-//        {
-//                TODO clearSelectedRecordings
-//            }
-
+        builder.setPositiveButton("ok", null)
 
         builder.setOnDismissListener {
-            //                TODO clearSelectedRecordings
             Log.d("SensorPlacementDialog", "Dialog dismissed")
         }
 

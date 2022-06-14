@@ -1,6 +1,9 @@
 package sensors_in_paradise.sonar.screen_recording.camera.pose_estimation
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import org.jetbrains.kotlinx.dataframe.DataColumn
 import org.jetbrains.kotlinx.dataframe.DataFrame
@@ -18,14 +21,72 @@ import kotlin.math.log2
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-class SensorPlacementEstimator() {
+@SuppressLint("SetTextI18n")
+class SensorPlacementEstimator(
+    val context: Context,
+    estimatePlacementButton: Button,
+    lessPositionsButton: Button,
+    morePositionsButton: Button,
+    numPositionsTV: TextView,
+    //private val numRecordingsTV: TextView, TODO
+    val onSelectedRecordingsChanged: ((List<Recording>) -> Unit)
+) {
+    val recordings = mutableListOf<Recording>()
+    private var numPositions = 1
 
     companion object {
         val POSITIONS = SensorPlacementDialog.POSITIONS_MAP.keys
         const val FRAME_LENGTH = 500
     }
 
-    fun tryEstimateSensorPlacements(context: Context, recording: Recording): Map<String, Float>? {
+    init {
+        estimatePlacementButton.setOnClickListener {
+            val dialog = SensorPlacementDialog(context, mapOf())
+            val scores = tryEstimateSensorPlacements()
+            scores?.let { dialog.updateScores(it) }
+        }
+        lessPositionsButton.setOnClickListener {
+            // TODO
+        }
+        morePositionsButton.setOnClickListener {
+            // TODO
+        }
+        numPositionsTV.text = "$numPositions Positions"
+        // numRecordingsTV.text = "1" TODO
+    }
+
+    /**
+     * Returns [true] if recording is being added to selected recordings, else [false]
+     */
+    fun toggleRecordingSelection(recording: Recording): Boolean {
+        return if (recording in recordings) {
+            removeRecording(recording)
+            false
+        } else {
+            tryAddRecording(recording)
+        }
+    }
+
+    private fun removeRecording(recording: Recording) {
+        recordings.remove(recording)
+        onRecordingUpdate()
+    }
+
+    private fun tryAddRecording(recording: Recording): Boolean {
+        if (!isRecordingEligible(recording)) {
+            return false
+        }
+        recordings.add(recording)
+        onRecordingUpdate()
+        return true
+    }
+
+    private fun onRecordingUpdate() {
+        onSelectedRecordingsChanged(recordings)
+        // numRecordingsTV.text = "${recordings.size}" TODO
+    }
+
+    private fun isRecordingEligible(recording: Recording): Boolean {
         try {
             if (!recording.hasPoseSequenceRecording()) {
                 throw Exception("No Body Pose Sequence available.")
@@ -35,23 +96,37 @@ class SensorPlacementEstimator() {
             if (PoseEstimationStorageManager.getPoseTypeFromCSV(context, poseFilePath)
                 != Pose.BodyPose
             ) {
-                throw Exception("Pose Sequence not compatible. Sequence has to be of type 'Body Pose'.")
+                throw Exception("Pose Sequence has to be of type 'Body Pose'.")
             }
+        } catch (e: Exception) {
+            Toast.makeText(
+                context,
+                e.message,
+                Toast.LENGTH_SHORT
+            ).show()
+            return false
+        }
+        return true
+    }
 
+    private fun tryEstimateSensorPlacements(): Map<String, Float>? {
+        val recording = recordings[0]// TODO
+
+        try {
             // TODO
             // assert min 2 activities with min 2 over 1 min
         } catch (e: Exception) {
-            Toast.makeText(
+            Toast.makeText( // TODO
                 context,
                 e.message,
                 Toast.LENGTH_LONG
             ).show()
             return null
         }
-        return estimateRecording(context, recording)
+        return estimateRecording(recording)
     }
 
-    private fun estimateRecording(context: Context, recording: Recording): Map<String, Float>? {
+    private fun estimateRecording(recording: Recording): Map<String, Float>? {
         try {
             val poseFilePath = recording.getPoseSequenceFile().absolutePath
             var df = createDataFrame(poseFilePath)
