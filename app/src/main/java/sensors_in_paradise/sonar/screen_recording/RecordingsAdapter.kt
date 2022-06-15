@@ -92,6 +92,11 @@ class RecordingsAdapter(
             // Set check file text & color conditionally
             checkFilesTextView.setTextColor(getCheckFileColor(recording))
             checkFilesTextView.text = getCheckFileText(recording)
+            itemView.setOnLongClickListener {
+                //TODO: Remove this listener before PR
+                recording.mergeSensorFiles()
+                true
+            }
         }
     }
 

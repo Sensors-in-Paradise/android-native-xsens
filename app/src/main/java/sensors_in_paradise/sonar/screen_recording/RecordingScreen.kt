@@ -93,6 +93,7 @@ class RecordingScreen(
             activity.findViewById<TextureView>(R.id.surfaceView_camera_captureFragment)
         cameraManager =
             CameraManager(context, previewView, overlayView)
+        updateNoRecordingsTVVisibility()
     }
 
     @Suppress("LongMethod", "ComplexMethod")

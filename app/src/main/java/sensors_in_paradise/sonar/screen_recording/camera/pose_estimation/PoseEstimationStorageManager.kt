@@ -114,8 +114,9 @@ class PoseEstimationStorageManager(var csvFile: File) {
                 val fileReader = GlobalValues.getCSVHeaderAwareFileReader(File(inputFile))
                 val csvReader = CSVReaderHeaderAware(fileReader)
 
-                var line: Map<String, String>? = mapOf("_" to "")
-                while (line != null) {
+               // var line: Map<String, String>? = mapOf("_" to "")
+                do {
+                    var line: Map<String, String>?
                     try {
                         line = csvReader.readMap()
                         csvData.timeStamps.add(line["TimeStamp"]!!.toLong())
@@ -123,7 +124,7 @@ class PoseEstimationStorageManager(var csvFile: File) {
                     } catch (_: Exception) {
                         break
                     }
-                }
+                } while (line != null)
                 csvReader.close()
             } catch (_: IOException) {
                 Toast.makeText(
