@@ -16,6 +16,7 @@ import sensors_in_paradise.sonar.screen_recording.Recording
 import sensors_in_paradise.sonar.screen_recording.RecordingMetadataStorage
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Pose
 import java.util.*
+import java.util.Collections.min
 import kotlin.math.abs
 import kotlin.math.log2
 import kotlin.math.pow
@@ -36,14 +37,18 @@ class SensorPlacementEstimator(
 
     companion object {
         val POSITIONS = SensorPlacementDialog.POSITIONS_MAP.keys
-        const val FRAME_LENGTH = 500
+        const val MIN_FRAME_LENGTH = 500
+        const val MIN_ESTIMATED_DURATION = 60
     }
 
     init {
         estimatePlacementButton.setOnClickListener {
-            val dialog = SensorPlacementDialog(context, mapOf())
-            val scores = tryEstimateSensorPlacements()
-            scores?.let { dialog.updateScores(it) }
+            if (areRecordingsEligible()) {
+                val scores = estimateSensorPlacements()
+                scores?.let {
+                    SensorPlacementDialog(context).updateScores(scores)
+                }
+            }
         }
         lessPositionsButton.setOnClickListener {
             // TODO
@@ -52,7 +57,7 @@ class SensorPlacementEstimator(
             // TODO
         }
         numPositionsTV.text = "$numPositions Positions"
-        // numRecordingsTV.text = "1" TODO
+        numRecordingsTV.text = "1"
     }
 
     /**
@@ -86,6 +91,9 @@ class SensorPlacementEstimator(
         numRecordingsTV.text = "${recordings.size}"
     }
 
+    /**
+     * Checks whether a recording contains valuable data at all
+     */
     private fun isRecordingEligible(recording: Recording): Boolean {
         try {
             if (!recording.hasPoseSequenceRecording()) {
@@ -109,40 +117,50 @@ class SensorPlacementEstimator(
         return true
     }
 
-    private fun tryEstimateSensorPlacements(): Map<String, Float>? {
-        val recording = recordings[0]// TODO
-
+    /**
+     * Checks efficiently whether the selected recordings are likely to suffice the required amount of data
+     */
+    private fun areRecordingsEligible(): Boolean {
         try {
-            // TODO
-            // assert min 2 activities with min 2 over 1 min
+            val estimatedActivityTimes = mutableMapOf<String, Long>()
+            recordings.forEach { recording ->
+                val activities = recording.metadataStorage.getActivities()
+                activities.forEachIndexed { index, labelEntry ->
+                    val activityEndTime = activities.getOrNull(index + 1)?.timeStarted
+                        ?: recording.metadataStorage.getTimeEnded()
+                    val duration = activityEndTime - labelEntry.timeStarted
+
+                    val oldDuration = estimatedActivityTimes.getOrDefault(labelEntry.activity, 0L)
+                    estimatedActivityTimes[labelEntry.activity] = oldDuration + (duration / 1000)
+                }
+            }
+
+            val filteredActivityTimes =
+                estimatedActivityTimes.filter { (_, duration) -> duration >= MIN_ESTIMATED_DURATION }
+
+            if (filteredActivityTimes.size < 2) {
+                throw Exception("At least 2 Activities with 60s Capture time required.")
+            }
         } catch (e: Exception) {
             Toast.makeText( // TODO
                 context,
                 e.message,
                 Toast.LENGTH_LONG
             ).show()
-            return null
+            return false
         }
-        return estimateRecording(recording)
+        return true
     }
 
-    private fun estimateRecording(recording: Recording): Map<String, Float>? {
+    private fun estimateSensorPlacements(): Map<String, Float>? {
         try {
-            val poseFilePath = recording.getPoseSequenceFile().absolutePath
-            var df = createDataFrame(poseFilePath)
+            var (df, activities) = createMergedDataFrame()
 
             df = mergeColumns(df)
 
-            val activities = recording.metadataStorage.getActivities()
             df = appendActivities(df, activities)
 
-            val activityGroups = df.groupBy("Activity")
-            val activityFrames = activityGroups.keys.values().mapIndexedNotNull { index, activity ->
-                val frame = activityGroups.groups[index]
-                if (frame.size().nrow >= FRAME_LENGTH) {
-                    activity.toString() to frame
-                } else null
-            }.toMap()
+            val activityFrames = getFramesPerActivity(df)
 
             if (activityFrames.size < 2) {
                 throw Exception("Not enough data provided.")
@@ -151,13 +169,12 @@ class SensorPlacementEstimator(
             val scores = POSITIONS.associateWith { position ->
                 calcSensorScore(position, activityFrames.values.toList())
             }
-
             return scores
 
         } catch (e: Exception) {
             Toast.makeText(
                 context,
-                "Estimation of Sensor Placement Failed:\n ${e.toString()}",
+                "Estimation Failed:\n ${e.message}",
                 Toast.LENGTH_LONG
             ).show()
             return null
@@ -197,6 +214,22 @@ class SensorPlacementEstimator(
         return sensorScore
     }
 
+    private fun getFramesPerActivity(df: DataFrame<*>): Map<String, DataFrame<Any?>> {
+        val activityGroups = df.groupBy("Activity")
+        val activityFrames = activityGroups.keys.values().mapIndexedNotNull { index, activity ->
+            val frame = activityGroups.groups[index]
+            if (frame.size().nrow >= MIN_FRAME_LENGTH) {
+                activity.toString() to frame
+            } else null
+        }.toMap()
+
+        // Cut Frames into equal size, by taking only the first minFrameSize rows
+        val minFrameSize = min(activityFrames.map { (_, frame) -> frame.size().nrow })
+        return activityFrames.mapValues { (_, frame) ->
+            frame.take(minFrameSize)
+        }
+    }
+
     private fun appendActivities(
         df: DataFrame<*>,
         activities: ArrayList<RecordingMetadataStorage.LabelEntry>
@@ -234,7 +267,22 @@ class SensorPlacementEstimator(
         return mergedDf
     }
 
-    private fun createDataFrame(poseFilePath: String): DataFrame<*> {
+    private fun appendPoseFileToDataFrame(
+        df: DataFrame<*>?,
+        poseFilePath: String,
+        colTypes: Map<String, ColType>
+    ): DataFrame<*> {
+        val newDf = DataFrame.readCSV(
+            poseFilePath,
+            colTypes = colTypes,
+            delimiter = ',',
+            skipLines = PoseEstimationStorageManager.getHeaderLineSize(poseFilePath),
+            parserOptions = ParserOptions(Locale.ENGLISH)
+        )
+        return df?.concat(newDf) ?: newDf
+    }
+
+    private fun createMergedDataFrame(): Pair<DataFrame<*>, ArrayList<RecordingMetadataStorage.LabelEntry>> {
         val colTypes =
             PoseEstimationStorageManager.getCSVColumns(Pose.BodyPose).associateWith { colName ->
                 when (colName) {
@@ -242,12 +290,15 @@ class SensorPlacementEstimator(
                     else -> ColType.Double
                 }
             }
-        return DataFrame.readCSV(
-            poseFilePath,
-            colTypes = colTypes,
-            delimiter = ',',
-            skipLines = PoseEstimationStorageManager.getHeaderLineSize(poseFilePath),
-            parserOptions = ParserOptions(Locale.ENGLISH)
-        )
+
+        var df: DataFrame<*>? = null
+        val activities = ArrayList<RecordingMetadataStorage.LabelEntry>()
+        val sortedRecordings = recordings.sortedBy { r -> r.metadataStorage.getTimeStarted() }
+        sortedRecordings.forEach { recording ->
+            val poseFilePath = recording.getPoseSequenceFile().absolutePath
+            df = appendPoseFileToDataFrame(df, poseFilePath, colTypes)
+            activities.addAll(recording.metadataStorage.getActivities())
+        }
+        return Pair(df!!, activities)
     }
 }
