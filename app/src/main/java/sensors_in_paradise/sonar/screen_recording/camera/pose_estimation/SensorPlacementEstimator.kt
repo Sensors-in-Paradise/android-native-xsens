@@ -5,6 +5,7 @@ import android.content.Context
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import autovalue.shaded.com.`google$`.common.math.`$IntMath`.pow
 import org.jetbrains.kotlinx.dataframe.DataColumn
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
@@ -17,10 +18,7 @@ import sensors_in_paradise.sonar.screen_recording.RecordingMetadataStorage
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Pose
 import java.util.*
 import java.util.Collections.min
-import kotlin.math.abs
-import kotlin.math.log2
-import kotlin.math.pow
-import kotlin.math.sqrt
+import kotlin.math.*
 
 @SuppressLint("SetTextI18n")
 class SensorPlacementEstimator(
@@ -28,7 +26,7 @@ class SensorPlacementEstimator(
     estimatePlacementButton: Button,
     lessPositionsButton: Button,
     morePositionsButton: Button,
-    numPositionsTV: TextView,
+    private val numPositionsTV: TextView,
     private val numRecordingsTV: TextView,
     val onSelectedRecordingsChanged: ((List<Recording>) -> Unit)
 ) {
@@ -51,13 +49,18 @@ class SensorPlacementEstimator(
             }
         }
         lessPositionsButton.setOnClickListener {
-            // TODO
+            numPositions = max(numPositions - 1, 1)
+            onNumPositionsChanged()
         }
         morePositionsButton.setOnClickListener {
-            // TODO
+            numPositions = min(numPositions + 1, POSITIONS.size - 1)
+            onNumPositionsChanged()
         }
+        onNumPositionsChanged()
+    }
+
+    private fun onNumPositionsChanged() {
         numPositionsTV.text = "$numPositions Positions"
-        numRecordingsTV.text = "1"
     }
 
     /**
@@ -74,7 +77,7 @@ class SensorPlacementEstimator(
 
     private fun removeRecording(recording: Recording) {
         recordings.remove(recording)
-        onRecordingUpdate()
+        onRecordingsUpdate()
     }
 
     private fun tryAddRecording(recording: Recording): Boolean {
@@ -82,11 +85,11 @@ class SensorPlacementEstimator(
             return false
         }
         recordings.add(recording)
-        onRecordingUpdate()
+        onRecordingsUpdate()
         return true
     }
 
-    private fun onRecordingUpdate() {
+    private fun onRecordingsUpdate() {
         onSelectedRecordingsChanged(recordings)
         numRecordingsTV.text = "${recordings.size}"
     }
@@ -152,7 +155,7 @@ class SensorPlacementEstimator(
         return true
     }
 
-    private fun estimateSensorPlacements(): Map<String, Float>? {
+    private fun estimateSensorPlacements(): Map<List<String>, Float>? {
         try {
             var (df, activities) = createMergedDataFrame()
 
@@ -166,8 +169,9 @@ class SensorPlacementEstimator(
                 throw Exception("Not enough data provided.")
             }
 
-            val scores = POSITIONS.associateWith { position ->
-                calcSensorScore(position, activityFrames.values.toList())
+            val positionSubsets = getAllSubsetOfSize(numPositions, POSITIONS.toList())
+            val scores = positionSubsets.associateWith { positions ->
+                calPositionsScore(positions, activityFrames.values.toList())
             }
             return scores
 
@@ -193,17 +197,28 @@ class SensorPlacementEstimator(
         return abs(log2(abs(cosine).toFloat()))
     }
 
-    private fun calcSensorScore(position: String, activityFrames: List<DataFrame<*>>): Float {
+    private fun getMergedPositionsFrame(df: DataFrame<*>, positions: List<String>): Pair<DataColumn<Double>, DataColumn<Double>> {
+        var xColumn: DataColumn<Double>? = null
+        var yColumn: DataColumn<Double>? = null
+        positions.forEach { position ->
+            val newXColumn = df["${position}_X"].convertToDouble().dropNulls()
+            xColumn = xColumn?.concat(newXColumn) ?: newXColumn
+
+            val newYColumn = df["${position}_Y"].convertToDouble().dropNulls()
+            yColumn = yColumn?.concat(newYColumn) ?: newYColumn
+        }
+        return Pair(xColumn!!, yColumn!!)
+    }
+
+    private fun calPositionsScore(positions: List<String>, activityFrames: List<DataFrame<*>>): Float {
         var sensorScore = 0f
         var actIterator = activityFrames.size - 2
         activityFrames.forEach { frame1 ->
-            val x1 = frame1["${position}_X"].convertToDouble().dropNulls()
-            val y1 = frame1["${position}_Y"].convertToDouble().dropNulls()
+            val (x1, y1) = getMergedPositionsFrame(frame1, positions)
 
             for (i in actIterator downTo 0) {
                 val frame2 = activityFrames[i]
-                val x2 = frame2["${position}_X"].convertToDouble().dropNulls()
-                val y2 = frame2["${position}_Y"].convertToDouble().dropNulls()
+                val (x2, y2) = getMergedPositionsFrame(frame2, positions)
 
                 sensorScore += calcScore(x1, x2)
                 sensorScore += calcScore(y1, y2)
@@ -212,6 +227,28 @@ class SensorPlacementEstimator(
             actIterator -= 1
         }
         return sensorScore
+    }
+
+    private fun getAllSubsetOfSize(size: Int, fromList: List<String>): Set<List<String>> {
+        val n = fromList.size
+        if (size < 1 || size >= n) {
+            return setOf()
+        }
+
+        val maxIt = pow(2, n)
+        val subsets = mutableSetOf<List<String>>()
+        for (i in 0 until maxIt) {
+            var bitstring = i.toString(2)
+            bitstring = "0".repeat(n - bitstring.length) + bitstring
+            val indices = bitstring.toList().mapIndexedNotNull { index, value ->
+                if (value == '1') index
+                else null
+            }
+            if (indices.size == size) {
+                subsets.add(indices.map { fromList[it] })
+            }
+        }
+        return subsets
     }
 
     private fun getFramesPerActivity(df: DataFrame<*>): Map<String, DataFrame<Any?>> {

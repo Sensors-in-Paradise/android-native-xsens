@@ -14,10 +14,10 @@ import java.util.Collections.min
 
 class SensorPlacementDialog(
     val context: Context,
-    ) {
+) {
     private var imageView: ImageView
     private var textView: TextView
-    private var scores = mapOf<String, Float>()
+    private var scores = mapOf<List<String>, Float>()
 
     init {
         val builder = AlertDialog.Builder(context)
@@ -40,7 +40,7 @@ class SensorPlacementDialog(
         dialog.show()
     }
 
-    fun updateScores(newScores: Map<String, Float>) {
+    fun updateScores(newScores: Map<List<String>, Float>) {
         scores = newScores
         normalizeScores()
 
@@ -82,13 +82,25 @@ class SensorPlacementDialog(
     }
 
     private fun getPositionColors(): List<Int?> {
-        return POSITIONS_MAP.keys.map { position ->
-            scores.getOrDefault(position, null)?.let { normScore ->
-                ColorUtils.blendARGB(
-                    context.getColor(R.color.backgroundContrast),
-                    context.getColor(R.color.colorSecondary),
-                    normScore
-                )
+        if (scores.isEmpty()) {
+            return POSITIONS_MAP.map { null }
+        }
+
+        val optimalPositions = scores.maxByOrNull { (_, score) -> score }!!.key
+        if (optimalPositions.size == 1) {
+            return POSITIONS_MAP.keys.map { position ->
+                scores.getOrDefault(listOf(position), null)?.let { normScore ->
+                    ColorUtils.blendARGB(
+                        context.getColor(R.color.backgroundContrast),
+                        context.getColor(R.color.colorSecondary),
+                        normScore
+                    )
+                }
+            }
+        } else {
+            return POSITIONS_MAP.keys.map { position ->
+                if (position in optimalPositions) context.getColor(R.color.colorSecondary)
+                else context.getColor(R.color.backgroundContrast)
             }
         }
     }
@@ -99,18 +111,39 @@ class SensorPlacementDialog(
         return rankedScores.joinToString(
             "\n",
             limit = 99,
-            transform = { (position, score) ->
-                val name = position
-                    .replace('_', ' ')
-                    .lowercase()
-                    .replaceFirstChar { it.titlecase() }
-                val score = (score * 100f).toInt()
+            transform = { (positions, score) ->
+                val name = formatPositions(positions)
+                val percentage = (score * 100f).toInt()
                 var padding = ""
                 if (score < 100) padding += "  "
                 if (score < 10) padding += "  "
-                "$padding$score%  -  $name"
+                "$padding$percentage%  -  $name"
             }
         )
+    }
+
+    private fun formatPositions(positions: List<String>): String {
+        return positions.joinToString(
+            " + ",
+            transform = {
+                formatPosition(it, positions.size > 1)
+            })
+    }
+
+    private fun formatPosition(position: String, shorten: Boolean): String {
+        return if (shorten) {
+            position
+                .split('_')
+                .let { parts ->
+                    if (parts.size == 1) formatPosition(parts[0], false)
+                    else parts.joinToString("", transform = { it[0].toString() })
+                }
+        } else {
+            position
+                .replace('_', ' ')
+                .lowercase()
+                .replaceFirstChar { it.titlecase() }
+        }
     }
 
     companion object {
