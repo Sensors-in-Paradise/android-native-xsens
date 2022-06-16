@@ -60,7 +60,7 @@ class SensorPlacementEstimator(
     }
 
     private fun onNumPositionsChanged() {
-        numPositionsTV.text = "$numPositions Positions"
+        numPositionsTV.text = "$numPositions Sensor" + if (numPositions > 1) "s" else ""
     }
 
     /**

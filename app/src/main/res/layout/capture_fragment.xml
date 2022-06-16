@@ -182,8 +182,9 @@
                         android:layout_width="150dp"
                         android:layout_height="match_parent"
                         android:gravity="center"
-                        android:text="0 Sensors"
-                        android:textAlignment="center" />
+                        android:textAlignment="center"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_morePositions_captureFragment"
