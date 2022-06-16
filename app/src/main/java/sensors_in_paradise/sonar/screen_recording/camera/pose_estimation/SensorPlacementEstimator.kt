@@ -171,7 +171,7 @@ class SensorPlacementEstimator(
 
             val positionSubsets = getAllSubsetOfSize(numPositions, POSITIONS.toList())
             val scores = positionSubsets.associateWith { positions ->
-                calPositionsScore(positions, activityFrames.values.toList())
+                calcPositionsScore(positions, activityFrames.values.toList())
             }
             return scores
 
@@ -194,10 +194,13 @@ class SensorPlacementEstimator(
         val norm2 = sqrt(v2.map { it.pow(2) }.sum())
 
         val cosine = dotProduct / (norm1 * norm2)
-        return abs(log2(abs(cosine).toFloat()))
+        return abs(1f - cosine.toFloat())
     }
 
-    private fun getMergedPositionsFrame(df: DataFrame<*>, positions: List<String>): Pair<DataColumn<Double>, DataColumn<Double>> {
+    private fun getMergedPositionsFrame(
+        df: DataFrame<*>,
+        positions: List<String>
+    ): Pair<DataColumn<Double>, DataColumn<Double>> {
         var xColumn: DataColumn<Double>? = null
         var yColumn: DataColumn<Double>? = null
         positions.forEach { position ->
@@ -210,13 +213,16 @@ class SensorPlacementEstimator(
         return Pair(xColumn!!, yColumn!!)
     }
 
-    private fun calPositionsScore(positions: List<String>, activityFrames: List<DataFrame<*>>): Float {
+    private fun calcPositionsScore(
+        positions: List<String>,
+        activityFrames: List<DataFrame<*>>
+    ): Float {
         var sensorScore = 0f
-        var actIterator = activityFrames.size - 2
+        var actIterator = 1
         activityFrames.forEach { frame1 ->
             val (x1, y1) = getMergedPositionsFrame(frame1, positions)
 
-            for (i in actIterator downTo 0) {
+            for (i in activityFrames.size - 1 downTo actIterator) {
                 val frame2 = activityFrames[i]
                 val (x2, y2) = getMergedPositionsFrame(frame2, positions)
 
@@ -224,7 +230,7 @@ class SensorPlacementEstimator(
                 sensorScore += calcScore(y1, y2)
             }
 
-            actIterator -= 1
+            actIterator += 1
         }
         return sensorScore
     }
