@@ -108,25 +108,29 @@ class SensorPlacementDialog(
     private fun getRankingString(): String {
         val rankedScores = scores.asIterable().sortedBy { -it.value }
 
+        var ranking = 0
         return rankedScores.joinToString(
             "\n",
-            limit = 99,
+            limit = 50,
             transform = { (positions, score) ->
+                ranking += 1
+
                 val name = formatPositions(positions)
-                val percentage = (score * 100f).toInt()
                 var padding = ""
-                if (score < 100) padding += "  "
-                if (score < 10) padding += "  "
-                "$padding$percentage%  -  $name"
+                if (ranking < 10) padding += "  "
+                "$padding$ranking.   $name"
             }
         )
     }
 
     private fun formatPositions(positions: List<String>): String {
+        var index = 0
         return positions.joinToString(
             " + ",
             transform = {
-                formatPosition(it, positions.size > 1)
+                index += 1
+                val newLine = if (index % 6 == 0) "\n         " else ""
+                newLine + formatPosition(it, positions.size > 1)
             })
     }
 
@@ -135,7 +139,7 @@ class SensorPlacementDialog(
             position
                 .split('_')
                 .let { parts ->
-                    if (parts.size == 1) formatPosition(parts[0], false)
+                    if (parts.size == 1 && position.length < 5) formatPosition(position, false)
                     else parts.joinToString("", transform = { it[0].toString() })
                 }
         } else {

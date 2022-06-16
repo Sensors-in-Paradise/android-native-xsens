@@ -6,13 +6,11 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import autovalue.shaded.com.`google$`.common.math.`$IntMath`.pow
-import org.jetbrains.kotlinx.dataframe.DataColumn
-import org.jetbrains.kotlinx.dataframe.DataFrame
+import org.jetbrains.kotlinx.dataframe.*
 import org.jetbrains.kotlinx.dataframe.api.*
 import org.jetbrains.kotlinx.dataframe.columns.ColumnSet
 import org.jetbrains.kotlinx.dataframe.io.ColType
 import org.jetbrains.kotlinx.dataframe.io.readCSV
-import org.jetbrains.kotlinx.dataframe.size
 import sensors_in_paradise.sonar.screen_recording.Recording
 import sensors_in_paradise.sonar.screen_recording.RecordingMetadataStorage
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Pose
@@ -142,7 +140,7 @@ class SensorPlacementEstimator(
                 estimatedActivityTimes.filter { (_, duration) -> duration >= MIN_ESTIMATED_DURATION }
 
             if (filteredActivityTimes.size < 2) {
-                throw Exception("At least 2 Activities with 60s Capture time required.")
+                throw Exception("At least 2 Activities with 1 min Capture time required.")
             }
         } catch (e: Exception) {
             Toast.makeText( // TODO
@@ -163,7 +161,11 @@ class SensorPlacementEstimator(
 
             df = appendActivities(df, activities)
 
-            val activityFrames = getFramesPerActivity(df)
+            df = centralizePose(df)
+
+            val activityFrames = getFramesPerActivity(df).filter {
+                    (activity, _) -> "null" !in activity
+            }
 
             if (activityFrames.size < 2) {
                 throw Exception("Not enough data provided.")
@@ -271,6 +273,22 @@ class SensorPlacementEstimator(
         return activityFrames.mapValues { (_, frame) ->
             frame.take(minFrameSize)
         }
+    }
+
+    private fun centralizePose(df: DataFrame<*>): DataFrame<*> {
+        val xColumns = df.getColumns { endsWith("_X") }.toColumnGroup("xColumns")
+        var newDf = df.update { endsWith("_X") }.perRowCol { row, col ->
+            val massPoint = row[xColumns].rowMean()
+            val translation = massPoint - 0.5
+            (row[col] as Double) - translation
+        }
+        val yColumns = df.getColumns { endsWith("_Y") }.toColumnGroup("yColumns")
+        newDf = newDf.update { endsWith("_Y") }.perRowCol { row, col ->
+            val massPoint = row[yColumns].rowMean()
+            val translation = massPoint - 0.5
+            (row[col] as Double) - translation
+        }
+        return newDf
     }
 
     private fun appendActivities(
