@@ -98,14 +98,14 @@ class SensorPlacementEstimator(
     private fun isRecordingEligible(recording: Recording): Boolean {
         try {
             if (!recording.hasPoseSequenceRecording()) {
-                throw Exception("No Body Pose Sequence available.")
+                throw Exception("Placement Estimation requires Body Pose Sequence.")
             }
 
             val poseFilePath = recording.getPoseSequenceFile().absolutePath
             if (PoseEstimationStorageManager.getPoseTypeFromCSV(context, poseFilePath)
                 != Pose.BodyPose
             ) {
-                throw Exception("Pose Sequence has to be of type 'Body Pose'.")
+                throw Exception("Placement Estimation requires 'Body' Pose Sequence.")
             }
         } catch (e: Exception) {
             Toast.makeText(
@@ -135,15 +135,15 @@ class SensorPlacementEstimator(
                     estimatedActivityTimes[labelEntry.activity] = oldDuration + (duration / 1000)
                 }
             }
-
-            val filteredActivityTimes =
-                estimatedActivityTimes.filter { (_, duration) -> duration >= MIN_ESTIMATED_DURATION }
+            val filteredActivityTimes = estimatedActivityTimes.filter { (activity, duration) ->
+                duration >= MIN_ESTIMATED_DURATION && "null" !in activity
+            }
 
             if (filteredActivityTimes.size < 2) {
-                throw Exception("At least 2 Activities with 1 min Capture time required.")
+                throw Exception("Requires 2 Activities (not null) with 1 min Capture time.")
             }
         } catch (e: Exception) {
-            Toast.makeText( // TODO
+            Toast.makeText(
                 context,
                 e.message,
                 Toast.LENGTH_LONG
@@ -163,8 +163,8 @@ class SensorPlacementEstimator(
 
             df = centralizePose(df)
 
-            val activityFrames = getFramesPerActivity(df).filter {
-                    (activity, _) -> "null" !in activity
+            val activityFrames = getFramesPerActivity(df).filter { (activity, _) ->
+                "null" !in activity
             }
 
             if (activityFrames.size < 2) {
