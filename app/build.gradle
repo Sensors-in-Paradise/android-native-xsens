@@ -67,6 +67,12 @@ android {
     configurations.all {
         resolutionStrategy.force 'com.google.code.findbugs:jsr305:3.0.2'
     }
+    sourceSets {
+        androidTest {
+            assets.srcDirs = ['src/main/assets', 'src/androidTest/assets', 'src/debug/assets/']
+            java.srcDirs = ['src/main/java', 'src/androidTest/java', 'src/debug/java']
+        }
+    }
 }
 
 dependencies {
