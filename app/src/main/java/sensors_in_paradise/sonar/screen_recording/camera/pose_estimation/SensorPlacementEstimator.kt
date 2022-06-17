@@ -1,6 +1,5 @@
 package sensors_in_paradise.sonar.screen_recording.camera.pose_estimation
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Looper
 import android.widget.Button
@@ -15,11 +14,16 @@ import org.jetbrains.kotlinx.dataframe.io.readCSV
 import sensors_in_paradise.sonar.screen_recording.Recording
 import sensors_in_paradise.sonar.screen_recording.RecordingMetadataStorage
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Pose
+import java.io.FileNotFoundException
 import java.util.*
 import java.util.Collections.min
-import kotlin.math.*
+import kotlin.math.max
+import kotlin.math.sqrt
+import kotlin.math.pow
+import kotlin.math.abs
+import kotlin.math.min
 
-@SuppressLint("SetTextI18n")
+@Suppress("LongParameterList")
 class SensorPlacementEstimator(
     val context: Context,
     estimatePlacementButton: Button,
@@ -114,16 +118,16 @@ class SensorPlacementEstimator(
     private fun isRecordingEligible(recording: Recording): Boolean {
         try {
             if (!recording.hasPoseSequenceRecording()) {
-                throw Exception("Placement Estimation requires Body Pose Sequence.")
+                throw FileNotFoundException("Placement Estimation requires Body Pose Sequence.")
             }
 
             val poseFilePath = recording.getPoseSequenceFile().absolutePath
             if (PoseEstimationStorageManager.getPoseTypeFromCSV(context, poseFilePath)
                 != Pose.BodyPose
             ) {
-                throw Exception("Placement Estimation requires 'Body' Pose Sequence.")
+                throw FileNotFoundException("Placement Estimation requires 'Body' Pose Sequence.")
             }
-        } catch (e: Exception) {
+        } catch (e: FileNotFoundException) {
             Toast.makeText(
                 context,
                 e.message,
@@ -156,9 +160,9 @@ class SensorPlacementEstimator(
             }
 
             if (filteredActivityTimes.size < 2) {
-                throw Exception("Requires 2 Activities (not null) with 1 min Capture time.")
+                throw FileNotFoundException("Requires 2 Activities (not null) with 1 min Capture time.")
             }
-        } catch (e: Exception) {
+        } catch (e: FileNotFoundException) {
             Toast.makeText(
                 context,
                 e.message,
@@ -187,7 +191,7 @@ class SensorPlacementEstimator(
             }
 
             if (activityFrames.size < 2) {
-                throw Exception("Not enough data provided.")
+                throw FileNotFoundException("Not enough data provided.")
             }
 
             val positionSubsets = getAllSubsetOfSize(lockedNumPositions, POSITIONS.toList())
@@ -195,7 +199,6 @@ class SensorPlacementEstimator(
                 calcPositionsScore(positions, activityFrames.values.toList())
             }
             return scores
-
         } catch (e: Exception) {
             Toast.makeText(
                 context,
@@ -331,14 +334,14 @@ class SensorPlacementEstimator(
         var mergedDf = df
 
         // Merge Head Points
-        mergedDf =
-            mergedDf.merge { ("NOSE_X" and "LEFT_EYE_X" and "RIGHT_EYE_X" and "LEFT_EAR_X" and "RIGHT_EAR_X") as ColumnSet<Double> }
-                .by { it.average() }.into("HEAD_X")
-        mergedDf =
-            mergedDf.merge { ("NOSE_Y" and "LEFT_EYE_Y" and "RIGHT_EYE_Y" and "LEFT_EAR_Y" and "RIGHT_EAR_Y") as ColumnSet<Double> }
-                .by { it.average() }.into("HEAD_Y")
+        mergedDf = mergedDf.merge {
+            ("NOSE_X" and "LEFT_EYE_X" and "RIGHT_EYE_X" and "LEFT_EAR_X" and "RIGHT_EAR_X") as ColumnSet<Double>
+        }.by { it.average() }.into("HEAD_X")
+        mergedDf = mergedDf.merge {
+            ("NOSE_Y" and "LEFT_EYE_Y" and "RIGHT_EYE_Y" and "LEFT_EAR_Y" and "RIGHT_EAR_Y") as ColumnSet<Double>
+        }.by { it.average() }.into("HEAD_Y")
 
-        //Merge Hip Points
+        // Merge Hip Points
         mergedDf = mergedDf.merge { ("LEFT_HIP_X" and "RIGHT_HIP_X") as ColumnSet<Double> }
             .by { it.average() }.into("HIP_X")
         mergedDf = mergedDf.merge { ("LEFT_HIP_Y" and "RIGHT_HIP_Y") as ColumnSet<Double> }
@@ -362,7 +365,9 @@ class SensorPlacementEstimator(
         return df?.concat(newDf) ?: newDf
     }
 
-    private fun createMergedDataFrame(lockedRecordings: List<Recording>): Pair<DataFrame<*>, ArrayList<RecordingMetadataStorage.LabelEntry>> {
+    private fun createMergedDataFrame(
+        lockedRecordings: List<Recording>
+    ): Pair<DataFrame<*>, ArrayList<RecordingMetadataStorage.LabelEntry>> {
         val colTypes =
             PoseEstimationStorageManager.getCSVColumns(Pose.BodyPose).associateWith { colName ->
                 when (colName) {
