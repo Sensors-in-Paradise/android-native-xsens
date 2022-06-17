@@ -21,7 +21,7 @@ jobs:
             - name: Run espresso tests
               uses: reactivecircus/android-emulator-runner@v2
               with:
-                api-level: 31
+                api-level: 30
                 target: google_apis
                 arch: x86
                 disable-animations: true
