@@ -118,13 +118,28 @@ class RecordingScreen(
             }
         }
 
+        val estimatePlacementButton: Button = activity.findViewById(R.id.button_estimatePlacement_captureFragment)
+        val progressBar: ProgressBar = activity.findViewById(R.id.progressBar_estimatingPlacement_captureFragment)
+        val onRunningToggle = { isRunning: Boolean ->
+            activity.runOnUiThread {
+                if (isRunning) {
+                    estimatePlacementButton.visibility = View.INVISIBLE
+                    progressBar.visibility = View.VISIBLE
+                } else {
+                    estimatePlacementButton.visibility = View.VISIBLE
+                    progressBar.visibility = View.GONE
+                }
+            }
+        }
+
         return SensorPlacementEstimator(
             context,
-            activity.findViewById(R.id.button_estimatePlacement_captureFragment),
+            estimatePlacementButton,
             activity.findViewById(R.id.button_lessPositions_captureFragment),
             activity.findViewById(R.id.button_morePositions_captureFragment),
             activity.findViewById(R.id.textView_numPositions_captureFragment),
             activity.findViewById(R.id.textView_numRecordings_captureFragment),
+            onRunningToggle,
             onSelectedRecordingsChanged)
     }
 

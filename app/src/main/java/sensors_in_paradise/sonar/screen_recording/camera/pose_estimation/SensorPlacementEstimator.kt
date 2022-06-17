@@ -2,6 +2,7 @@ package sensors_in_paradise.sonar.screen_recording.camera.pose_estimation
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Looper
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -26,10 +27,13 @@ class SensorPlacementEstimator(
     morePositionsButton: Button,
     private val numPositionsTV: TextView,
     private val numRecordingsTV: TextView,
+    val onRunningToggle: ((Boolean) -> Unit),
     val onSelectedRecordingsChanged: ((List<Recording>) -> Unit)
 ) {
     val recordings = mutableListOf<Recording>()
     private var numPositions = 1
+
+    private var isRunning = false
 
     companion object {
         val POSITIONS = SensorPlacementDialog.POSITIONS_MAP.keys
@@ -40,10 +44,14 @@ class SensorPlacementEstimator(
     init {
         estimatePlacementButton.setOnClickListener {
             if (areRecordingsEligible()) {
-                val scores = estimateSensorPlacements()
-                scores?.let {
-                    SensorPlacementDialog(context).updateScores(scores)
-                }
+                Thread {
+                    Looper.prepare()
+                    toggleRunning()
+                    val scores = estimateSensorPlacements(recordings.toList(), numPositions)
+                    scores?.let { SensorPlacementDialog(context).updateScores(it) }
+                    toggleRunning()
+                    Looper.loop()
+                }.start()
             }
         }
         lessPositionsButton.setOnClickListener {
@@ -55,6 +63,11 @@ class SensorPlacementEstimator(
             onNumPositionsChanged()
         }
         onNumPositionsChanged()
+    }
+
+    private fun toggleRunning() {
+        isRunning = !isRunning
+        onRunningToggle(isRunning)
     }
 
     private fun onNumPositionsChanged() {
@@ -74,6 +87,9 @@ class SensorPlacementEstimator(
     }
 
     private fun removeRecording(recording: Recording) {
+        if (isRunning && recordings.size == 1) {
+            return
+        }
         recordings.remove(recording)
         onRecordingsUpdate()
     }
@@ -153,9 +169,12 @@ class SensorPlacementEstimator(
         return true
     }
 
-    private fun estimateSensorPlacements(): Map<List<String>, Float>? {
+    private fun estimateSensorPlacements(
+        lockedRecordings: List<Recording>,
+        lockedNumPositions: Int
+    ): Map<List<String>, Float>? {
         try {
-            var (df, activities) = createMergedDataFrame()
+            var (df, activities) = createMergedDataFrame(lockedRecordings)
 
             df = mergeColumns(df)
 
@@ -171,7 +190,7 @@ class SensorPlacementEstimator(
                 throw Exception("Not enough data provided.")
             }
 
-            val positionSubsets = getAllSubsetOfSize(numPositions, POSITIONS.toList())
+            val positionSubsets = getAllSubsetOfSize(lockedNumPositions, POSITIONS.toList())
             val scores = positionSubsets.associateWith { positions ->
                 calcPositionsScore(positions, activityFrames.values.toList())
             }
@@ -343,7 +362,7 @@ class SensorPlacementEstimator(
         return df?.concat(newDf) ?: newDf
     }
 
-    private fun createMergedDataFrame(): Pair<DataFrame<*>, ArrayList<RecordingMetadataStorage.LabelEntry>> {
+    private fun createMergedDataFrame(lockedRecordings: List<Recording>): Pair<DataFrame<*>, ArrayList<RecordingMetadataStorage.LabelEntry>> {
         val colTypes =
             PoseEstimationStorageManager.getCSVColumns(Pose.BodyPose).associateWith { colName ->
                 when (colName) {
@@ -354,7 +373,7 @@ class SensorPlacementEstimator(
 
         var df: DataFrame<*>? = null
         val activities = ArrayList<RecordingMetadataStorage.LabelEntry>()
-        val sortedRecordings = recordings.sortedBy { r -> r.metadataStorage.getTimeStarted() }
+        val sortedRecordings = lockedRecordings.sortedBy { r -> r.metadataStorage.getTimeStarted() }
         sortedRecordings.forEach { recording ->
             val poseFilePath = recording.getPoseSequenceFile().absolutePath
             df = appendPoseFileToDataFrame(df, poseFilePath, colTypes)
