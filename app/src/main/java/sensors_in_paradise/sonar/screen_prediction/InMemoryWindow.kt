@@ -34,7 +34,7 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
 
     fun appendSensorData(featureWithSensorTagPrefix: String, value: Float, timeStamp: Long) {
         var v = value
-        val featureValues = this[featureWithSensorTagPrefix]
+        val featureValues = this[featureWithSensorTagPrefix.uppercase()]
         if (featureValues != null) {
         // insert the new value at the end of the list or if the timestamp of the new value
         // is lower than the largest timestamp, insert the new value at the correct position

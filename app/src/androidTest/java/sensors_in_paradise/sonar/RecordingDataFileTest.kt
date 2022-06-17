@@ -27,20 +27,19 @@ class RecordingDataFileTest {
     fun windowizeTest() {
         val features = arrayOf("Quat_Z_LF", "dq_W_LF", "dv[1]_LF").map { it.uppercase() }.toTypedArray()
         val windowSize = 90
-
-
         val data = RecordingDataFile(recordingFile)
         val startIndexes = data.getWindowStartIndexes(windowSize)
 
         assert(startIndexes.size > 0)
+        var i = 1
         for(startIndex in startIndexes){
+            Log.d("RecordingDataFileTest-windowizeTest", "Working on window $i of ${startIndexes.size}")
             val (window, activity) = data.getWindowAtIndex(startIndex, windowSize, features)
             assert(window.size==features.size)
 
             // Test if compiling the window into a float buffer runs through
             window.compileWindow()
         }
-
     }
 
     @Test
@@ -48,15 +47,16 @@ class RecordingDataFileTest {
         val model = TFLiteModel(modelFile)
 
         val features = model.getFeaturesToPredict().map { it.uppercase() }.toTypedArray()
-        val windowSize = 90
 
 
         val data = RecordingDataFile(recordingFile)
-        val startIndexes = data.getWindowStartIndexes(windowSize)
+        val startIndexes = data.getWindowStartIndexes(model.windowSize)
         var correctPredictions = 0
         assert(startIndexes.size > 0)
+
+        var i = 1
         for(startIndex in startIndexes){
-            val (window, activity) = data.getWindowAtIndex(startIndex, windowSize, features)
+            val (window, activity) = data.getWindowAtIndex(startIndex, model.windowSize, features)
             assert(window.size==features.size)
 
             // Test if compiling the window into a float buffer runs through
@@ -66,10 +66,10 @@ class RecordingDataFileTest {
             if(predictedLabel == activity){
                 correctPredictions++
             }
-
+            Log.d("RecordingDataFileTest-predictionPipelineTest", "Working on window $i of ${startIndexes.size}")
+            i++
         }
         val accuracy = (correctPredictions*100/startIndexes.size)
-        Log.d("RecordingDataFileTest", "Prediction accuracy on the example recording: $accuracy")
-
+        Log.d("RecordingDataFileTest", "Prediction accuracy on the example recording: $accuracy%")
     }
 }
