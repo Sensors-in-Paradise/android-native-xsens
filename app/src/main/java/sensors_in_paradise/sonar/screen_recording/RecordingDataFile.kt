@@ -21,19 +21,20 @@ class RecordingDataFile @Throws(IOException::class) constructor(private val merg
         csvReader.skip(startingIndex)
         val window = InMemoryWindow(featuresWithSensorTagPrefix, window_size)
         var activity: String? = null
+        val errorMsgPrefix = "Window can't be filled from start line index $startingIndex: "
         for (i in 0 until (window_size)) {
             val line: Map<String, String> = optNextLine(csvReader)
-                ?: throw WindowException("Window can't be filled from start line index $startingIndex: Line is null before reaching window_size $window_size")
+                ?: throw WindowException("$errorMsgPrefix Line is null before reaching window_size $window_size")
             val lineActivity = line["activity"]
-                ?: throw WindowException("Window can't be filled from start line index $startingIndex: Line without activity detected")
+                ?: throw WindowException("$errorMsgPrefix Line without activity detected")
             val stf = line["SampleTimeFine"]?.toLong()
-                ?: throw WindowException("Window can't be filled from start line index $startingIndex: Can't infer SampleTimeFine from line")
+                ?: throw WindowException("$errorMsgPrefix Can't infer SampleTimeFine from line")
 
             if (activity == null) {
                 activity = lineActivity
             }
             if (activity != lineActivity) {
-                throw WindowException("Window can't be filled from start line index $startingIndex: Multiple activities within window have been detected: $lineActivity, $activity")
+                throw WindowException("$errorMsgPrefix Multiple activities within window have been detected: $lineActivity, $activity")
             }
             for ((feature, valueStr) in line) {
                 if (window.needsFeature(feature)) {
@@ -46,7 +47,7 @@ class RecordingDataFile @Throws(IOException::class) constructor(private val merg
     }
 
     private fun getResetCsvReader(): CSVReaderHeaderAware {
-        return CSVReaderHeaderAware( FileReader(mergedSensorDataFile))
+        return CSVReaderHeaderAware(FileReader(mergedSensorDataFile))
     }
 
     fun getWindowStartIndexes(

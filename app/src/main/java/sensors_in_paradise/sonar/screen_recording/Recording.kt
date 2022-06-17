@@ -326,16 +326,16 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
                             resultLineEntries["${key}_$tagPrefix"] = value
                         }
                     }
-                    if(sampleTimeFine==null){
-                        val stf = line["SampleTimeFine"]?: throw InvalidRecordingException("Could not find SampleTimeFine in sensor file of sensor with tag $tagPrefix ")
+                    if (sampleTimeFine == null) {
+                        val stf = line["SampleTimeFine"] ?: throw InvalidRecordingException("Could not find SampleTimeFine in sensor file of sensor with tag $tagPrefix ")
                         sampleTimeFine = stf.replace(" ", "").toLong()
                         resultLineEntries["SampleTimeFine"] = stf
                     }
-                    if(startSampleTimeFine==null){
+                    if (startSampleTimeFine == null) {
                         startSampleTimeFine = sampleTimeFine
                     }
                 }
-                if(hasNewContent) {
+                if (hasNewContent) {
                     val timeMsIntoRecording = sampleTimeFine!! - startSampleTimeFine!!
                     val activity = metadataStorage.getActivityAtTime(timeMsIntoRecording)
                         ?: throw InvalidRecordingException("Could not find activity for current row ($timeMsIntoRecording ms into recording)")
@@ -416,7 +416,6 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
             } while ((currentSmallestDiff ?: Long.MAX_VALUE) >= abs(stf - relativeStartTime))
         }
         // TODO: Fill following rows into InMemoryWindow (csvReaders point to the start positions now)
-
 
         return window
     }

@@ -93,12 +93,11 @@ class RecordingsAdapter(
             checkFilesTextView.setTextColor(getCheckFileColor(recording))
             checkFilesTextView.text = getCheckFileText(recording)
             itemView.setOnLongClickListener {
-                //TODO: Remove this listener before PR
+                // TODO: Remove this listener before PR
                 val file = recording.mergeSensorFiles()
-                if(file.exists()){
+                if (file.exists()) {
                     val recFile = RecordingDataFile(file)
                     val startIndexes = recFile.getWindowStartIndexes(90)
-
                 }
                 true
             }

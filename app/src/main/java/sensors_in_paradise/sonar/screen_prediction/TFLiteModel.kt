@@ -121,12 +121,13 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         interpreter.runSignature(inputs, outputs, "restore")
     }
     @Throws(IllegalArgumentException::class)
-    fun convertPredictionToLabel(prediction: FloatArray): String{
+    fun convertPredictionToLabel(prediction: FloatArray): String {
         val labels = getLabelsMap()
-        if(labels.size!= prediction.size){
-            throw IllegalArgumentException("Number of items in prediction ${prediction.size} is different to number of labels in this model ${labels.size}")
+        if (labels.size != prediction.size) {
+            throw IllegalArgumentException("Number of items in prediction ${prediction.size} " +
+                    "is different to number of labels in this model ${labels.size}")
         }
-        val index =  prediction.indices.maxByOrNull{
+        val index = prediction.indices.maxByOrNull {
             prediction[it]
         }!!
         return labels[index]!!

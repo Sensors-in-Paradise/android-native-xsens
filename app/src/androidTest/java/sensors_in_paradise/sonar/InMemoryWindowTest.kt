@@ -16,7 +16,7 @@ class InMemoryWindowTest {
     fun addDataTest() {
         val features = arrayOf("Quat_Z_LF", "dq_W_RW", "dv[1]_LF")
         val window = InMemoryWindow(features, 2)
-        for(feature in features){
+        for (feature in features) {
             assert(window.needsFeature(feature))
         }
         val data = XsensDotData().apply {

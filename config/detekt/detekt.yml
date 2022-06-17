@@ -802,3 +802,4 @@ style:
       - 'android.graphics.*'
       - 'androidx.camera.video.*'
       - 'java.nio.file.*'
+      - 'sensors_in_paradise.sonar.*'

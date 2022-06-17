@@ -82,10 +82,16 @@ class PredictionScreen(
             startDataCollection()
         }
     }
+
     private fun checkPredictionPreconditions(): Boolean {
-        val isInvalidTagConnected = devices.getConnectedWithOfflineMetadata().any { !it.isTagValid() }
+        val isInvalidTagConnected =
+            devices.getConnectedWithOfflineMetadata().any { !it.isTagValid() }
         if (isInvalidTagConnected) {
-            MessageDialog(context, context.getString(R.string.sensor_tag_prefix_pattern_explanation), "Tags of connected sensors invalid")
+            MessageDialog(
+                context,
+                context.getString(R.string.sensor_tag_prefix_pattern_explanation),
+                "Tags of connected sensors invalid"
+            )
             return false
         }
         val requiredButNotConnectedDevices = getRequiredButNotConnectedDevices()
@@ -216,7 +222,13 @@ class PredictionScreen(
             } catch (e: InMemoryWindow.SensorsOutOfSyncException) {
                 activity.runOnUiThread {
                     stopDataCollection()
-                    MessageDialog(context, "The following exception occurred:\n${e.message}\n\nTo avoid this, sync the connected sensors on the connection screen before starting live prediction.", "Sensors are out of sync")
+                    MessageDialog(
+                        context,
+                        "The following exception occurred:\n${e.message}\n\n" +
+                                "To avoid this, sync the connected sensors on the " +
+                                "connection screen before starting live prediction.",
+                        "Sensors are out of sync"
+                    )
                 }
             }
         }
@@ -302,7 +314,7 @@ class PredictionScreen(
     }
 
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
-        val deviceTag = devices[deviceAddress]?.tag?: return
+        val deviceTag = devices[deviceAddress]?.tag ?: return
         val deviceTagPrefix = XSensDotDeviceWithOfflineMetadata.extractTagPrefixFromTag(deviceTag)
         if (deviceTagPrefix != null) {
             window?.appendSensorData(deviceTagPrefix, xsensDotData)

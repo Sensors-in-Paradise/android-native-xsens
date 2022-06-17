@@ -195,23 +195,23 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) :
         return RecordingMetadataStorage(file, json)
     }
 
-    fun getActivityAtTime(relativeTimeMs:Long): String?{
-        if(relativeTimeMs<0){
+    fun getActivityAtTime(relativeTimeMs: Long): String? {
+        if (relativeTimeMs <0) {
             return null
         }
         val activities = getActivities()
-        if(relativeTimeMs>getDuration()){
+        if (relativeTimeMs> getDuration()) {
             return activities.last().activity
         }
-        if(activities.isEmpty()){
+        if (activities.isEmpty()) {
             return null
         }
         val absoluteRecStartTime = activities[0].timeStarted
-        for ((index,entry) in activities.withIndex()){
+        for ((index, entry) in activities.withIndex()) {
             val (absStartTime, _) = entry
-            val relativeActivityStartTime = absStartTime-absoluteRecStartTime
-            if(relativeTimeMs<relativeActivityStartTime){
-                return if(index>0) (activities[index-1].activity) else null
+            val relativeActivityStartTime = absStartTime - absoluteRecStartTime
+            if (relativeTimeMs <relativeActivityStartTime) {
+                return if (index> 0) (activities[index - 1].activity) else null
             }
         }
         return activities.last().activity

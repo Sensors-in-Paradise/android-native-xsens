@@ -1,15 +1,14 @@
 package sensors_in_paradise.sonar.screen_prediction
 
 import android.util.Log
-import com.opencsv.CSVReaderHeaderAware
 import com.xsens.dot.android.sdk.events.XsensDotData
-import sensors_in_paradise.sonar.GlobalValues
 import java.nio.FloatBuffer
 import java.util.Collections.max
 
 class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize: Int = 90) :
     LinkedHashMap<String, ArrayList<Pair<Long, Float>>>() {
-    class SensorsOutOfSyncException(msg: String = "Sensors are out of sync") : IllegalStateException(msg)
+    class SensorsOutOfSyncException(msg: String = "Sensors are out of sync") :
+        IllegalStateException(msg)
 
     private val featuresPerSensorTagPrefix = LinkedHashMap<String, List<String>>()
 
@@ -28,7 +27,8 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
                 extractFeatures(deviceTagPrefix, this.keys)
         }
     }
-    fun needsFeature(featureWithSensorTagPrefix: String):Boolean{
+
+    fun needsFeature(featureWithSensorTagPrefix: String): Boolean {
         return featureWithSensorTagPrefix.uppercase() in this
     }
 
@@ -36,33 +36,35 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
         var v = value
         val featureValues = this[featureWithSensorTagPrefix.uppercase()]
         if (featureValues != null) {
-        // insert the new value at the end of the list or if the timestamp of the new value
-        // is lower than the largest timestamp, insert the new value at the correct position
-        var insertionIndex = featureValues.size
-        if (featureValues.isNotEmpty()) {
-            if (featureValues.last().first > timeStamp) {
-                insertionIndex = featureValues.indexOfLast { it.first < timeStamp } + 1
+            // insert the new value at the end of the list or if the timestamp of the new value
+            // is lower than the largest timestamp, insert the new value at the correct position
+            var insertionIndex = featureValues.size
+            if (featureValues.isNotEmpty()) {
+                if (featureValues.last().first > timeStamp) {
+                    insertionIndex = featureValues.indexOfLast { it.first < timeStamp } + 1
+                }
             }
-        }
-        if (value.isNaN()) {
-            // TODO("Count nans per feature")
-            v =
-                if (insertionIndex == 0) 0.0f else featureValues[insertionIndex - 1].second
-        }
-        featureValues.add(
-            insertionIndex, Pair(
-                timeStamp,
-                v
+            if (value.isNaN()) {
+                // TODO("Count nans per feature")
+                v =
+                    if (insertionIndex == 0) 0.0f else featureValues[insertionIndex - 1].second
+            }
+            featureValues.add(
+                insertionIndex, Pair(
+                    timeStamp,
+                    v
+                )
             )
-        )
         }
     }
+
     fun appendSensorData(deviceTagPrefix: String, xsensDotData: XsensDotData) {
         val timeStamp: Long = xsensDotData.sampleTimeFine
         if (deviceTagPrefix !in featuresPerSensorTagPrefix.keys) {
             Log.w(
                 "InMemoryWindow-appendSensorData",
-                "The device tag prefix $deviceTagPrefix for the given sensor data is not mentioned in the features that should be collected for this window."
+                "The device tag prefix $deviceTagPrefix for the given sensor data is not "
+                        + "mentioned in the features that should be collected for this window."
             )
             return
         }
@@ -72,9 +74,9 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
             if (featureValues != null) {
                 // replace nan values with the forward fill method except for the first time stamp
                 val value = getValueFromXsensDotData(featureTag, xsensDotData)
-                appendSensorData(featureKey, value,  timeStamp)
+                appendSensorData(featureKey, value, timeStamp)
             }
-    }
+        }
     }
 
     private fun getValueFromXsensDotData(featureTag: String, xsensDotData: XsensDotData): Float {
@@ -120,13 +122,13 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
             .toList()
     }
 
-    fun getRequiredSensorTagPrefixes(): List<String>{
+    fun getRequiredSensorTagPrefixes(): List<String> {
         return extractDeviceTagPrefixes(this.keys)
     }
 
     fun compileWindow(): FloatBuffer {
         // find starting indices of feature vectors closest to the starting timestamp
-        val startingIndices: Array<Int> = getStartIndices()
+        val startingIndices = getStartIndices()
 
         // return byteBuffer of feature vectors starting at the starting indices
         val buffer = FloatBuffer.allocate(this.keys.size * windowSize)
@@ -150,21 +152,22 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
             this[key]?.clear()
         }
     }
+
     @Throws(SensorsOutOfSyncException::class)
-    private fun getStartIndices(): Array<Int> {
+    private fun getStartIndices(): IntArray {
         // find latest starting timestamp of each feature
         val startingTimestamp: Long = max(this.values.map { if (it.isEmpty()) 0 else it[0].first })
         // find starting indices of feature vectors closest to the starting timestamp
         return this.values.map {
             val closestIndex = findClosestIndex(startingTimestamp, it)
-            if (closestIndex> sensorsOutOfSyncMinStartIndexDifference) {
+            if (closestIndex > sensorsOutOfSyncMinStartIndexDifference) {
                 throw SensorsOutOfSyncException("Sensors are out of synch by at least $closestIndex measurements")
             }
             return@map closestIndex
-        }.toTypedArray()
+        }.toIntArray()
     }
 
-    private fun hasEnoughDataToCompileWindow(startIndices: Array<Int>): Boolean {
+    private fun hasEnoughDataToCompileWindow(startIndices: IntArray): Boolean {
         for ((i, key) in this.keys.withIndex()) {
 
             if (startIndices[i] + windowSize > (this[key]?.size ?: 0)) {
@@ -173,6 +176,7 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
         }
         return true
     }
+
     @Throws(SensorsOutOfSyncException::class)
     fun hasEnoughDataToCompileWindow(): Boolean {
         return hasEnoughDataToCompileWindow(getStartIndices())
@@ -198,7 +202,6 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
 
     companion object {
         private const val cushion = 10
-        private const val bytesPerFloat = 4
         private val indexSpellingRegex = Regex("\\[\\d\\]")
         private const val sensorsOutOfSyncMinStartIndexDifference = 100
     }
