@@ -36,6 +36,7 @@ class RecordingDataFileTest {
 
             // Test if compiling the window into a float buffer runs through
             window.compileWindow()
+            i++
         }
     }
 

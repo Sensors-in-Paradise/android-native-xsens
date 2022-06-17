@@ -29,3 +29,4 @@ jobs:
               with:
                 name: instrumentation_test_report
                 path: app/build/reports/androidTests/connected/
+                files: app/build/outputs/androidTest-results/connected/test-result.pb
