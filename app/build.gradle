@@ -51,7 +51,6 @@ android {
     }
     packagingOptions {
         resources.excludes.add("META-INF/*")
-        merge 'git.properties'
     }
     buildFeatures {
         mlModelBinding true
