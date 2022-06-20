@@ -38,13 +38,11 @@ class PoseSequenceViewHolder(
         onSourceLoadedListener()
     }
 
-
     /**
      *  Converts (time) series of 1 .. n poses, to n individual pose series' with own timestamps each.
      *  Sets sequence instance variables.
      */
-    private fun setConvertedSequences(
-        poseSequence: PoseSequence) {
+    private fun setConvertedSequences(poseSequence: PoseSequence) {
         val numPoseInstances = poseSequence.posesArray.maxOf { it.size }
 
         val posesList = mutableListOf<ArrayList<List<PointF>>>()
