@@ -302,8 +302,6 @@ class CameraManager(
         }
     }
 
-     /* MEIN CODE IST IN ORDNUNG - ALEX! */
-
     private var onPoseRecordingFinalized: ((captureStartTime: Long, tempFile: File) -> Unit)? =
         null
 
