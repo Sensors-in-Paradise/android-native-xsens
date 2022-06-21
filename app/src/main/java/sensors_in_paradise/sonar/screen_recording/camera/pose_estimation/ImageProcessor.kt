@@ -5,14 +5,16 @@ import android.graphics.*
 import android.media.Image
 import android.view.TextureView
 import sensors_in_paradise.sonar.R
-import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.BodyPart
-import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.KeyPoint
+import sensors_in_paradise.sonar.screen_recording.LoggingManager
 import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Person
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.data.Pose
+import java.time.LocalDateTime
 
 class ImageProcessor(
     private val context: Context,
-    val poseDetector: PoseDetector,
-    private val poseEstimationStorageManager: PoseEstimationStorageManager
+    private val poseEstimationStorageManager: PoseEstimationStorageManager,
+    val bodyPoseDetector: PoseDetector? = null,
+    val handPoseDetector: HandDetector? = null
 ) {
     companion object {
         /** Threshold for confidence score. */
@@ -44,80 +46,106 @@ class ImageProcessor(
     private fun extractPoses(bitmap: Bitmap): List<Person> {
         val persons = mutableListOf<Person>()
         synchronized(lock) {
-            poseDetector.estimatePoses(bitmap).let {
+            bodyPoseDetector!!.estimatePoses(bitmap).let {
                 persons.addAll(it)
             }
         }
         return persons.filter { it.score > MIN_CONFIDENCE }.toList()
     }
 
-    private fun drawOnCanvas(persons: List<Person>, overlayView: TextureView, bitmap: Bitmap, isRotated90: Boolean) {
-        val surfaceCanvas = overlayView.lockCanvas()
-        surfaceCanvas?.let { canvas ->
-            VisualizationUtils.transformKeyPoints(
-                persons, bitmap, canvas,
-                VisualizationUtils.Transformation.PROJECT_ON_CANVAS,
-                isRotated90
-            )
-
-            VisualizationUtils.drawBodyKeyPoints(
-                persons,
-                canvas,
-                circleColor = context.getColor(R.color.stickmanJoints),
-                lineColor = context.getColor(R.color.slightBackgroundContrast)
-            )
-
-            overlayView.unlockCanvasAndPost(canvas)
-        }
-    }
-
-    fun getDummyPose(): Person {
-        val kpList = mutableListOf<KeyPoint>()
-        kpList.add(KeyPoint(BodyPart.NOSE, PointF(0.3f, 0.6f), 0.93f))
-        kpList.add(KeyPoint(BodyPart.LEFT_EYE, PointF(0.3f, 324.7f), 0.93f))
-        kpList.add(KeyPoint(BodyPart.RIGHT_EYE, PointF(0.3f, 54.7f), 0.93f))
-        kpList.add(KeyPoint(BodyPart.LEFT_EAR, PointF(30.3f, 324.7f), 0.93f))
-        kpList.add(KeyPoint(BodyPart.RIGHT_EAR, PointF(32.3f, 45.7f), 0.93f))
-        kpList.add(KeyPoint(BodyPart.LEFT_SHOULDER, PointF(50.3f, 345.7f), 0.93f))
-        kpList.add(KeyPoint(BodyPart.RIGHT_SHOULDER, PointF(765.3f, 213.7f), 0.93f))
-        kpList.add(KeyPoint(BodyPart.LEFT_ELBOW, PointF(67.3f, 345.7f), 0.93f))
-        kpList.add(KeyPoint(BodyPart.RIGHT_ELBOW, PointF(345.3f, 2.7f), 0.93f))
-        kpList.add(KeyPoint(BodyPart.LEFT_WRIST, PointF(264.3f, 89.7f), 0.93f))
-        kpList.add(KeyPoint(BodyPart.RIGHT_WRIST, PointF(23.3f, 678.7f), 0.93f))
-        kpList.add(KeyPoint(BodyPart.LEFT_HIP, PointF(263.3f, 43.7f), 0.93f))
-        kpList.add(KeyPoint(BodyPart.RIGHT_HIP, PointF(423.3f, 3.7f), 0.93f))
-        kpList.add(KeyPoint(BodyPart.LEFT_KNEE, PointF(846.3f, 1257.7f), 0.93f))
-        kpList.add(KeyPoint(BodyPart.RIGHT_KNEE, PointF(676.3f, 65.7f), 0.93f))
-        kpList.add(KeyPoint(BodyPart.LEFT_ANKLE, PointF(87.3f, 345.7f), 0.93f))
-        kpList.add(KeyPoint(BodyPart.RIGHT_ANKLE, PointF(56.3f, 877.7f), 0.93f))
-
-        return Person(3, kpList, null, 0.92f)
-    }
-
     fun clearView(overlayView: TextureView) {
         val surfaceCanvas = overlayView.lockCanvas()
         surfaceCanvas?.let { canvas ->
-            VisualizationUtils.drawBodyKeyPoints(listOf<Person>(), canvas)
+            VisualizationUtils.drawSkeleton(listOf(), canvas)
             overlayView.unlockCanvasAndPost(canvas)
         }
     }
 
-    fun processImage(bitmap: Bitmap, overlayView: TextureView, isRotated90: Boolean) {
+    private fun drawOnCanvas(
+        points: List<List<PointF>>,
+        lines: List<Pair<Int, Int>>,
+        overlayView: TextureView,
+        bitmap: Bitmap,
+        isRotated90: Boolean
+    ) {
+        val surfaceCanvas = overlayView.lockCanvas()
+        surfaceCanvas?.let { canvas ->
+            VisualizationUtils.transformPoints(
+                points, bitmap, canvas,
+                VisualizationUtils.Transformation.PROJECT_ON_CANVAS,
+                isRotated90
+            )
+            VisualizationUtils.drawSkeleton(
+                points,
+                canvas,
+                lines,
+                circleColor = context.getColor(R.color.stickmanJoints),
+                lineColor = context.getColor(R.color.slightBackgroundContrast)
+            )
+            overlayView.unlockCanvasAndPost(canvas)
+        }
+    }
+
+    private fun processBodyPoseImage(
+        bitmap: Bitmap,
+        overlayView: TextureView,
+        isRotated90: Boolean
+    ) {
+        val timeStamp = LoggingManager.normalizeTimeStamp(LocalDateTime.now())
+
         val persons = extractPoses(bitmap)
 
         VisualizationUtils.transformKeyPoints(
-            persons, bitmap, null,
+            persons, bitmap,
             VisualizationUtils.Transformation.NORMALIZE
         )
         if (isRotated90) {
             VisualizationUtils.transformKeyPoints(
-                persons, null, null,
+                persons, null,
                 VisualizationUtils.Transformation.ROTATE90
             )
         }
-        poseEstimationStorageManager.storePoses(persons)
+        poseEstimationStorageManager.storeBodyPoses(persons, timeStamp)
 
-        drawOnCanvas(persons, overlayView, bitmap, isRotated90)
+        val pointLists = VisualizationUtils.convertTo2DPoints(persons)
+        val lines = VisualizationUtils.get2DLines(Pose.BodyPose)
+        drawOnCanvas(pointLists, lines, overlayView, bitmap, isRotated90)
+    }
+
+    private fun processHandPoseImage(
+        bitmap: Bitmap,
+        overlayView: TextureView,
+        isRotated90: Boolean
+    ) {
+        val timeStamp = LoggingManager.normalizeTimeStamp(LocalDateTime.now())
+
+        handPoseDetector!!.estimatePose(bitmap) { handsResult ->
+            var hands = handsResult.multiHandLandmarks().toList()
+            val handsClasses = handsResult.multiHandedness().map { handClass ->
+                // Because of camera mirroring, the sides are inverted
+                when (handClass.label) {
+                    "Right" -> "Left"
+                    "Left" -> "Right"
+                    else -> { handClass.label }
+                }
+            }
+            if (isRotated90) {
+                hands = VisualizationUtils.transformHandLandmarks(
+                    hands, null,
+                    VisualizationUtils.Transformation.ROTATE90
+                )
+            }
+            poseEstimationStorageManager.storeHandPoses(hands, handsClasses, timeStamp)
+
+            val pointLists = VisualizationUtils.convertTo2DPoints(hands)
+            val lines = VisualizationUtils.get2DLines(Pose.HandPose)
+            drawOnCanvas(pointLists, lines, overlayView, bitmap, isRotated90)
+        }
+    }
+
+    fun processImage(bitmap: Bitmap, overlayView: TextureView, isRotated90: Boolean) {
+        if (bodyPoseDetector != null) processBodyPoseImage(bitmap, overlayView, isRotated90)
+        if (handPoseDetector != null) processHandPoseImage(bitmap, overlayView, isRotated90)
     }
 
     fun processImage(image: Image, overlayView: TextureView, isRotated90: Boolean) {

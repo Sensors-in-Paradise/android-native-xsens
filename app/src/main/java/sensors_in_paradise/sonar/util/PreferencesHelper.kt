@@ -107,6 +107,10 @@ class PreferencesHelper private constructor() {
             return getSharedPreferences(context).getBoolean("storePrediction", false)
         }
 
+        fun shouldUseHandPoseEstimation(context: Context): Boolean {
+            return getSharedPreferences(context).getBoolean("useHandPose", false)
+        }
+
         fun getPoseEstimationModel(context: Context): ModelType {
             return when (getSharedPreferences(context).getString(
                 "poseEstimationModel",

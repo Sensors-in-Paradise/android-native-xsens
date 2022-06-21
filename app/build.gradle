@@ -112,6 +112,9 @@ dependencies {
     implementation("androidx.camera:camera-video:${camerax_version}")
     implementation("androidx.camera:camera-view:${camerax_version}")
 
+    implementation 'com.google.mediapipe:solution-core:latest.release'
+    implementation 'com.google.mediapipe:hands:latest.release'
+
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 
     implementation("org.jcodec:jcodec:0.2.3")
