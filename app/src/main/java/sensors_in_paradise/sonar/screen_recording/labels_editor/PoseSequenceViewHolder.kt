@@ -30,8 +30,7 @@ class PoseSequenceViewHolder(
         val multiPoseSequence =
             PoseEstimationStorageManager.loadPoseSequenceFromCSV(context, sourcePath)
 
-        val (pS, tsS) = convertSequences(multiPoseSequence)
-        poseSequences = pS; timeStampSequences = tsS
+        setConvertedSequences(multiPoseSequence)
 
         jointsToDraw = VisualizationUtils.get2DLines(multiPoseSequence.type)
         startTime = multiPoseSequence.startTime
@@ -39,10 +38,11 @@ class PoseSequenceViewHolder(
         onSourceLoadedListener()
     }
 
-    // Convert (time) series of 1 .. n poses, to n individual pose series' with own timestamps each
-    private fun convertSequences(
-        poseSequence: PoseSequence
-    ): Pair<List<ArrayList<List<PointF>>>, List<ArrayList<Long>>> {
+    /**
+     *  Converts (time) series of 1 .. n poses, to n individual pose series' with own timestamps each.
+     *  Sets sequence instance variables.
+     */
+    private fun setConvertedSequences(poseSequence: PoseSequence) {
         val numPoseInstances = poseSequence.posesArray.maxOf { it.size }
 
         val posesList = mutableListOf<ArrayList<List<PointF>>>()
@@ -58,7 +58,8 @@ class PoseSequenceViewHolder(
             ) { i, _ -> poseSequence.posesArray[i].getOrNull(instanceIndex) != null }
             timeStampsList.add(timeStamps)
         }
-        return Pair(posesList.toList(), timeStampsList.toList())
+        poseSequences = posesList
+        timeStampSequences = timeStampsList
     }
 
     override fun seekTo(ms: Long) {
