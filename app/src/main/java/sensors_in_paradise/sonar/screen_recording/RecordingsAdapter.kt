@@ -26,7 +26,7 @@ class RecordingsAdapter(
     private val sensorPlacementEstimator: SensorPlacementEstimator
 ) : RecyclerView.Adapter<RecordingsAdapter.ViewHolder>() {
     private val dateFormat = DateFormat.getDateTimeInstance()
-    var isInSplitMode = false
+    var isInSelectMode = false
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val activityTextView: TextView = view.findViewById(R.id.tv_activity)
@@ -58,7 +58,7 @@ class RecordingsAdapter(
                 showDeleteRecordingDialog(recording)
             }
             itemView.setOnClickListener {
-                if (!isInSplitMode) {
+                if (!isInSelectMode) {
                     val onEditBtnClickListener =
                         DialogInterface.OnClickListener { _: DialogInterface, _: Int ->
                             LabelsEditorDialog(context, currentUseCase, recording) {

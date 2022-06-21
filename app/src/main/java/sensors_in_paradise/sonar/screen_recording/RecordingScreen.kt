@@ -106,12 +106,12 @@ class RecordingScreen(
     private fun createSensorPlacementEstimator(): SensorPlacementEstimator {
         val onSelectedRecordingsChanged = { recordings: List<Recording> ->
             if (recordings.isEmpty()) {
-                recordingsAdapter.isInSplitMode = false
+                recordingsAdapter.isInSelectMode = false
 
                 captureLayout.visibility = View.VISIBLE
                 sensorPlacementLayout.visibility = View.GONE
             } else {
-                recordingsAdapter.isInSplitMode = true
+                recordingsAdapter.isInSelectMode = true
 
                 captureLayout.visibility = View.INVISIBLE
                 sensorPlacementLayout.visibility = View.VISIBLE
