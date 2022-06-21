@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.screen_prediction
 
+import android.util.Log
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.metadata.MetadataExtractor
 import java.io.File
@@ -70,7 +71,8 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
     }
 
     fun getDeviceTags(): Array<String> {
-        return features.map { it.substringAfterLast("_") }.distinct().filter { it != "" }.toTypedArray()
+        return features.map { it.substringAfterLast("_") }.distinct().filter { it != "" }
+            .toTypedArray()
     }
 
     fun getNumDevices(): Int {
@@ -95,14 +97,40 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         return output.array()
     }
 
-    fun runTraining(windows: Any, labels: Any): FloatArray {
+    fun runTraining(windows: FloatBuffer, labels: FloatArray): FloatArray {
+        val numFeatures = features.size
+        val batchSize = windows.capacity() / (windowSize * numFeatures)
+        Log.d("Test-TFLiteModel - runTraining", "Running training on batch size $batchSize")
         val inputs = HashMap<String, Any>()
-        inputs["windows"] = windows
+        inputs["input_windows"] = windows
         inputs["labels"] = labels
         val outputs = HashMap<String, Any>()
-        outputs["loss"] = FloatArray(1)
+        val loss = FloatBuffer.allocate(1)
+        loss.rewind()
+        outputs["loss"] = loss
+
+        val getInputShape: ()->String = {
+            interpreter.getInputTensorFromSignature("input_windows", "train").shapeSignature().joinToString()
+        }
+        Log.d(
+            "Test-TFLiteModel-runTraining",
+            "Input tensor shape before: ${
+                getInputShape()
+            }"
+        )
+
+        //interpreter.resizeInput(interpreter.getInputIndex("input_windows"), intArrayOf(batchSize, windowSize, numFeatures), true)
+        //interpreter.allocateTensors()
+        Log.d(
+            "Test-TFLiteModel-runTraining",
+            "Input tensor shape after: ${
+                getInputShape()
+            }"
+        )
+        windows.rewind()
+
         interpreter.runSignature(inputs, outputs, "train")
-        return outputs["loss"] as FloatArray
+        return loss as FloatArray
     }
 
     fun runSave(file: File) {
@@ -120,16 +148,35 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         inputs["checkpoint_path"] = checkpointPath
         interpreter.runSignature(inputs, outputs, "restore")
     }
+
     @Throws(IllegalArgumentException::class)
     fun convertPredictionToLabel(prediction: FloatArray): String {
         val labels = getLabelsMap()
         if (labels.size != prediction.size) {
-            throw IllegalArgumentException("Number of items in prediction ${prediction.size} " +
-                    "is different to number of labels in this model ${labels.size}")
+            throw IllegalArgumentException(
+                "Number of items in prediction ${prediction.size} " +
+                        "is different to number of labels in this model ${labels.size}"
+            )
         }
         val index = prediction.indices.maxByOrNull {
             prediction[it]
         }!!
         return labels[index]!!
+    }
+
+    @Throws(IllegalArgumentException::class)
+    fun convertLabelToOneHotEncoding(label: String): FloatArray {
+        val labels = getLabelsMap()
+        if (!labels.containsValue(label)) {
+            throw IllegalArgumentException(
+                "Label $label" +
+                        "is not in labels of model: $labels"
+            )
+        }
+        val index = labels.filter { label == it.value }.keys.first()
+
+        val result = FloatArray(labels.size)
+        result[index] = 1f
+        return result
     }
 }
