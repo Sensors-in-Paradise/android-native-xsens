@@ -7,6 +7,7 @@ import java.io.File
 import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 
+//TODO: move all ML related classes into new package (they are used across multiple screens, not only prediction screen)
 class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFile: File) {
     class InvalidModelMetadata(message: String) : Exception(message)
 
@@ -69,6 +70,9 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
             index to label
         }.toMap()
     }
+    fun getNumOutputClasses(): Int{
+        return labels.size
+    }
 
     fun getDeviceTags(): Array<String> {
         return features.map { it.substringAfterLast("_") }.distinct().filter { it != "" }
@@ -86,8 +90,9 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
     fun getWindowInMilliSeconds(): Long {
         return 1000L * (windowSize / frequency)
     }
-
+    @Deprecated("This function seems to fail when runInfer(windows: Array<Array<FloatArray>>) has been executed before with multiple windows, altering the input buffer size.", ReplaceWith("runInfer(windows: Array<Array<FloatArray>>)"))
     fun runInfer(window: FloatBuffer): FloatArray {
+        // TODO: This function seems to fail when runInfer(windows: Array<Array<FloatArray>>) has been executed before with multiple windows (Maybe delete this one?)
         val inputs = HashMap<String, Any>()
         inputs["input_window"] = window.rewind()
         val outputs = HashMap<String, Any>()
@@ -96,10 +101,32 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         output.rewind()
         return output.array()
     }
+    fun runInfer(windows: Array<Array<FloatArray>>): Array<FloatArray> {
+        val inputs = HashMap<String, Any>()
+        inputs["input_window"] = windows
+        val outputs = HashMap<String, Any>()
+        Log.d("TFLiteModel-runInfer", "Output buffer capacity: ${labels.size*windows.size}")
+        val output = Array(windows.size){FloatArray(labels.size)}
+        outputs["output"] = output
+        interpreter.runSignature(inputs, outputs, "infer")
+       return output
+    }
 
-    fun runTraining(windows: FloatBuffer, labels: FloatArray): FloatArray {
+    fun runTraining(windows: Array<Array<FloatArray>>, labels: Array<FloatArray>): FloatArray {
+        if(windows.isEmpty()){
+            throw java.lang.IllegalArgumentException("Can't run training on an empty windows array")
+        }
         val numFeatures = features.size
-        val batchSize = windows.capacity() / (windowSize * numFeatures)
+        if(windows.size!=labels.size){
+            throw java.lang.IllegalArgumentException("Window size ${windows.size} is different to number of labels ${labels.size}")
+        }
+        if(windows[0].size!=windowSize){
+            throw java.lang.IllegalArgumentException("Size of provided windows ${windows[0].size} is different to expected window size: $windowSize")
+        }
+        if(windows[0][0].size!=numFeatures){
+            throw java.lang.IllegalArgumentException("Number of provided features ${windows[0][0].size} inside the windows is different to expected number of features: $numFeatures")
+        }
+        val batchSize = windows.size
         Log.d("Test-TFLiteModel - runTraining", "Running training on batch size $batchSize")
         val inputs = HashMap<String, Any>()
         inputs["input_windows"] = windows
@@ -108,29 +135,8 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         val loss = FloatBuffer.allocate(1)
         loss.rewind()
         outputs["loss"] = loss
-
-        val getInputShape: ()->String = {
-            interpreter.getInputTensorFromSignature("input_windows", "train").shapeSignature().joinToString()
-        }
-        Log.d(
-            "Test-TFLiteModel-runTraining",
-            "Input tensor shape before: ${
-                getInputShape()
-            }"
-        )
-
-        //interpreter.resizeInput(interpreter.getInputIndex("input_windows"), intArrayOf(batchSize, windowSize, numFeatures), true)
-        //interpreter.allocateTensors()
-        Log.d(
-            "Test-TFLiteModel-runTraining",
-            "Input tensor shape after: ${
-                getInputShape()
-            }"
-        )
-        windows.rewind()
-
         interpreter.runSignature(inputs, outputs, "train")
-        return loss as FloatArray
+        return loss.array()
     }
 
     fun runSave(file: File) {
@@ -179,4 +185,33 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         result[index] = 1f
         return result
     }
+    fun getAccuracyFromPredictions(predictions: Array<FloatArray>, actualLabels: Array<String>):Float{
+        if(predictions.size!=actualLabels.size){
+            throw IllegalArgumentException("Size of predictions (${predictions.size}) is unequals to size of actualLabels (${actualLabels.size})")
+        }
+        var correctPredictions = 0f
+        for(i in predictions.indices){
+            val prediction = predictions[i]
+            val label = actualLabels[i]
+            if(convertPredictionToLabel(prediction)==label){
+                correctPredictions++
+            }
+        }
+        return correctPredictions/predictions.size
+    }
+    fun getAccuracyFromPredictions(predictions: Array<FloatArray>, actualLabels: Array<FloatArray>):Float{
+        if(predictions.size!=actualLabels.size){
+            throw IllegalArgumentException("Size of predictions (${predictions.size}) is unequals to size of actualLabels (${actualLabels.size})")
+        }
+        var correctPredictions = 0f
+        for(i in predictions.indices){
+            val prediction = predictions[i]
+            val label = actualLabels[i]
+            if(convertPredictionToLabel(prediction) == convertPredictionToLabel(label)){
+                correctPredictions++
+            }
+        }
+        return correctPredictions/predictions.size
+    }
+    // TODO: add functions to run inference and training on Batch instance
 }

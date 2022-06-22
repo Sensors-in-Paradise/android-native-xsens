@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Before
 import org.junit.Test
+import sensors_in_paradise.sonar.screen_prediction.DataSet
 import sensors_in_paradise.sonar.screen_prediction.TFLiteModel
 import sensors_in_paradise.sonar.screen_recording.RecordingDataFile
 import sensors_in_paradise.sonar.use_cases.UseCase
@@ -18,7 +19,7 @@ class RecordingDataFileTest {
     @Before
     fun init() {
         UseCase.extractFileFromAssets(assetContext, "0_orhan_1652085453257.csv", recordingFile)
-        UseCase.extractFileFromAssets(assetContext, "resnet_model_test.tflite", modelFile)
+        UseCase.extractFileFromAssets(assetContext, "resnet_model_22_06_2022.tflite", modelFile)
     }
 
     @Test
@@ -58,9 +59,9 @@ class RecordingDataFileTest {
             assert(window.size == features.size)
 
             // Test if compiling the window into a float buffer runs through
-            val input = window.compileWindow()
-            val prediction = model.runInfer(input)
-            val predictedLabel = model.convertPredictionToLabel(prediction)
+            val input = window.compileWindowToArray()
+            val prediction = model.runInfer(arrayOf(input))
+            val predictedLabel = model.convertPredictionToLabel(prediction[0])
             if (predictedLabel == activity) {
                 correctPredictions++
             }
@@ -77,48 +78,42 @@ class RecordingDataFileTest {
         val features = model.getFeaturesToPredict().map { it.uppercase() }.toTypedArray()
 
         val data = RecordingDataFile(recordingFile)
-        val startIndexes = data.getWindowStartIndexes(model.windowSize)
-        val numFeatures = features.size
-        val numLabels = model.getLabelsMap().size
-        assert(startIndexes.size > 0)
+        val dataSet = DataSet().apply { add(data) }
 
-        val batchSize = startIndexes.size
-        val trainingInputBuffer = FloatBuffer.allocate(batchSize*model.windowSize*numFeatures)
-        val trainingOutputBuffer = FloatBuffer.allocate(batchSize*numLabels)
-        // Training
-        for ((i,startIndex) in startIndexes.withIndex()) {
-            val (window, activity) = data.getWindowAtIndex(startIndex, model.windowSize, features)
-            assert(window.size == features.size)
 
-            // Test if compiling the window into a float buffer runs through
-            val windowData = window.compileWindow()
-            val labelOneHot = model.convertLabelToOneHotEncoding(activity)
-            trainingInputBuffer.put(windowData)
-            trainingOutputBuffer.put(labelOneHot)
+        val batches = dataSet.convertToBatches(7, model.windowSize, progressCallback = {progress->
+            Log.d(
+                "RecordingDataFileTest-trainingPipelineTest",
+                "Batching dataset: $progress%"
+            )
+        })
 
-            model.runTraining(windowData, labelOneHot)
-            Log.d("RecordingDataFileTest-predictionPipelineTest", "Working on window $i of ${startIndexes.size}")
+        // The following should NOT be done when using this in regular code
+        // Batches are there to be compiled (loaded into RAM) one after another to avoid OutOfMemory Errors
+        // Here we load them all into RAM to speed up testing since we know we only have a few batches...
+        val compiledBatches = batches.mapIndexed { index, batch ->  batch.compile(model, progressCallback = {progress->
+            Log.d(
+                "RecordingDataFileTest-trainingPipelineTest",
+                "Windowizing batch $index: $progress%"
+            )
+        }) }
+        var accuracyBeforeTraining = 0f
+        for((windows, labels) in compiledBatches){
+            val result = model.runInfer(windows)
+            val batchAccuracy = model.getAccuracyFromPredictions(result, labels)
+            accuracyBeforeTraining += batchAccuracy / compiledBatches.size
+        }
+        for((windows, labels) in compiledBatches){
+            model.runTraining(windows, labels)
+        }
+        var accuracyAfterTraining = 0f
+        for((windows, labels) in compiledBatches){
+            val result = model.runInfer(windows)
+            val batchAccuracy = model.getAccuracyFromPredictions(result, labels)
+            accuracyAfterTraining += batchAccuracy / compiledBatches.size
         }
 
-
-
-        // Prediction
-        var correctPredictions = 0
-        for ((i,startIndex) in startIndexes.withIndex()) {
-            val (window, activity) = data.getWindowAtIndex(startIndex, model.windowSize, features)
-            assert(window.size == features.size)
-
-            // Test if compiling the window into a float buffer runs through
-            val input = window.compileWindow()
-            val prediction = model.runInfer(input)
-            val predictedLabel = model.convertPredictionToLabel(prediction)
-            if (predictedLabel == activity) {
-                correctPredictions++
-            }
-            Log.d("RecordingDataFileTest-predictionPipelineTest", "Working on window $i of ${startIndexes.size}")
-        }
-        val accuracyAfterTraining = (correctPredictions * 100 / startIndexes.size)
-        Log.d("RecordingDataFileTest", "Prediction accuracy on the example recording after training: $accuracyAfterTraining%")
+        Log.d("RecordingDataFileTest", "Prediction accuracy on the example recording before training: $accuracyBeforeTraining and after training: $accuracyAfterTraining%")
     }
 
 

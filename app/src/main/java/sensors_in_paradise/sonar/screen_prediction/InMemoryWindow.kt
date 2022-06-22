@@ -146,6 +146,27 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
         buffer.rewind()
         return buffer
     }
+    fun compileWindowToArray():Array<FloatArray>{
+        return Array(windowSize){FloatArray(keys.size)}.apply { compileWindowToArray(this) }
+    }
+    fun compileWindowToArray(array:Array<FloatArray>){
+        // find starting indices of feature vectors closest to the starting timestamp
+        val startingIndices = getStartIndices()
+
+
+        // return array of feature vectors starting at the starting indices
+
+        for (i in 0 until windowSize) {
+            for ((j, key) in this.keys.withIndex()) {
+                val index = startingIndices[j] + i
+                if (index < this[key]!!.size) {
+                    array[i][j] = this[key]!![index].second
+                } else {
+                    throw IllegalStateException("Not enough data to fill window for feature: $key")
+                }
+            }
+        }
+    }
 
     fun clearValues() {
         for (key in this.keys) {

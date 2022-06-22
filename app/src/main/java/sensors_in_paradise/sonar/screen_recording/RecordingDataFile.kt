@@ -54,6 +54,7 @@ class RecordingDataFile @Throws(IOException::class) constructor(private val merg
         window_size: Int,
         minOverlapForCutOffWindow: Float = 0.5f
     ): ArrayList<Int> {
+        //TODO: enable 50% overlap?!
         val indexes = ArrayList<Int>()
 
         for (i in 0 until (indexesOfActivityChanges.size - 1)) {
