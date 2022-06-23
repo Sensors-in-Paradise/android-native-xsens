@@ -211,7 +211,7 @@ class PoseEstimationStorageManager(var csvFile: File) {
                 ) Pose.HandPose
                 else Pose.BodyPose
 
-                val fileReader = GlobalValues.getHeaderAwareFileReader(File(inputFile))
+                val fileReader = GlobalValues.getCSVHeaderAwareFileReader(File(inputFile))
                 val csvReader = CSVReaderHeaderAware(fileReader)
 
                 var line: Map<String, String>? = mapOf("_" to "")
