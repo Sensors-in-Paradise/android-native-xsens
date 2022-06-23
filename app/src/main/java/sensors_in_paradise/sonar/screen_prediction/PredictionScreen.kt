@@ -210,7 +210,7 @@ class PredictionScreen(
         if (window != null) {
             try {
                 if (window!!.hasEnoughDataToCompileWindow()) {
-                    model?.runInfer(window!!.compileWindow())?.let { updatePrediction(it) }
+                    model?.infer(window!!.compileWindow())?.let { updatePrediction(it) }
                     window!!.clearValues()
                 } else {
                     Toast.makeText(

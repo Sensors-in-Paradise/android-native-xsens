@@ -9,13 +9,13 @@ import sensors_in_paradise.sonar.screen_prediction.TFLiteModel
 import sensors_in_paradise.sonar.screen_recording.RecordingDataFile
 import sensors_in_paradise.sonar.use_cases.UseCase
 import java.io.File
-import java.nio.FloatBuffer
 
 class RecordingDataFileTest {
     private val assetContext = InstrumentationRegistry.getInstrumentation().context
     private val appContext = InstrumentationRegistry.getInstrumentation().targetContext
     private val recordingFile = File(appContext.cacheDir, "recordingData.csv")
     private val modelFile = File(appContext.cacheDir, "model_test.tflite")
+
     @Before
     fun init() {
         UseCase.extractFileFromAssets(assetContext, "0_orhan_1652085453257.csv", recordingFile)
@@ -24,7 +24,8 @@ class RecordingDataFileTest {
 
     @Test
     fun windowizeTest() {
-        val features = arrayOf("Quat_Z_LF", "dq_W_LF", "dv[1]_LF").map { it.uppercase() }.toTypedArray()
+        val features =
+            arrayOf("Quat_Z_LF", "dq_W_LF", "dv[1]_LF").map { it.uppercase() }.toTypedArray()
         val windowSize = 90
         val data = RecordingDataFile(recordingFile)
         val startIndexes = data.getWindowStartIndexes(windowSize)
@@ -32,7 +33,10 @@ class RecordingDataFileTest {
         assert(startIndexes.size > 0)
         var i = 1
         for (startIndex in startIndexes) {
-            Log.d("RecordingDataFileTest-windowizeTest", "Working on window $i of ${startIndexes.size}")
+            Log.d(
+                "RecordingDataFileTest-windowizeTest",
+                "Working on window $i of ${startIndexes.size}"
+            )
             val (window, activity) = data.getWindowAtIndex(startIndex, windowSize, features)
             assert(window.size == features.size)
 
@@ -60,61 +64,60 @@ class RecordingDataFileTest {
 
             // Test if compiling the window into a float buffer runs through
             val input = window.compileWindowToArray()
-            val prediction = model.runInfer(arrayOf(input))
+            val prediction = model.infer(arrayOf(input))
             val predictedLabel = model.convertPredictionToLabel(prediction[0])
             if (predictedLabel == activity) {
                 correctPredictions++
             }
-            Log.d("RecordingDataFileTest-predictionPipelineTest", "Working on window $i of ${startIndexes.size}")
+            Log.d(
+                "RecordingDataFileTest-predictionPipelineTest",
+                "Working on window $i of ${startIndexes.size}"
+            )
             i++
         }
         val accuracy = (correctPredictions * 100 / startIndexes.size)
         Log.d("RecordingDataFileTest", "Prediction accuracy on the example recording: $accuracy%")
     }
+
     @Test
     fun trainingPipelineTest() {
         val model = TFLiteModel(modelFile)
-
-        val features = model.getFeaturesToPredict().map { it.uppercase() }.toTypedArray()
-
         val data = RecordingDataFile(recordingFile)
         val dataSet = DataSet().apply { add(data) }
 
-
-        val batches = dataSet.convertToBatches(7, model.windowSize, progressCallback = {progress->
+        val batches = dataSet.convertToBatches(7, model.windowSize, progressCallback = { progress ->
             Log.d(
                 "RecordingDataFileTest-trainingPipelineTest",
                 "Batching dataset: $progress%"
             )
         })
 
-        // The following should NOT be done when using this in regular code
-        // Batches are there to be compiled (loaded into RAM) one after another to avoid OutOfMemory Errors
-        // Here we load them all into RAM to speed up testing since we know we only have a few batches...
-        val compiledBatches = batches.mapIndexed { index, batch ->  batch.compile(model, progressCallback = {progress->
+        val accuracyBeforeTraining = model.evaluate(batches) { batch, window ->
             Log.d(
-                "RecordingDataFileTest-trainingPipelineTest",
-                "Windowizing batch $index: $progress%"
+                "RecordingDataFileTest",
+                "Evaluating model before training. Batch: $batch%, Window Progress: $window%"
             )
-        }) }
-        var accuracyBeforeTraining = 0f
-        for((windows, labels) in compiledBatches){
-            val result = model.runInfer(windows)
-            val batchAccuracy = model.getAccuracyFromPredictions(result, labels)
-            accuracyBeforeTraining += batchAccuracy / compiledBatches.size
         }
-        for((windows, labels) in compiledBatches){
-            model.runTraining(windows, labels)
+        val losses = model.train(batches, 5) { epoch, batch, window ->
+            Log.d(
+                "RecordingDataFileTest",
+                "Training model. Epoch $epoch%, batch $batch%, window $window%"
+            )
         }
-        var accuracyAfterTraining = 0f
-        for((windows, labels) in compiledBatches){
-            val result = model.runInfer(windows)
-            val batchAccuracy = model.getAccuracyFromPredictions(result, labels)
-            accuracyAfterTraining += batchAccuracy / compiledBatches.size
+        Log.d(
+            "RecordingDataFileTest",
+            "Losses during training epochs: ${losses.joinToString()}"
+        )
+        val accuracyAfterTraining = model.evaluate(batches) { batch, window ->
+            Log.d(
+                "RecordingDataFileTest",
+                "Evaluating model after training. Batch: $batch%, Window Progress: $window%"
+            )
         }
-
-        Log.d("RecordingDataFileTest", "Prediction accuracy on the example recording before training: $accuracyBeforeTraining and after training: $accuracyAfterTraining%")
+        Log.d(
+            "RecordingDataFileTest",
+            "Prediction accuracy on the example recording before training: " +
+                    "$accuracyBeforeTraining and after training: $accuracyAfterTraining%"
+        )
     }
-
-
 }
