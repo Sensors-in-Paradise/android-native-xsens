@@ -3,7 +3,7 @@ package sensors_in_paradise.sonar
 import com.xsens.dot.android.sdk.events.XsensDotData
 import org.junit.Assert
 import org.junit.Test
-import sensors_in_paradise.sonar.screen_prediction.InMemoryWindow
+import sensors_in_paradise.sonar.machine_learning.InMemoryWindow
 
 class InMemoryWindowTest {
     @Test

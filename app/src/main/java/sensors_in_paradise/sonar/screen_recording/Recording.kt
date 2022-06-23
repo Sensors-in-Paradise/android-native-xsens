@@ -4,9 +4,7 @@ import android.util.Log
 import com.opencsv.CSVReaderHeaderAware
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.XSensDotDeviceWithOfflineMetadata
-import sensors_in_paradise.sonar.screen_prediction.InMemoryWindow
 import java.io.*
-import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.random.Random
 
@@ -213,7 +211,8 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
     }
 
     fun getRecordingFiles(): Array<File> {
-        return dir.listFiles { file -> file.isFile && file.name.endsWith(".csv") && file.name != MERGED_SENSOR_DATA_FILE_NAME }
+        return dir.listFiles { file -> file.isFile && file.name.endsWith(".csv") &&
+                file.name != MERGED_SENSOR_DATA_FILE_NAME }
             ?: emptyArray()
     }
 
@@ -289,7 +288,8 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
             if (sensorTagPrefix == null) {
                 Log.w(
                     "Recording-mergeSensorFiles",
-                    "Can't include sensor data file ${file.name} of recording ${dir.name} in merge: Could not infer sensor tag from address $sensorAddress"
+                    "Can't include sensor data file ${file.name} of recording ${dir.name} " +
+                            "in merge: Could not infer sensor tag from address $sensorAddress"
                 )
                 continue
             }
@@ -297,7 +297,9 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
         }
         return recordingSensorTagToReaderMap
     }
+
     @Throws(InvalidRecordingException::class)
+    @Suppress("LongMethod", "ComplexMethod")
     fun mergeSensorFiles(): File {
         val outFile = File(dir, MERGED_SENSOR_DATA_FILE_NAME)
         val recordingSensorTagToReaderMap = getCSVReadersOfSensorRecordings()
@@ -320,14 +322,17 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
                         hasNewContent = false
                         break
                     }
-                    for ((key, value) in line) {
-                        // since the linked hash map is defined outside of the for loop, we preserve the order of its keys
-                        if (key !in sensorDataColumnsToIgnoreInMerge) {
-                            resultLineEntries["${key}_$tagPrefix"] = value
-                        }
+                    for ((key, value) in line.filter { it.key !in sensorDataColumnsToIgnoreInMerge }) {
+                        // since the linked hash map is defined outside of the for loop,
+                        // we preserve the order of its keys
+                        resultLineEntries["${key}_$tagPrefix"] = value
                     }
                     if (sampleTimeFine == null) {
-                        val stf = line["SampleTimeFine"] ?: throw InvalidRecordingException("Could not find SampleTimeFine in sensor file of sensor with tag $tagPrefix ")
+                        val stf = line["SampleTimeFine"]
+                            ?: throw InvalidRecordingException(
+                                "Could not find SampleTimeFine " +
+                                        "in sensor file of sensor with tag $tagPrefix "
+                            )
                         sampleTimeFine = stf.replace(" ", "").toLong()
                         resultLineEntries["SampleTimeFine"] = stf
                     }
@@ -338,7 +343,10 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
                 if (hasNewContent) {
                     val timeMsIntoRecording = sampleTimeFine!! - startSampleTimeFine!!
                     val activity = metadataStorage.getActivityAtTime(timeMsIntoRecording)
-                        ?: throw InvalidRecordingException("Could not find activity for current row ($timeMsIntoRecording ms into recording)")
+                        ?: throw InvalidRecordingException(
+                            "Could not find activity for current " +
+                                    "row ($timeMsIntoRecording ms into recording)"
+                        )
 
                     resultLineEntries["activity"] = activity
                     if (!hasWrittenColumnNames) {
@@ -367,63 +375,11 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
 
     class InvalidRecordingException(msg: String) : Exception(msg)
 
-    fun getWindowAt(
-        relativeStartTime: Long,
-        featuresWithSensorTagPrefix: Array<String>,
-        windowSize: Int? = null
-    ): InMemoryWindow {
-        val window = if (windowSize != null) InMemoryWindow(
-            featuresWithSensorTagPrefix,
-            windowSize
-        ) else InMemoryWindow(featuresWithSensorTagPrefix)
-
-        val tagPrefixToRecordingCSVReaderMap = LinkedHashMap<String, CSVReaderHeaderAware>()
-
-        val requiredTagPrefixes = window.getRequiredSensorTagPrefixes()
-        // STF = SampleTimeFine
-        val tagPrefixToFirstSTFMap = LinkedHashMap<String, Long>()
-        for ((address, tag) in metadataStorage.getSensorMacMap()) {
-            val tagPrefix = XSensDotDeviceWithOfflineMetadata.extractTagPrefixFromTag(tag)
-            if (tagPrefix !in requiredTagPrefixes || tagPrefix == null) {
-                continue
-            }
-
-            val csvDataFile = File(dir, "$address.csv")
-            if (!csvDataFile.exists()) {
-                throw InvalidRecordingException("Recording is incomplete. Data for sensor with tag $tag and address $address is missing (file ${csvDataFile.name} does not exist)")
-            }
-            val fileReader = GlobalValues.getCSVHeaderAwareFileReader(csvDataFile)
-            val csvReader = CSVReaderHeaderAware(fileReader)
-            tagPrefixToRecordingCSVReaderMap[tagPrefix] = csvReader
-
-            val row = csvReader.readMap()
-            if (!row.containsKey("SampleTimeFine")) {
-                throw InvalidRecordingException("Recording is invalid. The file ${csvDataFile.name} does not contain a SampleTimeFine column.")
-            }
-            tagPrefixToFirstSTFMap[tagPrefix] = row["SampleTimeFine"]!!.toLong()
-        }
-        val tagPrefixToSmallestSTFToRelativeStartTimeDiffMap = LinkedHashMap<String, Long>()
-        for ((tagPrefix, csvReader) in tagPrefixToRecordingCSVReaderMap) {
-            do {
-                val row = csvReader.readMap()
-                val stf = row["SampleTimeFine"]!!.toLong()
-                val currentSmallestDiff =
-                    tagPrefixToSmallestSTFToRelativeStartTimeDiffMap[tagPrefix]
-                if ((currentSmallestDiff ?: Long.MAX_VALUE) > abs(stf - relativeStartTime)) {
-                    tagPrefixToSmallestSTFToRelativeStartTimeDiffMap[tagPrefix] =
-                        abs(stf - relativeStartTime)
-                }
-            } while ((currentSmallestDiff ?: Long.MAX_VALUE) >= abs(stf - relativeStartTime))
-        }
-        // TODO: Fill following rows into InMemoryWindow (csvReaders point to the start positions now)
-
-        return window
-    }
-
     companion object {
         const val VIDEO_CAPTURE_FILENAME = "recording.mp4"
         const val POSE_CAPTURE_FILENAME = "poseSequence.csv"
         private const val MERGED_SENSOR_DATA_FILE_NAME = "allSensorData.csv"
-        private val sensorDataColumnsToIgnoreInMerge = arrayOf("PacketCounter", "Status", "SampleTimeFine")
+        private val sensorDataColumnsToIgnoreInMerge =
+            arrayOf("PacketCounter", "Status", "SampleTimeFine")
     }
 }

@@ -4,8 +4,8 @@ import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Before
 import org.junit.Test
-import sensors_in_paradise.sonar.screen_prediction.DataSet
-import sensors_in_paradise.sonar.screen_prediction.TFLiteModel
+import sensors_in_paradise.sonar.machine_learning.DataSet
+import sensors_in_paradise.sonar.machine_learning.TFLiteModel
 import sensors_in_paradise.sonar.screen_recording.RecordingDataFile
 import sensors_in_paradise.sonar.use_cases.UseCase
 import java.io.File

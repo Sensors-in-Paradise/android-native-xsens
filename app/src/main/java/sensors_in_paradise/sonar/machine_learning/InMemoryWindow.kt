@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.screen_prediction
+package sensors_in_paradise.sonar.machine_learning
 
 import android.util.Log
 import com.xsens.dot.android.sdk.events.XsensDotData
@@ -11,11 +11,12 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
         IllegalStateException(msg)
 
     private val featuresPerSensorTagPrefix = LinkedHashMap<String, List<String>>()
-
+    private val nansPerFeature = LinkedHashMap<String, Int>()
     init {
         for (feature in featuresWithSensorTagPrefix) {
             if (feature.isNotEmpty()) {
                 put(feature.uppercase(), ArrayList(windowSize + cushion))
+                nansPerFeature[feature.uppercase()] = 0
             }
         }
         for (deviceTagPrefix in extractDeviceTagPrefixes(this.keys)) {
@@ -45,7 +46,8 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
                 }
             }
             if (value.isNaN()) {
-                // TODO("Count nans per feature")
+                val nansReceived = nansPerFeature[featureWithSensorTagPrefix]
+                nansPerFeature[featureWithSensorTagPrefix] = nansReceived!! + 1
                 v =
                     if (insertionIndex == 0) 0.0f else featureValues[insertionIndex - 1].second
             }
@@ -63,8 +65,8 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
         if (deviceTagPrefix !in featuresPerSensorTagPrefix.keys) {
             Log.w(
                 "InMemoryWindow-appendSensorData",
-                "The device tag prefix $deviceTagPrefix for the given sensor data is not "
-                        + "mentioned in the features that should be collected for this window."
+                "The device tag prefix $deviceTagPrefix for the given sensor data is not " +
+                        "mentioned in the features that should be collected for this window."
             )
             return
         }
@@ -146,13 +148,12 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
         buffer.rewind()
         return buffer
     }
-    fun compileWindowToArray():Array<FloatArray>{
-        return Array(windowSize){FloatArray(keys.size)}.apply { compileWindowToArray(this) }
+    fun compileWindowToArray(): Array<FloatArray> {
+        return Array(windowSize) { FloatArray(keys.size) }.apply { compileWindowToArray(this) }
     }
-    fun compileWindowToArray(array:Array<FloatArray>){
+    fun compileWindowToArray(array: Array<FloatArray>) {
         // find starting indices of feature vectors closest to the starting timestamp
         val startingIndices = getStartIndices()
-
 
         // return array of feature vectors starting at the starting indices
 
@@ -219,6 +220,10 @@ class InMemoryWindow(featuresWithSensorTagPrefix: Array<String>, val windowSize:
             }
         }
         return closestIndex
+    }
+
+    fun getNansReceivedPerFeature(): Map<String, Int> {
+        return nansPerFeature
     }
 
     companion object {

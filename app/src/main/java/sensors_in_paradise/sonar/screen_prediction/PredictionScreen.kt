@@ -15,8 +15,10 @@ import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import sensors_in_paradise.sonar.*
+import sensors_in_paradise.sonar.machine_learning.InMemoryWindow
+import sensors_in_paradise.sonar.machine_learning.TFLiteModel
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
-import sensors_in_paradise.sonar.screen_prediction.TFLiteModel.InvalidModelMetadata
+import sensors_in_paradise.sonar.machine_learning.TFLiteModel.InvalidModelMetadata
 import sensors_in_paradise.sonar.screen_prediction.barChart.PredictionBarChart
 import sensors_in_paradise.sonar.screen_train.PredictionHistoryStorage
 import sensors_in_paradise.sonar.screen_train.PredictionHistoryStorage.Prediction
@@ -98,7 +100,8 @@ class PredictionScreen(
         if (requiredButNotConnectedDevices.isNotEmpty()) {
             UIHelper.showAlert(
                 context = context,
-                message = "The model for this use case requires sensors with the following tag prefixes to be connected:\n" +
+                message = "The model for this use case requires sensors with the following " +
+                        "tag prefixes to be connected:\n" +
                         "    ${model!!.getDeviceTags().joinToString("\n    ")}\n" +
                         "These are currently not connected:\n" +
                         "    ${requiredButNotConnectedDevices.joinToString("\n    ")}",
@@ -126,7 +129,7 @@ class PredictionScreen(
         }
         for (device in devices.getConnected()) {
             device.measurementMode =
-                XsensDotPayload.PAYLOAD_TYPE_CUSTOM_MODE_4 // TODO("Set measurement mode from model metadata")
+                XsensDotPayload.PAYLOAD_TYPE_CUSTOM_MODE_4
             device.startMeasuring()
         }
         timer.base = SystemClock.elapsedRealtime()
@@ -210,7 +213,7 @@ class PredictionScreen(
         if (window != null) {
             try {
                 if (window!!.hasEnoughDataToCompileWindow()) {
-                    model?.infer(window!!.compileWindow())?.let { updatePrediction(it) }
+                    model?.infer(arrayOf(window!!.compileWindowToArray()))?.let { updatePrediction(it[0]) }
                     window!!.clearValues()
                 } else {
                     Toast.makeText(
@@ -346,7 +349,7 @@ class PredictionScreen(
         }
         try {
             initMetadataModel(currentUseCase.getModelFile())
-        } catch (e: InvalidModelMetadata) {
+        } catch (_: InvalidModelMetadata) {
             return ModelInitializationResult.MISSING_METADATA
         }
         return ModelInitializationResult.SUCCESS

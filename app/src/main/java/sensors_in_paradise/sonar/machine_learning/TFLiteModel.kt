@@ -1,4 +1,4 @@
-package sensors_in_paradise.sonar.screen_prediction
+package sensors_in_paradise.sonar.machine_learning
 
 import android.util.Log
 import org.tensorflow.lite.Interpreter
@@ -8,7 +8,6 @@ import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 import kotlin.Array as Array1
 
-//TODO: move all ML related classes into new package (they are used across multiple screens, not only prediction screen)
 class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFile: File) {
     class InvalidModelMetadata(message: String) : Exception(message)
 
@@ -93,21 +92,6 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         return 1000L * (windowSize / frequency)
     }
 
-    @Deprecated(
-        "This function seems to fail when runInfer(windows: Array<Array<FloatArray>>) has been executed before with multiple windows, altering the input buffer size.",
-        ReplaceWith("runInfer(windows: Array<Array<FloatArray>>)")
-    )
-    fun infer(window: FloatBuffer): FloatArray {
-        // TODO: This function seems to fail when runInfer(windows: Array<Array<FloatArray>>) has been executed before with multiple windows (Maybe delete this one?)
-        val inputs = HashMap<String, Any>()
-        inputs["input_window"] = window.rewind()
-        val outputs = HashMap<String, Any>()
-        outputs["output"] = this.output
-        interpreter.runSignature(inputs, outputs, "infer")
-        output.rewind()
-        return output.array()
-    }
-
     fun infer(windows: Array1<Array1<FloatArray>>): Array1<FloatArray> {
         val inputs = HashMap<String, Any>()
         inputs["input_window"] = windows
@@ -146,9 +130,11 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         val (windows, labels) = batch.compile(this, progressCallback)
         return train(windows, labels)
     }
-    private fun toPercentage(v: Int,  max: Int,min: Int=0):Int{
-        return (v*100)/(max-min)
+
+    private fun toPercentage(v: Int, max: Int, min: Int = 0): Int {
+        return (v * 100) / (max - min)
     }
+
     /*Returns an array of losses with one entry per epoch*/
     fun train(
         batches: Collection<Batch>,
@@ -181,13 +167,17 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         }
         val numFeatures = features.size
         if (windows.size != labels.size) {
-            throw java.lang.IllegalArgumentException("Window size ${windows.size} is different to number of labels ${labels.size}")
+            throw java.lang.IllegalArgumentException("Window size ${windows.size} is different to " +
+                    "number of labels ${labels.size}")
         }
         if (windows[0].size != windowSize) {
-            throw java.lang.IllegalArgumentException("Size of provided windows ${windows[0].size} is different to expected window size: $windowSize")
+            throw java.lang.IllegalArgumentException("Size of provided windows ${windows[0].size} " +
+                    "is different to expected window size: $windowSize")
         }
         if (windows[0][0].size != numFeatures) {
-            throw java.lang.IllegalArgumentException("Number of provided features ${windows[0][0].size} inside the windows is different to expected number of features: $numFeatures")
+            throw java.lang.IllegalArgumentException("Number of provided features " +
+                    "${windows[0][0].size} inside the windows is different to expected" +
+                    " number of features: $numFeatures")
         }
         val batchSize = windows.size
         Log.d("Test-TFLiteModel - runTraining", "Running training on batch size $batchSize")
@@ -254,7 +244,8 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         actualLabels: Array1<String>
     ): Float {
         if (predictions.size != actualLabels.size) {
-            throw IllegalArgumentException("Size of predictions (${predictions.size}) is unequals to size of actualLabels (${actualLabels.size})")
+            throw IllegalArgumentException("Size of predictions (${predictions.size}) is " +
+                    "unequals to size of actualLabels (${actualLabels.size})")
         }
         var correctPredictions = 0f
         for (i in predictions.indices) {
@@ -272,7 +263,8 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         actualLabels: Array1<FloatArray>
     ): Float {
         if (predictions.size != actualLabels.size) {
-            throw IllegalArgumentException("Size of predictions (${predictions.size}) is unequals to size of actualLabels (${actualLabels.size})")
+            throw IllegalArgumentException("Size of predictions (${predictions.size}) " +
+                    "is unequals to size of actualLabels (${actualLabels.size})")
         }
         var correctPredictions = 0f
         for (i in predictions.indices) {
@@ -284,5 +276,4 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         }
         return correctPredictions / predictions.size
     }
-    // TODO: add functions to run inference and training on Batch instance
 }

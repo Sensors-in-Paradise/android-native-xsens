@@ -1,7 +1,7 @@
 package sensors_in_paradise.sonar.screen_recording
 
 import com.opencsv.CSVReaderHeaderAware
-import sensors_in_paradise.sonar.screen_prediction.InMemoryWindow
+import sensors_in_paradise.sonar.machine_learning.InMemoryWindow
 import java.io.File
 import java.io.FileReader
 import java.io.IOException
@@ -14,17 +14,17 @@ class RecordingDataFile @Throws(IOException::class) constructor(private val merg
     @Throws(WindowException::class)
     fun getWindowAtIndex(
         startingIndex: Int,
-        window_size: Int,
+        windowSize: Int,
         featuresWithSensorTagPrefix: Array<String>
     ): Pair<InMemoryWindow, String> {
         val csvReader = getResetCsvReader()
         csvReader.skip(startingIndex)
-        val window = InMemoryWindow(featuresWithSensorTagPrefix, window_size)
+        val window = InMemoryWindow(featuresWithSensorTagPrefix, windowSize)
         var activity: String? = null
         val errorMsgPrefix = "Window can't be filled from start line index $startingIndex: "
-        for (i in 0 until (window_size)) {
+        for (i in 0 until (windowSize)) {
             val line: Map<String, String> = optNextLine(csvReader)
-                ?: throw WindowException("$errorMsgPrefix Line is null before reaching window_size $window_size")
+                ?: throw WindowException("$errorMsgPrefix Line is null before reaching window_size $windowSize")
             val lineActivity = line["activity"]
                 ?: throw WindowException("$errorMsgPrefix Line without activity detected")
             val stf = line["SampleTimeFine"]?.toLong()
@@ -34,7 +34,8 @@ class RecordingDataFile @Throws(IOException::class) constructor(private val merg
                 activity = lineActivity
             }
             if (activity != lineActivity) {
-                throw WindowException("$errorMsgPrefix Multiple activities within window have been detected: $lineActivity, $activity")
+                throw WindowException("$errorMsgPrefix Multiple activities " +
+                        "within window have been detected: $lineActivity, $activity")
             }
             for ((feature, valueStr) in line) {
                 if (window.needsFeature(feature)) {
@@ -51,10 +52,8 @@ class RecordingDataFile @Throws(IOException::class) constructor(private val merg
     }
 
     fun getWindowStartIndexes(
-        window_size: Int,
-        minOverlapForCutOffWindow: Float = 0.5f
+        windowSize: Int
     ): ArrayList<Int> {
-        //TODO: enable 50% overlap?!
         val indexes = ArrayList<Int>()
 
         for (i in 0 until (indexesOfActivityChanges.size - 1)) {
@@ -62,15 +61,18 @@ class RecordingDataFile @Throws(IOException::class) constructor(private val merg
             val endIndex = indexesOfActivityChanges[i + 1] - 1
 
             val activityLength = endIndex - startIndex
-            if (activityLength < window_size) {
+            if (activityLength < windowSize) {
                 continue
             }
-            val numCompletelyFittingWindows = activityLength / window_size
+            val numCompletelyFittingWindows = activityLength / windowSize
             for (j in 0 until (numCompletelyFittingWindows)) {
-                indexes.add(startIndex + j * window_size)
-            }
-            if (activityLength - numCompletelyFittingWindows >= window_size * minOverlapForCutOffWindow) {
-                indexes.add(endIndex - window_size)
+                val windowStartIndex = startIndex + j * windowSize
+                indexes.add(windowStartIndex)
+                // 50% overlap
+                val overlappingWindowStartIndex = windowStartIndex + windowSize / 2
+                if (overlappingWindowStartIndex + windowSize <= endIndex) {
+                    indexes.add(overlappingWindowStartIndex)
+                }
             }
         }
         return indexes
