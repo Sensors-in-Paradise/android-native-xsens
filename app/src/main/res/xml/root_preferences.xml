@@ -20,11 +20,11 @@
 
     <PreferenceCategory app:title="Appearance">
         <SwitchPreferenceCompat
+            android:disableDependentsState="true"
+            app:defaultValue="true"
             app:key="followSystemTheme"
             app:summary="If enabled, the app will follow the selected system theme. \nIf disabled, you can choose light or dark mode for this app individually"
-            app:title="Use system theme"
-            app:defaultValue="true"
-            android:disableDependentsState="true"/>
+            app:title="Use system theme" />
 
         <SwitchPreferenceCompat
             app:dependency="followSystemTheme"
@@ -33,55 +33,60 @@
     </PreferenceCategory>
     <PreferenceCategory app:title="Developer options">
         <SwitchPreferenceCompat
-            app:key="verboseToasts"
-            app:title="Verbose Toast logging"
             app:defaultValue="false"
-            app:summary="Show semi-important Toasts for debugging"/>
+            app:key="verboseToasts"
+            app:summary="Show semi-important Toasts for debugging"
+            app:title="Verbose Toast logging" />
     </PreferenceCategory>
     <PreferenceCategory app:title="Data recording options">
         <SwitchPreferenceCompat
             app:key="playSoundOnRecordingStartAndStop"
-            app:title="Play start/stop sound"
             app:summary="This can be useful to synchronize the sensor recordings with recordings from external cameras etc."
-            />
+            app:title="Play start/stop sound" />
         <SwitchPreferenceCompat
             app:key="recordWithCamera"
             app:title="Enable camera on recording screen" />
         <SwitchPreferenceCompat
             app:dependency="recordWithCamera"
             app:key="storeRawCameraVideo"
-            app:title="Store camera video "
-            app:summary="Store the raw video from the smartphone camera when recording sensors"/>
+            app:summary="Store the raw video from the smartphone camera when recording sensors"
+            app:title="Store camera video " />
         <ListPreference
-            app:dependency="storeRawCameraVideo"
-            app:key="videoRecordingQuality"
-            app:defaultValue="HD"
-            app:title="Camera recording quality"
             android:entries="@array/video_quality_labels"
             android:entryValues="@array/video_quality_values"
-            />
+            app:defaultValue="HD"
+            app:dependency="storeRawCameraVideo"
+            app:key="videoRecordingQuality"
+            app:title="Camera recording quality" />
         <SwitchPreferenceCompat
             app:dependency="recordWithCamera"
             app:key="storePoseEstimation"
-            app:title="Store estimated poses as stickman"
-            app:summary="Store pose data estimated by TensorFlow-MoveNet when recording."/>
-        <ListPreference
+            app:summary="Store pose data extracted from video frames when recording."
+            app:title="Store estimated Poses" />
+        <SwitchPreference
+            android:disableDependentsState="true"
             app:dependency="storePoseEstimation"
-            app:key="poseEstimationModel"
-            app:title="Pose Estimation Model"
-            app:summary="(Models marked with ⚠ won't run GPU accelerated.)"
+            app:key="useHandPose"
+            app:summaryOff="Body Pose Model selected."
+            app:summaryOn="Hand Pose Model selected."
+            app:title="Use Hand Pose Model" />
+        <ListPreference
             android:defaultValue="@string/default_pose_estimation_model"
             android:entries="@array/pose_estimation_model_labels"
-            android:entryValues="@array/pose_estimation_model_values" />
+            android:entryValues="@array/pose_estimation_model_values"
+            app:dependency="useHandPose"
+            app:key="poseEstimationModel"
+            app:summary="(Models marked with ⚠ won't run GPU accelerated.)"
+            app:title="Pose Estimation Model" />
         <SwitchPreference
             app:key="showPoseBackground"
-            app:title="Stickman Background"
-            app:summary="Show selected background image for Pose Sequence in Label Editor. Please note that you can only select png files."/>
+            app:summary="Show selected background image for Pose Sequence in Label Editor. Please note that you can only select png files."
+            app:title="Stick Figure Background" />
         <Preference
-            app:enabled="false"
-            android:selectable="false"
             android:persistent="false"
-            android:summary="⚠ The combination of video capture and pose estimation can result in reduced performance."/>
+            android:selectable="false"
+            android:summary="⚠ The combination of video capture and pose estimation can result in reduced performance."
+            app:enabled="false" />
     </PreferenceCategory>
     <PreferenceCategory app:title="Activity prediction options">
         <SwitchPreferenceCompat
