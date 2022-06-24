@@ -1,25 +1,41 @@
 package sensors_in_paradise.sonar.util.dialogs
 
+
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
+import android.view.ViewGroup
+import sensors_in_paradise.sonar.custom_views.confusion_matrix.ConfusionMatrixView
 
-class MessageDialog(
+class ConfusionMatrixDialog(
     context: Context,
-    message: String,
     title: String? = null,
-    positiveButtonText: String = "Yes",
+    message: String? = null,
     onPositiveButtonClickListener: DialogInterface.OnClickListener? = null,
     neutralButtonText: String = "Neutral",
-    onNeutralButtonClickListener: DialogInterface.OnClickListener? = null,
-    negativeButtonText: String = DEFAULT_NEGATIVE_BUTTON_LABEL,
-    onNegativeButtonClickListener: DialogInterface.OnClickListener? = null
+    onNeutralButtonClickListener: DialogInterface.OnClickListener? = null
 ) {
+
+
     init {
         val builder = AlertDialog.Builder(context)
-        builder.setMessage(message)
+
+
+        val confusionMatrix = ConfusionMatrixView(context)
+
+        confusionMatrix.layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
+        builder.setView(confusionMatrix)
+
+
+
         if (title != null) {
             builder.setTitle(title)
+        }
+        if (message != null) {
+            builder.setMessage(message)
         }
         if (onNeutralButtonClickListener != null) {
             builder.setNeutralButton(neutralButtonText, onNeutralButtonClickListener)
@@ -27,22 +43,26 @@ class MessageDialog(
 
         if (onPositiveButtonClickListener != null) {
             builder.setPositiveButton(
-                positiveButtonText,
+                "Yes",
                 onPositiveButtonClickListener
             )
-            builder.setNegativeButton(negativeButtonText, onNegativeButtonClickListener)
+            builder.setNegativeButton(
+                "Cancel"
+            ) { dialog, _ ->
+                // User cancelled the dialog
+                dialog.cancel()
+            }
         } else {
             builder.setPositiveButton(
                 "Ok", null
             )
-            if(onNegativeButtonClickListener!=null||negativeButtonText!= DEFAULT_NEGATIVE_BUTTON_LABEL){
-                builder.setNegativeButton(negativeButtonText, onNegativeButtonClickListener)
-            }
+        }
+        builder.setOnDismissListener {
+
         }
         // Create the AlertDialog object and return it
         builder.create().show()
     }
-    companion object{
-        private const val DEFAULT_NEGATIVE_BUTTON_LABEL = "Cancel"
-    }
+
+
 }

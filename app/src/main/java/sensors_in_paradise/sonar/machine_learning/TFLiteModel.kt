@@ -6,7 +6,7 @@ import org.tensorflow.lite.support.metadata.MetadataExtractor
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.FloatBuffer
-import kotlin.Array as Array1
+import kotlin.Array
 
 class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFile: File) {
     class InvalidModelMetadata(message: String) : Exception(message)
@@ -17,8 +17,8 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
     private val interpreter: Interpreter
     private val extractor: MetadataExtractor
     private val labels: ArrayList<String>
-    private val features: Array1<String>
-    val signatureKeys: Array1<String>
+    private val features: Array<String>
+    val signatureKeys: Array<String>
 
     init {
         val buffer = ByteBuffer.allocate(tfLiteModelFile.readBytes().size)
@@ -46,14 +46,6 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
     fun close() {
         interpreter.close()
     }
-    /*
-    fun predict(sensorDataByteBuffer: ByteBuffer): FloatArray {
-        interpreter.run(
-            sensorDataByteBuffer,
-            output
-        )
-        return output[0]
-    }*/
 
     private fun readFeatureFile(): String {
         val inputStream = extractor.getAssociatedFile("features.txt")
@@ -75,7 +67,7 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         return labels.size
     }
 
-    fun getDeviceTags(): Array1<String> {
+    fun getDeviceTags(): Array<String> {
         return features.map { it.substringAfterLast("_") }.distinct().filter { it != "" }
             .toTypedArray()
     }
@@ -84,7 +76,7 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         return getDeviceTags().size
     }
 
-    fun getFeaturesToPredict(): Array1<String> {
+    fun getFeaturesToPredict(): Array<String> {
         return features
     }
 
@@ -92,12 +84,12 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         return 1000L * (windowSize / frequency)
     }
 
-    fun infer(windows: Array1<Array1<FloatArray>>): Array1<FloatArray> {
+    fun infer(windows: Array<Array<FloatArray>>): Array<FloatArray> {
         val inputs = HashMap<String, Any>()
         inputs["input_window"] = windows
         val outputs = HashMap<String, Any>()
         Log.d("TFLiteModel-runInfer", "Output buffer capacity: ${labels.size * windows.size}")
-        val output = Array1(windows.size) { FloatArray(labels.size) }
+        val output = Array(windows.size) { FloatArray(labels.size) }
         outputs["output"] = output
         interpreter.runSignature(inputs, outputs, "infer")
         return output
@@ -161,7 +153,7 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         return losses
     }
 
-    fun train(windows: Array1<Array1<FloatArray>>, labels: Array1<FloatArray>): Float {
+    fun train(windows: Array<Array<FloatArray>>, labels: Array<FloatArray>): Float {
         if (windows.isEmpty()) {
             throw java.lang.IllegalArgumentException("Can't run training on an empty windows array")
         }
@@ -240,8 +232,8 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
     }
 
     fun getAccuracyFromPredictions(
-        predictions: Array1<FloatArray>,
-        actualLabels: Array1<String>
+        predictions: Array<FloatArray>,
+        actualLabels: Array<String>
     ): Float {
         if (predictions.size != actualLabels.size) {
             throw IllegalArgumentException("Size of predictions (${predictions.size}) is " +
@@ -259,8 +251,8 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
     }
 
     fun getAccuracyFromPredictions(
-        predictions: Array1<FloatArray>,
-        actualLabels: Array1<FloatArray>
+        predictions: Array<FloatArray>,
+        actualLabels: Array<FloatArray>
     ): Float {
         if (predictions.size != actualLabels.size) {
             throw IllegalArgumentException("Size of predictions (${predictions.size}) " +

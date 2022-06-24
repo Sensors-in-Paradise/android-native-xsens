@@ -1,9 +1,14 @@
 package sensors_in_paradise.sonar
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import android.util.TypedValue
+import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
+import androidx.core.content.ContextCompat
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import java.io.BufferedReader
 import java.io.File
@@ -113,6 +118,19 @@ class GlobalValues private constructor() {
                 line = fileReader.readLine()
             }
             return fileReader
+        }
+
+        fun getAndroidColorResource(context: Context, id: Int):Int{
+            return context.getColorResCompat(id)
+        }
+
+        @ColorInt
+        @SuppressLint("ResourceAsColor")
+        private fun Context.getColorResCompat(@AttrRes id: Int): Int {
+            val resolvedAttr = TypedValue()
+            theme.resolveAttribute(id, resolvedAttr, true)
+            val colorRes = resolvedAttr.run { if (resourceId != 0) resourceId else data }
+            return ContextCompat.getColor(this, colorRes)
         }
     }
 }

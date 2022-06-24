@@ -59,7 +59,7 @@ class PieChartPopulator(val context: Context, private val chart: PieChart) {
             }
         })
         data.setValueTextSize(8f)
-        data.setValueTextColor(context.getColorResCompat(android.R.attr.textColorPrimary))
+        data.setValueTextColor( GlobalValues.getAndroidColorResource(context, android.R.attr.textColorPrimary))
         data.setValueTypeface(Typeface.DEFAULT)
 
         chart.legend.isEnabled = false
@@ -98,14 +98,7 @@ class PieChartPopulator(val context: Context, private val chart: PieChart) {
         }
         return result
     }
-    @ColorInt
-    @SuppressLint("ResourceAsColor")
-    private fun Context.getColorResCompat(@AttrRes id: Int): Int {
-        val resolvedAttr = TypedValue()
-        theme.resolveAttribute(id, resolvedAttr, true)
-        val colorRes = resolvedAttr.run { if (resourceId != 0) resourceId else data }
-        return ContextCompat.getColor(this, colorRes)
-    }
+
     companion object {
         const val SMALL_ITEM_PERCENTAGE_THRESHOLD = 0.04f
     }

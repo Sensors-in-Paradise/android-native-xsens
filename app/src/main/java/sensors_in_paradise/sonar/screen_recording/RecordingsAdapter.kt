@@ -15,6 +15,7 @@ import sensors_in_paradise.sonar.screen_recording.labels_editor.LabelsEditorDial
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import sensors_in_paradise.sonar.util.dialogs.VideoDialog
 import sensors_in_paradise.sonar.use_cases.UseCase
+import sensors_in_paradise.sonar.util.dialogs.ConfusionMatrixDialog
 import java.text.DateFormat
 import java.util.*
 
@@ -58,11 +59,17 @@ class RecordingsAdapter(
             }
             itemView.setOnClickListener {
                 val onEditBtnClickListener =
-                    DialogInterface.OnClickListener { _: DialogInterface, _: Int ->
+                    DialogInterface.OnClickListener { _, _ ->
                         LabelsEditorDialog(context, currentUseCase, recording) {
                             notifyItemChanged(position)
                         }
                     }
+                val onPredictBtnClickListener =
+                    DialogInterface.OnClickListener { _, _ ->
+                        ConfusionMatrixDialog(context)
+                    }
+                val onVideoBtnClickListener =
+                    DialogInterface.OnClickListener  { _, _ -> VideoDialog(context, recording.getVideoFile()) }
                 val title = recording.getDisplayTitle() + " ($personName)"
                 if (recording.hasVideoRecording()) {
                     MessageDialog(
@@ -71,15 +78,20 @@ class RecordingsAdapter(
                         title,
                         "Edit",
                         onEditBtnClickListener,
-                        "Show video"
-                    ) { _, _ -> VideoDialog(context, recording.getVideoFile()) }
+                        "Show video",
+                        onVideoBtnClickListener,
+                         "Predict",
+                        onPredictBtnClickListener
+                    )
                 } else {
                     MessageDialog(
                         context,
                         recording.getActivitiesSummary(),
                         title = title,
                         "Edit",
-                        onEditBtnClickListener
+                        onEditBtnClickListener,
+                        negativeButtonText = "Predict",
+                        onNegativeButtonClickListener = onPredictBtnClickListener
                     )
                 }
             }
