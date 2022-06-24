@@ -160,7 +160,7 @@ class SensorPlacementEstimator(
             }
 
             if (filteredActivityTimes.size < 2) {
-                throw FileNotFoundException("Requires 2 Activities (not null) with 1 min Capture time.")
+                throw FileNotFoundException("Requires 2 Activities (not null) captured 1 min each.")
             }
         } catch (e: FileNotFoundException) {
             Toast.makeText(
