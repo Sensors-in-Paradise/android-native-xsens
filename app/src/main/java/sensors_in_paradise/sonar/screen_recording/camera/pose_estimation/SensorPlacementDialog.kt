@@ -129,7 +129,7 @@ class SensorPlacementDialog(
             " + ",
             transform = {
                 index += 1
-                val newLine = if (index % 6 == 0) "\n         " else ""
+                val newLine = if (index % 6 == 0) "\n        " else ""
                 newLine + formatPosition(it, positions.size > 1)
             })
     }
