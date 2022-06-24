@@ -16,6 +16,7 @@ This is a tool for recording data through Xsens DOT sensors and labeling it when
 - Additional camera recording
 - Pose estimation from camera to store anonymous visual data
 - Relabeling during and after recording
+- Optimal Sensor Placement Estimation
 - Simple Connection to any WebDAV Cloud to make storing data easy
 - Data visualisation on device
 - On-Device training
@@ -24,9 +25,10 @@ This is a tool for recording data through Xsens DOT sensors and labeling it when
 
 The Connection Screen works well with Xsens DOT Sensors. For connected Sensors you can make them flash their LED to identify them making a long press on their item. After their first connection they will be remembered with their name and set.
 
-The Recording Screen is used for making recordings, labeling and storing them. You can add and select subjects as well as the performed action to record. There can be only one subject per recording and the one currently selected at the end of the recording will be saved. For Activities however there can be multiple ones. When you open the Dialog a timestamp will be saved instantly with the label you select afterwards. This way you can take your time to select the new label and the timestamp will not change. If you want to discard this timestamp (because the activity did not change) you can close the dialog.
+The Recording Screen is used for making recordings, labeling and storing them. You can add and select subjects as well as the performed action to record. There can be only one subject per recording and the one currently selected at the end of the recording will be saved. For Activities however there can be multiple ones. When you open the Dialog a timestamp will be saved instantly with the label you select afterwards. This way you can take your time to select the new label and the timestamp will not change. If you want to discard this timestamp (because the activity did not change) you can close the dialog. <br />
 If you did not select a Label and the app crashes/ is stopped by android then the null - activity label and unknown subject will be chosen as a default value.
-During an recording you can use the activities tab to change labels and see the label history of this recording. For Changing Timestamps together with Labels you should edit the recording afterwards using the video recording for instance. Please note that we do not record audio together with video data.
+During an recording you can use the activities tab to change labels and see the label history of this recording. For Changing Timestamps together with Labels you should edit the recording afterwards using the video recording for instance. Please note that we do not record audio together with video data. <br />
+To estimate best placements for a certain number of sensors, you can long press on recordings with pose estimation file. The app automatically switches to selection mode, where you can further add recordings on which the estimation should be performed. The follwoing body parts are taken into consideration: Head, Right Shoulder (RS), Left Shoulder (LS), Right Elbow (RE), Left Elbow (LE), Right Wrist (RW), Left Wrist (LW), Hip, Right Knee (RK), Left Knee (LK), Right Ankle (RA), Left Ankle (LA).
 
 On the Data Screen "Filter for Training" hides the amount of collected data that has already been used for training. Only the recordings in the currently selected subdirectory of a use case will be considered on this screen.
 
