@@ -26,7 +26,10 @@ import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.UIHelper
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import java.nio.ByteBuffer
+import java.util.Collections.max
+import kotlin.math.max
 import kotlin.math.round
+import kotlin.random.Random
 
 class PredictionScreen(
     private var currentUseCase: UseCase,
@@ -62,6 +65,39 @@ class PredictionScreen(
         5 to "Walking",
     ).withDefault { "" }
 
+    private val predictionList = listOf(
+        Pair(0, 2),
+        Pair(1, 4),
+        Pair(2, 3),
+        Pair(4, 1)
+    )
+
+    private lateinit var linearLayout: LinearLayout
+    private var shouldDisplayFinalLabel = false
+    private val finalLabel = 3
+    private var predictionIterator = 0
+
+    private fun getNextDummyPrediction(): FloatArray {
+        predictionIterator += 1
+        val size = outputLabelMap.size
+
+        var tempIterator = 0
+        val actualLabel =
+            if (shouldDisplayFinalLabel) finalLabel
+            else predictionList.find {
+                tempIterator += it.second
+                tempIterator >= predictionIterator
+            }?.first ?: finalLabel
+
+        val predictions = mutableListOf<Float>()
+        for (i in 0 until size) {
+            predictions.add(Random.nextFloat())
+        }
+        predictions[actualLabel] = max(predictions) + (Random.nextFloat()/2f) + 0.5f
+
+        return predictions.map { it / predictions.sum() }.toFloatArray()
+    }
+
     private val numDevices = 5
     private var numConnectedDevices = 0
     private var isRunning = false
@@ -71,7 +107,7 @@ class PredictionScreen(
     private val predictionInterval = 4000L
     private val updatePredictionTask = object : Runnable {
         override fun run() {
-            processAndPredict()
+            predict(getNextDummyPrediction())
             mainHandler.postDelayed(this, predictionInterval)
         }
     }
@@ -112,35 +148,38 @@ class PredictionScreen(
         sensorOccupationInterface?.onSensorOccupationStatusChanged(true)
         clearBuffers()
         lastPredictionTime = 0L
-        if (tryInitializeSensorDataMap()) {
-            for (device in devices.getConnected()) {
-                device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
-                device.startMeasuring()
-            }
-            timer.base = SystemClock.elapsedRealtime()
-            timer.start()
-            textView.visibility = View.VISIBLE
-            textView.text = ""
+//        if (tryInitializeSensorDataMap()) {
+//            for (device in devices.getConnected()) {
+//                device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
+//                device.startMeasuring()
+//            }
+        timer.base = SystemClock.elapsedRealtime()
+        timer.start()
+        textView.visibility = View.VISIBLE
+        textView.text = ""
 
-            predictionBarChart.resetData()
+        predictionBarChart.resetData()
 
-            predictionHistoryStorage =
-                PredictionHistoryStorage(
-                    currentUseCase,
-                    System.currentTimeMillis(),
-                    PreferencesHelper.shouldStorePrediction(context)
-                )
-            predictionHistoryAdapter.predictionHistory = arrayListOf()
-            predictionHistoryAdapter.addPrediction(Prediction("", 0f), 0)
+        predictionHistoryStorage =
+            PredictionHistoryStorage(
+                currentUseCase,
+                System.currentTimeMillis(),
+                PreferencesHelper.shouldStorePrediction(context)
+            )
+        predictionHistoryAdapter.predictionHistory = arrayListOf()
+        predictionHistoryAdapter.addPrediction(Prediction("", 0f), 0)
 
-            isRunning = true
-            mainHandler.postDelayed(updatePredictionTask, 4000)
-            mainHandler.postDelayed(updateProgressBarTask, 100)
-            progressBar.visibility = View.VISIBLE
-            predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
+        predictionIterator = 0
+        shouldDisplayFinalLabel = false
 
-            toggleMotionLayout.transitionToEnd()
-        }
+        isRunning = true
+        mainHandler.postDelayed(updateProgressBarTask, 100)
+        mainHandler.postDelayed(updatePredictionTask, 4000)
+        progressBar.visibility = View.VISIBLE
+        predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
+
+        toggleMotionLayout.transitionToEnd()
+//        }
     }
 
     private fun tryInitializeSensorDataMap(): Boolean {
@@ -219,6 +258,11 @@ class PredictionScreen(
         model?.predict(sensorDataByteBuffer)?.let { updatePrediction(it) }
     }
 
+    private fun predict(predictions: FloatArray) {
+        lastPredictionTime = System.currentTimeMillis()
+        updatePrediction(predictions)
+    }
+
     override fun onActivityCreated(activity: Activity) {
 
         this.activity = activity
@@ -269,6 +313,12 @@ class PredictionScreen(
             activity.findViewById(R.id.motionLayout_predictionToggling_predictionFragment)
 
         mainHandler = Handler(Looper.getMainLooper())
+
+        linearLayout = activity.findViewById(R.id.linearLayout_prediction)
+        linearLayout.setOnLongClickListener {
+            shouldDisplayFinalLabel = !shouldDisplayFinalLabel
+            true
+        }
     }
 
     override fun onActivityResumed() {}
