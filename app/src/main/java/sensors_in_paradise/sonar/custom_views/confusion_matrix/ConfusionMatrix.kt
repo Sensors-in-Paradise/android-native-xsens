@@ -1,6 +1,6 @@
 package sensors_in_paradise.sonar.custom_views.confusion_matrix
 
-class ConfusionMatrix(labels: Array<String>) {
+open class ConfusionMatrix(labels: Array<String>) {
     val labels = labels.mapIndexed { index, label ->
         label to index
     }.toMap()
@@ -8,14 +8,14 @@ class ConfusionMatrix(labels: Array<String>) {
     private var maxCellValue = 0
 
     init {
-        initData(labels)
+        initData()
     }
 
-    private fun initData(labels: Array<String>) {
+    private fun initData() {
         data.clear()
-        for (l in labels) {
+        repeat(getNumLabels()) {
             val column = ArrayList<Int>()
-            for (i in labels) {
+            repeat(getNumLabels()) {
                 column.add(0)
             }
             data.add(column)
@@ -48,7 +48,8 @@ class ConfusionMatrix(labels: Array<String>) {
 
     fun addPredictions(predictions: Array<String>, actualLabels: Array<String>) {
         if (predictions.size != actualLabels.size) {
-            throw IllegalArgumentException("Size of predictions (${predictions.size}) must be equal to size of labels (${actualLabels.size})")
+            throw IllegalArgumentException("Size of predictions (${predictions.size}) must " +
+                    "be equal to size of labels (${actualLabels.size})")
         }
         for (i in predictions.indices) {
             val prediction = predictions[i]
@@ -70,10 +71,8 @@ class ConfusionMatrix(labels: Array<String>) {
         }
     }
 
-
     companion object {
         const val COLUMN_AXIS_LABEL = "Predicted label"
-        const val ROW_AXIS_LABEL = "True label"
+        const val ROW_AXIS_LABEL = "Actual label"
     }
-
 }

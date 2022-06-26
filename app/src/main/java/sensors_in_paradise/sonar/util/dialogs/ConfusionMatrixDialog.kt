@@ -1,6 +1,5 @@
 package sensors_in_paradise.sonar.util.dialogs
 
-
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
@@ -16,20 +15,16 @@ class ConfusionMatrixDialog(
     onNeutralButtonClickListener: DialogInterface.OnClickListener? = null
 ) {
 
-
     init {
         val builder = AlertDialog.Builder(context)
-
 
         val confusionMatrix = ConfusionMatrixView(context)
 
         confusionMatrix.layoutParams = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
+            ViewGroup.LayoutParams.WRAP_CONTENT
         )
         builder.setView(confusionMatrix)
-
-
 
         if (title != null) {
             builder.setTitle(title)
@@ -58,11 +53,8 @@ class ConfusionMatrixDialog(
             )
         }
         builder.setOnDismissListener {
-
         }
         // Create the AlertDialog object and return it
         builder.create().show()
     }
-
-
 }

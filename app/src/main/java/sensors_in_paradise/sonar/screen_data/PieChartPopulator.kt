@@ -1,13 +1,8 @@
 package sensors_in_paradise.sonar.screen_data
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
-import android.util.TypedValue
-import androidx.annotation.AttrRes
-import androidx.annotation.ColorInt
-import androidx.core.content.ContextCompat
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
@@ -59,7 +54,7 @@ class PieChartPopulator(val context: Context, private val chart: PieChart) {
             }
         })
         data.setValueTextSize(8f)
-        data.setValueTextColor( GlobalValues.getAndroidColorResource(context, android.R.attr.textColorPrimary))
+        data.setValueTextColor(GlobalValues.getAndroidColorResource(context, android.R.attr.textColorPrimary))
         data.setValueTypeface(Typeface.DEFAULT)
 
         chart.legend.isEnabled = false

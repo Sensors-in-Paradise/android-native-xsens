@@ -69,7 +69,7 @@ class RecordingsAdapter(
                         ConfusionMatrixDialog(context)
                     }
                 val onVideoBtnClickListener =
-                    DialogInterface.OnClickListener  { _, _ -> VideoDialog(context, recording.getVideoFile()) }
+                    DialogInterface.OnClickListener { _, _ -> VideoDialog(context, recording.getVideoFile()) }
                 val title = recording.getDisplayTitle() + " ($personName)"
                 if (recording.hasVideoRecording()) {
                     MessageDialog(

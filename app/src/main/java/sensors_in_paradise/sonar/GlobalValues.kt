@@ -120,7 +120,7 @@ class GlobalValues private constructor() {
             return fileReader
         }
 
-        fun getAndroidColorResource(context: Context, id: Int):Int{
+        fun getAndroidColorResource(context: Context, id: Int): Int {
             return context.getColorResCompat(id)
         }
 

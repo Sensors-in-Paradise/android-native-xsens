@@ -35,14 +35,14 @@ class MessageDialog(
             builder.setPositiveButton(
                 "Ok", null
             )
-            if(onNegativeButtonClickListener!=null||negativeButtonText!= DEFAULT_NEGATIVE_BUTTON_LABEL){
+            if (onNegativeButtonClickListener != null || negativeButtonText != DEFAULT_NEGATIVE_BUTTON_LABEL) {
                 builder.setNegativeButton(negativeButtonText, onNegativeButtonClickListener)
             }
         }
         // Create the AlertDialog object and return it
         builder.create().show()
     }
-    companion object{
+    companion object {
         private const val DEFAULT_NEGATIVE_BUTTON_LABEL = "Cancel"
     }
 }
