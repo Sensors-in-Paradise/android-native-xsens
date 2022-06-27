@@ -57,24 +57,32 @@ class PredictionScreen(
 
     private val numOutputs = 6
     val outputLabelMap = mapOf(
-        0 to "Running",
-        1 to "Squats",
-        2 to "Stairs Down",
-        3 to "1 min Pitch",
-        4 to "Standing",
-        5 to "Walking",
+            0 to "Aufräumen",
+            1 to "Aufwecken",
+            2 to "Bett Machen",
+            3 to "Dokumentation",
+            4 to "Essen Reichen",
+            5 to "Waschen",
+            6 to "Haare Kämmen",
+            7 to "Medikamente Stellen",
+            8 to "Hautpflege",
+            9 to "Rollstuhl Transfer",
+            10 to "Umkleiden",
     ).withDefault { "" }
 
     private val predictionList = listOf(
-        Pair(0, 2),
-        Pair(1, 4),
-        Pair(2, 3),
-        Pair(4, 1)
+        Pair(1, 1),
+        Pair(10, 8),
+        Pair(5, 26),
+        Pair(8, 100),
+        Pair(10, 15),
+        Pair(6, 4),
+        Pair(0, 100)
     )
 
     private lateinit var linearLayout: LinearLayout
     private var shouldDisplayFinalLabel = false
-    private val finalLabel = 3
+    private val finalLabel = 10
     private var predictionIterator = 0
 
     private fun getNextDummyPrediction(): FloatArray {
@@ -284,7 +292,7 @@ class PredictionScreen(
         progressBar = activity.findViewById(R.id.progressBar_nextPrediction_predictionFragment)
 
         predictionButton.setOnClickListener {
-            if (initModelFromCurrentUseCase()) {
+            if (true) {
                 val signatures = model?.signatureKeys
                 Log.d("PredictionScreen-onActivityCreated", signatures.toString())
                 togglePrediction()
@@ -317,6 +325,7 @@ class PredictionScreen(
         linearLayout = activity.findViewById(R.id.linearLayout_prediction)
         linearLayout.setOnLongClickListener {
             shouldDisplayFinalLabel = !shouldDisplayFinalLabel
+            predictionIterator = 150
             true
         }
     }
