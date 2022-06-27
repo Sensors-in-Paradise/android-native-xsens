@@ -55,14 +55,16 @@ class RecordingsAdapter(
 
         viewHolder.apply {
             deleteButton.setOnClickListener {
-                showDeleteRecordingDialog(recording)
+                if (recording !in sensorPlacementEstimator.recordings) {
+                    showDeleteRecordingDialog(recording)
+                }
             }
             itemView.setOnClickListener {
                 if (!isInSelectMode) {
                     val onEditBtnClickListener =
                         DialogInterface.OnClickListener { _: DialogInterface, _: Int ->
                             LabelsEditorDialog(context, currentUseCase, recording) {
-                                notifyItemChanged(position)
+                                notifyItemChanged(getRecordingPosition(recording))
                             }
                         }
                     val title = recording.getDisplayTitle() + " ($personName)"
@@ -86,12 +88,12 @@ class RecordingsAdapter(
                     }
                 } else {
                     sensorPlacementEstimator.toggleRecordingSelection(recording)
-                    notifyItemChanged(position)
+                    notifyItemChanged(getRecordingPosition(recording))
                 }
             }
             itemView.setOnLongClickListener {
                 sensorPlacementEstimator.toggleRecordingSelection(recording)
-                notifyItemChanged(position)
+                notifyItemChanged(getRecordingPosition(recording))
                 true
             }
 
@@ -139,6 +141,10 @@ class RecordingsAdapter(
                 recordings.deleteRecording(recording)
                 notifyItemRemoved(index)
             })
+    }
+
+    private fun getRecordingPosition(recording: Recording): Int {
+        return recordings.indexOf(recording)
     }
 
     override fun getItemCount() = recordings.size
