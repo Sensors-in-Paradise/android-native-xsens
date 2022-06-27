@@ -5,19 +5,15 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.Typeface
+import android.util.Log
 import androidx.core.graphics.withRotation
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
 import kotlin.math.min
 
-class DrawableConfusionMatrix(val context: Context, labels: Array<String>) : ConfusionMatrix(labels) {
-    constructor(context: Context, cm: ConfusionMatrix) : this(context, cm.getLabels().toTypedArray()) {
-        for (c in 0 until cm.getNumLabels()) {
-            for (r in 0 until cm.getNumLabels()) {
-                this[c, r] = cm[c, r]
-            }
-        }
-    }
+class DrawableConfusionMatrix(val context: Context, cm: ConfusionMatrix) : ConfusionMatrix(cm) {
+    constructor(context: Context, labels: Array<String>) : this(context, ConfusionMatrix(labels))
+
     private class BoundedTextPaint(
         text: String,
         color: Int,
@@ -83,6 +79,9 @@ class DrawableConfusionMatrix(val context: Context, labels: Array<String>) : Con
 
         val colWidth = entries.maxOf { it.second.textBounds.width() } + 20
         val columns = (right - left) / colWidth
+        if (columns == 0) {
+            return top
+        }
         val rowHeight = entries.maxOf { it.second.textBounds.height() } + 20
 
         for ((index, entry) in entries.withIndex()) {
@@ -272,7 +271,8 @@ class DrawableConfusionMatrix(val context: Context, labels: Array<String>) : Con
     }
 
     private fun getPaintForCell(cellValue: Int, maxCellValue: Int): Paint {
-        val relativeShare = (cellValue * 255) / maxCellValue
+        val relativeShare = if (maxCellValue != 0) ((cellValue * 255) / maxCellValue) else 0
+        Log.d("DrawableConfusionMatrix", "Max cell value $maxCellValue")
         cellPaint.alpha = relativeShare
         return cellPaint
     }

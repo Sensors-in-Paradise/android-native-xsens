@@ -1,6 +1,16 @@
 package sensors_in_paradise.sonar.custom_views.confusion_matrix
 
-open class ConfusionMatrix(labels: Array<String>) {
+import android.util.Log
+
+open class ConfusionMatrix(labels: Array<String>, var title: String = "Confusion Matrix") {
+    constructor(confusionMatrix: ConfusionMatrix) : this(confusionMatrix.getLabels().toTypedArray(), confusionMatrix.title) {
+       for (col in 0 until getNumLabels()) {
+           for (row in 0 until getNumLabels()) {
+                this[col, row] = confusionMatrix[col, row]
+           }
+       }
+        this.maxCellValue = confusionMatrix.maxCellValue
+    }
     val labels = labels.mapIndexed { index, label ->
         label to index
     }.toMap()
@@ -48,8 +58,10 @@ open class ConfusionMatrix(labels: Array<String>) {
 
     fun addPredictions(predictions: Array<String>, actualLabels: Array<String>) {
         if (predictions.size != actualLabels.size) {
-            throw IllegalArgumentException("Size of predictions (${predictions.size}) must " +
-                    "be equal to size of labels (${actualLabels.size})")
+            throw IllegalArgumentException(
+                "Size of predictions (${predictions.size}) must " +
+                        "be equal to size of labels (${actualLabels.size})"
+            )
         }
         for (i in predictions.indices) {
             val prediction = predictions[i]
@@ -61,10 +73,14 @@ open class ConfusionMatrix(labels: Array<String>) {
             if (predictionIndex == null || labelIndex == null) {
                 throw IllegalArgumentException(
                     "Prediction ($prediction) or actual label " +
-                            "($label) at index $i are not in specified labels this ConfusionMatrix " +
+                            "($label) at index $i is not in specified labels this ConfusionMatrix " +
                             "was initialized with."
                 )
             }
+            Log.d(
+                "ConfusionMatrix",
+                "Current maxCellValue: $maxCellValue, value of current cell: ${this[predictionIndex, labelIndex] + 1}"
+            )
             if (++this[predictionIndex, labelIndex] > maxCellValue) {
                 maxCellValue = this[predictionIndex, labelIndex]
             }

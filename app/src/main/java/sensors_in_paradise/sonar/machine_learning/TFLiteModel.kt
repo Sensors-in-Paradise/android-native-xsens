@@ -3,6 +3,7 @@ package sensors_in_paradise.sonar.machine_learning
 import android.util.Log
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.metadata.MetadataExtractor
+import sensors_in_paradise.sonar.custom_views.confusion_matrix.ConfusionMatrix
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.FloatBuffer
@@ -63,6 +64,10 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         }.toMap()
     }
 
+    fun getLabels(): List<String> {
+        return labels
+    }
+
     fun getNumOutputClasses(): Int {
         return labels.size
     }
@@ -98,24 +103,32 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
     fun evaluate(
         batches: Collection<Batch>,
         progressCallback: ((Int, Int) -> Unit)? = null
-    ): Float {
+    ): Pair<Float, ConfusionMatrix> {
+        val confusionMatrix = ConfusionMatrix(labels.toTypedArray())
         var accuracy = 0f
         for ((index, batch) in batches.withIndex()) {
             val interBatchProgress = (index * 100) / batches.size
-            val batchAccuracy = evaluate(batch) { intraBatchProgress ->
+            val batchAccuracy = evaluate(batch, confusionMatrix) { intraBatchProgress ->
                 progressCallback?.let {
                     it(interBatchProgress, intraBatchProgress)
                 }
             }
             accuracy += batchAccuracy / batches.size
         }
-        return accuracy
+
+        return Pair(accuracy, confusionMatrix)
     }
 
-    fun evaluate(batch: Batch, progressCallback: ((Int) -> Unit)? = null): Float {
+    fun evaluate(batch: Batch, confusionMatrix: ConfusionMatrix? = null, progressCallback: ((Int) -> Unit)? = null): Float {
+
         val (windows, labels) = batch.compile(this, progressCallback)
         val prediction = infer(windows)
-        return getAccuracyFromPredictions(prediction, labels)
+        val accuracy = getAccuracyFromPredictions(prediction, labels)
+        val predictedLabels = prediction.map { convertPredictionToLabel(it) }
+        val actualLabels = labels.map { convertPredictionToLabel(it) }
+
+        confusionMatrix?.addPredictions(predictedLabels.toTypedArray(), actualLabels.toTypedArray())
+        return accuracy
     }
 
     fun train(batch: Batch, progressCallback: ((Int) -> Unit)? = null): Float {

@@ -2,6 +2,8 @@ package sensors_in_paradise.sonar.use_cases
 
 import android.content.Context
 import android.widget.Toast
+import sensors_in_paradise.sonar.R
+import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import java.io.File
 import java.io.IOException
 import java.nio.file.*
@@ -48,6 +50,10 @@ class UseCase(
         return useCaseDir.resolve("predictions").apply { mkdir() }
     }
 
+    fun getModelCheckpointsDir(): File {
+        return useCaseDir.resolve("modelCheckpoints").apply { mkdir() }
+    }
+
     fun getPredictionHistoryJSONFile(startTimestamp: Long): File {
         val predictionsDir = getPredictionsDir()
         return predictionsDir.resolve("$startTimestamp.json")
@@ -63,6 +69,7 @@ class UseCase(
     }
 
     fun setRecordingsSubDir(dir: String) {
+        //TODO find out why selected sub dir does not seem to be persistent
         recordingsSubDir = getRecordingsDir().resolve(dir).apply { mkdir() }
         useCaseStorage.setSelectedSubDir(dir)
     }
@@ -107,6 +114,22 @@ class UseCase(
             }
         }
         if (!f.delete()) throw IOException("Failed to delete file: $f")
+    }
+
+    fun showNoModelFileExistingDialog(context: Context) {
+        MessageDialog(
+            context,
+            message = context.getString(
+                R.string.missing_model_dialog_message,
+                getModelFile().absolutePath
+            ),
+            title = context.getString(R.string.missing_model_dialog_title),
+            positiveButtonText = "Okay",
+            neutralButtonText = "Import default Model",
+            onNeutralButtonClickListener = { _, _ ->
+                importDefaultModel()
+            }
+        )
     }
 
     companion object {

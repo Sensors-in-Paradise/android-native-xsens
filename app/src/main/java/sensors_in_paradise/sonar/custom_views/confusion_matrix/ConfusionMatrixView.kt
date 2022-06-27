@@ -8,20 +8,8 @@ import android.util.Log
 import android.view.View
 
 class ConfusionMatrixView(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
-    private var confusionMatrix: DrawableConfusionMatrix? =
-        DrawableConfusionMatrix(
-            context,
-            arrayOf(
-                "Laufen",
-                "Saugen",
-                "Raufen", "kaufen", "Haufen", "Taufen", "Schlaufen"
-            )
-        ).apply {
-            addPredictions(
-                arrayOf("Laufen", "Saugen", "Raufen", "Saugen", "Raufen", "Laufen"),
-                arrayOf("Laufen", "Raufen", "Laufen", "Saugen", "Raufen", "Saugen")
-            )
-        }
+    private var confusionMatrix: DrawableConfusionMatrix? = null
+
         set(value) {
             field = value
             invalidate()

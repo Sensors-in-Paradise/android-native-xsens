@@ -274,19 +274,7 @@ class PredictionScreen(
                         )
                     }
                     ModelInitializationResult.FILE_NOT_EXISTING -> {
-                        MessageDialog(
-                            context,
-                            message = context.getString(
-                                R.string.missing_model_dialog_message,
-                                currentUseCase.getModelFile().absolutePath
-                            ),
-                            title = context.getString(R.string.missing_model_dialog_title),
-                            positiveButtonText = "Okay",
-                            neutralButtonText = "Import default Model",
-                            onNeutralButtonClickListener = { _, _ ->
-                                currentUseCase.importDefaultModel()
-                            }
-                        )
+                        currentUseCase.showNoModelFileExistingDialog(context)
                     }
                 }
             } else {

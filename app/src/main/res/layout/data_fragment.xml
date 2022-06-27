@@ -128,13 +128,30 @@
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/button_trainModel_dataFragment"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:drawableLeft="@drawable/ic_baseline_model_training_24"
-        android:text="Train model"
-        android:layout_marginHorizontal="8dp"/>
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button_predict_dataFragment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginHorizontal="8dp"
+            android:layout_weight="1"
+            android:drawableLeft="@drawable/ic_baseline_local_fire_department_24"
+            android:text="Predict" />
+
+        <Button
+            android:id="@+id/button_trainModel_dataFragment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginHorizontal="8dp"
+            android:layout_weight="1"
+            android:drawableLeft="@drawable/ic_baseline_model_training_24"
+            android:text="Train model" />
+    </LinearLayout>
 
 </FrameLayout>

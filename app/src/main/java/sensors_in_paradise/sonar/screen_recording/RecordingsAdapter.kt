@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
+import sensors_in_paradise.sonar.custom_views.confusion_matrix.ConfusionMatrix
 import sensors_in_paradise.sonar.screen_recording.labels_editor.LabelsEditorDialog
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import sensors_in_paradise.sonar.util.dialogs.VideoDialog
@@ -66,7 +67,18 @@ class RecordingsAdapter(
                     }
                 val onPredictBtnClickListener =
                     DialogInterface.OnClickListener { _, _ ->
-                        ConfusionMatrixDialog(context)
+                        ConfusionMatrixDialog(context, listOf(ConfusionMatrix(
+                            arrayOf(
+                                "Laufen",
+                                "Saugen",
+                                "Raufen", "kaufen", "Haufen", "Taufen", "Schlaufen"
+                            )
+                        ).apply {
+                            addPredictions(
+                                arrayOf("Laufen", "Saugen", "Raufen", "Saugen", "Raufen", "Laufen"),
+                                arrayOf("Laufen", "Raufen", "Laufen", "Saugen", "Raufen", "Saugen")
+                            )
+                        }))
                     }
                 val onVideoBtnClickListener =
                     DialogInterface.OnClickListener { _, _ -> VideoDialog(context, recording.getVideoFile()) }

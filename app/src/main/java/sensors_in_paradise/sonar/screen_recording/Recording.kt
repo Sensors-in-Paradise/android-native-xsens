@@ -298,10 +298,18 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
         return recordingSensorTagToReaderMap
     }
 
+    fun hasMergedSensorFile(): Boolean {
+        return getMergedSensorFile().exists()
+    }
+
+    fun getMergedSensorFile(): File {
+        return File(dir, MERGED_SENSOR_DATA_FILE_NAME)
+    }
+
     @Throws(InvalidRecordingException::class)
     @Suppress("LongMethod", "ComplexMethod")
     fun mergeSensorFiles(): File {
-        val outFile = File(dir, MERGED_SENSOR_DATA_FILE_NAME)
+        val outFile = getMergedSensorFile()
         val recordingSensorTagToReaderMap = getCSVReadersOfSensorRecordings()
 
         val resultLineEntries = LinkedHashMap<String, String>()
