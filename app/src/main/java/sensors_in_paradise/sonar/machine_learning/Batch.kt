@@ -16,6 +16,7 @@ class Batch(
     /**Loads the specified batch data into RAM and return a Pair of windows and one hot encoded labels*/
     fun compile(
         model: TFLiteModel,
+        acceptSmallerBatchesOnCompileException: Boolean = false,
         progressCallback: ((Int) -> Unit)? = null
     ): Pair<Array<Array<FloatArray>>, Array<FloatArray>> {
         val features = model.getFeaturesToPredict()
@@ -31,9 +32,15 @@ class Batch(
                     model.windowSize,
                     features
                 )
-                window.compileWindowToArray(windows[windowIndex])
-                labelsOneHotEncoded[windowIndex] = model.convertLabelToOneHotEncoding(label)
-                windowIndex++
+                try {
+                    window.compileWindowToArray(windows[windowIndex])
+                    labelsOneHotEncoded[windowIndex] = model.convertLabelToOneHotEncoding(label)
+                }catch (e: IllegalArgumentException){
+                    if(!acceptSmallerBatchesOnCompileException){
+                        throw e
+                    }
+                }
+                    windowIndex++
                 progressCallback?.let { it((windowIndex * 100) / numWindows) }
             }
         }

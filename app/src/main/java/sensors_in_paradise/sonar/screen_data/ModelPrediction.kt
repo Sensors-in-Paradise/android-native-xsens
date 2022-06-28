@@ -3,6 +3,8 @@ package sensors_in_paradise.sonar.screen_data
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
+import sensors_in_paradise.sonar.AsyncUI
 import sensors_in_paradise.sonar.machine_learning.DataSet
 import sensors_in_paradise.sonar.machine_learning.TFLiteModel
 import sensors_in_paradise.sonar.screen_recording.Recording
@@ -16,9 +18,9 @@ class ModelPrediction(
     private val context: Context,
     private val recordingsManager: RecordingDataManager,
     val model: TFLiteModel
-) {
+) : AsyncUI() {
 
-    private val uiHandler: Handler = Handler(Looper.getMainLooper())
+
 
     init {
         MessageDialog(
@@ -38,64 +40,79 @@ class ModelPrediction(
 
     private fun prepareAndExecutePrediction(recordings: List<Recording>) {
         val progressDialog = ProgressDialog(context)
-        uiHandler.run {
+        ui {
             progressDialog.show()
-            progressDialog.setProgress(0, "Training process")
-            progressDialog.setSubProgress(0, "Merging recording data files")
+            progressDialog.setProgress(0, "Prediction process")
+
         }
-        try {
-            Thread() {
-                val dataFiles = RecordingDataManager.convertRecordings(recordings) {
-                    uiHandler.run { progressDialog.setSubProgress(it) }
+
+        async {
+            try {
+                val dataFiles = RecordingDataManager.convertRecordings(
+                    recordings,
+                    regenerateExistingFiles = false
+                ) {
+                    ui {
+                        progressDialog.setSubProgress(
+                            it,
+                            "Loading recording data files ${((it / 100f) * recordings.size).toInt()}/${recordings.size}"
+                        )
+                    }
                 }
-                uiHandler.run { progressDialog.setProgress(30) }
+                ui { progressDialog.setProgress(30) }
 
                 val dataSet = DataSet().apply {
                     addAll(dataFiles)
                 }
 
-                uiHandler.run {
+                ui {
                     progressDialog.setSubProgress(
                         0,
                         "Converting recordings into batches"
                     )
                 }
                 val batches = dataSet.convertToBatches(7, model.windowSize) {
-                    uiHandler.run {
+                    ui {
                         progressDialog.setSubProgress(it)
                     }
                 }
-                uiHandler.run {
+                ui {
                     progressDialog.setProgress(80)
                     progressDialog.setSubProgress(0, "Evaluating model")
                 }
 
                 val (accuracyBefore, cm) = model.evaluate(batches) { batch, _ ->
-                    progressDialog.setSubProgress((batch * 100) / batches.size)
+                    ui { progressDialog.setSubProgress((batch * 100) / batches.size) }
                 }
 
-                uiHandler.run { progressDialog.setProgress(100) }
+                ui { progressDialog.setProgress(100) }
 
                 cm.title =
                     "Confusion Matrix (acc ${(accuracyBefore * 100).roundToInt()}%)"
-                uiHandler.run {
+                ui {
                     progressDialog.setProgress(100)
                     progressDialog.dismiss()
-                }
-                uiHandler.run {
                     ConfusionMatrixDialog(
                         context,
                         listOf(cm)
                     )
                 }
-            }.start()
-        } catch (e: Exception) {
-            progressDialog.dismiss()
-            MessageDialog(
-                context,
-                "Prediction failed with exception: \n${e.message}",
-                "Prediction failed"
-            )
+                Log.d("ModelPrediction", "Confusion Matrix: \n$cm")
+                Log.d("ModelPrediction", "Evaluated on ${batches.size} batches of size 7")
+                Log.d("ModelPrediction", "Dataset was of size ${dataSet.size}")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                ui {
+                    progressDialog.dismiss()
+                    MessageDialog(
+                        context,
+                        "Prediction failed with exception: \n${e.message}",
+                        "Prediction failed"
+                    )
+                }
+            }
         }
+
     }
+
 }

@@ -4,8 +4,11 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.ViewAnimator
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.custom_views.confusion_matrix.ConfusionMatrix
@@ -23,6 +26,8 @@ class ConfusionMatrixDialog(
     private var index: Int = 0
     private val nextBtn: ImageButton
     private val previousBtn: ImageButton
+    private val positionTv: TextView
+    private val navigationFrameLayout: FrameLayout
 
     init {
         val builder = AlertDialog.Builder(context)
@@ -40,14 +45,16 @@ class ConfusionMatrixDialog(
         }
         nextBtn = root.findViewById(R.id.button_next_confusionMatrixDialog)
         previousBtn = root.findViewById(R.id.button_previous_confusionMatrixDialog)
+        positionTv = root.findViewById(R.id.textView_navigation_confusionMatrixDialog)
+        navigationFrameLayout = root.findViewById(R.id.frameLayout_navigation_confusionMatrixDialog)
 
         nextBtn.setOnClickListener {
             viewAnimator.displayedChild = ++index
-            updateButtons()
+            updateNavigationUi()
         }
         previousBtn.setOnClickListener {
             viewAnimator.displayedChild = --index
-            updateButtons()
+            updateNavigationUi()
         }
 
         builder.setView(root)
@@ -71,12 +78,14 @@ class ConfusionMatrixDialog(
         }
         // Create the AlertDialog object and return it
         dialog = builder.create()
-        updateButtons()
+        updateNavigationUi()
         dialog.show()
     }
-    private fun updateButtons() {
+    private fun updateNavigationUi() {
         previousBtn.isEnabled = index > 0
         nextBtn.isEnabled = index < confusionMatrices.size - 1
         dialog.setTitle(confusionMatrices[index].title)
+        positionTv.text = "${index+1}/${confusionMatrices.size}"
+        navigationFrameLayout.visibility = if(confusionMatrices.size>1) View.VISIBLE else View.GONE
     }
 }

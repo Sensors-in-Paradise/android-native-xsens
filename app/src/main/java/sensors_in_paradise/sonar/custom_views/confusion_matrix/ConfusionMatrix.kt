@@ -87,6 +87,18 @@ open class ConfusionMatrix(labels: Array<String>, var title: String = "Confusion
         }
     }
 
+    override fun toString(): String{
+        var result = ""
+
+        for(col in 0 until getNumLabels()){
+            for(row in 0 until getNumLabels()){
+                result += this[row, col].toString() + " "
+            }
+            result += "\n"
+        }
+        return result
+    }
+
     companion object {
         const val COLUMN_AXIS_LABEL = "Predicted label"
         const val ROW_AXIS_LABEL = "Actual label"

@@ -14,17 +14,12 @@ class UseCase(
     private val baseDir: File,
     val title: String,
     private val onUseCaseDeleted: (useCase: UseCase) -> Unit,
-    private val onUseCaseDuplicated: (originalUseCase: UseCase, duplicateTitle: String) -> UseCase,
-    recordingsSubDirName: String = DEFAULT_RECORDINGS_SUB_DIR_NAME,
+    private val onUseCaseDuplicated: (originalUseCase: UseCase, duplicateTitle: String) -> UseCase
 ) {
     private val useCaseDir = baseDir.resolve(title).apply { mkdirs() }
-    private var recordingsSubDir =
-        getRecordingsDir().resolve(recordingsSubDirName).apply { mkdir() }
     private val useCaseStorage = UseCaseStorage(useCaseDir.resolve(STORAGE_SUB_DIR_NAME))
-
-    init {
-        useCaseStorage.setSelectedSubDir(recordingsSubDirName)
-    }
+    private var recordingsSubDir =
+        getRecordingsDir().resolve(useCaseStorage.getSelectedSubDir()).apply { mkdir() }
 
     fun getActivityLabelsJSONFile(): File {
         return useCaseDir.resolve("labels.json")
@@ -69,7 +64,6 @@ class UseCase(
     }
 
     fun setRecordingsSubDir(dir: String) {
-        //TODO find out why selected sub dir does not seem to be persistent
         recordingsSubDir = getRecordingsDir().resolve(dir).apply { mkdir() }
         useCaseStorage.setSelectedSubDir(dir)
     }

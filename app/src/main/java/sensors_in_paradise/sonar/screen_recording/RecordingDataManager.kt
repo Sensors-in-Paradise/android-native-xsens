@@ -1,5 +1,6 @@
 package sensors_in_paradise.sonar.screen_recording
 
+import android.util.Log
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.ObservableArrayList
 import java.io.File
@@ -172,12 +173,23 @@ class RecordingDataManager(recordingsDir: File) :
         @Throws(Recording.InvalidRecordingException::class)
         fun convertRecordings(
             recordings: List<Recording>,
+            skipInvalidRecordings: Boolean = true,
+            regenerateExistingFiles: Boolean = false,
             callback: (progress: Int) -> Unit
         ): List<RecordingDataFile> {
             val result = ArrayList<RecordingDataFile>(recordings.size)
             for ((index, recording) in recordings.withIndex()) {
-                val dataFile = if (recording.hasMergedSensorFile()) recording.getMergedSensorFile() else recording.mergeSensorFiles()
-                result.add(RecordingDataFile(dataFile))
+                try {
+                    val dataFile =
+                        if (recording.hasMergedSensorFile()&&!regenerateExistingFiles) recording.getMergedSensorFile() else recording.mergeSensorFiles()
+                    result.add(RecordingDataFile(dataFile))
+                }
+                catch (e: Exception){
+                    if(!skipInvalidRecordings){
+                        throw Recording.InvalidRecordingException(e.message?:"Could not convert ${recording.dir}")
+                    }
+                    Log.w("RecordingDataManager-convertRecordings", "Exception occured when converting recording: ${e.message}")
+                }
                 callback(((index + 1) * 100) / recordings.size)
             }
             return result

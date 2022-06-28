@@ -349,7 +349,7 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
                     }
                 }
                 if (hasNewContent) {
-                    val timeMsIntoRecording = sampleTimeFine!! - startSampleTimeFine!!
+                    val timeMsIntoRecording = (sampleTimeFine!! - startSampleTimeFine!!)/1000L
                     val activity = metadataStorage.getActivityAtTime(timeMsIntoRecording)
                         ?: throw InvalidRecordingException(
                             "Could not find activity for current " +
@@ -363,7 +363,7 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
                     }
                     mergedCSVWriter.println(resultLineEntries.values.joinToString(","))
                 }
-            } catch (_: IOException) {
+            } catch (_: Exception) {
                 hasNewContent = false
             }
         } while (hasNewContent)

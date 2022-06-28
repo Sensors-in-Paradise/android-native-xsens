@@ -121,7 +121,7 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
 
     fun evaluate(batch: Batch, confusionMatrix: ConfusionMatrix? = null, progressCallback: ((Int) -> Unit)? = null): Float {
 
-        val (windows, labels) = batch.compile(this, progressCallback)
+        val (windows, labels) = batch.compile(this, true,progressCallback)
         val prediction = infer(windows)
         val accuracy = getAccuracyFromPredictions(prediction, labels)
         val predictedLabels = prediction.map { convertPredictionToLabel(it) }
@@ -132,7 +132,7 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
     }
 
     fun train(batch: Batch, progressCallback: ((Int) -> Unit)? = null): Float {
-        val (windows, labels) = batch.compile(this, progressCallback)
+        val (windows, labels) = batch.compile(this,false, progressCallback)
         return train(windows, labels)
     }
 
