@@ -247,7 +247,7 @@ exceptions:
     active: true
   TooGenericExceptionCaught:
     active: true
-    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
+    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**', '**/SensorPlacementEstimator.kt']
     exceptionNames:
       - 'ArrayIndexOutOfBoundsException'
       - 'Error'
@@ -802,3 +802,5 @@ style:
       - 'android.graphics.*'
       - 'androidx.camera.video.*'
       - 'java.nio.file.*'
+      - 'org.jetbrains.kotlinx.dataframe.*'
+

@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import sensors_in_paradise.sonar.GlobalValues
 import sensors_in_paradise.sonar.R
+import sensors_in_paradise.sonar.screen_recording.camera.pose_estimation.SensorPlacementEstimator
 import sensors_in_paradise.sonar.screen_recording.labels_editor.LabelsEditorDialog
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import sensors_in_paradise.sonar.util.dialogs.VideoDialog
@@ -21,11 +22,11 @@ import java.util.*
 class RecordingsAdapter(
     private val recordings: RecordingDataManager,
     private val context: Context,
-    var currentUseCase: UseCase
-) :
-
-    RecyclerView.Adapter<RecordingsAdapter.ViewHolder>() {
+    var currentUseCase: UseCase,
+    private val sensorPlacementEstimator: SensorPlacementEstimator
+) : RecyclerView.Adapter<RecordingsAdapter.ViewHolder>() {
     private val dateFormat = DateFormat.getDateTimeInstance()
+    var isInSelectMode = false
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val activityTextView: TextView = view.findViewById(R.id.tv_activity)
@@ -54,35 +55,48 @@ class RecordingsAdapter(
 
         viewHolder.apply {
             deleteButton.setOnClickListener {
-                showDeleteRecordingDialog(recording)
-            }
-            itemView.setOnClickListener {
-                val onEditBtnClickListener =
-                    DialogInterface.OnClickListener { _: DialogInterface, _: Int ->
-                        LabelsEditorDialog(context, currentUseCase, recording) {
-                            notifyItemChanged(position)
-                        }
-                    }
-                val title = recording.getDisplayTitle() + " ($personName)"
-                if (recording.hasVideoRecording()) {
-                    MessageDialog(
-                        context,
-                        recording.getActivitiesSummary(),
-                        title,
-                        "Edit",
-                        onEditBtnClickListener,
-                        "Show video"
-                    ) { _, _ -> VideoDialog(context, recording.getVideoFile()) }
-                } else {
-                    MessageDialog(
-                        context,
-                        recording.getActivitiesSummary(),
-                        title = title,
-                        "Edit",
-                        onEditBtnClickListener
-                    )
+                if (recording !in sensorPlacementEstimator.recordings) {
+                    showDeleteRecordingDialog(recording)
                 }
             }
+            itemView.setOnClickListener {
+                if (!isInSelectMode) {
+                    val onEditBtnClickListener =
+                        DialogInterface.OnClickListener { _: DialogInterface, _: Int ->
+                            LabelsEditorDialog(context, currentUseCase, recording) {
+                                notifyItemChanged(getRecordingPosition(recording))
+                            }
+                        }
+                    val title = recording.getDisplayTitle() + " ($personName)"
+                    if (recording.hasVideoRecording()) {
+                        MessageDialog(
+                            context,
+                            recording.getActivitiesSummary(),
+                            title,
+                            "Edit",
+                            onEditBtnClickListener,
+                            "Show video"
+                        ) { _, _ -> VideoDialog(context, recording.getVideoFile()) }
+                    } else {
+                        MessageDialog(
+                            context,
+                            recording.getActivitiesSummary(),
+                            title = title,
+                            "Edit",
+                            onEditBtnClickListener
+                        )
+                    }
+                } else {
+                    sensorPlacementEstimator.toggleRecordingSelection(recording)
+                    notifyItemChanged(getRecordingPosition(recording))
+                }
+            }
+            itemView.setOnLongClickListener {
+                sensorPlacementEstimator.toggleRecordingSelection(recording)
+                notifyItemChanged(getRecordingPosition(recording))
+                true
+            }
+
             activityTextView.text =
                 recording.getDisplayTitle()
             durationTextView.text = "Duration: " + GlobalValues.getDurationAsString(duration)
@@ -92,6 +106,8 @@ class RecordingsAdapter(
             // Set check file text & color conditionally
             checkFilesTextView.setTextColor(getCheckFileColor(recording))
             checkFilesTextView.text = getCheckFileText(recording)
+
+            itemView.isSelected = recording in sensorPlacementEstimator.recordings
         }
     }
 
@@ -125,6 +141,10 @@ class RecordingsAdapter(
                 recordings.deleteRecording(recording)
                 notifyItemRemoved(index)
             })
+    }
+
+    private fun getRecordingPosition(recording: Recording): Int {
+        return recordings.indexOf(recording)
     }
 
     override fun getItemCount() = recordings.size
