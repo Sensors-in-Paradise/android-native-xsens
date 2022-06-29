@@ -44,17 +44,37 @@ open class DataSet : ObservableArrayList<RecordingDataFile>() {
      * However it will at least put 1 Recording into each data set.
      * */
     fun splitByPercentage(secondDataSetPercentage: Float = 0.2f): Pair<DataSet, DataSet>{
-        if(size<2){
+        if (size < 2) {
             throw IllegalArgumentException("Can't split a dataset of size $size into two parts.")
         }
-        val secondDataSetSize = ceil(secondDataSetPercentage* size).toInt()
+        val secondDataSetSize = ceil(secondDataSetPercentage * size).toInt()
         val indices = (0 until size).shuffled()
         val second = DataSet()
         val first = DataSet()
 
-        for((entryIndex,recordingIndex) in indices.withIndex()){
-            (if(entryIndex<secondDataSetSize) second else first).add(this[recordingIndex])
+        for ((entryIndex, recordingIndex) in indices.withIndex()) {
+            (if (entryIndex < secondDataSetSize) second else first).add(this[recordingIndex])
         }
         return Pair(first, second)
+    }
+
+    fun convertToTrainValBatches(
+        windowsPerBatch: Int,
+        windowSize: Int,
+        splitPercentage: Float,
+        filterForActivities: Collection<String>? = null,
+        progressCallback: ((Int) -> Unit)? = null
+    ): Pair<ArrayList<Batch>, ArrayList<Batch>> {
+        val batches = convertToBatches(
+            windowsPerBatch = windowsPerBatch,
+            windowSize = windowSize,
+            shuffle = true,
+            filterForActivities = filterForActivities,
+            progressCallback = progressCallback
+        )
+        val splitIndex = ceil(splitPercentage * batches.size).toInt()
+        val train = ArrayList(batches.subList(0, splitIndex))
+        val validation = ArrayList(batches.subList(splitIndex, batches.size))
+        return Pair(train, validation)
     }
 }
