@@ -36,7 +36,7 @@
                 android:id="@+id/textView_progressLabel_progressDialog3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Doing stuff...."
+                android:text="Loading"
                 android:textStyle="bold" />
 
             <TextView
@@ -44,14 +44,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
-                android:text="0/10" />
+                android:text="0%" />
         </FrameLayout>
 
         <ProgressBar
             android:id="@+id/progressBar_progress_progressDialog"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:progressTint="@color/colorPrimary" />
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -61,15 +62,15 @@
                 android:id="@+id/textView_subprogressLabel_progressDialog"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Doing stuff...."
-                android:textStyle="bold" />
+                android:text="Loading"
+                android:textStyle="normal" />
 
             <TextView
                 android:id="@+id/textView_subprogress_progressDialog"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
-                android:text="0/10" />
+                android:text="0%" />
         </FrameLayout>
 
         <ProgressBar

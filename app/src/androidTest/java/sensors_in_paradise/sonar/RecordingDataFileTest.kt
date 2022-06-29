@@ -19,7 +19,7 @@ class RecordingDataFileTest {
     @Before
     fun init() {
         UseCase.extractFileFromAssets(assetContext, "0_orhan_1652085453257.csv", recordingFile)
-        UseCase.extractFileFromAssets(assetContext, "resnet_model_22_06_2022.tflite", modelFile)
+        UseCase.extractFileFromAssets(assetContext, "resnet_model.tflite", modelFile)
     }
 
     @Test

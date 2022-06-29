@@ -79,6 +79,7 @@ class ConfusionMatrixDialog(
         // Create the AlertDialog object and return it
         dialog = builder.create()
         updateNavigationUi()
+
         dialog.show()
     }
     private fun updateNavigationUi() {
@@ -87,5 +88,7 @@ class ConfusionMatrixDialog(
         dialog.setTitle(confusionMatrices[index].title)
         positionTv.text = "${index+1}/${confusionMatrices.size}"
         navigationFrameLayout.visibility = if(confusionMatrices.size>1) View.VISIBLE else View.GONE
+        confusionMatrices[index].description?.let { dialog.setMessage(it) }
+
     }
 }

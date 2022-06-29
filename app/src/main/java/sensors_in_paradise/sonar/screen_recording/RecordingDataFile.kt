@@ -39,7 +39,8 @@ class RecordingDataFile @Throws(IOException::class) constructor(private val merg
             }
             for ((feature, valueStr) in line) {
                 if (window.needsFeature(feature)) {
-                    val value = valueStr.replace(" ", "").toFloat()
+                    val cleanedValueStr = valueStr.replace(" ", "")
+                    val value = if(cleanedValueStr.isNotEmpty()) cleanedValueStr.toFloat() else 0f
                     window.appendSensorData(feature, value, stf)
                 }
             }
@@ -51,18 +52,22 @@ class RecordingDataFile @Throws(IOException::class) constructor(private val merg
         return CSVReaderHeaderAware(FileReader(mergedSensorDataFile))
     }
 
+    @Suppress("LoopWithTooManyJumpStatements")
     fun getWindowStartIndexes(
-        windowSize: Int
+        windowSize: Int,
+        filterForActivities: Collection<String>? = null,
     ): ArrayList<Int> {
         val indexes = ArrayList<Int>()
 
         for (i in 0 until (indexesOfActivityChanges.size - 1)) {
-            //TODO: also include interval from last change index to end of recording
-            val startIndex = indexesOfActivityChanges[i]
-            val endIndex = indexesOfActivityChanges[i + 1] - 1
-
+            val startIndex = indexesOfActivityChanges[i].first
+            val endIndex = indexesOfActivityChanges[i + 1].first - 1
+            val activity = indexesOfActivityChanges[i].second
             val activityLength = endIndex - startIndex
             if (activityLength < windowSize) {
+                continue
+            }
+            if(filterForActivities?.contains(activity) == false){
                 continue
             }
             val numCompletelyFittingWindows = activityLength / windowSize
@@ -79,8 +84,8 @@ class RecordingDataFile @Throws(IOException::class) constructor(private val merg
         return indexes
     }
 
-    private fun findIndexesOfActivityChanges(): ArrayList<Int> {
-        val indexesOfActivityChanges = ArrayList<Int>()
+    private fun findIndexesOfActivityChanges(): ArrayList<Pair<Int, String?>> {
+        val indexesOfActivityChanges = ArrayList<Pair<Int, String?>>()
         val csvReader = getResetCsvReader()
         var lastActivity: String? = null
         var line: Map<String, String>? = optNextLine(csvReader)
@@ -89,13 +94,13 @@ class RecordingDataFile @Throws(IOException::class) constructor(private val merg
         while (line != null) {
             val activity = line["activity"]
             if (activity != lastActivity) {
-                indexesOfActivityChanges.add(i)
+                indexesOfActivityChanges.add(Pair(i, activity))
                 lastActivity = activity
             }
             i++
             line = optNextLine(csvReader)
         }
-        indexesOfActivityChanges.add(i-1)
+        indexesOfActivityChanges.add(Pair(i-1, null))
         return indexesOfActivityChanges
     }
 

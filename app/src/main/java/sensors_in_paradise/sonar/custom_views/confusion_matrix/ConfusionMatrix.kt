@@ -2,7 +2,7 @@ package sensors_in_paradise.sonar.custom_views.confusion_matrix
 
 import android.util.Log
 
-open class ConfusionMatrix(labels: Array<String>, var title: String = "Confusion Matrix") {
+open class ConfusionMatrix(labels: Array<String>, var title: String = "Confusion Matrix", var description: String? = null) {
     constructor(confusionMatrix: ConfusionMatrix) : this(confusionMatrix.getLabels().toTypedArray(), confusionMatrix.title) {
        for (col in 0 until getNumLabels()) {
            for (row in 0 until getNumLabels()) {

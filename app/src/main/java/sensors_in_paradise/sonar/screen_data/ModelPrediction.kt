@@ -71,7 +71,7 @@ class ModelPrediction(
                         "Converting recordings into batches"
                     )
                 }
-                val batches = dataSet.convertToBatches(7, model.windowSize) {
+                val batches = dataSet.convertToBatches(7, model.windowSize, filterForActivities = model.getLabels()) {
                     ui {
                         progressDialog.setSubProgress(it)
                     }
@@ -81,8 +81,8 @@ class ModelPrediction(
                     progressDialog.setSubProgress(0, "Evaluating model")
                 }
 
-                val (accuracyBefore, cm) = model.evaluate(batches) { batch, _ ->
-                    ui { progressDialog.setSubProgress((batch * 100) / batches.size) }
+                val (accuracyBefore, cm) = model.evaluate(batches) { batchProgress, _ ->
+                    ui { progressDialog.setSubProgress(batchProgress) }
                 }
 
                 ui { progressDialog.setProgress(100) }

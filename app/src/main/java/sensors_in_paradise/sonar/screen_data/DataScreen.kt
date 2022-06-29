@@ -73,7 +73,7 @@ class DataScreen(
                     historyRV.scrollToPosition(0)
                     historyTV.isVisible = true
 
-                    model.runSave(
+                    model.save(
                         currentUseCase.getModelCheckpointsDir()
                             .resolve(item.timestamp.toString())
                     )
@@ -166,6 +166,9 @@ class DataScreen(
     private fun populateAndAnimateCharts() {
         activitiesPieChartPopulator.populateAndAnimateChart(
             recordingsManager.getActivityDurations(onlyUntrainedRecordings = filterSwitch.isChecked)
+        )
+        peoplePieChartPopulator.populateAndAnimateChart(
+            recordingsManager.getPeopleDurations(onlyUntrainedRecordings = filterSwitch.isChecked)
         )
     }
 

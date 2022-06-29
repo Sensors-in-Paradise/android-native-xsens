@@ -2,6 +2,7 @@ package sensors_in_paradise.sonar.machine_learning
 
 import sensors_in_paradise.sonar.ObservableArrayList
 import sensors_in_paradise.sonar.screen_recording.RecordingDataFile
+import kotlin.math.ceil
 
 open class DataSet : ObservableArrayList<RecordingDataFile>() {
 
@@ -9,9 +10,10 @@ open class DataSet : ObservableArrayList<RecordingDataFile>() {
         windowsPerBatch: Int,
         windowSize: Int,
         shuffle: Boolean = true,
+        filterForActivities: Collection<String>? = null,
         progressCallback: ((Int) -> Unit)? = null
     ): ArrayList<Batch> {
-        val windowStartIndexesPerRecording = this.map { it.getWindowStartIndexes(windowSize) }
+        val windowStartIndexesPerRecording = this.map { it.getWindowStartIndexes(windowSize,filterForActivities) }
 
         val indexesOfIndexes = ArrayList<Pair<Int, Int>>()
         for ((recordingIndex, startIndexes) in windowStartIndexesPerRecording.withIndex()) {
@@ -35,5 +37,24 @@ open class DataSet : ObservableArrayList<RecordingDataFile>() {
             progressCallback?.let { it((b * 100) / numBatches) }
         }
         return result
+    }
+
+    /**Splits the current DataSet into 2 DataSets and returns them as a pair.
+     * Tries to make the relative size of the second data set close to the parameter `secondDataSetPercentage`.
+     * However it will at least put 1 Recording into each data set.
+     * */
+    fun splitByPercentage(secondDataSetPercentage: Float = 0.2f): Pair<DataSet, DataSet>{
+        if(size<2){
+            throw IllegalArgumentException("Can't split a dataset of size $size into two parts.")
+        }
+        val secondDataSetSize = ceil(secondDataSetPercentage* size).toInt()
+        val indices = (0 until size).shuffled()
+        val second = DataSet()
+        val first = DataSet()
+
+        for((entryIndex,recordingIndex) in indices.withIndex()){
+            (if(entryIndex<secondDataSetSize) second else first).add(this[recordingIndex])
+        }
+        return Pair(first, second)
     }
 }

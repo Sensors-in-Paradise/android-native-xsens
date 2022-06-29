@@ -3,6 +3,7 @@ package sensors_in_paradise.sonar.screen_data
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import sensors_in_paradise.sonar.AsyncUI
 import sensors_in_paradise.sonar.machine_learning.DataSet
 import sensors_in_paradise.sonar.machine_learning.TFLiteModel
 import sensors_in_paradise.sonar.screen_recording.Recording
@@ -18,9 +19,8 @@ class ModelTraining(
     private val recordingsManager: RecordingDataManager,
     val model: TFLiteModel,
     private val onTrainedModelSaveRequested: (recordingsUsedForTraining: List<Recording>) -> Unit
-) {
-    val progressDialog = ProgressDialog(context)
-    private val uiHandler: Handler = Handler(Looper.getMainLooper())
+) : AsyncUI() {
+    private val progressDialog = ProgressDialog(context)
 
     init {
         val peopleDurations = recordingsManager.getPeopleDurations(onlyUntrainedRecordings = true)
@@ -29,9 +29,9 @@ class ModelTraining(
             "Subjects to train on",
             peopleDurations.keys.toTypedArray(),
             onItemChosen = {
-                val recordings = recordingsManager.getRecordingsBySubject(it, false)
+                val recordings = recordingsManager.getRecordingsBySubject(it, true)
                 if (recordings.size >= 2) {
-                    prepareAndExecuteTraining(recordings)
+                    prepareAndExecuteTraining(recordings, it)
                 } else {
                     MessageDialog(
                         context,
@@ -44,93 +44,117 @@ class ModelTraining(
             })
     }
 
-    private fun prepareAndExecuteTraining(recordings: List<Recording>) {
+    @Suppress("TooGenericExceptionCaught")
+    private fun prepareAndExecuteTraining(recordings: List<Recording>, subject: String) {
         progressDialog.show()
 
         progressDialog.setProgress(0, "Training process")
         progressDialog.setSubProgress(0, "Merging recording data files")
-        try {
-            Thread() {
+        async {
+            try {
+
                 val dataFiles = RecordingDataManager.convertRecordings(recordings) {
-                    uiHandler.run { progressDialog.setSubProgress(it) }
+                    ui { progressDialog.setSubProgress(it) }
                 }
-                uiHandler.run { progressDialog.setProgress(30) }
-                val validationDataFile = dataFiles[0]
-                val validationDataSet = DataSet().apply {
-                    add(validationDataFile)
+                ui { progressDialog.setProgress(10) }
+
+                val dataSet =  DataSet().apply {
+                    addAll(dataFiles)
                 }
 
-                uiHandler.run {
+                val (trainDataSet, validationDataSet) = dataSet.splitByPercentage(
+                    DESIRED_VALIDATION_SPLIT)
+
+
+                ui {
                     progressDialog.setSubProgress(
                         0,
                         "Converting validation recordings into batches"
                     )
                 }
-                val validationBatches = validationDataSet.convertToBatches(7, model.windowSize) {
-                    uiHandler.run {
-                        progressDialog.setSubProgress(it)
+                val validationBatches =
+                    validationDataSet.convertToBatches(VALIDATION_BATCH_SIZE, model.windowSize, filterForActivities = model.getLabels()) {
+                        ui {
+                            progressDialog.setSubProgress(it)
+                        }
                     }
-                }
-                uiHandler.run {
-                    progressDialog.setProgress(50)
+                ui {
+                    progressDialog.setProgress(20)
                     progressDialog.setSubProgress(0, "Evaluating model before training")
                 }
 
-                val (accuracyBefore, cmBefore) = model.evaluate(validationBatches) { batch, _ ->
-                    progressDialog.setSubProgress((batch * 100) / validationBatches.size)
+                val (accuracyBefore, cmBefore) = model.evaluate(validationBatches) { batchProgress, _ ->
+                    ui { progressDialog.setSubProgress(batchProgress) }
                 }
 
-                val trainDataSet = DataSet().apply {
-                    addAll(dataFiles.subList(1, dataFiles.size - 1))
-                }
-
-                uiHandler.run {
+                ui {
                     progressDialog.setSubProgress(0, "Converting training recordings into batches")
                 }
-                val trainBatches = trainDataSet.convertToBatches(20, model.windowSize) {
-                    uiHandler.run {
+                val trainBatches = trainDataSet.convertToBatches(BATCH_SIZE, model.windowSize, filterForActivities = model.getLabels()) {
+                    ui {
                         progressDialog.setSubProgress(it)
                     }
                 }
-                uiHandler.run { progressDialog.setProgress(60) }
+                ui { progressDialog.setProgress(30) }
                 model.train(trainBatches, NUM_EPOCHS) { epoch, batch, window ->
-                    progressDialog.setSubProgress(
-                        epoch,
-                        "Training model. Epoch: $epoch/$NUM_EPOCHS, Batch: $batch/${trainBatches.size}, window: $window/$BATCH_SIZE"
-                    )
+                    ui {
+                        progressDialog.setSubProgress(
+                            epoch,
+                            "Training model\nEpoch: $epoch%\nBatch: $batch%\nWindow: $window%"
+                        )
+                    }
                 }
-                uiHandler.run {
+                ui {
                     progressDialog.setProgress(90)
                     progressDialog.setSubProgress(0, "Evaluating model after training")
                 }
-                val (accuracyAfter, cmAfter) = model.evaluate(validationBatches) { batch, _ ->
-                    progressDialog.setSubProgress((batch * 100) / validationBatches.size)
+                val (accuracyAfter, cmAfter) = model.evaluate(validationBatches) { batchProgress, _ ->
+                    ui {
+                        progressDialog.setSubProgress(batchProgress)
+                    }
                 }
-                cmBefore.title = "Confusion Matrix before training (acc ${(accuracyBefore * 100).roundToInt()}%)"
-                cmAfter.title = "Confusion Matrix after training (acc ${(accuracyAfter * 100).roundToInt()})"
-
-                uiHandler.run {
+                val evaluationDescription =
+                    "\n\nEvaluated on ${validationDataSet.size} recordings of $subject comprised of ${VALIDATION_BATCH_SIZE * validationBatches.size} windows.\n"
+                cmBefore.title =
+                    "Confusion Matrix before training"
+                cmBefore.description =
+                    "Accuracy: ${(accuracyBefore * 100).roundToInt()}%$evaluationDescription"
+                cmAfter.title =
+                    "Confusion Matrix after training"
+                cmAfter.description =
+                    "Accuracy: ${(accuracyAfter * 100).roundToInt()}%$evaluationDescription" + "Trained on ${trainDataSet.size} recordings comprised of ${trainBatches.size} batches of size $BATCH_SIZE for $NUM_EPOCHS epochs"
+                ui {
+                    progressDialog.dismiss()
                     ConfusionMatrixDialog(
                         context,
-                        listOf(cmBefore, cmAfter),
+                        listOf(
+                            cmBefore,
+                            cmAfter
+                        ),
                         positiveButtonText = "Save Model",
                         onPositiveButtonClickListener = { _, _ ->
                             onTrainedModelSaveRequested(trainDataSet as List<Recording>)
                         })
                 }
-            }.start()
-        } catch (e: Exception) {
-            progressDialog.dismiss()
-            MessageDialog(
-                context,
-                "Training failed with exception: \n${e.message}",
-                "Training failed"
-            )
+
+            } catch (e: Exception) {
+                ui {
+                    progressDialog.dismiss()
+                    MessageDialog(
+                        context,
+                        "Training failed with exception: \n${e.message}",
+                        "Training failed"
+                    )
+                }
+                e.printStackTrace()
+            }
         }
     }
 
     companion object {
-        const val NUM_EPOCHS = 5
-        const val BATCH_SIZE = 20
+        const val NUM_EPOCHS = 1
+        const val BATCH_SIZE = 7
+        const val VALIDATION_BATCH_SIZE = 7
+        const val DESIRED_VALIDATION_SPLIT = 0.2f
     }
 }

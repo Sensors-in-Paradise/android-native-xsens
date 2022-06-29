@@ -197,7 +197,7 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         return loss.array()[0]
     }
 
-    fun runSave(file: File) {
+    fun save(file: File) {
         val inputs = HashMap<String, Any>()
         val outputs = HashMap<String, Any>()
         val checkpointPath = file.absolutePath
@@ -233,7 +233,7 @@ class TFLiteModel @Throws(InvalidModelMetadata::class) constructor(tfLiteModelFi
         val labels = getLabelsMap()
         if (!labels.containsValue(label)) {
             throw IllegalArgumentException(
-                "Label $label" +
+                "Label $label " +
                         "is not in labels of model: $labels"
             )
         }
