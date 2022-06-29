@@ -39,21 +39,39 @@ class InMemoryWindowTest {
         Assert.assertTrue(window.hasEnoughDataToCompileWindow())
 
         window.compileWindow()
+
     }
     @Test
-    fun forwardFillDataTest() {
-        val features = arrayOf("Quat_Z_LF", "dq_W_RW", "dv[1]_LF")
-        val window = InMemoryWindow(features, 2)
+    fun forwardFillDataTest(){
+        val features = arrayOf("Quat_W_LF", "Quat_X_LF", "Quat_Y_LF", "Quat_Z_LF")
+        val window = InMemoryWindow(features, 3)
 
-        val data = XsensDotData().apply {
+        val data0 = XsensDotData().apply {
             sampleTimeFine = 0L
             quat = floatArrayOf(0f, Float.NaN, 1f, 0f)
             dq = doubleArrayOf(0.0, 0.0, 0.2, 23.0)
             dv = doubleArrayOf(23.0, 0.0, Double.NaN)
+            quat = floatArrayOf(0f, Float.NaN, 1f, 1f)
+        }
+        val data1 = XsensDotData().apply {
+            sampleTimeFine = 1L
+            quat = floatArrayOf(0f, 1f, Float.NaN, 2f)
+        }
+        val data2 = XsensDotData().apply {
+            sampleTimeFine = 2L
+            quat = floatArrayOf(0f, Float.NaN, 0f, 0f)
         }
 
-        window.appendSensorData("LF", data)
+        window.appendSensorData("LF", data0)
         Assert.assertFalse(windowHasNan(window))
+        window.appendSensorData("LF", data1)
+        Assert.assertFalse(windowHasNan(window))
+        window.appendSensorData("LF", data2)
+        Assert.assertFalse(windowHasNan(window))
+        Assert.assertTrue(window["QUAT_W_LF"]!! == arrayListOf(Pair(0L, 0f), Pair(1L, 0f), Pair(2L, 0f)))
+        Assert.assertTrue(window["QUAT_X_LF"]!! == arrayListOf(Pair(0L, 0f), Pair(1L, 1f), Pair(2L, 1f)))
+        Assert.assertTrue(window["QUAT_Y_LF"]!! == arrayListOf(Pair(0L, 1f), Pair(1L, 1f), Pair(2L, 0f)))
+        Assert.assertTrue(window["QUAT_Z_LF"]!! == arrayListOf(Pair(0L, 1f), Pair(1L, 2f), Pair(2L, 0f)))
     }
 
     private fun windowHasNan(window: InMemoryWindow): Boolean {
