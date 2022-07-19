@@ -25,9 +25,9 @@ class RecordingDataFile @Throws(IOException::class) constructor(private val merg
         for (i in 0 until (windowSize)) {
             val line: Map<String, String> = optNextLine(csvReader)
                 ?: throw WindowException("$errorMsgPrefix Line is null before reaching window_size $windowSize")
-            val lineActivity = line["activity"]
+            val lineActivity = line["activity"]?.replace(".0", "")
                 ?: throw WindowException("$errorMsgPrefix Line without activity detected")
-            val stf = line["SampleTimeFine"]?.replace(" ", "")?.toLong()
+            val stf = line["SampleTimeFine"]?.replace(" ", "")?.replace(".0", "")?.toLong()
                 ?: throw WindowException("$errorMsgPrefix Can't infer SampleTimeFine from line")
 
             if (activity == null) {

@@ -77,7 +77,7 @@ class UseCase(
     }
 
     fun importDefaultModel() {
-        extractFileFromAssets(context, "resnet_model.tflite", getModelFile())
+        extractFileFromAssets(context, "CNNTL_model_sub_01.tflite", getModelFile())
     }
 
     fun getDisplayInfo(): String {

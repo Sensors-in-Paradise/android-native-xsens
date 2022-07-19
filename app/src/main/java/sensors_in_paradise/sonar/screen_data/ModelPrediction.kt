@@ -20,8 +20,6 @@ class ModelPrediction(
     val model: TFLiteModel
 ) : AsyncUI() {
 
-
-
     init {
         MessageDialog(
             context,
