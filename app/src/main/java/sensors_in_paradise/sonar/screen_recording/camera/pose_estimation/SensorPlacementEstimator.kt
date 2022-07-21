@@ -173,6 +173,7 @@ class SensorPlacementEstimator(
         return true
     }
 
+    @Suppress("TooGenericExceptionCaught")
     private fun estimateSensorPlacements(
         lockedRecordings: List<Recording>,
         lockedNumPositions: Int

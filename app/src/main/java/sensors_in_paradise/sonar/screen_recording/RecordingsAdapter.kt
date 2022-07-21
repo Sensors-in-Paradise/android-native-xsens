@@ -45,6 +45,7 @@ class RecordingsAdapter(
     }
 
     @SuppressLint("SetTextI18n")
+    @Suppress("LongMethod")
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val recording = recordings[position]
         val metadata = recording.metadataStorage

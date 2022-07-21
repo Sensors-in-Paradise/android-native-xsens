@@ -2,6 +2,8 @@ package sensors_in_paradise.sonar.use_cases
 
 import android.content.Context
 import android.widget.Toast
+import sensors_in_paradise.sonar.R
+import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import java.io.File
 import java.io.IOException
 import java.nio.file.*
@@ -12,17 +14,12 @@ class UseCase(
     private val baseDir: File,
     val title: String,
     private val onUseCaseDeleted: (useCase: UseCase) -> Unit,
-    private val onUseCaseDuplicated: (originalUseCase: UseCase, duplicateTitle: String) -> UseCase,
-    recordingsSubDirName: String = DEFAULT_RECORDINGS_SUB_DIR_NAME,
+    private val onUseCaseDuplicated: (originalUseCase: UseCase, duplicateTitle: String) -> UseCase
 ) {
     private val useCaseDir = baseDir.resolve(title).apply { mkdirs() }
-    private var recordingsSubDir =
-        getRecordingsDir().resolve(recordingsSubDirName).apply { mkdir() }
     private val useCaseStorage = UseCaseStorage(useCaseDir.resolve(STORAGE_SUB_DIR_NAME))
-
-    init {
-        useCaseStorage.setSelectedSubDir(recordingsSubDirName)
-    }
+    private var recordingsSubDir =
+        getRecordingsDir().resolve(useCaseStorage.getSelectedSubDir()).apply { mkdir() }
 
     fun getActivityLabelsJSONFile(): File {
         return useCaseDir.resolve("labels.json")
@@ -46,6 +43,10 @@ class UseCase(
 
     private fun getPredictionsDir(): File {
         return useCaseDir.resolve("predictions").apply { mkdir() }
+    }
+
+    fun getModelCheckpointsDir(): File {
+        return useCaseDir.resolve("modelCheckpoints").apply { mkdir() }
     }
 
     fun getPredictionHistoryJSONFile(startTimestamp: Long): File {
@@ -76,7 +77,7 @@ class UseCase(
     }
 
     fun importDefaultModel() {
-        extractFileFromAssets(context, "LSTMModel-1-18.tflite", getModelFile())
+        extractFileFromAssets(context, "resnet_model.tflite", getModelFile())
     }
 
     fun getDisplayInfo(): String {
@@ -107,6 +108,22 @@ class UseCase(
             }
         }
         if (!f.delete()) throw IOException("Failed to delete file: $f")
+    }
+
+    fun showNoModelFileExistingDialog(context: Context) {
+        MessageDialog(
+            context,
+            message = context.getString(
+                R.string.missing_model_dialog_message,
+                getModelFile().absolutePath
+            ),
+            title = context.getString(R.string.missing_model_dialog_title),
+            positiveButtonText = "Okay",
+            neutralButtonText = "Import default Model",
+            onNeutralButtonClickListener = { _, _ ->
+                importDefaultModel()
+            }
+        )
     }
 
     companion object {

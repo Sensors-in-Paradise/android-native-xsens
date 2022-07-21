@@ -179,7 +179,8 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) :
         }
         json.put("sensorMapping", obj)
     }
-
+    /** Returns map of Mac address of sensors to their respective tag
+     * */
     fun getSensorMacMap(): Map<String, String> {
         val result = mutableMapOf<String, String>()
         val obj = json.getJSONObject("sensorMapping")
@@ -192,6 +193,28 @@ class RecordingMetadataStorage(file: File, initialJson: JSONObject? = null) :
 
     fun clone(): RecordingMetadataStorage {
         return RecordingMetadataStorage(file, json)
+    }
+
+    fun getActivityAtTime(relativeTimeMs: Long): String? {
+        if (relativeTimeMs <0) {
+            return null
+        }
+        val activities = getActivities()
+        if (relativeTimeMs> getDuration()) {
+            return activities.last().activity
+        }
+        if (activities.isEmpty()) {
+            return null
+        }
+        val absoluteRecStartTime = activities[0].timeStarted
+        for ((index, entry) in activities.withIndex()) {
+            val (absStartTime, _) = entry
+            val relativeActivityStartTime = absStartTime - absoluteRecStartTime
+            if (relativeTimeMs <relativeActivityStartTime) {
+                return if (index> 0) (activities[index - 1].activity) else null
+            }
+        }
+        return activities.last().activity
     }
 
     companion object {

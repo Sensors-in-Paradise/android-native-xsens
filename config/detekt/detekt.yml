@@ -247,7 +247,7 @@ exceptions:
     active: true
   TooGenericExceptionCaught:
     active: true
-    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**', '**/SensorPlacementEstimator.kt']
+    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
     exceptionNames:
       - 'ArrayIndexOutOfBoundsException'
       - 'Error'
@@ -726,7 +726,7 @@ style:
   SpacingBetweenPackageAndImports:
     active: false
   ThrowsCount:
-    active: true
+    active: false
     max: 2
     excludeGuardClauses: false
   TrailingWhitespace:
@@ -803,4 +803,5 @@ style:
       - 'androidx.camera.video.*'
       - 'java.nio.file.*'
       - 'org.jetbrains.kotlinx.dataframe.*'
-
+      - 'sensors_in_paradise.sonar.*'
+      - 'java.io.*'
