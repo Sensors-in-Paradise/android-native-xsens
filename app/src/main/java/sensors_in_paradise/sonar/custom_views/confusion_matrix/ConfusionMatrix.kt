@@ -2,15 +2,23 @@ package sensors_in_paradise.sonar.custom_views.confusion_matrix
 
 import android.util.Log
 
-open class ConfusionMatrix(labels: Array<String>, var title: String = "Confusion Matrix", var description: String? = null) {
-    constructor(confusionMatrix: ConfusionMatrix) : this(confusionMatrix.getLabels().toTypedArray(), confusionMatrix.title) {
-       for (col in 0 until getNumLabels()) {
-           for (row in 0 until getNumLabels()) {
+open class ConfusionMatrix(
+    labels: Array<String>,
+    var title: String = "Confusion Matrix",
+    var description: String? = null
+) {
+    constructor(confusionMatrix: ConfusionMatrix) : this(
+        confusionMatrix.getLabels().toTypedArray(),
+        confusionMatrix.title
+    ) {
+        for (col in 0 until getNumLabels()) {
+            for (row in 0 until getNumLabels()) {
                 this[col, row] = confusionMatrix[col, row]
-           }
-       }
+            }
+        }
         this.maxCellValue = confusionMatrix.maxCellValue
     }
+
     val labels = labels.mapIndexed { index, label ->
         label to index
     }.toMap()
@@ -87,11 +95,11 @@ open class ConfusionMatrix(labels: Array<String>, var title: String = "Confusion
         }
     }
 
-    override fun toString(): String{
+    override fun toString(): String {
         var result = ""
 
-        for(col in 0 until getNumLabels()){
-            for(row in 0 until getNumLabels()){
+        for (col in 0 until getNumLabels()) {
+            for (row in 0 until getNumLabels()) {
                 result += this[row, col].toString() + " "
             }
             result += "\n"

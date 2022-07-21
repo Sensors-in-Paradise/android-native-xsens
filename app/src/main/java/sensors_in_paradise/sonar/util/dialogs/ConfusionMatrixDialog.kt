@@ -22,7 +22,7 @@ class ConfusionMatrixDialog(
     neutralButtonText: String = "Neutral",
     onNeutralButtonClickListener: DialogInterface.OnClickListener? = null,
     onShowListener: DialogInterface.OnShowListener? = null,
-    showAutomatically : Boolean = true
+    showAutomatically: Boolean = true
 ) {
     private val dialog: AlertDialog
     private var index: Int = 0
@@ -30,7 +30,7 @@ class ConfusionMatrixDialog(
     private val previousBtn: ImageButton
     private val positionTv: TextView
     private val navigationFrameLayout: FrameLayout
-    private  val viewAnimator: ViewAnimator
+    private val viewAnimator: ViewAnimator
     init {
         val builder = AlertDialog.Builder(context)
         val root = LayoutInflater.from(context).inflate(R.layout.confusion_matrix_dialog, null)
@@ -82,7 +82,7 @@ class ConfusionMatrixDialog(
         dialog = builder.create()
         updateNavigationUi()
         dialog.setOnShowListener(onShowListener)
-        if(showAutomatically) {
+        if (showAutomatically) {
             dialog.show()
         }
     }
@@ -90,29 +90,28 @@ class ConfusionMatrixDialog(
         previousBtn.isEnabled = index > 0
         nextBtn.isEnabled = index < confusionMatrices.size - 1
         dialog.setTitle(confusionMatrices[index].title)
-        positionTv.text = "${index+1}/${confusionMatrices.size}"
-        navigationFrameLayout.visibility = if(confusionMatrices.size>1) View.VISIBLE else View.GONE
+        positionTv.text = "${index + 1}/${confusionMatrices.size}"
+        navigationFrameLayout.visibility = if (confusionMatrices.size> 1) View.VISIBLE else View.GONE
         confusionMatrices[index].description?.let { dialog.setMessage(it) }
-
     }
 
-    fun setOnShowListener(onShowListener: DialogInterface.OnShowListener){
+    fun setOnShowListener(onShowListener: DialogInterface.OnShowListener) {
         val alreadyShownBefore = dialog.isShowing
         dialog.setOnShowListener(onShowListener)
-        if(alreadyShownBefore){
+        if (alreadyShownBefore) {
             onShowListener.onShow(dialog)
         }
     }
 
-    fun setDisplayConfusionMatrix(index: Int){
-        this.index= index
+    fun setDisplayConfusionMatrix(index: Int) {
+        this.index = index
         viewAnimator.displayedChild = index
         updateNavigationUi()
     }
-    fun show(){
+    fun show() {
         dialog.show()
     }
-    fun dismiss(){
+    fun dismiss() {
         dialog.dismiss()
     }
 }

@@ -349,7 +349,7 @@ open class Recording(val dir: File, var metadataStorage: RecordingMetadataStorag
                     }
                 }
                 if (hasNewContent) {
-                    val timeMsIntoRecording = (sampleTimeFine!! - startSampleTimeFine!!)/1000L
+                    val timeMsIntoRecording = (sampleTimeFine!! - startSampleTimeFine!!) / 1000L
                     val activity = metadataStorage.getActivityAtTime(timeMsIntoRecording)
                         ?: throw InvalidRecordingException(
                             "Could not find activity for current " +

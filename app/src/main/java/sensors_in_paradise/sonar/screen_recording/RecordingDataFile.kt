@@ -40,7 +40,7 @@ class RecordingDataFile @Throws(IOException::class) constructor(private val merg
             for ((feature, valueStr) in line) {
                 if (window.needsFeature(feature)) {
                     val cleanedValueStr = valueStr.replace(" ", "")
-                    val value = if(cleanedValueStr.isNotEmpty()) cleanedValueStr.toFloat() else 0f
+                    val value = if (cleanedValueStr.isNotEmpty()) cleanedValueStr.toFloat() else 0f
                     window.appendSensorData(feature, value, stf)
                 }
             }
@@ -67,7 +67,7 @@ class RecordingDataFile @Throws(IOException::class) constructor(private val merg
             if (activityLength < windowSize) {
                 continue
             }
-            if(filterForActivities?.contains(activity) == false){
+            if (filterForActivities?.contains(activity) == false) {
                 continue
             }
             val numCompletelyFittingWindows = activityLength / windowSize
@@ -100,7 +100,7 @@ class RecordingDataFile @Throws(IOException::class) constructor(private val merg
             i++
             line = optNextLine(csvReader)
         }
-        indexesOfActivityChanges.add(Pair(i-1, null))
+        indexesOfActivityChanges.add(Pair(i - 1, null))
         return indexesOfActivityChanges
     }
 

@@ -170,7 +170,9 @@ class RecordingDataManager(recordingsDir: File) :
             }
             return result
         }
+
         @Throws(Recording.InvalidRecordingException::class)
+        @Suppress("TooGenericExceptionCaught", "SwallowedException")
         fun convertRecordings(
             recordings: List<Recording>,
             skipInvalidRecordings: Boolean = true,
@@ -181,14 +183,19 @@ class RecordingDataManager(recordingsDir: File) :
             for ((index, recording) in recordings.withIndex()) {
                 try {
                     val dataFile =
-                        if (recording.hasMergedSensorFile()&&!regenerateExistingFiles) recording.getMergedSensorFile() else recording.mergeSensorFiles()
+                        if (recording.hasMergedSensorFile() && !regenerateExistingFiles)
+                            recording.getMergedSensorFile() else recording.mergeSensorFiles()
                     result.add(RecordingDataFile(dataFile))
-                }
-                catch (e: Exception){
-                    if(!skipInvalidRecordings){
-                        throw Recording.InvalidRecordingException(e.message?:"Could not convert ${recording.dir}")
+                } catch (e: Exception) {
+                    if (!skipInvalidRecordings) {
+                        throw Recording.InvalidRecordingException(
+                            e.message ?: "Could not convert ${recording.dir}"
+                        )
                     }
-                    Log.w("RecordingDataManager-convertRecordings", "Exception occured when converting recording: ${e.message}")
+                    Log.w(
+                        "RecordingDataManager-convertRecordings",
+                        "Exception occured when converting recording: ${e.message}"
+                    )
                 }
                 callback(((index + 1) * 100) / recordings.size)
             }

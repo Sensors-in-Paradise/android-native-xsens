@@ -13,7 +13,7 @@ open class DataSet : ObservableArrayList<RecordingDataFile>() {
         filterForActivities: Collection<String>? = null,
         progressCallback: ((Int) -> Unit)? = null
     ): ArrayList<Batch> {
-        val windowStartIndexesPerRecording = this.map { it.getWindowStartIndexes(windowSize,filterForActivities) }
+        val windowStartIndexesPerRecording = this.map { it.getWindowStartIndexes(windowSize, filterForActivities) }
 
         val indexesOfIndexes = ArrayList<Pair<Int, Int>>()
         for ((recordingIndex, startIndexes) in windowStartIndexesPerRecording.withIndex()) {
@@ -43,7 +43,7 @@ open class DataSet : ObservableArrayList<RecordingDataFile>() {
      * Tries to make the relative size of the second data set close to the parameter `secondDataSetPercentage`.
      * However it will at least put 1 Recording into each data set.
      * */
-    fun splitByPercentage(secondDataSetPercentage: Float = 0.2f): Pair<DataSet, DataSet>{
+    fun splitByPercentage(secondDataSetPercentage: Float = 0.2f): Pair<DataSet, DataSet> {
         if (size < 2) {
             throw IllegalArgumentException("Can't split a dataset of size $size into two parts.")
         }

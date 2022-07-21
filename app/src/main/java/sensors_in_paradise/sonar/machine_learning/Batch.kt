@@ -35,8 +35,8 @@ class Batch(
                 try {
                     window.compileWindowToArray(windows[windowIndex])
                     labelsOneHotEncoded[windowIndex] = model.convertLabelToOneHotEncoding(label)
-                }catch (e: IllegalArgumentException){
-                    if(!acceptSmallerBatchesOnCompileException){
+                } catch (e: IllegalArgumentException) {
+                    if (!acceptSmallerBatchesOnCompileException) {
                         throw e
                     }
                 }

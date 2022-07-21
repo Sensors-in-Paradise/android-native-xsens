@@ -41,7 +41,7 @@ class InMemoryWindowTest {
         window.compileWindow()
     }
     @Test
-    fun forwardFillDataTest(){
+    fun forwardFillDataTest() {
         val features = arrayOf("Quat_W_LF", "Quat_X_LF", "Quat_Y_LF", "Quat_Z_LF")
         val window = InMemoryWindow(features, 3)
 

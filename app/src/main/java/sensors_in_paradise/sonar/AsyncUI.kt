@@ -10,13 +10,13 @@ open class AsyncUI {
     private val asyncExecutor = Executors.newFixedThreadPool(1)
 
     @AnyThread
-    fun async(run: ()->Unit){
+    fun async(run: () -> Unit) {
         asyncExecutor.execute(run)
     }
 
     @AnyThread
-    fun ui(runOnUiThread: ()->Unit){
-        uiHandler.post{
+    fun ui(runOnUiThread: () -> Unit) {
+        uiHandler.post {
             runOnUiThread()
         }
     }

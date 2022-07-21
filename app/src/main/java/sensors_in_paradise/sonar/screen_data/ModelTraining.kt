@@ -1,8 +1,6 @@
 package sensors_in_paradise.sonar.screen_data
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import sensors_in_paradise.sonar.AsyncUI
 import sensors_in_paradise.sonar.machine_learning.DataSet
 import sensors_in_paradise.sonar.machine_learning.TFLiteModel
@@ -58,13 +56,13 @@ class ModelTraining(
                 }
                 ui { progressDialog.setProgress(10) }
 
-                val dataSet =  DataSet().apply {
+                val dataSet = DataSet().apply {
                     addAll(dataFiles)
                 }
 
                 val (trainDataSet, validationDataSet) = dataSet.splitByPercentage(
-                    DESIRED_VALIDATION_SPLIT)
-
+                    DESIRED_VALIDATION_SPLIT
+                )
 
                 ui {
                     progressDialog.setSubProgress(
@@ -73,7 +71,11 @@ class ModelTraining(
                     )
                 }
                 val validationBatches =
-                    validationDataSet.convertToBatches(VALIDATION_BATCH_SIZE, model.windowSize, filterForActivities = model.getLabels()) {
+                    validationDataSet.convertToBatches(
+                        VALIDATION_BATCH_SIZE,
+                        model.windowSize,
+                        filterForActivities = model.getLabels()
+                    ) {
                         ui {
                             progressDialog.setSubProgress(it)
                         }
@@ -90,7 +92,11 @@ class ModelTraining(
                 ui {
                     progressDialog.setSubProgress(0, "Converting training recordings into batches")
                 }
-                val trainBatches = trainDataSet.convertToBatches(BATCH_SIZE, model.windowSize, filterForActivities = model.getLabels()) {
+                val trainBatches = trainDataSet.convertToBatches(
+                    BATCH_SIZE,
+                    model.windowSize,
+                    filterForActivities = model.getLabels()
+                ) {
                     ui {
                         progressDialog.setSubProgress(it)
                     }
@@ -122,7 +128,9 @@ class ModelTraining(
                 cmAfter.title =
                     "Confusion Matrix after training"
                 cmAfter.description =
-                    "Accuracy: ${(accuracyAfter * 100).roundToInt()}%$evaluationDescription" + "Trained on ${trainDataSet.size} recordings comprised of ${trainBatches.size} batches of size $BATCH_SIZE for $NUM_EPOCHS epochs"
+                    "Accuracy: ${(accuracyAfter * 100).roundToInt()}%$evaluationDescription" +
+                            "Trained on ${trainDataSet.size} recordings comprised of " +
+                            "${trainBatches.size} batches of size $BATCH_SIZE for $NUM_EPOCHS epochs"
                 ui {
                     progressDialog.dismiss()
                     ConfusionMatrixDialog(
@@ -136,7 +144,6 @@ class ModelTraining(
                             onTrainedModelSaveRequested(trainDataSet as List<Recording>)
                         })
                 }
-
             } catch (e: Exception) {
                 ui {
                     progressDialog.dismiss()

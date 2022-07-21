@@ -1,8 +1,6 @@
 package sensors_in_paradise.sonar.screen_data
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import sensors_in_paradise.sonar.AsyncUI
 import sensors_in_paradise.sonar.machine_learning.DataSet
@@ -20,8 +18,6 @@ class ModelPrediction(
     val model: TFLiteModel
 ) : AsyncUI() {
 
-
-
     init {
         MessageDialog(
             context,
@@ -38,12 +34,12 @@ class ModelPrediction(
             })
     }
 
+    @Suppress("TooGenericExceptionCaught")
     private fun prepareAndExecutePrediction(recordings: List<Recording>) {
         val progressDialog = ProgressDialog(context)
         ui {
             progressDialog.show()
             progressDialog.setProgress(0, "Prediction process")
-
         }
 
         async {
@@ -112,7 +108,5 @@ class ModelPrediction(
                 }
             }
         }
-
     }
-
 }
