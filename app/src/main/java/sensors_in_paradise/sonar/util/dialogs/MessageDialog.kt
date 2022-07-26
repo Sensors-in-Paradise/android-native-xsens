@@ -11,7 +11,9 @@ class MessageDialog(
     positiveButtonText: String = "Yes",
     onPositiveButtonClickListener: DialogInterface.OnClickListener? = null,
     neutralButtonText: String = "Neutral",
-    onNeutralButtonClickListener: DialogInterface.OnClickListener? = null
+    onNeutralButtonClickListener: DialogInterface.OnClickListener? = null,
+    negativeButtonText: String = DEFAULT_NEGATIVE_BUTTON_LABEL,
+    onNegativeButtonClickListener: DialogInterface.OnClickListener? = null
 ) {
     init {
         val builder = AlertDialog.Builder(context)
@@ -28,17 +30,19 @@ class MessageDialog(
                 positiveButtonText,
                 onPositiveButtonClickListener
             )
-            builder.setNegativeButton("Cancel",
-                { dialog, id ->
-                    // User cancelled the dialog
-                    dialog.cancel()
-                })
+            builder.setNegativeButton(negativeButtonText, onNegativeButtonClickListener)
         } else {
             builder.setPositiveButton(
                 "Ok", null
             )
+            if (onNegativeButtonClickListener != null || negativeButtonText != DEFAULT_NEGATIVE_BUTTON_LABEL) {
+                builder.setNegativeButton(negativeButtonText, onNegativeButtonClickListener)
+            }
         }
         // Create the AlertDialog object and return it
         builder.create().show()
+    }
+    companion object {
+        private const val DEFAULT_NEGATIVE_BUTTON_LABEL = "Cancel"
     }
 }

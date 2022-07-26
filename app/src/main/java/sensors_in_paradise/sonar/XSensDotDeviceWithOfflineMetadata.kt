@@ -37,6 +37,13 @@ class XSensDotDeviceWithOfflineMetadata(
             }
         )
     }
+    fun getTagPrefix(): String? {
+        return extractTagPrefixFromTag(tag)
+    }
+
+    fun isTagValid(): Boolean {
+        return tag.matches(sensorTagRegex)
+    }
 
     fun hasSetColor(): Boolean {
         return when (getSet()) {
@@ -56,5 +63,6 @@ class XSensDotDeviceWithOfflineMetadata(
         fun extractTagPrefixFromTag(tag: String): String? {
             return if (doesTagMatchPattern(tag)) tag.substring(0, 2) else null
         }
+        private val sensorTagRegex = Regex("^[A-Z]+-\\d+\$")
     }
 }

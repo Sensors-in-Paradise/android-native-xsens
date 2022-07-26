@@ -203,7 +203,6 @@ class ConnectionScreen(private val scannedDevices: XSENSArrayList) :
     }
 
     override fun onConnectionCancelRequested(device: XsensDotDevice) {
-        // TODO Check if works
         device.disconnect()
 
         activity.runOnUiThread {

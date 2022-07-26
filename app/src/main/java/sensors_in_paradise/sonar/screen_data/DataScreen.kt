@@ -14,8 +14,10 @@ import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import sensors_in_paradise.sonar.R
 import sensors_in_paradise.sonar.ScreenInterface
+import sensors_in_paradise.sonar.machine_learning.TFLiteModel
 import sensors_in_paradise.sonar.screen_recording.RecordingDataManager
 import sensors_in_paradise.sonar.use_cases.UseCase
+import sensors_in_paradise.sonar.util.dialogs.MessageDialog
 import sensors_in_paradise.sonar.util.dialogs.file_explorer.FileExplorerDialog
 
 class DataScreen(
@@ -34,6 +36,7 @@ class DataScreen(
     private lateinit var dataHistoryAdapter: DataHistoryAdapter
     private lateinit var dataHistoryStorage: DataHistoryStorage
     private lateinit var trainBtn: Button
+    private lateinit var predictBtn: Button
     private lateinit var exploreFilesBtn: Button
     override fun onActivityCreated(activity: Activity) {
         this.activity = activity
@@ -48,75 +51,44 @@ class DataScreen(
         dataHistoryStorage = DataHistoryStorage(currentUseCase)
         dataHistoryAdapter = DataHistoryAdapter(dataHistoryStorage.getTrainingHistory())
         trainBtn = activity.findViewById(R.id.button_trainModel_dataFragment)
+        predictBtn = activity.findViewById(R.id.button_predict_dataFragment)
         exploreFilesBtn = activity.findViewById(R.id.button_exploreFiles_dataFragment)
         historyRV.adapter = dataHistoryAdapter
         trainBtn.setOnClickListener {
-            val item = dataHistoryStorage.addTrainingOccasion(
-                currentUseCase.getRecordingsSubDir().name,
-                recordingsManager.getPeopleDurationsOfTrainableRecordings(),
-                recordingsManager.getActivityDurationsOfTrainableRecordings()
-            )
-            dataHistoryAdapter.trainingHistory.add(
-                0,
-                item
-            )
-            dataHistoryAdapter.notifyItemAdded(0)
-            historyRV.scrollToPosition(0)
-            historyTV.isVisible = true
+            val model = attemptModelInit()
+            model?.let {
+                ModelTraining(context, recordingsManager, model) { recordingsTrainedOn ->
+                    val activityDurations =
+                        RecordingDataManager.getActivityDurations(recordingsTrainedOn)
+                    val item = dataHistoryStorage.addTrainingOccasion(
+                        currentUseCase.getRecordingsSubDir().name,
+                        recordingsManager.getPeopleDurations(),
+                        activityDurations
+                    )
+                    dataHistoryAdapter.trainingHistory.add(
+                        0,
+                        item
+                    )
+                    dataHistoryAdapter.notifyItemAdded(0)
+                    historyRV.scrollToPosition(0)
+                    historyTV.isVisible = true
+
+                    model.save(
+                        currentUseCase.getModelCheckpointsDir()
+                            .resolve(item.timestamp.toString())
+                    )
+                }
+            }
         }
-        trainBtn.isEnabled = false
-
-        activitiesPieChart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
-            override fun onValueSelected(e: Entry?, h: Highlight?) {
-                val pieEntry = e as PieEntry?
-                peoplePieChartPopulator.populateAndAnimateChart(
-                    if (filterSwitch.isChecked) {
-                        recordingsManager.getPeopleDurationsOfTrainableRecordings(pieEntry?.label)
-                    } else {
-                        recordingsManager.getPeopleDurationsOfAllRecordings(pieEntry?.label)
-                    }
-                )
-                peoplePieChart.isHighlightPerTapEnabled = false
+        predictBtn.setOnClickListener {
+            val model = attemptModelInit()
+            model?.let {
+                ModelPrediction(context, recordingsManager, model)
             }
+        }
 
-            override fun onNothingSelected() {
-                peoplePieChartPopulator.populateAndAnimateChart(
-                    if (filterSwitch.isChecked) {
-                        recordingsManager.getPeopleDurationsOfTrainableRecordings()
-                    } else {
-                        recordingsManager.getPeopleDurationsOfAllRecordings()
-                    }
-
-                )
-                peoplePieChart.isHighlightPerTapEnabled = true
-            }
-        })
         activitiesPieChart.description.isEnabled = false
 
-        peoplePieChart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
-            override fun onValueSelected(e: Entry?, h: Highlight?) {
-                val pieEntry = e as PieEntry?
-                activitiesPieChartPopulator.populateAndAnimateChart(
-                    if (filterSwitch.isChecked) {
-                        recordingsManager.getActivityDurationsOfTrainableRecordings(pieEntry?.label)
-                    } else {
-                        recordingsManager.getActivityDurationsOfAllRecordings(pieEntry?.label)
-                    }
-                )
-                activitiesPieChart.isHighlightPerTapEnabled = false
-            }
-
-            override fun onNothingSelected() {
-                activitiesPieChartPopulator.populateAndAnimateChart(
-                    if (filterSwitch.isChecked) {
-                        recordingsManager.getActivityDurationsOfTrainableRecordings()
-                    } else {
-                        recordingsManager.getActivityDurationsOfAllRecordings()
-                    }
-                )
-                activitiesPieChart.isHighlightPerTapEnabled = true
-            }
-        })
         exploreFilesBtn.setOnClickListener {
             FileExplorerDialog(
                 context,
@@ -125,8 +97,69 @@ class DataScreen(
             )
         }
         peoplePieChart.description.isEnabled = false
-
+        initPieChartListeners()
         filterSwitch.setOnCheckedChangeListener { _, _ -> populateAndAnimateCharts() }
+    }
+
+    private fun initPieChartListeners() {
+        activitiesPieChart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
+            override fun onValueSelected(e: Entry?, h: Highlight?) {
+                val pieEntry = e as PieEntry?
+                peoplePieChartPopulator.populateAndAnimateChart(
+                    recordingsManager.getPeopleDurations(
+                        pieEntry?.label,
+                        onlyUntrainedRecordings = filterSwitch.isChecked
+                    )
+                )
+                peoplePieChart.isHighlightPerTapEnabled = false
+            }
+
+            override fun onNothingSelected() {
+                peoplePieChartPopulator.populateAndAnimateChart(
+                    recordingsManager.getPeopleDurations(onlyUntrainedRecordings = filterSwitch.isChecked)
+                )
+                peoplePieChart.isHighlightPerTapEnabled = true
+            }
+        })
+        peoplePieChart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
+            override fun onValueSelected(e: Entry?, h: Highlight?) {
+                val pieEntry = e as PieEntry?
+                activitiesPieChartPopulator.populateAndAnimateChart(
+                    recordingsManager.getActivityDurations(
+                        pieEntry?.label,
+                        onlyUntrainedRecordings = filterSwitch.isChecked
+                    )
+                )
+                activitiesPieChart.isHighlightPerTapEnabled = false
+            }
+
+            override fun onNothingSelected() {
+                activitiesPieChartPopulator.populateAndAnimateChart(
+                    recordingsManager.getActivityDurations(onlyUntrainedRecordings = filterSwitch.isChecked)
+                )
+                activitiesPieChart.isHighlightPerTapEnabled = true
+            }
+        })
+    }
+
+    private fun attemptModelInit(): TFLiteModel? {
+        val modelFile = currentUseCase.getModelFile()
+        if (modelFile.exists()) {
+            try {
+                val model = TFLiteModel(modelFile)
+                return model
+            } catch (e: TFLiteModel.InvalidModelMetadata) {
+                MessageDialog(
+                    context,
+                    "Could not load the TFLite model from current use case. " +
+                            "The following exception was thrown:\n${e.message}",
+                    "Failed loading model"
+                )
+            }
+        } else {
+            currentUseCase.showNoModelFileExistingDialog(context)
+        }
+        return null
     }
 
     override fun onScreenOpened() {
@@ -135,18 +168,10 @@ class DataScreen(
 
     private fun populateAndAnimateCharts() {
         activitiesPieChartPopulator.populateAndAnimateChart(
-            if (filterSwitch.isChecked) {
-                recordingsManager.getActivityDurationsOfTrainableRecordings()
-            } else {
-                recordingsManager.getActivityDurationsOfAllRecordings()
-            }
+            recordingsManager.getActivityDurations(onlyUntrainedRecordings = filterSwitch.isChecked)
         )
         peoplePieChartPopulator.populateAndAnimateChart(
-            if (filterSwitch.isChecked) {
-                recordingsManager.getPeopleDurationsOfTrainableRecordings()
-            } else {
-                recordingsManager.getPeopleDurationsOfAllRecordings()
-            }
+            recordingsManager.getPeopleDurations(onlyUntrainedRecordings = filterSwitch.isChecked)
         )
     }
 

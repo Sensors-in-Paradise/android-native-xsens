@@ -1,6 +1,5 @@
 package sensors_in_paradise.sonar.screen_prediction
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.os.Handler
@@ -16,16 +15,19 @@ import com.google.android.material.button.MaterialButton
 import com.xsens.dot.android.sdk.events.XsensDotData
 import com.xsens.dot.android.sdk.models.XsensDotPayload
 import sensors_in_paradise.sonar.*
+import sensors_in_paradise.sonar.machine_learning.InMemoryWindow
+import sensors_in_paradise.sonar.machine_learning.TFLiteModel
 import sensors_in_paradise.sonar.screen_connection.ConnectionInterface
+import sensors_in_paradise.sonar.machine_learning.TFLiteModel.InvalidModelMetadata
 import sensors_in_paradise.sonar.screen_prediction.barChart.PredictionBarChart
 import sensors_in_paradise.sonar.screen_train.PredictionHistoryStorage
 import sensors_in_paradise.sonar.screen_train.PredictionHistoryStorage.Prediction
 import sensors_in_paradise.sonar.use_cases.UseCase
-import sensors_in_paradise.sonar.util.PredictionHelper
 import sensors_in_paradise.sonar.util.PreferencesHelper
 import sensors_in_paradise.sonar.util.UIHelper
 import sensors_in_paradise.sonar.util.dialogs.MessageDialog
-import java.nio.ByteBuffer
+import java.io.File
+import java.lang.IllegalStateException
 import kotlin.math.round
 
 class PredictionScreen(
@@ -33,7 +35,6 @@ class PredictionScreen(
     private val devices: XSENSArrayList,
     private val sensorOccupationInterface: SensorOccupationInterface?
 ) : ScreenInterface, ConnectionInterface {
-
     private lateinit var activity: Activity
     private lateinit var context: Context
     private lateinit var recyclerView: RecyclerView
@@ -42,47 +43,33 @@ class PredictionScreen(
     private lateinit var progressBar: ProgressBar
     private lateinit var timer: Chronometer
     private lateinit var textView: TextView
-    private lateinit var predictionBarChart: PredictionBarChart
+    private var predictionBarChart: PredictionBarChart? = null
 
     private lateinit var toggleMotionLayout: MotionLayout
     private lateinit var metadataStorage: XSensDotMetadataStorage
     private var predictionHistoryStorage: PredictionHistoryStorage? = null
-    private lateinit var predictionHelper: PredictionHelper
-    private val rawSensorDataMap = mutableMapOf<String, MutableList<Pair<Long, FloatArray>>>()
 
     private var lastPredictionTime = 0L
-
-    private val numOutputs = 6
-    val outputLabelMap = mapOf(
-        0 to "Running",
-        1 to "Squats",
-        2 to "Stairs Down",
-        3 to "1 min Pitch",
-        4 to "Standing",
-        5 to "Walking",
-    ).withDefault { "" }
-
-    private val numDevices = 5
     private var numConnectedDevices = 0
     private var isRunning = false
-
+    private var window: InMemoryWindow? = null
     private lateinit var mainHandler: Handler
-
-    private val predictionInterval = 4000L
+    private var predictionInterval: Long? = null
     private val updatePredictionTask = object : Runnable {
         override fun run() {
-            processAndPredict()
-            mainHandler.postDelayed(this, predictionInterval)
+            if (isRunning) {
+                predict()
+                mainHandler.postDelayed(this, predictionInterval!!)
+            }
         }
     }
 
     private val updateProgressBarTask = object : Runnable {
         override fun run() {
             var progress = 0
-
             if (isRunning) {
                 progress =
-                    ((100 * (System.currentTimeMillis() - lastPredictionTime)) / predictionInterval).toInt()
+                    ((100 * (System.currentTimeMillis() - lastPredictionTime)) / predictionInterval!!).toInt()
                 mainHandler.postDelayed(this, 40)
             }
             progressBar.progress = progress
@@ -98,64 +85,84 @@ class PredictionScreen(
         }
     }
 
-    private fun clearBuffers() {
-        rawSensorDataMap.clear()
-    }
-
-    private fun resetSensorDataLists() {
-        for (key in rawSensorDataMap.keys) {
-            rawSensorDataMap[key]?.clear()
+    private fun checkPredictionPreconditions(): Boolean {
+        val isInvalidTagConnected =
+            devices.getConnectedWithOfflineMetadata().any { !it.isTagValid() }
+        if (isInvalidTagConnected) {
+            MessageDialog(
+                context,
+                context.getString(R.string.sensor_tag_prefix_pattern_explanation),
+                "Tags of connected sensors invalid"
+            )
+            return false
         }
+        val requiredButNotConnectedDevices = getRequiredButNotConnectedDevices()
+        if (requiredButNotConnectedDevices.isNotEmpty()) {
+            UIHelper.showAlert(
+                context = context,
+                message = "The model for this use case requires sensors with the following " +
+                        "tag prefixes to be connected:\n" +
+                        "    ${model!!.getDeviceTags().joinToString("\n    ")}\n" +
+                        "These are currently not connected:\n" +
+                        "    ${requiredButNotConnectedDevices.joinToString("\n    ")}",
+                title = "Not enough sensors connected"
+            )
+            return false
+        }
+        return true
     }
 
     private fun startDataCollection() {
-        sensorOccupationInterface?.onSensorOccupationStatusChanged(true)
-        clearBuffers()
-        lastPredictionTime = 0L
-        if (tryInitializeSensorDataMap()) {
-            for (device in devices.getConnected()) {
-                device.measurementMode = XsensDotPayload.PAYLOAD_TYPE_COMPLETE_QUATERNION
-                device.startMeasuring()
-            }
-            timer.base = SystemClock.elapsedRealtime()
-            timer.start()
-            textView.visibility = View.VISIBLE
-            textView.text = ""
-
-            predictionBarChart.resetData()
-
-            predictionHistoryStorage =
-                PredictionHistoryStorage(
-                    currentUseCase,
-                    System.currentTimeMillis(),
-                    PreferencesHelper.shouldStorePrediction(context)
-                )
-            predictionHistoryAdapter.predictionHistory = arrayListOf()
-            predictionHistoryAdapter.addPrediction(Prediction("", 0f), 0)
-
-            isRunning = true
-            mainHandler.postDelayed(updatePredictionTask, 4000)
-            mainHandler.postDelayed(updateProgressBarTask, 100)
-            progressBar.visibility = View.VISIBLE
-            predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
-
-            toggleMotionLayout.transitionToEnd()
+        if (!checkPredictionPreconditions()) {
+            return
         }
+        if (model == null) {
+            throw IllegalStateException("The TFLiteModel instance can't be null when starting data collection")
+        }
+        sensorOccupationInterface?.onSensorOccupationStatusChanged(true)
+        lastPredictionTime = 0L
+        window = model?.let {
+            InMemoryWindow(
+                windowSize = it.windowSize,
+                featuresWithSensorTagPrefix = it.getFeaturesToPredict()
+            )
+        }
+        for (device in devices.getConnected()) {
+            device.measurementMode =
+                XsensDotPayload.PAYLOAD_TYPE_CUSTOM_MODE_4
+            device.startMeasuring()
+        }
+        timer.base = SystemClock.elapsedRealtime()
+        timer.start()
+        textView.visibility = View.VISIBLE
+        textView.text = ""
+        val barChart: BarChart = activity.findViewById(R.id.barChart_predict_predictions)
+        predictionBarChart =
+            PredictionBarChart(context, barChart, (model!!.getLabelsMap().size))
+        predictionBarChart?.resetData()
+
+        predictionHistoryStorage =
+            PredictionHistoryStorage(
+                currentUseCase,
+                System.currentTimeMillis(),
+                PreferencesHelper.shouldStorePrediction(context)
+            )
+        predictionHistoryAdapter.predictionHistory = arrayListOf()
+        predictionHistoryAdapter.addPrediction(Prediction("", 0f), 0)
+        isRunning = true
+        mainHandler.postDelayed(updatePredictionTask, predictionInterval!!)
+        mainHandler.postDelayed(updateProgressBarTask, 100)
+        progressBar.visibility = View.VISIBLE
+        predictionButton.setIconResource(R.drawable.ic_baseline_stop_24)
+
+        toggleMotionLayout.transitionToEnd()
     }
 
-    private fun tryInitializeSensorDataMap(): Boolean {
-        if (numConnectedDevices < numDevices) {
-            Toast.makeText(context, "Not enough devices connected!", Toast.LENGTH_SHORT).show()
-            return false
-        }
-        val deviceSetKey =
-            metadataStorage.tryGetDeviceSetKey(devices.getConnectedWithOfflineMetadata())
-                ?: return false
-
-        for (tagPrefix in GlobalValues.sensorTagPrefixes) {
-            rawSensorDataMap[GlobalValues.formatTag(tagPrefix, deviceSetKey)] = mutableListOf()
-        }
-        return true
+    private fun getRequiredButNotConnectedDevices(): List<String> {
+        val connectedDeviceTagPrefixes =
+            devices.getConnectedWithOfflineMetadata().map { it.getTagPrefix() }
+        val requiredDeviceTagPrefixes = model!!.getDeviceTags()
+        return requiredDeviceTagPrefixes.filter { !connectedDeviceTagPrefixes.contains(it) }
     }
 
     private fun stopDataCollection() {
@@ -176,9 +183,9 @@ class PredictionScreen(
         toggleMotionLayout.transitionToStart()
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun updatePrediction(output: FloatArray) {
         val predictions = ArrayList<Prediction>()
+        val outputLabelMap = model!!.getLabelsMap()
         for (i in output.indices) {
             val percentage = round(output[i] * 10000) / 100
             val prediction = Prediction(outputLabelMap[i]!!, percentage)
@@ -187,7 +194,7 @@ class PredictionScreen(
         predictions.sortByDescending { it.percentage }
         val highestPrediction = predictions[0]
 
-        predictionBarChart.changeData(predictions, highestPrediction.label)
+        predictionBarChart?.changeData(predictions, highestPrediction.label)
 
         textView.text = highestPrediction.label
 
@@ -201,22 +208,33 @@ class PredictionScreen(
         }
     }
 
-    private fun processAndPredict() {
-        val buffer = predictionHelper.processSensorData(rawSensorDataMap)
-        if (buffer == null) {
-            Toast.makeText(
-                context, "Please measure an activity first!",
-                Toast.LENGTH_SHORT
-            ).show()
-        } else {
-            predict(buffer)
-            resetSensorDataLists()
-        }
-    }
-
-    private fun predict(sensorDataByteBuffer: ByteBuffer) {
+    private fun predict() {
         lastPredictionTime = System.currentTimeMillis()
-        model?.predict(sensorDataByteBuffer)?.let { updatePrediction(it) }
+        if (window != null) {
+            try {
+                if (window!!.hasEnoughDataToCompileWindow()) {
+                    model?.infer(arrayOf(window!!.compileWindowToArray()))?.let { updatePrediction(it[0]) }
+                    window!!.clearValues()
+                } else {
+                    Toast.makeText(
+                        context,
+                        "Not enough data collected for prediction.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } catch (e: InMemoryWindow.SensorsOutOfSyncException) {
+                activity.runOnUiThread {
+                    stopDataCollection()
+                    MessageDialog(
+                        context,
+                        "The following exception occurred:\n${e.message}\n\n" +
+                                "To avoid this, sync the connected sensors on the " +
+                                "connection screen before starting live prediction.",
+                        "Sensors are out of sync"
+                    )
+                }
+            }
+        }
     }
 
     override fun onActivityCreated(activity: Activity) {
@@ -225,9 +243,6 @@ class PredictionScreen(
         this.context = activity
 
         metadataStorage = XSensDotMetadataStorage(context)
-        predictionHelper =
-            PredictionHelper(context, PreferencesHelper.shouldShowToastsVerbose(context))
-
         // Initializing prediction RV
         recyclerView = activity.findViewById(R.id.rv_prediction)
         predictionHistoryAdapter = PredictionHistoryAdapter(context, arrayListOf())
@@ -240,31 +255,33 @@ class PredictionScreen(
         progressBar = activity.findViewById(R.id.progressBar_nextPrediction_predictionFragment)
 
         predictionButton.setOnClickListener {
-            if (initModelFromCurrentUseCase()) {
-                val signatures = model?.signatureKeys
-                Log.d("PredictionScreen-onActivityCreated", signatures.toString())
-                togglePrediction()
-            } else {
-                MessageDialog(
-                    context,
-                    message = context.getString(
-                        R.string.missing_model_dialog_message,
-                        currentUseCase.getModelFile().absolutePath
-                    ),
-                    title = context.getString(R.string.missing_model_dialog_title),
-                    positiveButtonText = "Okay",
-                    neutralButtonText = "Import default Model",
-                    onNeutralButtonClickListener = { _, _ ->
-                        currentUseCase.importDefaultModel()
-                        initModelFromCurrentUseCase()
+            if (!isRunning) {
+                when (initModelFromCurrentUseCase()) {
+                    ModelInitializationResult.SUCCESS -> {
+                        val signatures = model?.signatureKeys
+                        Log.d("PredictionScreen-onActivityCreated", signatures.toString())
                         togglePrediction()
                     }
-                )
+                    ModelInitializationResult.MISSING_METADATA -> {
+                        MessageDialog(
+                            context,
+                            message = context.getString(
+                                R.string.missing_metadata_dialog_message
+                            ),
+                            title = context.getString(R.string.missing_metadata_dialog_title),
+                            positiveButtonText = "Okay",
+                            neutralButtonText = "Import default Model"
+                        )
+                    }
+                    ModelInitializationResult.FILE_NOT_EXISTING -> {
+                        currentUseCase.showNoModelFileExistingDialog(context)
+                    }
+                }
+            } else {
+                togglePrediction()
             }
         }
-        val barChart: BarChart = activity.findViewById(R.id.barChart_predict_predictions)
-        predictionBarChart =
-            PredictionBarChart(context, barChart, numOutputs, predictionInterval)
+
         toggleMotionLayout =
             activity.findViewById(R.id.motionLayout_predictionToggling_predictionFragment)
 
@@ -281,20 +298,27 @@ class PredictionScreen(
 
         numConnectedDevices = devices.getConnected().size
 
-        if (isRunning && numConnectedDevices < numDevices) {
+        if (isRunning && numConnectedDevices < model!!.getNumDevices()) {
             stopDataCollection()
             UIHelper.showAlert(context, "Connection to device(s) lost!")
         }
     }
 
     override fun onXsensDotDataChanged(deviceAddress: String, xsensDotData: XsensDotData) {
-
-        val timeStamp: Long = xsensDotData.sampleTimeFine
-        val quat: FloatArray = xsensDotData.quat
-        val freeAcc: FloatArray = xsensDotData.freeAcc
-
-        val deviceTag = metadataStorage.getTagForAddress(deviceAddress)
-        rawSensorDataMap[deviceTag]?.add(Pair(timeStamp, quat + freeAcc))
+        val deviceTag = devices[deviceAddress]?.tag ?: return
+        val deviceTagPrefix = XSensDotDeviceWithOfflineMetadata.extractTagPrefixFromTag(deviceTag)
+        if (deviceTagPrefix != null) {
+            window?.appendSensorData(deviceTagPrefix, xsensDotData)
+        } else {
+            togglePrediction()
+            activity.runOnUiThread {
+                Toast.makeText(
+                    context,
+                    "Could not extract prefixe for device tag $deviceTag",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     override fun onXsensDotOutputRateUpdate(deviceAddress: String, outputRate: Int) {
@@ -305,17 +329,27 @@ class PredictionScreen(
         currentUseCase = useCase
     }
 
-    private fun initModelFromCurrentUseCase(): Boolean {
+    enum class ModelInitializationResult { SUCCESS, FILE_NOT_EXISTING, MISSING_METADATA }
+
+    private fun initModelFromCurrentUseCase(): ModelInitializationResult {
         if (!currentUseCase.getModelFile().exists()) {
-            return false
+            return ModelInitializationResult.FILE_NOT_EXISTING
         }
-        model = TFLiteModel(
-            currentUseCase.getModelFile(), intArrayOf(
-                1,
-                predictionHelper.dataVectorSize,
-                predictionHelper.dataLineFloatSize
-            ), 6
-        )
-        return true
+        try {
+            initMetadataModel(currentUseCase.getModelFile())
+        } catch (_: InvalidModelMetadata) {
+            return ModelInitializationResult.MISSING_METADATA
+        }
+        return ModelInitializationResult.SUCCESS
+    }
+
+    @Throws(InvalidModelMetadata::class)
+    private fun initMetadataModel(modelFile: File) {
+        model = TFLiteModel(modelFile)
+        predictionInterval = model!!.getWindowInMilliSeconds() + cushion // ms
+    }
+
+    companion object {
+        const val cushion = 1000L // ms
     }
 }
