@@ -5,6 +5,7 @@
 # SONAR - A Generic HAR App
 
 This is a tool for recording data through Xsens DOT sensors and labeling it when saving on the Device. It is designed to be very generic so that changing the sensors is possible while keeping most of the existing code and functionality. 
+![image](https://user-images.githubusercontent.com/29177177/185871656-5681deb4-c0e4-4380-925e-a94605fd8aa6.png)
 
 ## Available functionalities
 
@@ -37,8 +38,12 @@ On the Prediction Screen you can see the confidence of the model for the highest
 Not all Functions are activated by default and can be added in the settings menu at the top right.
 
 ## Architecture overview
+In the following a quick summary of the app architecture can be found. It is not to be seen as a complete guide but rather as a starting point for continued development of the app.
+### Screens
+The app consists of one single activity called `MainActivity`(except the Settings Activity) which consists of 4 `screens` which can be switched between using a tab layout.
+For each screen there is a package with the prefix `screen` (e.g. `screen_connection`) that contains the corresponding screen class with `Screen` suffix (e.g. `ConnectionScreen`). These screen classes implement the `ScreenInterface` which passes the lifecycle events of the MainActivity as well as other events to this class.
 
-TODO (give an overview where in the code what is done e.g. packages)
+The `ConnectionScreen` class handles the UI and functionality for managing connections with the XSensDot devices. It also implements `XsensDotScannerCallback` and` XsensDotDeviceCallback` from the XSens Dot SDK to interface the XSens Dot devices. Since we don't need to listen for all of the events from `XsensDotScannerCallback` and` XsensDotDeviceCallback` in the other screens, we have simplified the callbacks with the `ConnectionInterface`. It can be implemented by the other screens to receive data from the sensors or be notified when devices connect or disconnect. Then the instance of the class implementing the interface must be added to the `ConnectionScreen` instance via `connectionScreen.addConnectionInterface(connectionInterface)`. This is typically done in the `MainActivity` since one has access to all screen instances there.
 
 ## External sources used
 
